@@ -1,4 +1,4 @@
-import { Octokit } from "octokit";
+import { Octokit } from 'octokit';
 
 export interface WorldConfig {
   GITHUB_TOKEN: string;

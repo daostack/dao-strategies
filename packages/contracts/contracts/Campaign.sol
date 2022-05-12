@@ -132,10 +132,10 @@ contract Campaign is Initializable {
     }
 
     function withdrawAllowed() private view returns (bool) {
-        return campaignCancelled || (block.timestamp > claimPeriodStart && !sharesPublished);
+        return campaignCancelled || ((block.timestamp > claimPeriodStart) && !sharesPublished);
     }
 
     function claimAllowed() private view returns (bool) {
-        return block.timestamp > claimPeriodStart && sharesPublished && !campaignCancelled;
+        return (block.timestamp > claimPeriodStart) && sharesPublished && !campaignCancelled;
     }
 }

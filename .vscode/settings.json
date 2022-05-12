@@ -48,9 +48,10 @@
   },
   "explorerExclude.backup": null,
   "eslint.workingDirectories": [
-    { "directory": "packages/eth-hooks", "changeProcessCWD": true },
     { "directory": "packages/contracts", "changeProcessCWD": true },
-    { "directory": "packages/frontend", "changeProcessCWD": true }
+    { "directory": "packages/core", "changeProcessCWD": true },
+    { "directory": "packages/frontend", "changeProcessCWD": true },
+    { "directory": "packages/oracle-node", "changeProcessCWD": true }
   ],
   "solidity.packageDefaultDependenciesDirectory": "packages/contracts/node_modules",
   "editor.formatOnSave": true,

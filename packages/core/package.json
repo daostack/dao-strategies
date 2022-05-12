@@ -4,7 +4,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "rollup -w -c rollup.config.ts",
-    "build": "rollup -c rollup.config.ts"
+    "build": "rollup -c rollup.config.ts",
+    "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
+    "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
   },
   "dependencies": {
     "@octokit/plugin-rest-endpoint-methods": "^5.13.0",
@@ -14,7 +16,14 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.31",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
     "dotenv": "^16.0.0",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.4.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "rollup": "^2.70.1",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-typescript2": "^0.31.2",

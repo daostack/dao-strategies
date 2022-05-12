@@ -1,8 +1,8 @@
 // From https://github.com/Uniswap/merkle-distributor
 
-import { bufferToHex, keccak256 } from "ethereumjs-util";
+import { bufferToHex, keccak256 } from 'ethereumjs-util';
 
-export default class MerkleTree {
+export class MerkleTree {
   private readonly elements: Buffer[];
   private readonly bufferElementPositionIndex: { [hexElement: string]: number };
   private readonly layers: Buffer[][];
@@ -27,7 +27,7 @@ export default class MerkleTree {
 
   getLayers(elements: Buffer[]): Buffer[][] {
     if (elements.length === 0) {
-      throw new Error("empty tree");
+      throw new Error('empty tree');
     }
 
     const layers = [];
@@ -53,10 +53,10 @@ export default class MerkleTree {
   }
 
   static combinedHash(first?: Buffer, second?: Buffer): Buffer {
-    if (first == undefined) {
+    if (first === undefined) {
       return second as Buffer;
     }
-    if (second == undefined) {
+    if (second === undefined) {
       return first;
     }
 
@@ -74,8 +74,8 @@ export default class MerkleTree {
   getProof(el: Buffer): Buffer[] {
     let idx = this.bufferElementPositionIndex[bufferToHex(el)];
 
-    if (typeof idx !== "number") {
-      throw new Error("Element does not exist in Merkle tree");
+    if (typeof idx !== 'number') {
+      throw new Error('Element does not exist in Merkle tree');
     }
 
     return this.layers.reduce((proof, layer) => {
@@ -115,10 +115,10 @@ export default class MerkleTree {
 
   private static bufArrToHexArr(arr: Buffer[]): string[] {
     if (arr.some((el) => !Buffer.isBuffer(el))) {
-      throw new Error("Array is not an array of buffers");
+      throw new Error('Array is not an array of buffers');
     }
 
-    return arr.map((el) => "0x" + el.toString("hex"));
+    return arr.map((el) => '0x' + el.toString('hex'));
   }
 
   private static sortAndConcat(...args: Buffer[]): Buffer {

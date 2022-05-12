@@ -1,1 +1,1 @@
-export * from "./StrategyComputation";
+export * from './StrategyComputation';

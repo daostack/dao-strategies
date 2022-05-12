@@ -1,6 +1,6 @@
-import { github_strategies } from "./github";
-import type { GH_STRATEGY_ID } from "./github";
-import { Strategy } from "../types";
+import { Strategy } from '../types';
+
+import { github_strategies, GH_STRATEGY_ID } from './github';
 
 export type Strategy_ID = GH_STRATEGY_ID;
 
