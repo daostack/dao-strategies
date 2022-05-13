@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "rollup -w -c rollup.config.ts",
     "build": "rollup -c rollup.config.ts",
+    "build-test": "cd test && tsc --sourceMap test.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
   },

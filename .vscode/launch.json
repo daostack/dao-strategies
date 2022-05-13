@@ -21,10 +21,12 @@
       "outputCapture": "std"
     },
     {
-      "name": "Launch Current Opened File",
-      "program": "${file}",
+      "type": "node",
       "request": "launch",
-      "type": "node"
+      "name": "test core",
+      "cwd": "${workspaceFolder}/packages/core/test",
+      "args": ["test.js"],
+      "outputCapture": "std"
     }
   ]
 }
