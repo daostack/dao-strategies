@@ -1,5 +1,5 @@
 import { StrategyID } from '@dao-strategies/core';
-import { Campaign, Reward } from '@prisma/client';
+import { Campaign } from '@prisma/client';
 import { CID } from 'multiformats/cid';
 import * as json from 'multiformats/codecs/json';
 import * as raw from 'multiformats/codecs/raw';

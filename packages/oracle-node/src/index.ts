@@ -1,18 +1,17 @@
-import * as express from 'express';
-import * as bodyParser from 'body-parser';
-import * as winston from 'winston';
-import * as expressWinston from 'express-winston';
-import * as cors from 'cors';
-import { Request, Response } from 'express';
-
-import { Routes } from './enpoints/routes';
-import { port, worldConfig } from './config';
-import { Services } from './types';
-
-import { CampaignService } from './services/CampaignService';
-import { CampaignRepository } from './repositories/campaignRepository';
 import { StrategyComputation } from '@dao-strategies/core';
+import * as bodyParser from 'body-parser';
+import * as cors from 'cors';
+import * as express from 'express';
+import { Request, Response } from 'express';
+import * as expressWinston from 'express-winston';
+import * as winston from 'winston';
+
+import { port, worldConfig } from './config';
+import { Routes } from './enpoints/routes';
+import { CampaignRepository } from './repositories/campaignRepository';
+import { CampaignService } from './services/CampaignService';
 import { TimeService } from './services/TimeService';
+import { Services } from './types';
 
 function handleError(err, req, res, next) {
   res.status(err.statusCode || 500).send({ message: err.message });
@@ -29,7 +28,7 @@ export const oracleLogger = winston.createLogger({
 const app = express();
 
 /** CORS configuration */
-var corsOptions = {
+const corsOptions = {
   origin: 'http://localhost:3000',
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
@@ -62,8 +61,13 @@ Routes.forEach((route) => {
       try {
         const campaignRepo = new CampaignRepository();
         const strategyComputation = new StrategyComputation(worldConfig);
+        const timeService = new TimeService();
         const repos: Services = {
-          campaign: new CampaignService(campaignRepo, strategyComputation),
+          campaign: new CampaignService(
+            campaignRepo,
+            timeService,
+            strategyComputation
+          ),
           time: new TimeService(),
         };
         const result = await new (route.controller as any)(repos)[route.action](

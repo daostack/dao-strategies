@@ -1,12 +1,13 @@
 import {
   Balances,
   StrategyComputation,
-  StrategyID,
+  Strategy_ID,
 } from '@dao-strategies/core';
 import { Campaign, Prisma } from '@prisma/client';
-import { resimulationPeriod } from '../config';
 
+import { resimulationPeriod } from '../config';
 import { CampaignRepository } from '../repositories/campaignRepository';
+
 import {
   campaignToUriDetails,
   CampaignUriDetails,
@@ -70,14 +71,21 @@ export class CampaignService {
         stratID: details.strategyID,
         stratParamsStr: JSON.stringify(details.strategyParams),
         lastSimDate: this.timeService.now(),
+        registered: false,
+        address: '',
       };
 
-      this.create(details);
+      const campaign = await this.create(createData);
+      if (campaign.uri !== uri) {
+        throw new Error('Unexepected campaign uri');
+      }
     }
+
+    return uri;
   }
 
   async create(details: Prisma.CampaignCreateInput) {
-    this.campaignRepo.create(details);
+    return this.campaignRepo.create(details);
   }
 
   /**
@@ -104,7 +112,7 @@ export class CampaignService {
 
     if (
       simDate !== undefined &&
-      this.timeService.getTime() - simDate > resimulationPeriod
+      this.timeService.now() - simDate > resimulationPeriod
     ) {
       rewards = await this.getRewards(uri);
     } else {
@@ -117,7 +125,7 @@ export class CampaignService {
     return rewards;
   }
 
-  async run(strategyId: StrategyID, strategyParams: any) {
+  async run(strategyId: Strategy_ID, strategyParams: any) {
     const rewards = await this.strategyComputation.runStrategy(
       strategyId,
       strategyParams

@@ -1,3 +1,7 @@
+/* eslint-disable 
+  @typescript-eslint/no-unsafe-member-access, 
+  @typescript-eslint/no-unsafe-call, 
+  @typescript-eslint/no-var-requires */
 import { WorldConfig } from '@dao-strategies/core';
 
 require('dotenv').config();
