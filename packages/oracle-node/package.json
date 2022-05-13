@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "prod": "ts-node src/index.ts",
-    "migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
-    "reset": "cd ./src &&  npx prisma migrate reset --preview-feature && cd ..",
-    "generate": "cd ./src && npx prisma generate && cd ..",
+    "prisma-migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
+    "prisma-reset": "cd ./src &&  npx prisma migrate reset --preview-feature && cd ..",
+    "prisma-generate": "cd ./src && npx prisma generate && cd ..",
     "start": "nodemon src/index.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"

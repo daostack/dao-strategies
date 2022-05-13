@@ -96,7 +96,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const updateRewards = async (values: CampaignFormValues): Promise<void> => {
     const reqParams = getStrategyParams(values);
 
-    const response = await fetch(ORACLE_NODE_URL + '/campaign/simulate', {
+    const response = await fetch(ORACLE_NODE_URL + '/campaign/simulateFromDetails', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reqParams),

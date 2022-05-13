@@ -9,8 +9,8 @@ export const Routes = [
   },
   {
     method: 'post',
-    route: '/campaign/simulate',
+    route: '/campaign/simulateFromDetails',
     controller: CampaignController,
-    action: 'simulate',
+    action: 'simulateFromDetails',
   },
 ];
