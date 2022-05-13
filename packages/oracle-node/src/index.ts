@@ -13,7 +13,14 @@ import { CampaignService } from './services/CampaignService';
 import { TimeService } from './services/TimeService';
 import { Services } from './types';
 
-function handleError(err, req, res, next) {
+/* eslint-disable 
+  @typescript-eslint/no-unsafe-member-access,
+  unused-imports/no-unused-vars-ts,
+  @typescript-eslint/no-unsafe-call,
+  @typescript-eslint/no-unsafe-assignment,
+  @typescript-eslint/ban-types */
+
+function handleError(err, req, res, next): void {
   res.status(err.statusCode || 500).send({ message: err.message });
 }
 

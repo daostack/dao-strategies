@@ -68,7 +68,7 @@ export class CampaignService {
         oracle: '',
         execDate: details.execDate,
         cancelDate: 0,
-        stratID: details.strategyID,
+        stratID: details.strategyID as Strategy_ID,
         stratParamsStr: JSON.stringify(details.strategyParams),
         lastSimDate: this.timeService.now(),
         registered: false,
@@ -84,7 +84,7 @@ export class CampaignService {
     return uri;
   }
 
-  async create(details: Prisma.CampaignCreateInput) {
+  async create(details: Prisma.CampaignCreateInput): Promise<Campaign> {
     return this.campaignRepo.create(details);
   }
 
@@ -104,7 +104,7 @@ export class CampaignService {
    * returned.
    *
    * */
-  async computeRewards(uri: string) {
+  async computeRewards(uri: string): Promise<Balances> {
     /** check if this campaign was recently simulated */
     const simDate = await this.getLastSimDate(uri);
 
@@ -117,7 +117,10 @@ export class CampaignService {
       rewards = await this.getRewards(uri);
     } else {
       const details = campaignToUriDetails(await this.get(uri));
-      rewards = await this.run(details.strategyID, details.strategyParams);
+      rewards = await this.run(
+        details.strategyID as Strategy_ID,
+        details.strategyParams
+      );
 
       await this.setRewards(uri, rewards);
     }
@@ -125,7 +128,7 @@ export class CampaignService {
     return rewards;
   }
 
-  async run(strategyId: Strategy_ID, strategyParams: any) {
+  async run(strategyId: Strategy_ID, strategyParams: any): Promise<Balances> {
     const rewards = await this.strategyComputation.runStrategy(
       strategyId,
       strategyParams
