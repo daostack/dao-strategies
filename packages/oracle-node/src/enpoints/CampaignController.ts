@@ -1,9 +1,10 @@
+import { BalancesObject, balancesToObject } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
-import { Balances, balancesToObject, StrategyID } from '@dao-strategies/core';
+
+import { CampaignUriDetails } from '../services/CampaignUri';
+import { Services } from '../types';
 
 import { Controller } from './Controller';
-import { Services } from '../types';
-import { CampaignUriDetails } from '../services/CampaignUri';
 
 /**
  * On Retroactive Campaign
@@ -20,9 +21,15 @@ import { CampaignUriDetails } from '../services/CampaignUri';
  * - The frontend will gather the campaign configuration
  * - The frontend will call the `simulate` endpoint.
  * - The oracle will compute the rewards (in terms of social ids) and return them.
- * - The frontend will show the rewards, and, if approved, deploy the smart contract and "register" the campaign in the oracle
+ * - The frontend will show the rewards, and, if approved, deploy the smart contract and "register"
+ *   the campaign in the oracle
  * - The oracle will wait for the grace period, execute the strategy, and set the merkle root.
  */
+
+/* eslint-disable 
+    @typescript-eslint/no-unsafe-assignment, 
+    @typescript-eslint/no-unsafe-member-access,
+    unused-imports/no-unused-vars-ts */
 
 export class CampaignController extends Controller {
   constructor(services: Services) {
@@ -34,7 +41,7 @@ export class CampaignController extends Controller {
     request: Request,
     response: Response,
     next: NextFunction
-  ) {
+  ): Promise<BalancesObject> {
     /** Build the candidate CampaignUri */
     const details: CampaignUriDetails = {
       creator: request.user,
@@ -44,7 +51,7 @@ export class CampaignController extends Controller {
       strategyParams: request.body.strategyParams,
     };
 
-    const uri = await this.services.campaign.getOrCreateCampaign(details);
+    const uri = await this.services.campaign.getOrCreateCampaign(details, '');
     return balancesToObject(await this.services.campaign.computeRewards(uri));
   }
 
@@ -52,9 +59,8 @@ export class CampaignController extends Controller {
     request: Request,
     response: Response,
     next: NextFunction
-  ) {
-    return balancesToObject(
-      await this.services.campaign.computeRewards(request.body.uri)
-    );
+  ): Promise<BalancesObject> {
+    const uri: string = request.body.uri;
+    return balancesToObject(await this.services.campaign.computeRewards(uri));
   }
 }

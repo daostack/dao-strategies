@@ -1,6 +1,7 @@
-import { BigNumber } from 'ethers';
 import { Balances } from '@dao-strategies/core';
-import { PrismaClient, Prisma, Campaign, Reward } from '@prisma/client';
+import { PrismaClient, Prisma, Campaign } from '@prisma/client';
+import { BigNumber } from 'ethers';
+
 import { getRewardUri } from '../services/CampaignUri';
 
 export class CampaignRepository {
@@ -10,8 +11,8 @@ export class CampaignRepository {
     this.client = new PrismaClient();
   }
 
-  async create(campaignDetails: Prisma.CampaignCreateInput) {
-    await this.client.campaign.create({
+  async create(campaignDetails: Prisma.CampaignCreateInput): Promise<Campaign> {
+    return this.client.campaign.create({
       data: campaignDetails,
     });
   }

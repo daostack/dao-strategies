@@ -5,11 +5,12 @@
   "private": true,
   "scripts": {
     "prod": "ts-node src/index.ts",
-    "migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
-    "reset": "cd ./src &&  npx prisma migrate reset --preview-feature && cd ..",
-    "generate": "cd ./src && npx prisma generate && cd ..",
+    "prisma-migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
+    "prisma-reset": "cd ./src &&  npx prisma migrate reset --preview-feature && cd ..",
+    "prisma-generate": "cd ./src && npx prisma generate && cd ..",
     "start": "nodemon src/index.ts",
-    "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts"
+    "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
+    "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
   },
   "dependencies": {
     "@dao-strategies/core": "^0.0.0",
@@ -26,8 +27,14 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.10",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
     "dotenv": "^16.0.0",
-    "eslint": "^8.15.0",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.4.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "nodemon": "^2.0.15",
     "ts-node": "10.7.0",
     "typescript": "4.5.2"
