@@ -38,13 +38,15 @@ const App: FC = () => {
       <EthComponentsSettingsContext.Provider value={ethComponentsSettings}>
         <ContractsAppContext>
           <EthersAppContext>
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <ThemeSwitcherProvider themeMap={themes} defaultTheme={savedTheme || 'dark'}>
-                <Suspense fallback={<div />}>
-                  <MainPage />
-                </Suspense>
-              </ThemeSwitcherProvider>
-            </ErrorBoundary>
+            <LoggedUserContext>
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
+                <ThemeSwitcherProvider themeMap={themes} defaultTheme={savedTheme || 'dark'}>
+                  <Suspense fallback={<div />}>
+                    <MainPage />
+                  </Suspense>
+                </ThemeSwitcherProvider>
+              </ErrorBoundary>
+            </LoggedUserContext>
           </EthersAppContext>
         </ContractsAppContext>
       </EthComponentsSettingsContext.Provider>
