@@ -3,6 +3,7 @@ import { useEthersContext } from 'eth-hooks/context';
 import { BigNumber, ethers } from 'ethers';
 import { FC, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import { toTimeStamp } from '~~/components/utils';
 
 import { ORACLE_NODE_URL } from '~~/config/appConfig';
 import { useAppContracts } from '~~/config/contractContext';
@@ -20,12 +21,16 @@ interface CampaignFormValues {
   campaignType: string;
   repositoryOwner: string;
   repositoryName: string;
+  fromDate: string;
+  toDate: string;
 }
 
 interface RequestParams {
+  execDate: number;
   strategyID: string;
   strategyParams: {
     repositories: Array<{ owner: string; repo: string }>;
+    timeRange: { start: number; end: number };
   };
 }
 
@@ -76,14 +81,22 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     campaignType: 'github',
     repositoryOwner: 'ethereum',
     repositoryName: 'go-ethereum',
+    fromDate: '',
+    toDate: '',
   };
 
   const getStrategyParams = (values: CampaignFormValues): RequestParams | undefined => {
     switch (values.campaignType) {
       case 'github':
+        const start = toTimeStamp(values.fromDate);
+        const end = toTimeStamp(values.toDate);
         return {
+          execDate: end,
           strategyID: 'GH_PR_Weigthed',
-          strategyParams: { repositories: [{ owner: values.repositoryOwner, repo: values.repositoryName }] },
+          strategyParams: {
+            repositories: [{ owner: values.repositoryOwner, repo: values.repositoryName }],
+            timeRange: { start, end },
+          },
         };
     }
     return undefined;
