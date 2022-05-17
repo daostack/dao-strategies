@@ -1,15 +1,16 @@
 import { useEthersContext } from 'eth-hooks/context';
 import { asEthersAdaptor } from 'eth-hooks/functions';
 import { FC } from 'react';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
+import { useLoggedUser } from './components/common/hooks/useLoggedUser';
 import { MainPageFooter, MainPageHeader } from './components/main';
 
 import '~~/styles/main-page.css';
 import { useScaffoldProviders as useScaffoldAppProviders } from '~~/components/main/hooks/useScaffoldAppProviders';
 import { CampaignCreate, CampaignPage, CampaignsList } from '~~/components/pages';
 import { useConnectAppContracts, useLoadAppContracts } from '~~/config/contractContext';
-import { QueryClient, QueryClientProvider } from 'react-query';
 
 /**
  * The main component
@@ -20,8 +21,15 @@ export const Main: FC = () => {
 
   const ethersContext = useEthersContext();
 
+  ethersContext.connector?.on('accontsChanged', () => {
+    console.log('omg');
+  });
+
   useLoadAppContracts();
   useConnectAppContracts(asEthersAdaptor(ethersContext));
+
+  const loggedUser = useLoggedUser();
+  console.log({ loggedUser });
 
   const queryClient = new QueryClient();
 

@@ -5,6 +5,7 @@ import { FC, Suspense } from 'react';
 import { ThemeSwitcherProvider } from 'react-css-theme-switcher';
 
 import { ErrorBoundary, ErrorFallback } from '~~/components/common/ErrorFallback';
+import { LoggedUserContext } from '~~/components/common/hooks/useLoggedUser';
 import { ContractsAppContext } from '~~/config/contractContext';
 
 import '~~/styles/css/tailwind-base.pcss';

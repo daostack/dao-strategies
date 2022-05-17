@@ -57,7 +57,7 @@
     "packages": [
       "packages/contracts",
       "packages/core",
-      "packages/frontend",
+      "packages/frontend-2",
       "packages/oracle-node",
       "packages/services",
       "packages/subgraph",
