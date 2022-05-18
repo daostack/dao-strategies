@@ -5,6 +5,7 @@ import {
   getRepoContributors,
   toTimeStamp,
   getPullReactions,
+  repoAvailable
 } from '../utils';
 
 interface Params {
@@ -18,25 +19,30 @@ const strategy: Strategy = async (world: World, params: Params) => {
   }
 
   const reactionsPerContributor = new Map<string, Array<number>>();
-  let contributors = new Array<string | undefined>();
+  let contributors = new Set<string>();
 
   // get all contributors in the repositories
   for (const repo of params.repositories) {
+    // check once for every repo if available
+    if (!(await repoAvailable(world, repo))) {
+      throw new Error(`repo ${repo.owner}\\${repo.repo} is not available`);
+    }
+
     const repoContributors = await getRepoContributors(world, repo);
-    contributors.concat(repoContributors);
+    for (const contributor of repoContributors) {
+      if (contributor.login != null && contributor.login != undefined)
+        contributors.add(contributor.login);
+    }
   }
-  contributors = [...new Set(contributors)]; // remove duplicates
 
   for (const repo of params.repositories) {
-    // get all pulls that were created and merged at the specified time range
+    // get all pulls that were merged at the specified time range
     const allPulls = await getPrsInRepo(world, repo);
     const pullsFiltered = allPulls.filter(function (pull) {
       if (pull.merged_at == null) {
         return false;
       }
       return (
-        toTimeStamp(pull.created_at) >= params.timeRange.start &&
-        toTimeStamp(pull.created_at) <= params.timeRange.end &&
         toTimeStamp(pull.merged_at) >= params.timeRange.start &&
         toTimeStamp(pull.merged_at) <= params.timeRange.end
       );
@@ -48,16 +54,21 @@ const strategy: Strategy = async (world: World, params: Params) => {
         continue;
       }
       const pullCreator: string = pull.user.login;
-      let reactionsNum = 1; // every pull has one default reaction
+      let reactionsNum = 0;
       const reactions = await getPullReactions(world, repo, pull.number);
+      const reacted = new Set<string>();
       for (const reaction of reactions) {
         if (
-          reaction.user?.login !== pullCreator && // reaction wasn't made by the creator of the pull
-          contributors.includes(reaction.user?.login) && // only reactions by contributors
-          reaction.content === '+1'
+          reaction.user != null && // only reactions by users
+          contributors.has(reaction.user.login) && // only reactions by contributors
+          (reaction.content == '+1' ||
+            reaction.content == 'hooray' ||
+            reaction.content == 'heart' ||
+            reaction.content == 'rocket') && // only "thumbs up", "rocket", "heart" or "celebration" reactions 
+          !reacted.has(reaction.user.login) // one reaction per contributor
         ) {
-          // only "thumbs up" reactions count
           reactionsNum += 1;
+          reacted.add(reaction.user.login);
         }
       }
 
@@ -78,6 +89,15 @@ const strategy: Strategy = async (world: World, params: Params) => {
         1 / 2
       )
     );
+  }
+
+  // normalize the scores to percentage from the total amount of scores
+  let scoresSum = 0;
+  for (const score of scores.values()) {
+    scoresSum += score;
+  }
+  for (const [contributor, score] of scores) {
+    scores.set(contributor, (score / scoresSum) * 100);
   }
 
   return scores;

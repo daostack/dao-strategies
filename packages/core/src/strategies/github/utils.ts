@@ -8,6 +8,9 @@ type PullRequestListData =
 type ReactionsListData =
   RestEndpointMethodTypes['reactions']['listForIssue']['response']['data'];
 
+type ContributorsListData =
+  RestEndpointMethodTypes['repos']['listContributors']['response']['data'];
+
 /*
 todo: get typing for the pulls. Tries using PullRequestParams but the type is not compatible with the returned pulls 
 from the iterator.
@@ -21,6 +24,7 @@ export async function repoAvailable(
   try {
     await world.github.rest.repos.get({ ...repo });
   } catch (e) {
+    console.log(e);
     return false;
   }
 
@@ -31,10 +35,6 @@ export async function getPrsInRepo(
   world: World,
   repo: { owner: string; repo: string }
 ): Promise<PullRequestListData> {
-  if (!(await repoAvailable(world, repo))) {
-    throw new Error(`repo ${repo.owner}\\${repo.repo} is not available`);
-  }
-
   const allPulls: PullRequestListData = [];
   const iterator = world.github.paginate.iterator(
     world.github.rest.pulls.list,
@@ -58,11 +58,7 @@ export async function getPrsInRepo(
 export async function getRepoContributors(
   world: World,
   repo: { owner: string; repo: string }
-): Promise<Array<string | undefined>> {
-  if (!(await repoAvailable(world, repo))) {
-    throw new Error(`repo ${repo.owner}\\${repo.repo} is not available`);
-  }
-
+): Promise<ContributorsListData> {
   const response = await world.github.rest.repos.listContributors({ ...repo });
 
   if (response.status !== 200) {
@@ -71,7 +67,7 @@ export async function getRepoContributors(
     );
   }
 
-  return response.data.map((contributorData) => contributorData.login);
+  return response.data;
 }
 
 export async function getPullReactions(
@@ -79,10 +75,6 @@ export async function getPullReactions(
   repo: { owner: string; repo: string },
   pullNum: number
 ): Promise<ReactionsListData> {
-  if (!(await repoAvailable(world, repo))) {
-    throw new Error(`repo ${repo.owner}\\${repo.repo} is not available`);
-  }
-
   const response = await world.github.rest.reactions.listForIssue({
     ...repo,
     issue_number: pullNum,
