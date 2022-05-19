@@ -40,8 +40,12 @@ export class CampaignController extends Controller {
   async simulateFromDetails(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
+    loggedUser: string | undefined
   ): Promise<BalancesObject> {
+    if (loggedUser === undefined) {
+      throw new Error('logged user expected but not found');
+    }
     /** Build the candidate CampaignUri */
     const details: CampaignUriDetails = {
       creator: request.user,
@@ -51,7 +55,7 @@ export class CampaignController extends Controller {
       strategyParams: request.body.strategyParams,
     };
 
-    const uri = await this.services.campaign.getOrCreateCampaign(details, '');
+    const uri = await this.services.campaign.getOrCreate(details, loggedUser);
     return balancesToObject(await this.services.campaign.computeRewards(uri));
   }
 

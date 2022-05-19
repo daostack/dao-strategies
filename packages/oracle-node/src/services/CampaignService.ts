@@ -6,7 +6,7 @@ import {
 import { Campaign, Prisma } from '@prisma/client';
 
 import { resimulationPeriod } from '../config';
-import { CampaignRepository } from '../repositories/campaignRepository';
+import { CampaignRepository } from '../repositories/CampaignRepository';
 
 import {
   campaignToUriDetails,
@@ -46,10 +46,7 @@ export class CampaignService {
     return this.campaignRepo.exist(uri);
   }
 
-  async getOrCreateCampaign(
-    details: CampaignUriDetails,
-    by: string
-  ): Promise<string> {
+  async getOrCreate(details: CampaignUriDetails, by: string): Promise<string> {
     const uri = await getCampaignUri(details);
     const exist = await this.exist(uri);
 

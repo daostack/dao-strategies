@@ -1,6 +1,6 @@
 import { Button, PageHeader } from 'antd';
 import { useEthersContext } from 'eth-hooks/context';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 
 import { useScaffoldProviders } from './hooks/useScaffoldAppProviders';
 
