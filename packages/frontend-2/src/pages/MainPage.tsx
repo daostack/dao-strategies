@@ -1,24 +1,27 @@
-import { InjectedConnector } from '@wagmi/core';
 import { FC } from 'react';
-import { useAccount, useConnect, useSigner } from 'wagmi';
-import { useLoggedUser } from '../hooks/useLoggedUser';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { CampaignPage } from './campaign/CampaignPage';
+import { CampaignCreate } from './create/CampaignCreate';
+import { CampaignsList } from './list/CampaignsList';
+import { MainPageFooter } from './MainPageFooter';
+
+import { MainPageHeader } from './MainPageHeader';
+
+const queryClient = new QueryClient();
 
 export const MainPage: FC = () => {
-  const accountHook = useAccount();
-  const { checkLogin } = useLoggedUser();
-
-  const connectHook = useConnect({
-    connector: new InjectedConnector(),
-  });
-
-  const connect = async () => {
-    const connectResult = await connectHook.connectAsync();
-    if (connectResult.connector != null) {
-      const signer = await connectResult.connector.getSigner();
-      checkLogin(signer);
-    }
-  };
-
-  if (accountHook && accountHook.data) return <div>Connected to {accountHook.data.address}</div>;
-  return <button onClick={() => connect()}>Connect Wallet</button>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <MainPageHeader></MainPageHeader>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<CampaignsList />}></Route>
+          <Route path="/create" element={<CampaignCreate />}></Route>
+          <Route path="/campaign/:campaignAddress" element={<CampaignPage />}></Route>
+        </Routes>
+      </BrowserRouter>
+      <MainPageFooter></MainPageFooter>
+    </QueryClientProvider>
+  );
 };
