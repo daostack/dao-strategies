@@ -1,19 +1,24 @@
-import { InjectedConnector } from "@wagmi/core"
-import { FC } from "react"
-import { useAccount, useConnect, useEnsName } from "wagmi"
-import { useLoggedUser } from "../hooks/useLoggedUser"
+import { InjectedConnector } from '@wagmi/core';
+import { FC } from 'react';
+import { useAccount, useConnect, useSigner } from 'wagmi';
+import { useLoggedUser } from '../hooks/useLoggedUser';
 
 export const MainPage: FC = () => {
-    const { data: account } = useAccount()
-    const { data: ensName } = useEnsName({ address: account?.address })
-    const { checkLogin } = useLoggedUser();
-    const { connect } = useConnect({
-      connector: new InjectedConnector(),
-      onConnect: (data) => {
-        void checkLogin();
-      }
-    })
+  const accountHook = useAccount();
+  const { checkLogin } = useLoggedUser();
 
-    if (account) return <div>Connected to {ensName ?? account.address}</div>
-    return <button onClick={() => connect()}>Connect Wallet</button>
-}
+  const connectHook = useConnect({
+    connector: new InjectedConnector(),
+  });
+
+  const connect = async () => {
+    const connectResult = await connectHook.connectAsync();
+    if (connectResult.connector != null) {
+      const signer = await connectResult.connector.getSigner();
+      checkLogin(signer);
+    }
+  };
+
+  if (accountHook && accountHook.data) return <div>Connected to {accountHook.data.address}</div>;
+  return <button onClick={() => connect()}>Connect Wallet</button>;
+};

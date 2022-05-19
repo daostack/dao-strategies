@@ -51,7 +51,7 @@ export class CampaignController extends Controller {
       strategyParams: request.body.strategyParams,
     };
 
-    const uri = await this.services.campaign.getOrCreateCampaign(details, '');
+    const uri = await this.services.campaign.getOrCreate(details, '');
     return balancesToObject(await this.services.campaign.computeRewards(uri));
   }
 
