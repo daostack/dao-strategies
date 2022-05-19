@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "lib": ["DOM", "DOM.Iterable", "ESNext", "ES2017"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext",
+      "ES2017"
+    ],
     "sourceMap": true,
     "composite": true,
     "module": "ESNext",
@@ -24,9 +29,17 @@
     "baseUrl": "./",
     "outDir": "dist",
     "declarationDir": "dist/types",
-    "types": ["node"],
+    "types": [
+      "node",
+      "jest"
+    ],
     "paths": {}
   },
-  "include": ["src"],
-  "exclude": ["**/node_modules", "node_modules"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "node_modules"
+  ]
 }
