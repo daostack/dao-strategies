@@ -1,0 +1,477 @@
+{
+  "31337": {
+    "localhost": {
+      "name": "localhost",
+      "chainId": "31337",
+      "contracts": {
+        "Campaign": {
+          "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+          "abi": [
+            {
+              "inputs": [],
+              "name": "ClaimingNotAllowed",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "InvalidProof",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "NoFunds",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "NoRewardAvailable",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "OnlyDuringEvaluationPeriod",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "OnlyGuardian",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "OnlyOracle",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "RewardTransferFailed",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "SharesAlreadyPublished",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "WithdrawTransferFailed",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "WithdrawalNotAllowed",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "campaignCancelled",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "cancelCampaign",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "share",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "proof",
+                  "type": "bytes32[]"
+                }
+              ],
+              "name": "claim",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "claimPeriodStart",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "claimed",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "funds",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "guardian",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "totalShares",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "sharesMerkleRoot",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct Campaign.SharesData",
+                  "name": "_shares",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "_uri",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_guardian",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_oracle",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_sharesPublished",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_claimPeriodStart",
+                  "type": "uint256"
+                }
+              ],
+              "name": "initCampaign",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "oracle",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "totalShares",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "sharesMerkleRoot",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct Campaign.SharesData",
+                  "name": "_shares",
+                  "type": "tuple"
+                }
+              ],
+              "name": "publishShares",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "shares",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "totalShares",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "sharesMerkleRoot",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "sharesPublished",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "totalClaimed",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "uri",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                }
+              ],
+              "name": "withdrawFunds",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            }
+          ]
+        },
+        "CampaignFactory": {
+          "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address payable",
+                  "name": "_master",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "creator",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newCampaign",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bytes32",
+                  "name": "_sharesRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "_sharesTotal",
+                  "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bytes32",
+                  "name": "_uri",
+                  "type": "bytes32"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "_guardian",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "_oracle",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bool",
+                  "name": "_sharesPublished",
+                  "type": "bool"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "_claimPeriodStart",
+                  "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bytes32",
+                  "name": "salt",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "CampaignCreated",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "totalShares",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "sharesMerkleRoot",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct Campaign.SharesData",
+                  "name": "_shares",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "_uri",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_guardian",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_oracle",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_sharesPublished",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_claimPeriodStart",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "salt",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "createCampaign",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
