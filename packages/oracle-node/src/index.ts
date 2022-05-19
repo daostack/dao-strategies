@@ -83,9 +83,11 @@ Routes.forEach((route) => {
       try {
         const campaignRepo = new CampaignRepository();
         const userRepo = new UserRepository();
+
         const strategyComputation = new StrategyComputation(worldConfig);
         const timeService = new TimeService();
-        const repos: Services = {
+
+        const services: Services = {
           campaign: new CampaignService(
             campaignRepo,
             timeService,
@@ -94,11 +96,20 @@ Routes.forEach((route) => {
           time: new TimeService(),
           user: new UserService(userRepo),
         };
-        const result = await new (route.controller as any)(repos)[route.action](
-          req,
-          res,
-          next
-        );
+
+        const loggedUser: string | undefined = req.session?.siwe?.address;
+
+        if (route.protected) {
+          if (loggedUser === undefined) {
+            throw new Error(
+              'User not logged in and tried to access a protected endpoint'
+            );
+          }
+        }
+
+        const result = await new (route.controller as any)(services)[
+          route.action
+        ](req, res, next, loggedUser);
         res.json(result);
       } catch (error) {
         console.error(error);
