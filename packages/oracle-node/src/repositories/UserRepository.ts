@@ -1,11 +1,7 @@
 import { PrismaClient, Prisma, User } from '@prisma/client';
 
 export class UserRepository {
-  private client: PrismaClient;
-
-  constructor() {
-    this.client = new PrismaClient();
-  }
+  constructor(protected client: PrismaClient) {}
 
   async create(userDetails: Prisma.UserCreateInput): Promise<User> {
     return this.client.user.create({

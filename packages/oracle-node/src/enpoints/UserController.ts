@@ -32,7 +32,6 @@ export class UserController extends Controller {
     const nonce = generateNonce();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     request.session.nonce = nonce;
-    console.log({ nonce });
     return { nonce };
   }
 

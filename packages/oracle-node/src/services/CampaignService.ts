@@ -5,6 +5,7 @@ import {
 } from '@dao-strategies/core';
 import { Campaign, Prisma } from '@prisma/client';
 
+import { appLogger } from '..';
 import { resimulationPeriod } from '../config';
 import { CampaignRepository } from '../repositories/CampaignRepository';
 
@@ -67,7 +68,7 @@ export class CampaignService {
         cancelDate: 0,
         stratID: details.strategyID as Strategy_ID,
         stratParamsStr: JSON.stringify(details.strategyParams),
-        lastSimDate: this.timeService.now(),
+        lastSimDate: 0,
         registered: false,
         address: '',
       };
@@ -109,9 +110,10 @@ export class CampaignService {
 
     if (
       simDate !== undefined &&
-      this.timeService.now() - simDate > resimulationPeriod
+      this.timeService.now() - simDate < resimulationPeriod
     ) {
       rewards = await this.getRewards(uri);
+      appLogger.info(`rewards for strategy ${uri} read from DB`);
     } else {
       const details = campaignToUriDetails(await this.get(uri));
       rewards = await this.run(
@@ -126,9 +128,14 @@ export class CampaignService {
   }
 
   async run(strategyId: Strategy_ID, strategyParams: any): Promise<Balances> {
+    appLogger.info(`calling strategy ${strategyId}`);
     const rewards = await this.strategyComputation.runStrategy(
       strategyId,
       strategyParams
+    );
+
+    appLogger.info(
+      `calling strategy ${strategyId} - done, ${rewards.size} receivers found`
     );
 
     return rewards;

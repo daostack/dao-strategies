@@ -1,10 +1,10 @@
-import { Button, DatePicker, Form, Input, Select } from 'antd';
+import { Button, Form, Input, Select } from 'antd';
 // import { BigNumber, ethers } from 'ethers';
 import { FC, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { toTimeStamp } from '../../utils/general';
 
 import { ORACLE_NODE_URL } from '../../config/appConfig';
+import { DateManager } from '../../utils/time';
 // import { CampaignCreatedEvent } from '../../generated/typechain/CampaignFactory';
 
 // const RANDOM_BYTES32 = '0x5fd924625f6ab16a19cc9807c7c506ae1813490e4ba675f843d5a10e0baacdb8';
@@ -15,12 +15,15 @@ export interface ICampaignCreateProps {
 
 const { Option } = Select;
 
+enum LivePeriodChoice {
+  Last2Months = 'last-two-months',
+}
+
 interface CampaignFormValues {
   campaignType: string;
   repositoryOwner: string;
   repositoryName: string;
-  fromDate: string;
-  toDate: string;
+  livePeriodChoice: LivePeriodChoice;
 }
 
 interface RequestParams {
@@ -34,6 +37,8 @@ interface RequestParams {
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const [rewards, setRewards] = useState<Record<string, unknown>>({});
+  const [today] = useState<DateManager>(new DateManager());
+  const [simulating, setSimulating] = useState<boolean>(false);
 
   // const campaignFactoryContract = useAppContracts('CampaignFactory', ethersContext.chainId);
   // const navigate = useNavigate();
@@ -76,20 +81,25 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const initialValues: CampaignFormValues = {
     campaignType: 'github',
-    repositoryOwner: 'ethereum',
-    repositoryName: 'go-ethereum',
-    fromDate: '',
-    toDate: '',
+    repositoryOwner: 'gershido',
+    repositoryName: 'test-github-api',
+    livePeriodChoice: LivePeriodChoice.Last2Months,
+  };
+
+  const getStartEnd = (values: CampaignFormValues): [number, number] => {
+    switch (values.livePeriodChoice) {
+      case LivePeriodChoice.Last2Months:
+        return [today.clone().subtractMonths(2).getTime(), today.getTime()];
+    }
   };
 
   const getStrategyParams = (values: CampaignFormValues): RequestParams | undefined => {
     switch (values.campaignType) {
       case 'github':
-        const start = toTimeStamp(values.fromDate);
-        const end = toTimeStamp(values.toDate);
+        const [start, end] = getStartEnd(values);
         return {
           execDate: end,
-          strategyID: 'GH_PR_Weigthed',
+          strategyID: 'GH_PRS_REACTIONS_WEIGHED',
           strategyParams: {
             repositories: [{ owner: values.repositoryOwner, repo: values.repositoryName }],
             timeRange: { start, end },
@@ -103,21 +113,30 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     form.setFieldsValue({ campaignType: value });
   };
 
+  const onLivePeriodSelected = (value: string): void => {
+    form.setFieldsValue({ periodChoice: value });
+  };
+
   const updateRewards = async (values: CampaignFormValues): Promise<void> => {
+    setSimulating(true);
     const reqParams = getStrategyParams(values);
 
     const response = await fetch(ORACLE_NODE_URL + '/campaign/simulateFromDetails', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reqParams),
+      credentials: 'include',
     });
 
     const rew = await (response.json() as Promise<Record<string, unknown>>);
     setRewards(rew);
+    setSimulating(false);
   };
 
   const onSimulate = (values: CampaignFormValues): void => {
-    void updateRewards(values);
+    if (!simulating) {
+      void updateRewards(values);
+    }
   };
 
   const onReset = (): void => {
@@ -157,15 +176,15 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <Form.Item name="repositoryName" label="Repository Name" rules={[{ required: true }]}>
           <Input></Input>
         </Form.Item>
-        <Form.Item name="fromDate" label="Start counting on">
-          <DatePicker />
-        </Form.Item>
-        <Form.Item name="toDate" label="Count up until">
-          <DatePicker />
+        <Form.Item name="livePeriodChoice" label="Live period">
+          <Select onChange={onLivePeriodSelected}>
+            <Option value={LivePeriodChoice.Last2Months}>Last 2 months</Option>
+            <Option value="other">other (coming soon)</Option>
+          </Select>
         </Form.Item>
         <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit">
-            Simulate
+          <Button type="primary" htmlType="submit" disabled={simulating}>
+            {simulating ? 'Simulating...' : 'Simulate'}
           </Button>
           <Button htmlType="button" onClick={onReset}>
             Reset

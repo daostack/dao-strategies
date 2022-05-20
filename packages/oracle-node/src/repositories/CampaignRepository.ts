@@ -5,11 +5,7 @@ import { BigNumber } from 'ethers';
 import { getRewardUri } from '../services/CampaignUri';
 
 export class CampaignRepository {
-  private client: PrismaClient;
-
-  constructor() {
-    this.client = new PrismaClient();
-  }
+  constructor(protected client: PrismaClient) {}
 
   async create(campaignDetails: Prisma.CampaignCreateInput): Promise<Campaign> {
     return this.client.campaign.create({
@@ -38,9 +34,7 @@ export class CampaignRepository {
     }
 
     /** "BigInt" in the DB to support timestamps beyond 2038, "number" in JS */
-    return result.lastSimDate === null
-      ? undefined
-      : (result.lastSimDate as unknown as number);
+    return result.lastSimDate === null ? undefined : Number(result.lastSimDate);
   }
 
   async getRewards(uri: string): Promise<Balances> {

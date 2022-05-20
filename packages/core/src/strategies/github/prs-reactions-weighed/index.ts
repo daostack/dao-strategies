@@ -18,14 +18,13 @@ const strategy: Strategy = async (world: World, params: Params) => {
   }
 
   const reactionsPerContributor = new Map<string, Array<number>>();
-  let contributors = new Array<string | undefined>();
+  const contributors = new Set<string>();
 
   // get all contributors in the repositories
   for (const repo of params.repositories) {
     const repoContributors = await getRepoContributors(world, repo);
-    contributors.concat(repoContributors);
+    repoContributors.forEach(contributors.add, contributors);
   }
-  contributors = [...new Set(contributors)]; // remove duplicates
 
   for (const repo of params.repositories) {
     // get all pulls that were created and merged at the specified time range
@@ -35,8 +34,6 @@ const strategy: Strategy = async (world: World, params: Params) => {
         return false;
       }
       return (
-        toTimeStamp(pull.created_at) >= params.timeRange.start &&
-        toTimeStamp(pull.created_at) <= params.timeRange.end &&
         toTimeStamp(pull.merged_at) >= params.timeRange.start &&
         toTimeStamp(pull.merged_at) <= params.timeRange.end
       );
@@ -52,8 +49,9 @@ const strategy: Strategy = async (world: World, params: Params) => {
       const reactions = await getPullReactions(world, repo, pull.number);
       for (const reaction of reactions) {
         if (
-          reaction.user?.login !== pullCreator && // reaction wasn't made by the creator of the pull
-          contributors.includes(reaction.user?.login) && // only reactions by contributors
+          reaction.user !== null &&
+          reaction.user.login !== undefined &&
+          contributors.has(reaction.user?.login) && // only reactions by contributors
           reaction.content === '+1'
         ) {
           // only "thumbs up" reactions count
@@ -71,13 +69,11 @@ const strategy: Strategy = async (world: World, params: Params) => {
 
   const scores = new Map();
   for (const [contributor, reactions] of reactionsPerContributor.entries()) {
-    scores.set(
-      contributor,
-      Math.pow(
-        reactions.reduce((partialSum, num) => partialSum + Math.pow(num, 2), 0),
-        1 / 2
-      )
+    const amount = Math.pow(
+      reactions.reduce((partialSum, num) => partialSum + Math.pow(num, 2), 0),
+      1 / 2
     );
+    scores.set(contributor, amount);
   }
 
   return scores;
