@@ -25,6 +25,8 @@ contract CampaignFactory {
         master = Campaign(_master);
     }
 
+    receive() external payable {}
+
     function createCampaign(
         Campaign.SharesData memory _shares,
         bytes32 _uri,

@@ -1,13 +1,15 @@
 import { Button, Form, Input, Select } from 'antd';
-// import { BigNumber, ethers } from 'ethers';
+import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { ORACLE_NODE_URL } from '../../config/appConfig';
 import { DateManager } from '../../utils/time';
-// import { CampaignCreatedEvent } from '../../generated/typechain/CampaignFactory';
+import { useCampaignFactory } from '../../hooks/useContracts';
+import { BigNumber, ethers } from 'ethers';
+import { CampaignCreatedEvent } from '../../generated/typechain/CampaignFactory';
 
-// const RANDOM_BYTES32 = '0x5fd924625f6ab16a19cc9807c7c506ae1813490e4ba675f843d5a10e0baacdb8';
+const RANDOM_BYTES32 = '0x5fd924625f6ab16a19cc9807c7c506ae1813490e4ba675f843d5a10e0baacdb8';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -40,42 +42,41 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const [today] = useState<DateManager>(new DateManager());
   const [simulating, setSimulating] = useState<boolean>(false);
 
-  // const campaignFactoryContract = useAppContracts('CampaignFactory', ethersContext.chainId);
-  // const navigate = useNavigate();
+  const campaignFactory = useCampaignFactory();
+  const accountHook = useAccount();
+  const navigate = useNavigate();
 
-  // const createCampaign = async (): Promise<void> => {
-  //   const account = ethersContext.account;
-  //   if (account === undefined) throw new Error('account undefined');
-  //   const salt = ethers.utils.keccak256(ethers.utils.hashMessage(account + Date.now().toString()));
+  const createCampaign = async (): Promise<void> => {
+    const account = accountHook.data?.address;
+    if (account === undefined) throw new Error('account undefined');
+    const salt = ethers.utils.keccak256(ethers.utils.hashMessage(account + Date.now().toString()));
 
-  //   // const tx = transactor(ethComponentsSettings, ethersContext?.signer);
-  //   // if (tx === undefined) throw new Error('tx undefined');
+    // const tx = transactor(ethComponentsSettings, ethersContext?.signer);
+    // if (tx === undefined) throw new Error('tx undefined');
 
-  //   if (campaignFactoryContract === undefined) throw new Error('campaignFactoryContract undefined');
-  //   if (ethersContext === undefined) throw new Error('ethersContext undefined');
-  //   if (ethersContext.account === undefined) throw new Error('ethersContext.account undefined');
+    if (campaignFactory === undefined) throw new Error('campaignFactoryContract undefined');
 
-  //   const ex = await campaignFactoryContract.createCampaign(
-  //     { sharesMerkleRoot: RANDOM_BYTES32, totalShares: BigNumber.from(0) },
-  //     RANDOM_BYTES32,
-  //     account,
-  //     account,
-  //     true,
-  //     ethers.BigNumber.from(1000),
-  //     salt
-  //   );
-  //   const txReceipt = await ex.wait();
+    const ex = await campaignFactory.createCampaign(
+      { sharesMerkleRoot: RANDOM_BYTES32, totalShares: BigNumber.from(0) },
+      RANDOM_BYTES32,
+      account,
+      account,
+      true,
+      ethers.BigNumber.from(1000),
+      salt
+    );
+    const txReceipt = await ex.wait();
 
-  //   if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
-  //   const event = txReceipt.events.find((e) => e.event === 'CampaignCreated') as CampaignCreatedEvent;
+    if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
+    const event = txReceipt.events.find((e) => e.event === 'CampaignCreated') as CampaignCreatedEvent;
 
-  //   if (event === undefined) throw new Error('event undefined');
-  //   if (event.args === undefined) throw new Error('event.args undefined');
+    if (event === undefined) throw new Error('event undefined');
+    if (event.args === undefined) throw new Error('event.args undefined');
 
-  //   const campaignAddress = event.args.newCampaign;
+    const campaignAddress = event.args.newCampaign;
 
-  //   navigate(`/campaign/${campaignAddress}`);
-  // };
+    navigate(`/campaign/${campaignAddress}`);
+  };
 
   const [form] = Form.useForm();
 
@@ -146,7 +147,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const onCreate = (): void => {
     console.log('create');
-    // void createCampaign();
+    void createCampaign();
   };
 
   const layout = {
