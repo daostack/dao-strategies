@@ -3,7 +3,7 @@ import {
     StrategyComputation,
     WorldConfig,
 } from '@dao-strategies/core';
-
+import { BigNumber } from 'ethers';
 import 'dotenv/config';
 
 let token: string | undefined;
@@ -13,7 +13,6 @@ test('set token', () => {
     if (token == undefined) {
         throw 'Github token not defined';
     }
-    console.log('token:', token);
 });
 
 test('basic test', async () => {
@@ -25,5 +24,5 @@ test('basic test', async () => {
         timeRange: { start: 1640998800, end: 1652437383 },
     });
 
-    expect(balancesToObject(result)).toEqual({ "gershido": "100" });
+    expect(balancesToObject(result)).toEqual({ "gershido": "1000000000000000000" });
 });
