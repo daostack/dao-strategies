@@ -22,9 +22,9 @@ export default {
   plugins: [
     typescript({
       abortOnError: false,
-
       useTsconfigDeclarationDir: true,
       cacheRoot: `${require("temp-dir")}/.rpt2_cache`,
+      tsconfig: "./tsconfig.build.json"
     }),
 
     // Resolve source maps to the original source
