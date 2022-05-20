@@ -11,6 +11,7 @@ type RouteParams = {
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const params = useParams<RouteParams>();
+  const details = useCampaign();
   return (
     <>
       <Link to="/">Back</Link>
