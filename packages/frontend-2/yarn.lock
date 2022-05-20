@@ -7612,6 +7612,7 @@ __metadata:
     "@types/react-dom": ^18.0.4
     antd: ^4.20.5
     ethers: ^5.6.6
+    multiformats: ^9.6.5
     react: ^18.1.0
     react-css-theme-switcher: ^0.3.0
     react-dom: ^18.1.0
@@ -10195,6 +10196,13 @@ __metadata:
   bin:
     multicast-dns: cli.js
   checksum: 00b8a57df152d4cd0297946320a94b7c3cdf75a46a2247f32f958a8927dea42958177f9b7fdae69fab2e4e033fb3416881af1f5e9055a3e1542888767139e2fb
+  languageName: node
+  linkType: hard
+
+"multiformats@npm:^9.6.5":
+  version: 9.6.5
+  resolution: "multiformats@npm:9.6.5"
+  checksum: f4fce459bf19e1c38e4daa0e6de3aeea55ab000620d23ef599943495ab65d1c0351c5aa53d15eb365181d30a4b0629785a0d8901d17b5d153c48f4f1a683cd47
   languageName: node
   linkType: hard
 

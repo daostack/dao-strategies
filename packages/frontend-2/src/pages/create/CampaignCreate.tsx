@@ -6,10 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ORACLE_NODE_URL } from '../../config/appConfig';
 import { DateManager } from '../../utils/time';
 import { useCampaignFactory } from '../../hooks/useContracts';
-import { BigNumber, ethers } from 'ethers';
-import { CampaignCreatedEvent } from '../../generated/typechain/CampaignFactory';
-
-const RANDOM_BYTES32 = '0x5fd924625f6ab16a19cc9807c7c506ae1813490e4ba675f843d5a10e0baacdb8';
+import { createCampaign } from './create';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -37,8 +34,13 @@ interface RequestParams {
   };
 }
 
+interface SimulationResult {
+  uri: string;
+  rewards: Record<string, unknown>;
+}
+
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
-  const [rewards, setRewards] = useState<Record<string, unknown>>({});
+  const [simulated, setSimulated] = useState<SimulationResult>({ uri: '', rewards: {} });
   const [today] = useState<DateManager>(new DateManager());
   const [simulating, setSimulating] = useState<boolean>(false);
 
@@ -46,34 +48,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const accountHook = useAccount();
   const navigate = useNavigate();
 
-  const createCampaign = async (): Promise<void> => {
+  const create = async (): Promise<void> => {
     const account = accountHook.data?.address;
     if (account === undefined) throw new Error('account undefined');
-    const salt = ethers.utils.keccak256(ethers.utils.hashMessage(account + Date.now().toString()));
-
-    // const tx = transactor(ethComponentsSettings, ethersContext?.signer);
-    // if (tx === undefined) throw new Error('tx undefined');
-
     if (campaignFactory === undefined) throw new Error('campaignFactoryContract undefined');
 
-    const ex = await campaignFactory.createCampaign(
-      { sharesMerkleRoot: RANDOM_BYTES32, totalShares: BigNumber.from(0) },
-      RANDOM_BYTES32,
-      account,
-      account,
-      true,
-      ethers.BigNumber.from(1000),
-      salt
-    );
-    const txReceipt = await ex.wait();
-
-    if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
-    const event = txReceipt.events.find((e) => e.event === 'CampaignCreated') as CampaignCreatedEvent;
-
-    if (event === undefined) throw new Error('event undefined');
-    if (event.args === undefined) throw new Error('event.args undefined');
-
-    const campaignAddress = event.args.newCampaign;
+    const campaignAddress = await createCampaign(campaignFactory, account, simulated.uri);
 
     navigate(`/campaign/${campaignAddress}`);
   };
@@ -129,8 +109,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       credentials: 'include',
     });
 
-    const rew = await (response.json() as Promise<Record<string, unknown>>);
-    setRewards(rew);
+    const sim = await (response.json() as Promise<SimulationResult>);
+    setSimulated(sim);
     setSimulating(false);
   };
 
@@ -141,13 +121,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const onReset = (): void => {
-    setRewards({});
+    setSimulated({ uri: '', rewards: {} });
     form.resetFields();
   };
 
   const onCreate = (): void => {
     console.log('create');
-    void createCampaign();
+    void create();
+  };
+
+  const isSimulated = () => {
+    return Object.keys(simulated.rewards).length !== 0;
   };
 
   const layout = {
@@ -184,13 +168,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </Select>
         </Form.Item>
         <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit" disabled={simulating}>
-            {simulating ? 'Simulating...' : 'Simulate'}
+          <Button type={isSimulated() ? 'default' : 'primary'} htmlType="submit" disabled={simulating || isSimulated()}>
+            {simulating ? 'Simulating...' : isSimulated() ? 'Simulated' : 'Simulate'}
           </Button>
           <Button htmlType="button" onClick={onReset}>
             Reset
           </Button>
-          <Button htmlType="button" onClick={onCreate} disabled={Object.keys(rewards).length === 0}>
+          <Button
+            type={isSimulated() ? 'primary' : 'default'}
+            htmlType="button"
+            onClick={onCreate}
+            disabled={!isSimulated() || accountHook.data == null}>
             Create
           </Button>
         </Form.Item>
@@ -198,7 +186,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
       <div>
         <ul>
-          {Object.entries(rewards).map((entry) => {
+          {Object.entries(simulated.rewards).map((entry) => {
             return (
               <li key={entry[0]}>
                 <>

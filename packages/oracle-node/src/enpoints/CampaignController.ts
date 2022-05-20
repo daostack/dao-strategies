@@ -42,7 +42,7 @@ export class CampaignController extends Controller {
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
-  ): Promise<BalancesObject> {
+  ): Promise<{ uri: string; rewards: BalancesObject }> {
     if (loggedUser === undefined) {
       throw new Error('logged user expected but not found');
     }
@@ -56,7 +56,12 @@ export class CampaignController extends Controller {
     };
 
     const uri = await this.services.campaign.getOrCreate(details, loggedUser);
-    return balancesToObject(await this.services.campaign.computeRewards(uri));
+    return {
+      uri,
+      rewards: balancesToObject(
+        await this.services.campaign.computeRewards(uri)
+      ),
+    };
   }
 
   async simulateFromUri(
