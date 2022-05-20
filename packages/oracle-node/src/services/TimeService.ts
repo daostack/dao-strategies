@@ -1,5 +1,5 @@
 export class TimeService {
   now(): number {
-    return Date.now();
+    return Math.floor(Date.now() / 1000);
   }
 }

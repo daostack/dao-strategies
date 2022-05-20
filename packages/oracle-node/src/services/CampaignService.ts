@@ -122,6 +122,7 @@ export class CampaignService {
       );
 
       await this.setRewards(uri, rewards);
+      await this.campaignRepo.setLastSimDate(uri, this.timeService.now());
     }
 
     return rewards;
@@ -143,6 +144,10 @@ export class CampaignService {
 
   async getLastSimDate(uri: string): Promise<number | undefined> {
     return this.campaignRepo.getLastSimDate(uri);
+  }
+
+  async setLastSimDate(uri: string, date: number): Promise<void> {
+    return this.campaignRepo.setLastSimDate(uri, date);
   }
 
   async getRewards(uri: string): Promise<Balances> {

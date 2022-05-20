@@ -37,6 +37,13 @@ export class CampaignRepository {
     return result.lastSimDate === null ? undefined : Number(result.lastSimDate);
   }
 
+  async setLastSimDate(uri: string, date: number): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { lastSimDate: date },
+    });
+  }
+
   async getRewards(uri: string): Promise<Balances> {
     const result = await this.client.campaign.findUnique({
       where: { uri: uri },
