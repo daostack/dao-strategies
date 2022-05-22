@@ -29,11 +29,12 @@ test('basic test', async () => {
     expect(balancesToObject(result)).toEqual({ "gershido": "1000000000000000000" });
 });
 
-//test('geth', async () => {
-//    const result = await strategyComp.runStrategy('GH_PRS_REACTIONS_WEIGHED', {
-//        repositories: [{ owner: 'ethereum', repo: 'go-ethereum' }],
-//        timeRange: { start: 1641032578, end: 1653118615 },
-//    });
-//
-//    console.log(JSON.stringify(balancesToObject(result)));
-//});
+test('geth', async () => {
+    const result = await strategyComp.runStrategy('GH_PRS_REACTIONS_WEIGHED', {
+        repositories: [{ owner: 'ethereum', repo: 'go-ethereum' }],
+        timeRange: { start: 1651400578, end: 1653215165 },
+    });
+
+    console.log(JSON.stringify(balancesToObject(result)));
+    expect(1).toBe(1);
+}, 300e3);
