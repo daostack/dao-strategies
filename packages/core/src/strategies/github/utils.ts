@@ -1,4 +1,5 @@
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
+import { paginateRest } from "@octokit/plugin-paginate-rest";
 
 import { World } from '../../world/World';
 
@@ -11,11 +12,6 @@ type ReactionsListData =
 type ContributorsListData =
   RestEndpointMethodTypes['repos']['listContributors']['response']['data'];
 
-/*
-todo: get typing for the pulls. Tries using PullRequestParams but the type is not compatible with the returned pulls 
-from the iterator.
-https://github.com/octokit/plugin-rest-endpoint-methods.js#typescript 
-*/
 
 export async function repoAvailable(
   world: World,
@@ -33,7 +29,9 @@ export async function repoAvailable(
 
 export async function getPrsInRepo(
   world: World,
-  repo: { owner: string; repo: string }
+  repo: { owner: string; repo: string },
+  mergedFrom?: number,
+  mergedTo?: number
 ): Promise<PullRequestListData> {
   const allPulls: PullRequestListData = [];
   const iterator = world.github.paginate.iterator(
@@ -48,7 +46,17 @@ export async function getPrsInRepo(
   // iterate through each response
   for await (const { data: pulls } of iterator) {
     for (const pull of pulls) {
-      allPulls.push(pull);
+      if (mergedFrom != undefined && mergedTo != undefined && mergedFrom < mergedTo) { // if filter by merge time
+        if (
+          pull.merged_at != null &&
+          mergedFrom <= toTimeStamp(pull.merged_at) &&
+          mergedTo >= toTimeStamp(pull.merged_at)) {
+          allPulls.push(pull);;
+        }
+      }
+      else {
+        allPulls.push(pull);
+      }
     }
   }
 
@@ -59,15 +67,23 @@ export async function getRepoContributors(
   world: World,
   repo: { owner: string; repo: string }
 ): Promise<ContributorsListData> {
-  const response = await world.github.rest.repos.listContributors({ ...repo });
+  const allContributors: ContributorsListData = [];
+  const iterator = world.github.paginate.iterator(
+    world.github.rest.repos.listContributors,
+    {
+      ...repo,
+      per_page: 100,
+    }
+  );
 
-  if (response.status !== 200) {
-    throw new Error(
-      `github api get request for contributors in repo ${repo.owner}\\${repo.repo} failed`
-    );
+  // iterate through each response
+  for await (const { data: contibutors } of iterator) {
+    for (const contibutor of contibutors) {
+      allContributors.push(contibutor);
+    }
   }
 
-  return response.data;
+  return allContributors;
 }
 
 export async function getPullReactions(

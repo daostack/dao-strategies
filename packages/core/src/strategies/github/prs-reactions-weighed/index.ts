@@ -37,26 +37,18 @@ const strategy: Strategy = async (world: World, params: Params) => {
 
   for (const repo of params.repositories) {
     // get all pulls that were merged at the specified time range
-    const allPulls = await getPrsInRepo(world, repo);
-    const pullsFiltered = allPulls.filter(function (pull) {
-      if (pull.merged_at == null) {
-        return false;
-      }
-      return (
-        toTimeStamp(pull.merged_at) >= params.timeRange.start &&
-        toTimeStamp(pull.merged_at) <= params.timeRange.end
-      );
-    });
+    const allPulls = await getPrsInRepo(world, repo, params.timeRange.start, params.timeRange.end);
 
     // get the amount of reactions on every pull request that was made by a contributor
-    for (const pull of pullsFiltered) {
+    for (const pull of allPulls) {
       if (pull.user == null) {
         continue;
       }
       const pullCreator: string = pull.user.login;
-      let reactionsNum = 0;
+      let reactionsNum = 1;
       const reactions = await getPullReactions(world, repo, pull.number);
       const reacted = new Set<string>();
+      reacted.add(pullCreator);
       for (const reaction of reactions) {
         if (
           reaction.user != null && // only reactions by users
