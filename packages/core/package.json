@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "rollup -w -c rollup.config.ts",
     "build": "rollup -c rollup.config.ts",
-    "test": "jest test/main.test.ts",
+    "test": "jest test/main.test.ts --runInBand",
     "build-test": "cd test && tsc --sourceMap test.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
@@ -29,6 +29,7 @@
     "eslint-plugin-unused-imports": "^2.0.0",
     "jest": "^28.1.0",
     "rollup": "^2.70.1",
+    "rollup-plugin-cleaner": "^1.0.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-typescript2": "^0.31.2",
     "temp-dir": "^2.0.0",
