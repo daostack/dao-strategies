@@ -3,6 +3,7 @@ import { PrismaClient, Prisma, Campaign } from '@prisma/client';
 import { BigNumber } from 'ethers';
 
 import { getRewardUri } from '../services/CampaignUri';
+import { CampaignCreateDetails } from '../services/types';
 
 export class CampaignRepository {
   constructor(protected client: PrismaClient) {}
@@ -14,7 +15,14 @@ export class CampaignRepository {
   }
 
   async get(uri: string): Promise<Campaign> {
-    return this.client.campaign.findUnique({ where: { uri: uri } });
+    return this.client.campaign.findUnique({ where: { uri } });
+  }
+
+  async getFromAddress(address: string): Promise<Campaign> {
+    const res = await this.client.campaign.findUnique({
+      where: { address: address.toLowerCase() },
+    });
+    return res;
   }
 
   async exist(uri: string): Promise<boolean> {
@@ -79,5 +87,10 @@ export class CampaignRepository {
     const addNew = this.client.reward.createMany({ data: rewardsArray });
 
     await this.client.$transaction([deleteExisting, addNew]);
+  }
+
+  async setDetails(uri: string, details: CampaignCreateDetails): Promise<void> {
+    details.address = details.address.toLowerCase();
+    await this.client.campaign.update({ where: { uri }, data: details });
   }
 }

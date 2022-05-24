@@ -3,10 +3,17 @@ import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { ORACLE_NODE_URL } from '../../config/appConfig';
 import { DateManager } from '../../utils/time';
 import { useCampaignFactory } from '../../hooks/useContracts';
-import { createCampaign } from './create';
+import {
+  CampaignCreateDetails,
+  createCampaign,
+  LivePeriodChoice,
+  simulateCampaign,
+  SimulationParams,
+  SimulationResult,
+} from '../campaign.support';
+import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -14,33 +21,17 @@ export interface ICampaignCreateProps {
 
 const { Option } = Select;
 
-enum LivePeriodChoice {
-  Last2Months = 'last-two-months',
-}
-
-interface CampaignFormValues {
+export interface CampaignFormValues {
+  title: string;
+  description: string;
   campaignType: string;
-  repositoryOwner: string;
-  repositoryName: string;
+  repositoryURL: string;
   livePeriodChoice: LivePeriodChoice;
-}
-
-interface RequestParams {
-  execDate: number;
-  strategyID: string;
-  strategyParams: {
-    repositories: Array<{ owner: string; repo: string }>;
-    timeRange: { start: number; end: number };
-  };
-}
-
-interface SimulationResult {
-  uri: string;
-  rewards: Record<string, unknown>;
+  guardian: string;
 }
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
-  const [simulated, setSimulated] = useState<SimulationResult>({ uri: '', rewards: {} });
+  const [simulation, setSimulated] = useState<SimulationResult>({ uri: '', rewards: {} });
   const [today] = useState<DateManager>(new DateManager());
   const [simulating, setSimulating] = useState<boolean>(false);
 
@@ -48,23 +39,35 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const accountHook = useAccount();
   const navigate = useNavigate();
 
-  const create = async (): Promise<void> => {
+  const [form] = Form.useForm();
+
+  const create = async (values: CampaignFormValues): Promise<void> => {
     const account = accountHook.data?.address;
     if (account === undefined) throw new Error('account undefined');
     if (campaignFactory === undefined) throw new Error('campaignFactoryContract undefined');
+    if (simulation.params === undefined) throw new Error('simulation.params undefined');
 
-    const campaignAddress = await createCampaign(campaignFactory, account, simulated.uri);
+    const otherDetails: CampaignCreateDetails = {
+      title: values.title,
+      description: values.description,
+      guardian: values.guardian,
+      oracle: ORACLE_ADDRESS,
+      address: '',
+      cancelDate: simulation.params.execDate + CHALLENGE_PERIOD,
+    };
+
+    const campaignAddress = await createCampaign(campaignFactory, simulation.uri, otherDetails, account);
 
     navigate(`/campaign/${campaignAddress}`);
   };
 
-  const [form] = Form.useForm();
-
   const initialValues: CampaignFormValues = {
     campaignType: 'github',
-    repositoryOwner: 'gershido',
-    repositoryName: 'test-github-api',
+    title: 'demo',
+    description: '',
+    repositoryURL: 'https://github.com/gershido/test-github-api',
     livePeriodChoice: LivePeriodChoice.Last2Months,
+    guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
   };
 
   const getStartEnd = (values: CampaignFormValues): [number, number] => {
@@ -74,7 +77,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     }
   };
 
-  const getStrategyParams = (values: CampaignFormValues): RequestParams | undefined => {
+  const getRepo = (values: CampaignFormValues): { owner: string; repo: string } => {
+    const url = new URL(values.repositoryURL);
+    const parts = url.pathname.split('/');
+    return {
+      owner: parts[1],
+      repo: parts[2],
+    };
+  };
+
+  const getStrategyParams = (values: CampaignFormValues): SimulationParams | undefined => {
+    const repo = getRepo(values);
     switch (values.campaignType) {
       case 'github':
         const [start, end] = getStartEnd(values);
@@ -82,7 +95,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           execDate: end,
           strategyID: 'GH_PRS_REACTIONS_WEIGHED',
           strategyParams: {
-            repositories: [{ owner: values.repositoryOwner, repo: values.repositoryName }],
+            repositories: [repo],
             timeRange: { start, end },
           },
         };
@@ -100,16 +113,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const updateRewards = async (values: CampaignFormValues): Promise<void> => {
     setSimulating(true);
-    const reqParams = getStrategyParams(values);
+    const params = getStrategyParams(values);
+    if (params === undefined) throw new Error('params undefined');
 
-    const response = await fetch(ORACLE_NODE_URL + '/campaign/simulateFromDetails', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(reqParams),
-      credentials: 'include',
-    });
+    const sim = await simulateCampaign(params);
 
-    const sim = await (response.json() as Promise<SimulationResult>);
     setSimulated(sim);
     setSimulating(false);
   };
@@ -127,11 +135,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const onCreate = (): void => {
     console.log('create');
-    void create();
+    void create(form.getFieldsValue());
   };
 
   const isSimulated = () => {
-    return Object.keys(simulated.rewards).length !== 0;
+    return Object.keys(simulation.rewards).length !== 0;
   };
 
   const layout = {
@@ -155,13 +163,19 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Option value="twitter">Twitter (coming soon)</Option>
           </Select>
         </Form.Item>
-        <Form.Item name="repositoryOwner" label="Repository Owner" rules={[{ required: true }]}>
+        <Form.Item name="title" label="Title" rules={[{ required: true }]}>
           <Input></Input>
         </Form.Item>
-        <Form.Item name="repositoryName" label="Repository Name" rules={[{ required: true }]}>
-          <Input></Input>
+        <Form.Item name="description" label="Description" rules={[{ required: false }]}>
+          <Input.TextArea></Input.TextArea>
         </Form.Item>
-        <Form.Item name="livePeriodChoice" label="Live period">
+        <Form.Item name="repositoryURL" label="Repository URL" rules={[{ required: true }]}>
+          <Input placeholder="https://github.com/..."></Input>
+        </Form.Item>
+        <Form.Item name="guardian" label="Guardian" rules={[{ required: true }]}>
+          <Input placeholder="0x...."></Input>
+        </Form.Item>
+        <Form.Item name="livePeriodChoice" label="Live period" rules={[{ required: true }]}>
           <Select onChange={onLivePeriodSelected}>
             <Option value={LivePeriodChoice.Last2Months}>Last 2 months</Option>
             <Option value="other">other (coming soon)</Option>
@@ -177,7 +191,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           <Button
             type={isSimulated() ? 'primary' : 'default'}
             htmlType="button"
-            onClick={onCreate}
+            onClick={() => onCreate()}
             disabled={!isSimulated() || accountHook.data == null}>
             Create
           </Button>
@@ -186,7 +200,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
       <div>
         <ul>
-          {Object.entries(simulated.rewards).map((entry) => {
+          {Object.entries(simulation.rewards).map((entry) => {
             return (
               <li key={entry[0]}>
                 <>

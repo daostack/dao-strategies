@@ -15,6 +15,7 @@ import {
   getCampaignUri,
 } from './CampaignUri';
 import { TimeService } from './TimeService';
+import { CampaignCreateDetails } from './types';
 
 /**
  * On Retroactive Campaign
@@ -41,6 +42,10 @@ export class CampaignService {
 
   async get(uri: string): Promise<Campaign | undefined> {
     return this.campaignRepo.get(uri);
+  }
+
+  async getFromAddress(address: string): Promise<Campaign | undefined> {
+    return this.campaignRepo.getFromAddress(address);
   }
 
   async exist(uri: string): Promise<boolean> {
@@ -156,5 +161,9 @@ export class CampaignService {
 
   async setRewards(uri: string, rewards: Balances): Promise<void> {
     return this.campaignRepo.setRewards(uri, rewards);
+  }
+
+  async register(uri: string, details: CampaignCreateDetails): Promise<void> {
+    await this.campaignRepo.setDetails(uri, details);
   }
 }

@@ -1,7 +1,9 @@
 import { BalancesObject, balancesToObject } from '@dao-strategies/core';
+import { Campaign } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
 import { CampaignUriDetails } from '../services/CampaignUri';
+import { CampaignCreateDetails } from '../services/types';
 import { Services } from '../types';
 
 import { Controller } from './Controller';
@@ -67,9 +69,33 @@ export class CampaignController extends Controller {
   async simulateFromUri(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
+    loggedUser: string | undefined
   ): Promise<BalancesObject> {
     const uri: string = request.body.uri;
     return balancesToObject(await this.services.campaign.computeRewards(uri));
+  }
+
+  async register(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<void> {
+    await this.services.campaign.register(
+      request.params.uri as string,
+      request.body as CampaignCreateDetails
+    );
+  }
+
+  async getFromAddress(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<Campaign> {
+    return this.services.campaign.getFromAddress(
+      request.params.address as string
+    );
   }
 }

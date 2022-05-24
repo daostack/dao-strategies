@@ -28,6 +28,15 @@ function handleError(err, req, res, next): void {
   res.status(err.statusCode || 500).send({ message: err.message });
 }
 
+interface BigInt {
+  /** Convert to BigInt to string form in JSON.stringify */
+  toJSON: () => string;
+}
+(BigInt.prototype as any).toJSON = function (): string {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return this.toString();
+};
+
 export const appLogger = winston.createLogger({
   transports: [
     new winston.transports.Console(),
@@ -112,6 +121,7 @@ Routes.forEach((route) => {
         const result = await new (route.controller as any)(services)[
           route.action
         ](req, res, next, loggedUser);
+
         res.json(result);
       } catch (error) {
         console.error(error);
