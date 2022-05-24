@@ -1,4 +1,5 @@
 export interface CampaignCreateDetails {
+  registered: boolean;
   title: string;
   description: string;
   guardian: string;

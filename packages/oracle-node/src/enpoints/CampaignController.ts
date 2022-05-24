@@ -82,6 +82,7 @@ export class CampaignController extends Controller {
     next: NextFunction,
     loggedUser: string | undefined
   ): Promise<void> {
+    request.body.registered = true;
     await this.services.campaign.register(
       request.params.uri as string,
       request.body as CampaignCreateDetails
