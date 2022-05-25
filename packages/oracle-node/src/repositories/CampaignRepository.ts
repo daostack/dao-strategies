@@ -2,14 +2,10 @@ import { Balances } from '@dao-strategies/core';
 import { PrismaClient, Prisma, Campaign } from '@prisma/client';
 import { BigNumber } from 'ethers';
 
-import { getRewardUri } from '../services/CampaignUri';
+import { CampaignCreateDetails } from '../services/types';
 
 export class CampaignRepository {
-  private client: PrismaClient;
-
-  constructor() {
-    this.client = new PrismaClient();
-  }
+  constructor(protected client: PrismaClient) {}
 
   async create(campaignDetails: Prisma.CampaignCreateInput): Promise<Campaign> {
     return this.client.campaign.create({
@@ -18,7 +14,14 @@ export class CampaignRepository {
   }
 
   async get(uri: string): Promise<Campaign> {
-    return this.client.campaign.findUnique({ where: { uri: uri } });
+    return this.client.campaign.findUnique({ where: { uri } });
+  }
+
+  async getFromAddress(address: string): Promise<Campaign> {
+    const res = await this.client.campaign.findFirst({
+      where: { address: address.toLowerCase() },
+    });
+    return res;
   }
 
   async exist(uri: string): Promise<boolean> {
@@ -38,9 +41,14 @@ export class CampaignRepository {
     }
 
     /** "BigInt" in the DB to support timestamps beyond 2038, "number" in JS */
-    return result.lastSimDate === null
-      ? undefined
-      : (result.lastSimDate as unknown as number);
+    return result.lastSimDate === null ? undefined : Number(result.lastSimDate);
+  }
+
+  async setLastSimDate(uri: string, date: number): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { lastSimDate: date },
+    });
   }
 
   async getRewards(uri: string): Promise<Balances> {
@@ -60,11 +68,10 @@ export class CampaignRepository {
   }
 
   async setRewards(uri: string, rewards: Balances): Promise<void> {
-    const rewardsArray = await Promise.all(
-      Array.from(rewards.entries()).map(async ([account, amount]) => {
-        const id = await getRewardUri(uri, account);
-        return { id, account, amount: amount.toBigInt(), campaignId: uri };
-      })
+    const rewardsArray = Array.from(rewards.entries()).map(
+      ([account, amount]) => {
+        return { account, amount: amount.toBigInt(), campaignId: uri };
+      }
     );
 
     const deleteExisting = this.client.reward.deleteMany({
@@ -78,5 +85,10 @@ export class CampaignRepository {
     const addNew = this.client.reward.createMany({ data: rewardsArray });
 
     await this.client.$transaction([deleteExisting, addNew]);
+  }
+
+  async setDetails(uri: string, details: CampaignCreateDetails): Promise<void> {
+    details.address = details.address.toLowerCase();
+    await this.client.campaign.update({ where: { uri }, data: details });
   }
 }

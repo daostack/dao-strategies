@@ -2,28 +2,28 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "hardhat test",
       "type": "node",
       "request": "launch",
-      "name": "hardhat test",
       "skipFiles": ["<node_internals>/**"],
       "runtimeExecutable": "${workspaceFolder}/packages/contracts/node_modules/.bin/hardhat",
       "args": ["test", "--network", "localhost"],
       "cwd": "${workspaceFolder}/packages/contracts"
     },
     {
+      "name": "oracle",
       "type": "node",
       "request": "launch",
-      "name": "oracle",
       "skipFiles": ["<node_internals>/**"],
       "cwd": "${workspaceFolder}/packages/oracle-node",
       "runtimeExecutable": "${workspaceFolder}/packages/oracle-node/node_modules/.bin/ts-node",
       "args": ["src/index.ts"],
-      "outputCapture": "std"
+      "outputCapture": "console"
     },
     {
+      "name": "test core",
       "type": "node",
       "request": "launch",
-      "name": "test core",
       "cwd": "${workspaceFolder}/packages/core/test",
       "args": ["test.js"],
       "outputCapture": "std"

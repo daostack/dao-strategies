@@ -1,4 +1,5 @@
 import { StrategyComputation } from '@dao-strategies/core';
+import { PrismaClient } from '@prisma/client';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as express from 'express';
@@ -27,7 +28,16 @@ function handleError(err, req, res, next): void {
   res.status(err.statusCode || 500).send({ message: err.message });
 }
 
-export const oracleLogger = winston.createLogger({
+interface BigInt {
+  /** Convert to BigInt to string form in JSON.stringify */
+  toJSON: () => string;
+}
+(BigInt.prototype as any).toJSON = function (): string {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return this.toString();
+};
+
+export const appLogger = winston.createLogger({
   transports: [
     new winston.transports.Console(),
     // new winston.transports.File({ filename: 'combined.log' }),
@@ -59,15 +69,16 @@ app.use(
 /** Logger configuration */
 app.use(
   expressWinston.logger({
-    transports: oracleLogger.transports,
+    transports: appLogger.transports,
     format: winston.format.combine(
       winston.format.colorize(),
       winston.format.json()
     ),
     expressFormat: true,
     colorize: true,
+    meta: false,
     ignoreRoute: function (req, res) {
-      return true;
+      return false;
     },
   })
 );
@@ -75,28 +86,28 @@ app.use(
 /** JSON body parser */
 app.use(bodyParser.json());
 
+/** Services instantiation */
+const client = new PrismaClient();
+
+const campaignRepo = new CampaignRepository(client);
+const userRepo = new UserRepository(client);
+
+const strategyComputation = new StrategyComputation(worldConfig);
+const timeService = new TimeService();
+
+const services: Services = {
+  campaign: new CampaignService(campaignRepo, timeService, strategyComputation),
+  time: new TimeService(),
+  user: new UserService(userRepo),
+};
+/** --------------------- */
+
 /** Register routes */
 Routes.forEach((route) => {
   (app as any)[route.method](
     route.route,
     async (req: Request, res: Response, next: Function) => {
       try {
-        const campaignRepo = new CampaignRepository();
-        const userRepo = new UserRepository();
-
-        const strategyComputation = new StrategyComputation(worldConfig);
-        const timeService = new TimeService();
-
-        const services: Services = {
-          campaign: new CampaignService(
-            campaignRepo,
-            timeService,
-            strategyComputation
-          ),
-          time: new TimeService(),
-          user: new UserService(userRepo),
-        };
-
         const loggedUser: string | undefined = req.session?.siwe?.address;
 
         if (route.protected) {
@@ -110,11 +121,12 @@ Routes.forEach((route) => {
         const result = await new (route.controller as any)(services)[
           route.action
         ](req, res, next, loggedUser);
+
         res.json(result);
       } catch (error) {
         console.error(error);
         throw error;
-        oracleLogger.error(error.message);
+        appLogger.error(error.message);
         next(error);
       }
     }

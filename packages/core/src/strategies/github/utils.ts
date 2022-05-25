@@ -58,7 +58,7 @@ export async function getPrsInRepo(
 export async function getRepoContributors(
   world: World,
   repo: { owner: string; repo: string }
-): Promise<Array<string | undefined>> {
+): Promise<Set<string>> {
   if (!(await repoAvailable(world, repo))) {
     throw new Error(`repo ${repo.owner}\\${repo.repo} is not available`);
   }
@@ -71,7 +71,14 @@ export async function getRepoContributors(
     );
   }
 
-  return response.data.map((contributorData) => contributorData.login);
+  const set = new Set<string>();
+  response.data.forEach((contributorData) => {
+    if (contributorData.login !== undefined) {
+      set.add(contributorData.login);
+    }
+  });
+
+  return set;
 }
 
 export async function getPullReactions(

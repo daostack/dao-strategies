@@ -1,19 +1,19 @@
 import {
   Balances,
+  CampaignUriDetails,
+  getCampaignUri,
   StrategyComputation,
   Strategy_ID,
 } from '@dao-strategies/core';
 import { Campaign, Prisma } from '@prisma/client';
 
+import { appLogger } from '..';
 import { resimulationPeriod } from '../config';
 import { CampaignRepository } from '../repositories/CampaignRepository';
 
-import {
-  campaignToUriDetails,
-  CampaignUriDetails,
-  getCampaignUri,
-} from './CampaignUri';
+import { campaignToUriDetails } from './CampaignUri';
 import { TimeService } from './TimeService';
+import { CampaignCreateDetails } from './types';
 
 /**
  * On Retroactive Campaign
@@ -42,6 +42,10 @@ export class CampaignService {
     return this.campaignRepo.get(uri);
   }
 
+  async getFromAddress(address: string): Promise<Campaign | undefined> {
+    return this.campaignRepo.getFromAddress(address);
+  }
+
   async exist(uri: string): Promise<boolean> {
     return this.campaignRepo.exist(uri);
   }
@@ -67,7 +71,7 @@ export class CampaignService {
         cancelDate: 0,
         stratID: details.strategyID as Strategy_ID,
         stratParamsStr: JSON.stringify(details.strategyParams),
-        lastSimDate: this.timeService.now(),
+        lastSimDate: 0,
         registered: false,
         address: '',
       };
@@ -109,9 +113,10 @@ export class CampaignService {
 
     if (
       simDate !== undefined &&
-      this.timeService.now() - simDate > resimulationPeriod
+      this.timeService.now() - simDate < resimulationPeriod
     ) {
       rewards = await this.getRewards(uri);
+      appLogger.info(`rewards for strategy ${uri} read from DB`);
     } else {
       const details = campaignToUriDetails(await this.get(uri));
       rewards = await this.run(
@@ -120,15 +125,21 @@ export class CampaignService {
       );
 
       await this.setRewards(uri, rewards);
+      await this.campaignRepo.setLastSimDate(uri, this.timeService.now());
     }
 
     return rewards;
   }
 
   async run(strategyId: Strategy_ID, strategyParams: any): Promise<Balances> {
+    appLogger.info(`calling strategy ${strategyId}`);
     const rewards = await this.strategyComputation.runStrategy(
       strategyId,
       strategyParams
+    );
+
+    appLogger.info(
+      `calling strategy ${strategyId} - done, ${rewards.size} receivers found`
     );
 
     return rewards;
@@ -138,11 +149,19 @@ export class CampaignService {
     return this.campaignRepo.getLastSimDate(uri);
   }
 
+  async setLastSimDate(uri: string, date: number): Promise<void> {
+    return this.campaignRepo.setLastSimDate(uri, date);
+  }
+
   async getRewards(uri: string): Promise<Balances> {
     return this.campaignRepo.getRewards(uri);
   }
 
   async setRewards(uri: string, rewards: Balances): Promise<void> {
     return this.campaignRepo.setRewards(uri, rewards);
+  }
+
+  async register(uri: string, details: CampaignCreateDetails): Promise<void> {
+    await this.campaignRepo.setDetails(uri, details);
   }
 }

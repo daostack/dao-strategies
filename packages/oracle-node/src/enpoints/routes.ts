@@ -18,7 +18,7 @@ export const Routes: RouteConfig[] = [
     route: '/campaign/register',
     controller: CampaignController,
     action: 'register',
-    protected: false,
+    protected: true,
   },
   {
     method: 'post',
@@ -26,6 +26,20 @@ export const Routes: RouteConfig[] = [
     controller: CampaignController,
     action: 'simulateFromDetails',
     protected: true,
+  },
+  {
+    method: 'post',
+    route: '/campaign/register/:uri',
+    controller: CampaignController,
+    action: 'register',
+    protected: true,
+  },
+  {
+    method: 'get',
+    route: '/campaign/:address',
+    controller: CampaignController,
+    action: 'getFromAddress',
+    protected: false,
   },
   {
     method: 'get',
