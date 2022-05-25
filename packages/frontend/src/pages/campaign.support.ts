@@ -1,6 +1,7 @@
 import { BigNumber, ethers } from 'ethers';
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
+import { CampaignUriDetails } from '@dao-strategies/core';
 
 import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
 import { CampaignFactory } from '../generated/typechain';
@@ -12,18 +13,9 @@ export enum LivePeriodChoice {
   Last2Months = 'last-two-months',
 }
 
-export interface SimulationParams {
-  execDate: number;
-  strategyID: string;
-  strategyParams: {
-    repositories: Array<{ owner: string; repo: string }>;
-    timeRange: { start: number; end: number };
-  };
-}
-
 export interface SimulationResult {
   uri: string;
-  params?: SimulationParams;
+  details?: CampaignUriDetails;
   rewards: Record<string, unknown>;
 }
 
@@ -55,11 +47,11 @@ export interface CampaignDetails {
   address: string;
 }
 
-export const simulateCampaign = async (params: SimulationParams): Promise<SimulationResult> => {
+export const simulateCampaign = async (details: CampaignUriDetails): Promise<SimulationResult> => {
   const response = await fetch(ORACLE_NODE_URL + '/campaign/simulateFromDetails', {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
+    body: JSON.stringify({ details }),
     credentials: 'include',
   });
 
@@ -67,17 +59,15 @@ export const simulateCampaign = async (params: SimulationParams): Promise<Simula
   return {
     uri: result.uri,
     rewards: result.rewards,
-    params,
+    details,
   };
 };
 
-export const createCampaign = async (
+export const deployCampaign = async (
   campaignFactory: CampaignFactory,
   uri: string,
-  otherDetails: CampaignCreateDetails,
-  account: string
+  otherDetails: CampaignCreateDetails
 ) => {
-  const salt = ethers.utils.keccak256(ethers.utils.hashMessage(account + Date.now().toString()));
   const uriCid = CID.parse(uri, base32);
 
   if (uriCid == null) throw new Error(`uri ${uri} is not a CID`);
@@ -89,7 +79,8 @@ export const createCampaign = async (
     otherDetails.oracle,
     false,
     ethers.BigNumber.from(1000),
-    salt
+    /** the campaign uri uniquely and deterministically determines the campaign contract address */
+    uriCid.multihash.digest
   );
   const txReceipt = await ex.wait();
 

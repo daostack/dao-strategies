@@ -1,8 +1,11 @@
-import { BalancesObject, balancesToObject } from '@dao-strategies/core';
+import {
+  BalancesObject,
+  balancesToObject,
+  CampaignUriDetails,
+} from '@dao-strategies/core';
 import { Campaign } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
-import { CampaignUriDetails } from '../services/CampaignUri';
 import { CampaignCreateDetails } from '../services/types';
 import { Services } from '../types';
 
@@ -48,16 +51,11 @@ export class CampaignController extends Controller {
     if (loggedUser === undefined) {
       throw new Error('logged user expected but not found');
     }
-    /** Build the candidate CampaignUri */
-    const details: CampaignUriDetails = {
-      creator: request.user,
-      nonce: 0,
-      execDate: request.body.execDate,
-      strategyID: request.body.strategyID,
-      strategyParams: request.body.strategyParams,
-    };
 
-    const uri = await this.services.campaign.getOrCreate(details, loggedUser);
+    const uri = await this.services.campaign.getOrCreate(
+      request.body.details as CampaignUriDetails,
+      loggedUser
+    );
     return {
       uri,
       rewards: balancesToObject(

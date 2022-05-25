@@ -1,5 +1,7 @@
 import {
   Balances,
+  CampaignUriDetails,
+  getCampaignUri,
   StrategyComputation,
   Strategy_ID,
 } from '@dao-strategies/core';
@@ -9,11 +11,7 @@ import { appLogger } from '..';
 import { resimulationPeriod } from '../config';
 import { CampaignRepository } from '../repositories/CampaignRepository';
 
-import {
-  campaignToUriDetails,
-  CampaignUriDetails,
-  getCampaignUri,
-} from './CampaignUri';
+import { campaignToUriDetails } from './CampaignUri';
 import { TimeService } from './TimeService';
 import { CampaignCreateDetails } from './types';
 

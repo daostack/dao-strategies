@@ -2,7 +2,6 @@ import { Balances } from '@dao-strategies/core';
 import { PrismaClient, Prisma, Campaign } from '@prisma/client';
 import { BigNumber } from 'ethers';
 
-import { getRewardUri } from '../services/CampaignUri';
 import { CampaignCreateDetails } from '../services/types';
 
 export class CampaignRepository {
@@ -19,7 +18,7 @@ export class CampaignRepository {
   }
 
   async getFromAddress(address: string): Promise<Campaign> {
-    const res = await this.client.campaign.findUnique({
+    const res = await this.client.campaign.findFirst({
       where: { address: address.toLowerCase() },
     });
     return res;
@@ -69,11 +68,10 @@ export class CampaignRepository {
   }
 
   async setRewards(uri: string, rewards: Balances): Promise<void> {
-    const rewardsArray = await Promise.all(
-      Array.from(rewards.entries()).map(async ([account, amount]) => {
-        const id = await getRewardUri(uri, account);
-        return { id, account, amount: amount.toBigInt(), campaignId: uri };
-      })
+    const rewardsArray = Array.from(rewards.entries()).map(
+      ([account, amount]) => {
+        return { account, amount: amount.toBigInt(), campaignId: uri };
+      }
     );
 
     const deleteExisting = this.client.reward.deleteMany({

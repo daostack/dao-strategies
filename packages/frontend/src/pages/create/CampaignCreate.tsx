@@ -7,13 +7,13 @@ import { DateManager } from '../../utils/time';
 import { useCampaignFactory } from '../../hooks/useContracts';
 import {
   CampaignCreateDetails,
-  createCampaign,
+  deployCampaign,
   LivePeriodChoice,
   simulateCampaign,
-  SimulationParams,
   SimulationResult,
 } from '../campaign.support';
 import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
+import { CampaignUriDetails } from '@dao-strategies/core';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -45,7 +45,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     const account = accountHook.data?.address;
     if (account === undefined) throw new Error('account undefined');
     if (campaignFactory === undefined) throw new Error('campaignFactoryContract undefined');
-    if (simulation.params === undefined) throw new Error('simulation.params undefined');
+    if (simulation.details === undefined) throw new Error('simulation.params undefined');
 
     const otherDetails: CampaignCreateDetails = {
       title: values.title,
@@ -53,10 +53,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       guardian: values.guardian,
       oracle: ORACLE_ADDRESS,
       address: '',
-      cancelDate: simulation.params.execDate + CHALLENGE_PERIOD,
+      cancelDate: simulation.details.execDate + CHALLENGE_PERIOD,
     };
 
-    const campaignAddress = await createCampaign(campaignFactory, simulation.uri, otherDetails, account);
+    const campaignAddress = await deployCampaign(campaignFactory, simulation.uri, otherDetails);
 
     navigate(`/campaign/${campaignAddress}`);
   };
@@ -86,12 +86,19 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     };
   };
 
-  const getStrategyParams = (values: CampaignFormValues): SimulationParams | undefined => {
+  const getStrategyDetails = (values: CampaignFormValues): CampaignUriDetails | undefined => {
     const repo = getRepo(values);
     switch (values.campaignType) {
       case 'github':
         const [start, end] = getStartEnd(values);
+        if (accountHook.data === undefined) throw new Error('account undefined');
+        if (accountHook.data.address === undefined) throw new Error('account undefined');
+
+        const creator = accountHook.data.address;
+
         return {
+          creator,
+          nonce: 0,
           execDate: end,
           strategyID: 'GH_PRS_REACTIONS_WEIGHED',
           strategyParams: {
@@ -113,10 +120,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const updateRewards = async (values: CampaignFormValues): Promise<void> => {
     setSimulating(true);
-    const params = getStrategyParams(values);
-    if (params === undefined) throw new Error('params undefined');
+    const details = getStrategyDetails(values);
+    if (details === undefined) throw new Error('params undefined');
 
-    const sim = await simulateCampaign(params);
+    const sim = await simulateCampaign(details);
 
     setSimulated(sim);
     setSimulating(false);
