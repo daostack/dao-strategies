@@ -9,7 +9,7 @@ generator client {
 
 model Campaign {
   uri             String    @id
-  title           String
+  title           String  
   description     String
   creator         User      @relation(fields: [creatorId], references: [address])
   creatorId       String    
@@ -23,7 +23,7 @@ model Campaign {
   rewards         Reward[] 
   lastSimDate     BigInt
   registered      Boolean   // Registered campaigns are those live (with a smart contract). 
-  address         String    // Smart contract address
+  address         String    // cannot be @unique since it is null for simulated campaigns - Smart contract address
 }
 
 enum CampaignState {
@@ -39,7 +39,7 @@ model User {
 } 
 
 model Reward {  
-  id              String    @id   // id is hash(uri+account)
+  @@id([campaignId, account])
   account         String
   amount          BigInt        
   campaign        Campaign  @relation(fields: [campaignId], references: [uri])
