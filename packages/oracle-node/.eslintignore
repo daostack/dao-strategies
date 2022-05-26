@@ -1,0 +1,5 @@
+# folders
+lib/
+node_modules/
+# files
+**/*.json

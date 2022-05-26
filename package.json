@@ -58,6 +58,7 @@
       "packages/contracts",
       "packages/core",
       "packages/frontend",
+      "packages/oracle-node",
       "packages/services",
       "packages/subgraph",
       "packages/test-core-import"

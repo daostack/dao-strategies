@@ -1,6 +1,6 @@
-import { strategies } from "../strategies";
-import type { Strategy_ID } from "../strategies";
-import { World, WorldConfig } from "../world/World";
+import { strategies, Strategy_ID } from '../strategies';
+import { Balances } from '../types';
+import { World, WorldConfig } from '../world/World';
 
 export class StrategyComputation {
   protected world: World;
@@ -9,10 +9,8 @@ export class StrategyComputation {
     this.world = new World(config);
   }
 
-  async runStrategy(strategyId: Strategy_ID, params: any) {
-    const rewards = await strategies[strategyId](
-      this.world,
-      params
-    );
+  async runStrategy(strategyId: Strategy_ID, params: any): Promise<Balances> {
+    const rewards = await strategies[strategyId](this.world, params);
+    return rewards;
   }
 }

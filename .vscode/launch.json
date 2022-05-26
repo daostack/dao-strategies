@@ -9,6 +9,24 @@
       "runtimeExecutable": "${workspaceFolder}/packages/contracts/node_modules/.bin/hardhat",
       "args": ["test", "--network", "localhost"],
       "cwd": "${workspaceFolder}/packages/contracts"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "oracle",
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}/packages/oracle-node",
+      "runtimeExecutable": "${workspaceFolder}/packages/oracle-node/node_modules/.bin/ts-node",
+      "args": ["src/index.ts"],
+      "outputCapture": "std"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test core",
+      "cwd": "${workspaceFolder}/packages/core/test",
+      "args": ["test.js"],
+      "outputCapture": "std"
     }
   ]
 }
