@@ -29,6 +29,13 @@ export const Routes: RouteConfig[] = [
   },
   {
     method: 'post',
+    route: '/campaign/create',
+    controller: CampaignController,
+    action: 'create',
+    protected: true,
+  },
+  {
+    method: 'post',
     route: '/campaign/register/:uri',
     controller: CampaignController,
     action: 'register',

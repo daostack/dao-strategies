@@ -1,7 +1,7 @@
 import { BigNumber, ethers } from 'ethers';
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
-import { CampaignUriDetails } from '@dao-strategies/core';
+import { CampaignUriDetails, getCampaignUri } from '@dao-strategies/core';
 
 import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
 import { CampaignFactory } from '../generated/typechain';
@@ -9,14 +9,10 @@ import { ORACLE_NODE_URL } from '../config/appConfig';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
-export enum LivePeriodChoice {
-  Last2Months = 'last-two-months',
-}
-
 export interface SimulationResult {
-  uri: string;
+  uri?: string;
   details?: CampaignUriDetails;
-  rewards: Record<string, unknown>;
+  rewards?: Record<string, unknown>;
 }
 
 /** the details of a campaign that are not used as part of the URI */
@@ -63,12 +59,35 @@ export const simulateCampaign = async (details: CampaignUriDetails): Promise<Sim
   };
 };
 
+export const createCampaign = async (details: CampaignUriDetails): Promise<string> => {
+  const response = await fetch(ORACLE_NODE_URL + '/campaign/create', {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ details }),
+    credentials: 'include',
+  });
+
+  const result = await response.json();
+  return result.uri;
+};
+
 export const deployCampaign = async (
   campaignFactory: CampaignFactory,
-  uri: string,
-  otherDetails: CampaignCreateDetails
+  uri: string | undefined,
+  otherDetails: CampaignCreateDetails,
+  details: CampaignUriDetails | undefined
 ) => {
-  const uriCid = CID.parse(uri, base32);
+  let uriDefined;
+  if (uri !== undefined) {
+    uriDefined = uri;
+  } else {
+    /** if the campaign was not previously simulated we store it in the oracle and get its
+     * uri. (without simulating it) */
+    if (details === undefined) throw new Error();
+    uriDefined = await createCampaign(details);
+  }
+
+  const uriCid = CID.parse(uriDefined, base32);
 
   if (uriCid == null) throw new Error(`uri ${uri} is not a CID`);
 
@@ -92,10 +111,10 @@ export const deployCampaign = async (
 
   const address = event.args.newCampaign;
 
-  /** for now, we inform the orable about the newly created campaign, in the future, the
+  /** for now, the oracle is informed about the newly created campaign from this call, in the future, the
    * oracle might watch the blockchain */
   otherDetails.address = address;
-  await registerCampaign(uri, otherDetails);
+  await registerCampaign(uriDefined, otherDetails);
 
   return address;
 };
