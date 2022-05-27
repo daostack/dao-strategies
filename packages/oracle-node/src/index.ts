@@ -98,7 +98,7 @@ const timeService = new TimeService();
 const services: Services = {
   campaign: new CampaignService(campaignRepo, timeService, strategyComputation),
   time: new TimeService(),
-  user: new UserService(userRepo),
+  user: new UserService(userRepo, worldConfig.GITHUB_TOKEN),
 };
 /** --------------------- */
 
@@ -122,7 +122,7 @@ Routes.forEach((route) => {
           route.action
         ](req, res, next, loggedUser);
 
-        res.json(result);
+        res.json(result === undefined ? {} : result);
       } catch (error) {
         console.error(error);
         throw error;

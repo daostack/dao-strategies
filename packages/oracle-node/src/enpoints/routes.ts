@@ -5,7 +5,7 @@ import { Controller } from './Controller';
 import { UserController } from './UserController';
 
 export interface RouteConfig {
-  method: 'post' | 'get';
+  method: 'post' | 'get' | 'delete';
   route: string;
   controller: new (services: Services) => Controller;
   action: string;
@@ -25,6 +25,13 @@ export const Routes: RouteConfig[] = [
     route: '/campaign/simulateFromDetails',
     controller: CampaignController,
     action: 'simulateFromDetails',
+    protected: true,
+  },
+  {
+    method: 'post',
+    route: '/campaign/create',
+    controller: CampaignController,
+    action: 'create',
     protected: true,
   },
   {
@@ -60,6 +67,27 @@ export const Routes: RouteConfig[] = [
     route: '/user/verify',
     controller: UserController,
     action: 'verify',
+    protected: false,
+  },
+  {
+    method: 'delete',
+    route: '/user/logout',
+    controller: UserController,
+    action: 'logout',
+    protected: false,
+  },
+  {
+    method: 'post',
+    route: '/user/verifyAddressOfGithub',
+    controller: UserController,
+    action: 'verifyAddressOfGithub',
+    protected: false,
+  },
+  {
+    method: 'post',
+    route: '/user/verifyGithubOfAddress',
+    controller: UserController,
+    action: 'verifyGithubOfAddress',
     protected: false,
   },
 ];

@@ -1,6 +1,9 @@
+import add from 'date-fns/add';
+
 /** time wrapper to handle time-related operations (in seconds and not ms)*/
 export class DateManager {
   private date: Date;
+
   constructor(date?: Date) {
     this.date = date ? date : new Date();
   }
@@ -13,8 +16,8 @@ export class DateManager {
     return Math.floor(this.date.getTime() / 1000);
   }
 
-  subtractMonths(n: number): DateManager {
-    this.date.setMonth(this.date.getMonth() - n);
+  addMonths(n: number): DateManager {
+    this.date = add(this.date, { months: n });
     return this;
   }
 }

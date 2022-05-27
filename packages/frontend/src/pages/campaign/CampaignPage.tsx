@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCampaign } from '../../hooks/useCampaign';
+import { RouteNames } from '../MainPage';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -15,7 +16,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const { isLoading, campaign } = useCampaign(params.campaignAddress);
   return (
     <>
-      <Link to="/">Back</Link>
+      <Link to={RouteNames.Base}>Back</Link>
       <h1>Campaign {params.campaignAddress} Home</h1>
       {isLoading ? <>loading...</> : <>{campaign ? JSON.stringify(campaign) : 'undefined'}</>}
     </>

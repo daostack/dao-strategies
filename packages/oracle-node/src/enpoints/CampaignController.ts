@@ -64,6 +64,23 @@ export class CampaignController extends Controller {
     };
   }
 
+  async create(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<BalancesObject> {
+    if (loggedUser === undefined) {
+      throw new Error('logged user expected but not found');
+    }
+
+    const uri = await this.services.campaign.getOrCreate(
+      request.body.details as CampaignUriDetails,
+      loggedUser
+    );
+    return { uri };
+  }
+
   async simulateFromUri(
     request: Request,
     response: Response,
