@@ -163,5 +163,13 @@ export class CampaignService {
 
   async register(uri: string, details: CampaignCreateDetails): Promise<void> {
     await this.campaignRepo.setDetails(uri, details);
+    void this.checkExecute(uri);
+  }
+
+  async checkExecute(uri: string): Promise<void> {
+    const campaign = await this.get(uri);
+    if (campaign.execDate >= this.timeService.now()) {
+      console.log('SET MERKLE ROOT');
+    }
   }
 }
