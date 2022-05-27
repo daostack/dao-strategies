@@ -1,8 +1,9 @@
 import { Signer } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { DOMAIN, ORACLE_NODE_URL, ORIGIN } from '../config/appConfig';
+import { UserDetails } from '../hooks/useLoggedUser';
 
-export const checkLoggedUser = async (): Promise<string | undefined> => {
+export const checkLoggedUser = async (): Promise<UserDetails | undefined> => {
   const res = await fetch(`${ORACLE_NODE_URL}/user/me`, {
     credentials: 'include',
   });
@@ -13,7 +14,7 @@ export const checkLoggedUser = async (): Promise<string | undefined> => {
   }
 
   let result = await res.json();
-  return result.address;
+  return result;
 };
 
 const getNonce = async (): Promise<string> => {
@@ -38,7 +39,7 @@ const createSiweMessage = async (address: string, statement: string, chainId: nu
   return message.prepareMessage();
 };
 
-export const signInWithEthereum = async (address: string, signer: Signer) => {
+export const signInWithEthereum = async (address: string, signer: Signer): Promise<UserDetails | undefined> => {
   const chainId = await signer.getChainId();
   const message = await createSiweMessage(address, 'Login with my Ethereum account', chainId);
   const signature = await signer.signMessage(message);
@@ -54,12 +55,14 @@ export const signInWithEthereum = async (address: string, signer: Signer) => {
 
   if (!res.ok) {
     console.error(`Verification failed: ${res.statusText}`);
-    return;
+    return undefined;
   }
 
   const result = await res.json();
   if (!result.valid) {
     console.error(`Verification failed: ${res.statusText}`);
-    return;
+    return undefined;
   }
+
+  return result.user;
 };

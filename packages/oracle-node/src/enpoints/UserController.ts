@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { generateNonce, SiweMessage } from 'siwe';
+import { LoggedUserDetails } from '../services/UserService';
 
 import { Services } from '../types';
 
@@ -11,16 +12,18 @@ export class UserController extends Controller {
   }
 
   /** */
-  me(
+  async me(
     request: Request,
     _response: Response,
     _next: NextFunction
-  ): { address: string | undefined } {
+  ): Promise<LoggedUserDetails | undefined> {
     /* eslint-disable */
     if (!request.session.siwe) {
-      return { address: undefined };
+      return undefined;
     }
-    return { address: request.session.siwe.address };
+    const address = request.session.siwe.address;
+    const user = await this.services.user.get(address);
+    return { address: user.address, verified: { github: user.github } };
     /* eslint-enable */
   }
 
@@ -39,7 +42,7 @@ export class UserController extends Controller {
     request: Request,
     _response: Response,
     _next: NextFunction
-  ): Promise<{ valid: boolean }> {
+  ): Promise<{ valid: boolean; user?: LoggedUserDetails }> {
     try {
       /* eslint-disable */
       const reqMessage = request.body?.message as string | undefined;
@@ -61,12 +64,20 @@ export class UserController extends Controller {
       }
 
       /** If signature is valid, add or create user */
-      await this.services.user.getOrCreate({ address: fields.address });
+      const user = await this.services.user.getOrCreate({
+        address: fields.address,
+      });
 
       /* eslint-disable */
       request.session.siwe = fields;
       request.session.cookie.expires = new Date(fields.expirationTime);
-      return { valid: true };
+      return {
+        valid: true,
+        user: {
+          address: user.address,
+          verified: { github: user.github },
+        },
+      };
     } catch (e) {
       request.session.siwe = null;
       request.session.nonce = null;

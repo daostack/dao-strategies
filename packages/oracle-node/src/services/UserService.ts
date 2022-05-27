@@ -6,6 +6,13 @@ export interface UserCreateDetails {
   address: string;
 }
 
+export interface LoggedUserDetails {
+  address: string;
+  verified: {
+    github: string;
+  };
+}
+
 export class UserService {
   constructor(protected userRepo: UserRepository) {}
 

@@ -122,7 +122,7 @@ Routes.forEach((route) => {
           route.action
         ](req, res, next, loggedUser);
 
-        res.json(result);
+        res.json(result === undefined ? {} : result);
       } catch (error) {
         console.error(error);
         throw error;
