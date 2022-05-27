@@ -5,7 +5,7 @@ import { Controller } from './Controller';
 import { UserController } from './UserController';
 
 export interface RouteConfig {
-  method: 'post' | 'get';
+  method: 'post' | 'get' | 'delete';
   route: string;
   controller: new (services: Services) => Controller;
   action: string;
@@ -70,10 +70,24 @@ export const Routes: RouteConfig[] = [
     protected: false,
   },
   {
-    method: 'post',
-    route: '/user/verifyGithub',
+    method: 'delete',
+    route: '/user/logout',
     controller: UserController,
-    action: 'verifyGithub',
+    action: 'logout',
+    protected: false,
+  },
+  {
+    method: 'post',
+    route: '/user/verifyAddressOfGithub',
+    controller: UserController,
+    action: 'verifyAddressOfGithub',
+    protected: false,
+  },
+  {
+    method: 'post',
+    route: '/user/verifyGithubOfAddress',
+    controller: UserController,
+    action: 'verifyGithubOfAddress',
     protected: false,
   },
 ];

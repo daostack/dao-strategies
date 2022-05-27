@@ -12,7 +12,7 @@ export const CampaignsList: FC<ICampaignListProps> = (props: ICampaignListProps)
   const { data: signer } = useSigner();
   const { isLoading, campaigns } = useCampaigns();
 
-  console.log({ isLoading, campaigns });
+  // console.log({ isLoading, campaigns });
 
   return (
     <>

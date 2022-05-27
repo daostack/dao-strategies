@@ -5,6 +5,7 @@ import { UserDetails } from '../hooks/useLoggedUser';
 
 export const checkLoggedUser = async (): Promise<UserDetails | undefined> => {
   const res = await fetch(`${ORACLE_NODE_URL}/user/me`, {
+    method: 'get',
     credentials: 'include',
   });
 
@@ -15,6 +16,17 @@ export const checkLoggedUser = async (): Promise<UserDetails | undefined> => {
 
   let user = await res.json();
   return Object.keys(user).length > 0 ? user : undefined;
+};
+
+export const logout = async (): Promise<void> => {
+  const res = await fetch(`${ORACLE_NODE_URL}/user/logout`, {
+    method: 'delete',
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    console.error(`Failed in logut: ${res.statusText}`);
+  }
 };
 
 const getNonce = async (): Promise<string> => {

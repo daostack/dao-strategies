@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { generateNonce, SiweMessage } from 'siwe';
-import { LoggedUserDetails } from '../services/UserService';
 
+import { LoggedUserDetails } from '../services/UserService';
 import { Services } from '../types';
 
 import { Controller } from './Controller';
@@ -23,7 +23,7 @@ export class UserController extends Controller {
     }
     const address = request.session.siwe.address;
     const user = await this.services.user.get(address);
-    return { address: user.address, verified: { github: user.github } };
+    return { address: user.address, verified: { github: user.verifiedGithub } };
     /* eslint-enable */
   }
 
@@ -75,7 +75,7 @@ export class UserController extends Controller {
         valid: true,
         user: {
           address: user.address,
-          verified: { github: user.github },
+          verified: { github: user.verifiedGithub },
         },
       };
     } catch (e) {
@@ -88,12 +88,37 @@ export class UserController extends Controller {
     }
   }
 
-  async verifyGithub(
+  logout(request: Request, _response: Response, _next: NextFunction): void {
+    /* eslint-disable */
+    if (request.session) {
+      request.session.destroy();
+    }
+    /* eslint-enable */
+  }
+
+  verifyGithubOfAddress(
     request: Request,
     _response: Response,
     _next: NextFunction
-  ): Promise<{ valid: boolean }> {
+  ): Promise<{ address: string }> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return this.services.user.verifyGithub(request.body.handle as string);
+    return this.services.user.verifyGithubOfAddress(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      request.body.signature as string,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      request.body.github_username as string
+    );
+  }
+
+  verifyAddressOfGithub(
+    request: Request,
+    _response: Response,
+    _next: NextFunction
+  ): Promise<{ address: string }> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return this.services.user.verifyAddressOfGithub(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      request.body.handle as string
+    );
   }
 }

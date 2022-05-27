@@ -34,7 +34,8 @@ enum CampaignState {
 
 model User {
   address         String    @id
-  github          String
+  verifiedGithub  String?
+  signedGithub    String?
   created         Campaign[]
 } 
 

@@ -6,7 +6,7 @@
   "scripts": {
     "prod": "ts-node src/index.ts",
     "prisma-migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
-    "prisma-reset": "cd ./src &&  npx prisma migrate reset --preview-feature && cd ..",
+    "prisma-reset": "rm -rf ./src/prisma/migrations && cd ./src &&  npx prisma migrate reset --preview-feature && cd ..",
     "prisma-generate": "cd ./src && npx prisma generate && cd ..",
     "start": "nodemon src/index.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",

@@ -1,5 +1,7 @@
 import { Prisma, User } from '@prisma/client';
+import { verifyMessage } from 'ethers/lib/utils';
 import { Octokit } from 'octokit';
+import { ErrorTypes } from 'siwe';
 
 import { UserRepository } from '../repositories/UserRepository';
 
@@ -36,7 +38,6 @@ export class UserService {
     if (!exist) {
       const createData: Prisma.UserCreateInput = {
         address: details.address.toLowerCase(),
-        github: '',
       };
 
       return this.create(createData);
@@ -49,7 +50,30 @@ export class UserService {
     return this.userRepo.create(details);
   }
 
-  async verifyGithub(gihub_username: string): Promise<{ valid: boolean }> {
+  async verifyGithubOfAddress(
+    signature: string,
+    github_username: string
+  ): Promise<{ address: string }> {
+    const getMessage = (github_username: string): string => {
+      return `Associate the github account "${github_username}" with this ethereum address`;
+    };
+
+    const address = verifyMessage(getMessage(github_username), signature);
+    const exist = await this.exist(address);
+
+    if (!exist)
+      throw new Error(
+        `trying to verify the github of address ${address}, but there is no user with this address`
+      );
+
+    await this.userRepo.setSignedGithub(address, github_username);
+
+    return { address };
+  }
+
+  async verifyAddressOfGithub(
+    gihub_username: string
+  ): Promise<{ address: string }> {
     const { data: gists } = await this.octokit.rest.gists.listForUser({
       username: gihub_username,
       per_page: 3,
@@ -80,9 +104,22 @@ export class UserService {
     const valid = readAddress !== undefined;
 
     if (valid) {
+      /** only set verified github if signedGithub is already set and the same */
+      const user = await this.get(readAddress);
+      if (user.signedGithub !== gihub_username) {
+        throw new Error(
+          `Trying to verify github ${gihub_username} for address ${readAddress}, 
+          but that address current signed github account is ${
+            user.signedGithub as string
+          }`
+        );
+      }
+
+      /** delete this verifiedGithub of any previously existing address*/
+      await this.userRepo.clearVerifiedGithub(gihub_username);
       await this.userRepo.setVerifiedGithub(readAddress, gihub_username);
     }
 
-    return { valid };
+    return { address: readAddress };
   }
 }

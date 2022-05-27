@@ -24,19 +24,19 @@ CREATE TABLE "Campaign" (
 -- CreateTable
 CREATE TABLE "User" (
     "address" TEXT NOT NULL,
-    "github" TEXT NOT NULL,
+    "verifiedGithub" TEXT,
+    "signedGithub" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("address")
 );
 
 -- CreateTable
 CREATE TABLE "Reward" (
-    "id" TEXT NOT NULL,
     "account" TEXT NOT NULL,
     "amount" BIGINT NOT NULL,
     "campaignId" TEXT NOT NULL,
 
-    CONSTRAINT "Reward_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Reward_pkey" PRIMARY KEY ("campaignId","account")
 );
 
 -- AddForeignKey
