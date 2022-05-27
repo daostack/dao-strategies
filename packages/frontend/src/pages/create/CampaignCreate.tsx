@@ -10,6 +10,7 @@ import { useCampaignFactory } from '../../hooks/useContracts';
 import { CampaignCreateDetails, deployCampaign, simulateCampaign, SimulationResult } from '../campaign.support';
 import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
 import { CampaignUriDetails } from '@dao-strategies/core';
+import { RouteNames } from '../MainPage';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -75,7 +76,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     /** if the campaign was not simulated it must be created first */
     const campaignAddress = await deployCampaign(campaignFactory, simulation.uri, otherDetails, details);
 
-    navigate(`/campaign/${campaignAddress}`);
+    navigate(RouteNames.Campaign(campaignAddress));
   };
 
   const getStartEnd = (values: CampaignFormValues): [number, number] => {
@@ -216,7 +217,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   return (
     <>
-      <Link to="/">Back</Link>
+      <Link to={RouteNames.Base}>Back</Link>
       <br></br>
       <br></br>
       <Form {...layout} initialValues={initialValues} form={form} name="control-hooks" onValuesChange={onValuesUpdated}>

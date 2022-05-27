@@ -18,4 +18,18 @@ export class UserRepository {
       .findFirst({ where: { address: address } })
       .then(Boolean);
   }
+
+  async setVerifiedGithub(
+    address: string,
+    github_username: string
+  ): Promise<User> {
+    return this.client.user.update({
+      where: {
+        address: address.toLowerCase(),
+      },
+      data: {
+        github: github_username,
+      },
+    });
+  }
 }

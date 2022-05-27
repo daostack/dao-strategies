@@ -22,6 +22,7 @@
     "express-session": "^1.17.3",
     "express-winston": "^4.2.0",
     "multiformats": "^9.6.5",
+    "octokit": "^1.7.1",
     "pg": "^8.4.0",
     "reflect-metadata": "^0.1.13",
     "siwe": "^1.1.6",

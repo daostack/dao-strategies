@@ -87,4 +87,13 @@ export class UserController extends Controller {
       /* eslint-enable */
     }
   }
+
+  async verifyGithub(
+    request: Request,
+    _response: Response,
+    _next: NextFunction
+  ): Promise<{ valid: boolean }> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return this.services.user.verifyGithub(request.body.handle as string);
+  }
 }

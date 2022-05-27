@@ -69,4 +69,11 @@ export const Routes: RouteConfig[] = [
     action: 'verify',
     protected: false,
   },
+  {
+    method: 'post',
+    route: '/user/verifyGithub',
+    controller: UserController,
+    action: 'verifyGithub',
+    protected: false,
+  },
 ];

@@ -13,8 +13,8 @@ export const checkLoggedUser = async (): Promise<UserDetails | undefined> => {
     return undefined;
   }
 
-  let result = await res.json();
-  return result;
+  let user = await res.json();
+  return Object.keys(user).length > 0 ? user : undefined;
 };
 
 const getNonce = async (): Promise<string> => {
@@ -64,5 +64,5 @@ export const signInWithEthereum = async (address: string, signer: Signer): Promi
     return undefined;
   }
 
-  return result.user;
+  return Object.keys(result.user).length > 0 ? result.user : undefined;
 };

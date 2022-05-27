@@ -98,7 +98,7 @@ const timeService = new TimeService();
 const services: Services = {
   campaign: new CampaignService(campaignRepo, timeService, strategyComputation),
   time: new TimeService(),
-  user: new UserService(userRepo),
+  user: new UserService(userRepo, worldConfig.GITHUB_TOKEN),
 };
 /** --------------------- */
 
