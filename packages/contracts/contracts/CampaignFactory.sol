@@ -25,6 +25,12 @@ contract CampaignFactory {
         master = Campaign(_master);
     }
 
+    receive() external payable {}
+
+    function campaignAddress(bytes32 salt) public view returns (address) {
+        return Clones.predictDeterministicAddress(address(master), salt);
+    }
+
     function createCampaign(
         Campaign.SharesData memory _shares,
         bytes32 _uri,

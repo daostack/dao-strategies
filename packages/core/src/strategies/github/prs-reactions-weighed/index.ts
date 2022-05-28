@@ -4,3 +4,4 @@ import { Strategy } from '../../../types';
 
 
 export const strategy: Strategy = { strategyFunc: strategyFunc, strategyInfo: strategyInfo };
+

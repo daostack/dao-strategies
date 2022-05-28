@@ -1,3 +1,4 @@
+export * from './campaigns';
 export * from './merkleTree';
 export * from './strategyComputation';
 export * from './strategies';

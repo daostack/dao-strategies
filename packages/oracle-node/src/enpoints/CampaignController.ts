@@ -1,7 +1,12 @@
-import { BalancesObject, balancesToObject } from '@dao-strategies/core';
+import {
+  BalancesObject,
+  balancesToObject,
+  CampaignUriDetails,
+} from '@dao-strategies/core';
+import { Campaign } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
-import { CampaignUriDetails } from '../services/CampaignUri';
+import { CampaignCreateDetails } from '../services/types';
 import { Services } from '../types';
 
 import { Controller } from './Controller';
@@ -40,27 +45,73 @@ export class CampaignController extends Controller {
   async simulateFromDetails(
     request: Request,
     response: Response,
-    next: NextFunction
-  ): Promise<BalancesObject> {
-    /** Build the candidate CampaignUri */
-    const details: CampaignUriDetails = {
-      creator: request.user,
-      nonce: 0,
-      execDate: request.body.execDate,
-      strategyID: request.body.strategyID,
-      strategyParams: request.body.strategyParams,
-    };
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<{ uri: string; rewards: BalancesObject }> {
+    if (loggedUser === undefined) {
+      throw new Error('logged user expected but not found');
+    }
 
-    const uri = await this.services.campaign.getOrCreateCampaign(details, '');
-    return balancesToObject(await this.services.campaign.computeRewards(uri));
+    const uri = await this.services.campaign.getOrCreate(
+      request.body.details as CampaignUriDetails,
+      loggedUser
+    );
+    return {
+      uri,
+      rewards: balancesToObject(
+        await this.services.campaign.computeRewards(uri)
+      ),
+    };
+  }
+
+  async create(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<BalancesObject> {
+    if (loggedUser === undefined) {
+      throw new Error('logged user expected but not found');
+    }
+
+    const uri = await this.services.campaign.getOrCreate(
+      request.body.details as CampaignUriDetails,
+      loggedUser
+    );
+    return { uri };
   }
 
   async simulateFromUri(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
+    loggedUser: string | undefined
   ): Promise<BalancesObject> {
     const uri: string = request.body.uri;
     return balancesToObject(await this.services.campaign.computeRewards(uri));
+  }
+
+  async register(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<void> {
+    request.body.registered = true;
+    await this.services.campaign.register(
+      request.params.uri as string,
+      request.body as CampaignCreateDetails
+    );
+  }
+
+  async getFromAddress(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<Campaign> {
+    return this.services.campaign.getFromAddress(
+      request.params.address as string
+    );
   }
 }

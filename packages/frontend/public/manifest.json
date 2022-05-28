@@ -1,6 +1,6 @@
 {
-  "short_name": "🏭 scaffold-eth",
-  "name": "🏭 scaffold-eth",
+  "short_name": "React App",
+  "name": "Create React App Sample",
   "icons": [
     {
       "src": "favicon.ico",

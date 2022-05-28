@@ -18,6 +18,7 @@ const zerosStr = (n: number): string => {
   return '0'.repeat(n);
 };
 
+
 /* need to check a different conversion method because toPrecision can return exponential notation:
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toPrecision*/
 const floatToBN = (amount: number, nDecimals: number = 18): BigNumber => {

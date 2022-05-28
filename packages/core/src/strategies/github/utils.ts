@@ -76,6 +76,7 @@ export async function getRepoContributors(
     }
   );
 
+
   // iterate through each response
   for await (const { data: contibutors } of iterator) {
     for (const contibutor of contibutors) {

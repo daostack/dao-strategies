@@ -32,9 +32,14 @@ export declare namespace Campaign {
 export interface CampaignFactoryInterface extends utils.Interface {
   contractName: "CampaignFactory";
   functions: {
+    "campaignAddress(bytes32)": FunctionFragment;
     "createCampaign((uint256,bytes32),bytes32,address,address,bool,uint256,bytes32)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "campaignAddress",
+    values: [BytesLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "createCampaign",
     values: [
@@ -48,6 +53,10 @@ export interface CampaignFactoryInterface extends utils.Interface {
     ]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "campaignAddress",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "createCampaign",
     data: BytesLike
@@ -117,6 +126,11 @@ export interface CampaignFactory extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    campaignAddress(
+      salt: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     createCampaign(
       _shares: Campaign.SharesDataStruct,
       _uri: BytesLike,
@@ -128,6 +142,8 @@ export interface CampaignFactory extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
+
+  campaignAddress(salt: BytesLike, overrides?: CallOverrides): Promise<string>;
 
   createCampaign(
     _shares: Campaign.SharesDataStruct,
@@ -141,6 +157,11 @@ export interface CampaignFactory extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    campaignAddress(
+      salt: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     createCampaign(
       _shares: Campaign.SharesDataStruct,
       _uri: BytesLike,
@@ -181,6 +202,11 @@ export interface CampaignFactory extends BaseContract {
   };
 
   estimateGas: {
+    campaignAddress(
+      salt: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     createCampaign(
       _shares: Campaign.SharesDataStruct,
       _uri: BytesLike,
@@ -194,6 +220,11 @@ export interface CampaignFactory extends BaseContract {
   };
 
   populateTransaction: {
+    campaignAddress(
+      salt: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     createCampaign(
       _shares: Campaign.SharesDataStruct,
       _uri: BytesLike,
