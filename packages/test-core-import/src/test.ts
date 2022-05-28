@@ -1,4 +1,4 @@
-import { AccountAndBalance, BalanceTree } from "@dao-strategies/core";
+import { BalancesFloat, BalanceTree } from "@dao-strategies/core";
 import { toWei } from "./support";
 
 function main() {
@@ -14,14 +14,15 @@ function main() {
    * Account 2 : 2000 shares
    * Account 3 : 3000 shares
    */
-  const claimersBalances: AccountAndBalance[] = claimers.map((claimer, ix) => {
-    return {
-      account: claimer,
-      balance: toWei((1000 * (ix + 1)).toString()),
-    };
-  });
-
-  const tree = new BalanceTree(claimersBalances);
+  const claimersBalances: BalancesFloat = new Map();
+  //= claimers.map((claimer, ix) => {
+  //  return {
+  //    account: claimer,
+  //    balance: toWei((1000 * (ix + 1)).toString()),
+  //  };
+  //});
+  claimersBalances.set("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", 10);
+  //const tree = new BalanceTree(claimersBalances);
   console.log("tree");
 }
 

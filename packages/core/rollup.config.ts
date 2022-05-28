@@ -23,6 +23,7 @@ export default {
   plugins: [
     typescript({
       abortOnError: false,
+      useTsconfigDeclarationDir: true,
       tsconfig: "./tsconfig.build.json"
     }),
 

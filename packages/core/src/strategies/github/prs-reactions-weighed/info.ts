@@ -1,4 +1,4 @@
-import { StrategyInfo } from "src/types";
+import { StrategyInfo } from '../../../types';
 
 export const strategyInfo: StrategyInfo = {
     "name": "Github Contributors - PRs Weighted By Reactions",

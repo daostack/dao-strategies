@@ -3,8 +3,8 @@ import {
     StrategyComputation,
     WorldConfig,
     strategies
-} from '../src/dao-strategies-core';
-import type { Strategy_ID, Balances } from '../src/dao-strategies-core';
+} from '@dao-strategies/core';
+import type { Strategy_ID, Balances } from '@dao-strategies/core';
 import { BigNumber } from 'ethers';
 import 'dotenv/config';
 import { performance } from 'perf_hooks';
