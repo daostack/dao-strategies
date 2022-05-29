@@ -12,7 +12,6 @@ contract CampaignFactory {
         address creator,
         address newCampaign,
         bytes32 _sharesRoot,
-        uint256 _sharesTotal,
         bytes32 _uri,
         address _guardian,
         address _oracle,
@@ -32,7 +31,7 @@ contract CampaignFactory {
     }
 
     function createCampaign(
-        Campaign.SharesData memory _shares,
+        bytes32 _sharesMerkleRoot,
         bytes32 _uri,
         address _guardian,
         address _oracle,
@@ -41,19 +40,8 @@ contract CampaignFactory {
         bytes32 salt
     ) external {
         address payable proxy = payable(Clones.cloneDeterministic(address(master), salt));
-        Campaign(proxy).initCampaign(_shares, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart);
+        Campaign(proxy).initCampaign(_sharesMerkleRoot, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart);
 
-        emit CampaignCreated(
-            msg.sender,
-            proxy,
-            _shares.sharesMerkleRoot,
-            _shares.totalShares,
-            _uri,
-            _guardian,
-            _oracle,
-            _sharesPublished,
-            _claimPeriodStart,
-            salt
-        );
+        emit CampaignCreated(msg.sender, proxy, _sharesMerkleRoot, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart, salt);
     }
 }

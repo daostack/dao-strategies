@@ -17,23 +17,11 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export declare namespace Campaign {
-  export type SharesDataStruct = {
-    totalShares: BigNumberish;
-    sharesMerkleRoot: BytesLike;
-  };
-
-  export type SharesDataStructOutput = [BigNumber, string] & {
-    totalShares: BigNumber;
-    sharesMerkleRoot: string;
-  };
-}
-
 export interface CampaignFactoryInterface extends utils.Interface {
   contractName: "CampaignFactory";
   functions: {
     "campaignAddress(bytes32)": FunctionFragment;
-    "createCampaign((uint256,bytes32),bytes32,address,address,bool,uint256,bytes32)": FunctionFragment;
+    "createCampaign(bytes32,bytes32,address,address,bool,uint256,bytes32)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -43,7 +31,7 @@ export interface CampaignFactoryInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "createCampaign",
     values: [
-      Campaign.SharesDataStruct,
+      BytesLike,
       BytesLike,
       string,
       string,
@@ -63,30 +51,18 @@ export interface CampaignFactoryInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "CampaignCreated(address,address,bytes32,uint256,bytes32,address,address,bool,uint256,bytes32)": EventFragment;
+    "CampaignCreated(address,address,bytes32,bytes32,address,address,bool,uint256,bytes32)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "CampaignCreated"): EventFragment;
 }
 
 export type CampaignCreatedEvent = TypedEvent<
-  [
-    string,
-    string,
-    string,
-    BigNumber,
-    string,
-    string,
-    string,
-    boolean,
-    BigNumber,
-    string
-  ],
+  [string, string, string, string, string, string, boolean, BigNumber, string],
   {
     creator: string;
     newCampaign: string;
     _sharesRoot: string;
-    _sharesTotal: BigNumber;
     _uri: string;
     _guardian: string;
     _oracle: string;
@@ -132,7 +108,7 @@ export interface CampaignFactory extends BaseContract {
     ): Promise<[string]>;
 
     createCampaign(
-      _shares: Campaign.SharesDataStruct,
+      _sharesMerkleRoot: BytesLike,
       _uri: BytesLike,
       _guardian: string,
       _oracle: string,
@@ -146,7 +122,7 @@ export interface CampaignFactory extends BaseContract {
   campaignAddress(salt: BytesLike, overrides?: CallOverrides): Promise<string>;
 
   createCampaign(
-    _shares: Campaign.SharesDataStruct,
+    _sharesMerkleRoot: BytesLike,
     _uri: BytesLike,
     _guardian: string,
     _oracle: string,
@@ -163,7 +139,7 @@ export interface CampaignFactory extends BaseContract {
     ): Promise<string>;
 
     createCampaign(
-      _shares: Campaign.SharesDataStruct,
+      _sharesMerkleRoot: BytesLike,
       _uri: BytesLike,
       _guardian: string,
       _oracle: string,
@@ -175,11 +151,10 @@ export interface CampaignFactory extends BaseContract {
   };
 
   filters: {
-    "CampaignCreated(address,address,bytes32,uint256,bytes32,address,address,bool,uint256,bytes32)"(
+    "CampaignCreated(address,address,bytes32,bytes32,address,address,bool,uint256,bytes32)"(
       creator?: null,
       newCampaign?: null,
       _sharesRoot?: null,
-      _sharesTotal?: null,
       _uri?: null,
       _guardian?: null,
       _oracle?: null,
@@ -191,7 +166,6 @@ export interface CampaignFactory extends BaseContract {
       creator?: null,
       newCampaign?: null,
       _sharesRoot?: null,
-      _sharesTotal?: null,
       _uri?: null,
       _guardian?: null,
       _oracle?: null,
@@ -208,7 +182,7 @@ export interface CampaignFactory extends BaseContract {
     ): Promise<BigNumber>;
 
     createCampaign(
-      _shares: Campaign.SharesDataStruct,
+      _sharesMerkleRoot: BytesLike,
       _uri: BytesLike,
       _guardian: string,
       _oracle: string,
@@ -226,7 +200,7 @@ export interface CampaignFactory extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     createCampaign(
-      _shares: Campaign.SharesDataStruct,
+      _sharesMerkleRoot: BytesLike,
       _uri: BytesLike,
       _guardian: string,
       _oracle: string,

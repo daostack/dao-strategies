@@ -9,12 +9,9 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
  * @title Campaign
  */
 contract Campaign is Initializable {
-    struct SharesData {
-        uint256 totalShares;
-        bytes32 sharesMerkleRoot;
-    }
+    uint256 public constant totalShares = 10**18;
 
-    SharesData public shares;
+    bytes32 public sharesMerkleRoot;
     bytes32 public uri;
     address public guardian;
     address public oracle;
@@ -53,14 +50,14 @@ contract Campaign is Initializable {
     }
 
     function initCampaign(
-        SharesData memory _shares,
+        bytes32 _sharesMerkleRoot,
         bytes32 _uri,
         address _guardian,
         address _oracle,
         bool _sharesPublished,
         uint256 _claimPeriodStart
     ) public initializer {
-        shares = _shares;
+        sharesMerkleRoot = _sharesMerkleRoot;
         uri = _uri;
         guardian = _guardian;
         oracle = _oracle;
@@ -68,12 +65,12 @@ contract Campaign is Initializable {
         claimPeriodStart = _claimPeriodStart;
     }
 
-    function publishShares(SharesData memory _shares) external onlyOracle {
+    function publishShares(bytes32 _sharesMerkleRoot) external onlyOracle {
         if (sharesPublished) {
             revert SharesAlreadyPublished();
         }
         sharesPublished = true;
-        shares = _shares;
+        sharesMerkleRoot = _sharesMerkleRoot;
     }
 
     function claim(
@@ -85,12 +82,12 @@ contract Campaign is Initializable {
             revert ClaimingNotAllowed();
         }
         bytes32 leaf = keccak256(abi.encodePacked(account, share));
-        if (MerkleProof.verify(proof, shares.sharesMerkleRoot, leaf) == false) {
+        if (MerkleProof.verify(proof, sharesMerkleRoot, leaf) == false) {
             revert InvalidProof();
         }
 
         uint256 totalFundsReceived = address(this).balance + totalClaimed;
-        uint256 reward = (totalFundsReceived * share) / shares.totalShares - claimed[account];
+        uint256 reward = (totalFundsReceived * share) / totalShares - claimed[account];
         if (reward == 0) {
             revert NoRewardAvailable();
         }
