@@ -30,8 +30,7 @@ export async function repoAvailable(
 export async function getPrsInRepo(
   world: World,
   repo: { owner: string; repo: string },
-  mergedFrom?: number,
-  mergedTo?: number
+  filter?: (pull: any) => boolean
 ): Promise<PullRequestListData> {
   let allPulls: PullRequestListData = [];
 
@@ -43,11 +42,8 @@ export async function getPrsInRepo(
 
   if (firstReq.headers.link == undefined) { // no pagination needed
     firstReq.data.forEach(pull => {
-      if (mergedFrom != undefined && mergedTo != undefined && mergedFrom < mergedTo) { // if filter by merge time
-        if (
-          pull.merged_at != null &&
-          mergedFrom <= toTimeStamp(pull.merged_at) &&
-          mergedTo >= toTimeStamp(pull.merged_at)) {
+      if (filter != undefined) { // filter pull requests
+        if (filter(pull)) {
           allPulls.push(pull);
         }
       }
@@ -76,12 +72,9 @@ export async function getPrsInRepo(
         .then(responses => {
           for (let response of responses) {
             for (let pull of response.data) {
-              if (mergedFrom != undefined && mergedTo != undefined && mergedFrom < mergedTo) { // if filter by merge time
-                if (
-                  pull.merged_at != null &&
-                  mergedFrom <= toTimeStamp(pull.merged_at) &&
-                  mergedTo >= toTimeStamp(pull.merged_at)) {
-                  allPulls.push(pull);;
+              if (filter != undefined) { // filter pull requests
+                if (filter(pull)) {
+                  allPulls.push(pull);
                 }
               }
               else {

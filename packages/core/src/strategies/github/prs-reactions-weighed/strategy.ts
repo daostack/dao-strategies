@@ -4,7 +4,8 @@ import {
   getPrsInRepo,
   getRepoContributors,
   getPullReactions,
-  repoAvailable
+  repoAvailable,
+  toTimeStamp
 } from '../utils';
 
 interface Params {
@@ -36,7 +37,17 @@ export const strategyFunc: StrategyFunc = async (world: World, params: Params) =
 
   for (const repo of params.repositories) {
     // get all pulls that were merged at the specified time range
-    const allPulls = await getPrsInRepo(world, repo, params.timeRange.start, params.timeRange.end);
+    const allPulls = await getPrsInRepo(world, repo, (pull) => {
+      if (
+        pull.merged_at != null &&
+        params.timeRange.start <= toTimeStamp(pull.merged_at) &&
+        params.timeRange.end >= toTimeStamp(pull.merged_at)) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    });
 
     // get the amount of reactions on every pull request that was made by a contributor
     for (const pull of allPulls) {
