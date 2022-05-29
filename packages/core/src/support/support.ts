@@ -18,6 +18,9 @@ const zerosStr = (n: number): string => {
   return '0'.repeat(n);
 };
 
+
+/* need to check a different conversion method because toPrecision can return exponential notation:
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toPrecision*/
 const floatToBN = (amount: number, nDecimals: number = 18): BigNumber => {
   /** use string to convert from float to (large) integer */
   const [wholeStr, decimalsStr] = amount.toPrecision(64).split('.');
@@ -25,7 +28,7 @@ const floatToBN = (amount: number, nDecimals: number = 18): BigNumber => {
   const decimals = BigNumber.from(
     decimalsStr.length >= nDecimals
       ? decimalsStr.substring(0, nDecimals)
-      : zerosStr(nDecimals - decimalsStr.length)
+      : decimalsStr + zerosStr(nDecimals - decimalsStr.length)
   );
   return whole.add(decimals);
 };
@@ -62,11 +65,16 @@ export const normalizeRewards = (balancesFloat: BalancesFloat): Balances => {
     /** Round the balance to force exact sum of all balances is 1E18 */
     if (oneAccount !== undefined) {
       /** numerical error (should be small) */
-      const res = sumBN.sub(BigNumber.from('1000000000000000000'));
+      //const res = sumBN.sub(BigNumber.from('1000000000000000000'));
       const oneAccountBal = balances.get(oneAccount);
       if (oneAccountBal === undefined)
         throw new Error('unexpected balance for account');
-      balances.set(oneAccount, oneAccountBal.add(res));
+      if (sumBN.lt(BigNumber.from('1000000000000000000'))) {
+        balances.set(oneAccount, oneAccountBal.add(BigNumber.from('1000000000000000000').sub(sumBN)));
+      }
+      else {
+        balances.set(oneAccount, oneAccountBal.sub(sumBN.sub(BigNumber.from('1000000000000000000'))));
+      }
     }
   }
 

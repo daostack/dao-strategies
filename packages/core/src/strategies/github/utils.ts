@@ -1,4 +1,5 @@
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
+import { paginateRest } from "@octokit/plugin-paginate-rest";
 
 import { World } from '../../world/World';
 
@@ -8,11 +9,9 @@ type PullRequestListData =
 type ReactionsListData =
   RestEndpointMethodTypes['reactions']['listForIssue']['response']['data'];
 
-/*
-todo: get typing for the pulls. Tries using PullRequestParams but the type is not compatible with the returned pulls 
-from the iterator.
-https://github.com/octokit/plugin-rest-endpoint-methods.js#typescript 
-*/
+type ContributorsListData =
+  RestEndpointMethodTypes['repos']['listContributors']['response']['data'];
+
 
 export async function repoAvailable(
   world: World,
@@ -21,6 +20,7 @@ export async function repoAvailable(
   try {
     await world.github.rest.repos.get({ ...repo });
   } catch (e) {
+    console.log(e);
     return false;
   }
 
@@ -29,26 +29,63 @@ export async function repoAvailable(
 
 export async function getPrsInRepo(
   world: World,
-  repo: { owner: string; repo: string }
+  repo: { owner: string; repo: string },
+  filter?: (pull: any) => boolean
 ): Promise<PullRequestListData> {
-  if (!(await repoAvailable(world, repo))) {
-    throw new Error(`repo ${repo.owner}\\${repo.repo} is not available`);
+  let allPulls: PullRequestListData = [];
+
+  let firstReq = await world.github.rest.pulls.list({
+    ...repo,
+    state: 'all',
+    per_page: 100,
+  });
+
+  if (firstReq.headers.link == undefined) { // no pagination needed
+    firstReq.data.forEach(pull => {
+      if (filter != undefined) { // filter pull requests
+        if (filter(pull)) {
+          allPulls.push(pull);
+        }
+      }
+      else {
+        allPulls.push(pull);
+      }
+    });
   }
+  else {
+    let numPagesReg = firstReq.headers.link?.match(/<.*page=(\d+).*>; rel="last"/);
+    if (numPagesReg != undefined && numPagesReg != null) {
+      let numPages: number = Number(numPagesReg[1]);
+      console.log("Num Pages:", numPages);
+      let reqs = [];
+      reqs.push(firstReq);
+      for (let i = 2; i < numPages; i++) {
+        reqs.push(world.github.rest.pulls.list({
+          ...repo,
+          state: 'all',
+          per_page: 100,
+          page: i
+        }));
+      }
 
-  const allPulls: PullRequestListData = [];
-  const iterator = world.github.paginate.iterator(
-    world.github.rest.pulls.list,
-    {
-      ...repo,
-      state: 'all',
-      per_page: 100,
+      await Promise.all(reqs)
+        .then(responses => {
+          for (let response of responses) {
+            for (let pull of response.data) {
+              if (filter != undefined) { // filter pull requests
+                if (filter(pull)) {
+                  allPulls.push(pull);
+                }
+              }
+              else {
+                allPulls.push(pull);
+              }
+            }
+          }
+        })
     }
-  );
-
-  // iterate through each response
-  for await (const { data: pulls } of iterator) {
-    for (const pull of pulls) {
-      allPulls.push(pull);
+    else {
+      throw new Error("Error: cannot paginate all pull requests");
     }
   }
 
@@ -58,27 +95,25 @@ export async function getPrsInRepo(
 export async function getRepoContributors(
   world: World,
   repo: { owner: string; repo: string }
-): Promise<Set<string>> {
-  if (!(await repoAvailable(world, repo))) {
-    throw new Error(`repo ${repo.owner}\\${repo.repo} is not available`);
-  }
-
-  const response = await world.github.rest.repos.listContributors({ ...repo });
-
-  if (response.status !== 200) {
-    throw new Error(
-      `github api get request for contributors in repo ${repo.owner}\\${repo.repo} failed`
-    );
-  }
-
-  const set = new Set<string>();
-  response.data.forEach((contributorData) => {
-    if (contributorData.login !== undefined) {
-      set.add(contributorData.login);
+): Promise<ContributorsListData> {
+  const allContributors: ContributorsListData = [];
+  const iterator = world.github.paginate.iterator(
+    world.github.rest.repos.listContributors,
+    {
+      ...repo,
+      per_page: 100,
     }
-  });
+  );
 
-  return set;
+
+  // iterate through each response
+  for await (const { data: contibutors } of iterator) {
+    for (const contibutor of contibutors) {
+      allContributors.push(contibutor);
+    }
+  }
+
+  return allContributors;
 }
 
 export async function getPullReactions(
@@ -86,10 +121,6 @@ export async function getPullReactions(
   repo: { owner: string; repo: string },
   pullNum: number
 ): Promise<ReactionsListData> {
-  if (!(await repoAvailable(world, repo))) {
-    throw new Error(`repo ${repo.owner}\\${repo.repo} is not available`);
-  }
-
   const response = await world.github.rest.reactions.listForIssue({
     ...repo,
     issue_number: pullNum,
