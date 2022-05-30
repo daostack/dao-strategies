@@ -11,7 +11,7 @@ export class StrategyComputation {
   }
 
   async runStrategy(strategyId: Strategy_ID, params: any): Promise<Balances> {
-    const rewards = await strategies[strategyId](this.world, params);
+    const rewards = await strategies[strategyId].strategyFunc(this.world, params);
     return normalizeRewards(rewards);
   }
 }

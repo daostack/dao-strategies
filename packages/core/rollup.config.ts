@@ -1,5 +1,6 @@
 import sourceMaps from "rollup-plugin-sourcemaps";
 import typescript from "rollup-plugin-typescript2";
+import cleaner from 'rollup-plugin-cleaner';
 
 const pkg = require("./package.json");
 
@@ -22,12 +23,16 @@ export default {
   plugins: [
     typescript({
       abortOnError: false,
-
       useTsconfigDeclarationDir: true,
-      cacheRoot: `${require("temp-dir")}/.rpt2_cache`,
+      tsconfig: "./tsconfig.build.json"
     }),
 
     // Resolve source maps to the original source
     sourceMaps(),
+    cleaner({
+      targets: [
+        './dist/'
+      ]
+    })
   ],
 };
