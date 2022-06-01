@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
-import { Campaign, Campaign__factory, CampaignFactory__factory } from './../typechain';
+import { EthCampaign, EthCampaign__factory, EthCampaignFactory__factory } from './../typechain';
 import { toWei, getTimestamp, fastForwardToTimestamp } from './support';
 
 const LOG = true;
@@ -28,7 +28,7 @@ interface SetupData {
   tree: BalanceTree;
   merkleRoot: string;
   claimersBalances: Balances;
-  campaign: Campaign;
+  campaign: EthCampaign;
 }
 
 describe('campaign', () => {
@@ -50,8 +50,8 @@ describe('campaign', () => {
     const merkleRoot = tree.getHexRoot();
 
     const currentTimestamp = await getTimestamp();
-    const campaignFactoryDeployer = await ethers.getContractFactory<CampaignFactory__factory>('CampaignFactory');
-    const campaignDeployer = await ethers.getContractFactory<Campaign__factory>('Campaign');
+    const campaignFactoryDeployer = await ethers.getContractFactory<EthCampaignFactory__factory>('EthCampaignFactory');
+    const campaignDeployer = await ethers.getContractFactory<EthCampaign__factory>('EthCampaign');
 
     const campaignMaster = await campaignDeployer.deploy(); // deploy cmapign master implementation
     const campaignFactory = await campaignFactoryDeployer.deploy(campaignMaster.address);

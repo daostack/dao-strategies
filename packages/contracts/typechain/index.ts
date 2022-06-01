@@ -3,8 +3,10 @@
 /* eslint-disable */
 export type { Initializable } from "./Initializable";
 export type { Campaign } from "./Campaign";
-export type { CampaignFactory } from "./CampaignFactory";
+export type { EthCampaign } from "./EthCampaign";
+export type { EthCampaignFactory } from "./EthCampaignFactory";
 
 export { Initializable__factory } from "./factories/Initializable__factory";
 export { Campaign__factory } from "./factories/Campaign__factory";
-export { CampaignFactory__factory } from "./factories/CampaignFactory__factory";
+export { EthCampaign__factory } from "./factories/EthCampaign__factory";
+export { EthCampaignFactory__factory } from "./factories/EthCampaignFactory__factory";

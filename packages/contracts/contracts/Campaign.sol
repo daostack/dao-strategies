@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 /**
  * @title Campaign
  */
-contract Campaign is Initializable {
+abstract contract Campaign is Initializable {
     uint256 public constant totalShares = 10**18;
 
     bytes32 public sharesMerkleRoot;
@@ -17,6 +17,7 @@ contract Campaign is Initializable {
     address public oracle;
     uint256 public claimPeriodStart;
     uint256 public totalClaimed;
+    uint256 public totalReward;
     bool public campaignCancelled;
     bool public sharesPublished;
 
@@ -86,15 +87,17 @@ contract Campaign is Initializable {
             revert InvalidProof();
         }
 
-        uint256 totalFundsReceived = address(this).balance + totalClaimed;
+        uint256 totalFundsReceived = totalReward + totalClaimed;
         uint256 reward = (totalFundsReceived * share) / totalShares - claimed[account];
         if (reward == 0) {
             revert NoRewardAvailable();
         }
         claimed[account] += reward;
         totalClaimed += reward;
+        totalReward -= reward;
 
-        (bool success, ) = account.call{ value: reward }("");
+        bool success = transferValueOut(account, reward);
+
         if (!success) {
             revert RewardTransferFailed();
         }
@@ -109,6 +112,7 @@ contract Campaign is Initializable {
 
     receive() external payable {
         funds[msg.sender] += msg.value;
+        totalReward += msg.value;
     }
 
     function withdrawFunds(address account) external {
@@ -122,11 +126,14 @@ contract Campaign is Initializable {
         }
         funds[account] = 0;
 
-        (bool success, ) = account.call{ value: amount }("");
+        bool success = transferValueOut(account, amount);
+
         if (!success) {
             revert WithdrawTransferFailed();
         }
     }
+
+    function transferValueOut(address to, uint256 amount) internal virtual returns (bool);
 
     function withdrawAllowed() private view returns (bool) {
         return campaignCancelled || ((block.timestamp > claimPeriodStart) && !sharesPublished);

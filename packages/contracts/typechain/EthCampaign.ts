@@ -17,8 +17,8 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export interface CampaignInterface extends utils.Interface {
-  contractName: "Campaign";
+export interface EthCampaignInterface extends utils.Interface {
+  contractName: "EthCampaign";
   functions: {
     "campaignCancelled()": FunctionFragment;
     "cancelCampaign()": FunctionFragment;
@@ -155,13 +155,13 @@ export type InitializedEvent = TypedEvent<[number], { version: number }>;
 
 export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
 
-export interface Campaign extends BaseContract {
-  contractName: "Campaign";
+export interface EthCampaign extends BaseContract {
+  contractName: "EthCampaign";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CampaignInterface;
+  interface: EthCampaignInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,

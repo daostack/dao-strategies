@@ -17,8 +17,8 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export interface CampaignFactoryInterface extends utils.Interface {
-  contractName: "CampaignFactory";
+export interface EthCampaignFactoryInterface extends utils.Interface {
+  contractName: "EthCampaignFactory";
   functions: {
     "campaignAddress(bytes32)": FunctionFragment;
     "createCampaign(bytes32,bytes32,address,address,bool,uint256,bytes32)": FunctionFragment;
@@ -74,13 +74,13 @@ export type CampaignCreatedEvent = TypedEvent<
 
 export type CampaignCreatedEventFilter = TypedEventFilter<CampaignCreatedEvent>;
 
-export interface CampaignFactory extends BaseContract {
-  contractName: "CampaignFactory";
+export interface EthCampaignFactory extends BaseContract {
+  contractName: "EthCampaignFactory";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CampaignFactoryInterface;
+  interface: EthCampaignFactoryInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,

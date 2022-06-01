@@ -3,10 +3,10 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "./Campaign.sol";
+import "./EthCampaign.sol";
 
-contract CampaignFactory {
-    Campaign private master;
+contract EthCampaignFactory {
+    EthCampaign private master;
 
     event CampaignCreated(
         address creator,
@@ -21,7 +21,7 @@ contract CampaignFactory {
     );
 
     constructor(address payable _master) {
-        master = Campaign(_master);
+        master = EthCampaign(_master);
     }
 
     receive() external payable {}
