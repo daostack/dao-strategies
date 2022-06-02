@@ -24,14 +24,14 @@ describe('Test run', () => {
   test('Create campaign', async () => {
     const details: CampaignUriDetails = {
       creator: user1,
-      execDate: 0,
+      execDate: 1654168561,
       nonce: 0,
       strategyID: 'GH_PRS_REACTIONS_WEIGHED',
       strategyParams: {
-        repositories: [''],
+        repositories: [{ owner: 'gershido', repo: 'test-github-api' }],
         timeRange: {
-          start: 0,
-          end: 0,
+          start: 1646133361,
+          end: 1654168561,
         },
       },
     };
@@ -41,12 +41,13 @@ describe('Test run', () => {
         details,
       },
     };
-    const result = await campaign.create(
+    const create = await campaign.simulateFromDetails(
       request,
       {} as Response,
       () => {},
       user1
     );
-    console.log({ result });
+
+    console.log({ create });
   });
 });

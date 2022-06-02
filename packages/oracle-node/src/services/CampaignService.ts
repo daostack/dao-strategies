@@ -10,6 +10,7 @@ import { Campaign, Prisma } from '@prisma/client';
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
+import { toNumber } from '../utils/utils';
 
 import { campaignToUriDetails } from './CampaignUri';
 import { TimeService } from './TimeService';
@@ -71,13 +72,13 @@ export class CampaignService {
         cancelDate: 0,
         stratID: details.strategyID as Strategy_ID,
         stratParamsStr: JSON.stringify(details.strategyParams),
-        lastRunDate: 0,
+        lastRunDate: undefined,
+        publishDate: undefined,
         registered: false,
         running: false,
         executed: false,
         published: false,
         address: '',
-        publishDate: 0,
       };
 
       const campaign = await this.create(createData);
@@ -125,8 +126,8 @@ export class CampaignService {
     const campaign = await this.get(uri);
 
     /** check if this campaign was recently simulated */
-    const runDate = Number(campaign.lastRunDate);
-    const execDate = Number(campaign.execDate);
+    const runDate = toNumber(campaign.lastRunDate);
+    const execDate = toNumber(campaign.execDate);
 
     let rewards: Balances;
     const now = this.timeService.now();

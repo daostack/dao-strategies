@@ -3,6 +3,7 @@ import { PrismaClient, Prisma, Campaign } from '@prisma/client';
 import { BigNumber } from 'ethers';
 
 import { CampaignCreateDetails } from '../services/types';
+import { toNumber } from '../utils/utils';
 
 export class CampaignRepository {
   constructor(protected client: PrismaClient) {}
@@ -41,7 +42,9 @@ export class CampaignRepository {
     }
 
     /** "BigInt" in the DB to support timestamps beyond 2038, "number" in JS */
-    return result.lastRunDate === null ? undefined : Number(result.lastRunDate);
+    return result.lastRunDate === null
+      ? undefined
+      : toNumber(result.lastRunDate);
   }
 
   async setRunning(uri: string, value: boolean): Promise<void> {

@@ -1,5 +1,6 @@
 import { appLogger } from '../logger';
 import { Services } from '../types';
+import { toNumber } from '../utils/utils';
 
 const PERIOD_CHECK = 30;
 
@@ -67,7 +68,7 @@ export class ExecuteService {
             setTimeout(
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               callback,
-              Number(campaign.execDate) - this.services.time.now()
+              toNumber(campaign.execDate) - this.services.time.now()
             );
           }
         }
