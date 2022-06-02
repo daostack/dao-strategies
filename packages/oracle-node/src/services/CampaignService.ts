@@ -7,8 +7,8 @@ import {
 } from '@dao-strategies/core';
 import { Campaign, Prisma } from '@prisma/client';
 
-import { appLogger } from '../server';
 import { resimulationPeriod } from '../config';
+import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
 
 import { campaignToUriDetails } from './CampaignUri';

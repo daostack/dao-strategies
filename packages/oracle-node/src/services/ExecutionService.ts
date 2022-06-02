@@ -1,4 +1,4 @@
-import { appLogger } from '../server';
+import { appLogger } from '../logger';
 import { Services } from '../types';
 
 const PERIOD_CHECK = 30;

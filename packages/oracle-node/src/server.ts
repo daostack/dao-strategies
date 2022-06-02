@@ -9,6 +9,7 @@ import * as winston from 'winston';
 import { port } from './config';
 import { Routes } from './enpoints/routes';
 import { initServices } from './init';
+import { appLogger } from './logger';
 
 /* eslint-disable 
   @typescript-eslint/no-unsafe-member-access,
@@ -29,13 +30,6 @@ interface BigInt {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return this.toString();
 };
-
-export const appLogger = winston.createLogger({
-  transports: [
-    new winston.transports.Console(),
-    // new winston.transports.File({ filename: 'combined.log' }),
-  ],
-});
 
 // create express app
 const app = express();

@@ -4,12 +4,12 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "prod": "ts-node src/start.ts",
+    "prod": "ts-node src/server.ts",
     "prisma-migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
     "prisma-reset": "rm -rf ./src/prisma/migrations && cd ./src &&  npx prisma migrate reset --preview-feature && cd ..",
     "prisma-generate": "cd ./src && npx prisma generate && cd ..",
     "test": "jest test/main.test.ts",
-    "start": "nodemon src/index.ts",
+    "start": "nodemon src/server.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
   },
