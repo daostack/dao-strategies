@@ -4,6 +4,23 @@ import { Response } from 'express';
 import { CampaignController } from '../src/enpoints/CampaignController';
 import { ServiceManager } from '../src/service.manager';
 
+import { StrategyComputationMockFunctions } from './mocks/strategy.computation';
+
+/** Mock the strategy computation */
+/* eslint-disable */
+jest.mock('@dao-strategies/core', () => {
+  const originalModule = jest.requireActual('@dao-strategies/core');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    StrategyComputation: jest.fn(function (): any {
+      return StrategyComputationMockFunctions;
+    }),
+  };
+});
+/* eslint-enable */
+
 describe('Test run', () => {
   let manager: ServiceManager;
   let campaign: CampaignController;
