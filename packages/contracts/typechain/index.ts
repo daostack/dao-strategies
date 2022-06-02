@@ -2,11 +2,23 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { Initializable } from "./Initializable";
+export type { ERC20 } from "./ERC20";
+export type { IERC20Metadata } from "./IERC20Metadata";
+export type { IERC20 } from "./IERC20";
 export type { Campaign } from "./Campaign";
+export type { Erc20Campaign } from "./Erc20Campaign";
+export type { Erc20CampaignFactory } from "./Erc20CampaignFactory";
 export type { EthCampaign } from "./EthCampaign";
 export type { EthCampaignFactory } from "./EthCampaignFactory";
+export type { TestErc20 } from "./TestErc20";
 
 export { Initializable__factory } from "./factories/Initializable__factory";
+export { ERC20__factory } from "./factories/ERC20__factory";
+export { IERC20Metadata__factory } from "./factories/IERC20Metadata__factory";
+export { IERC20__factory } from "./factories/IERC20__factory";
 export { Campaign__factory } from "./factories/Campaign__factory";
+export { Erc20Campaign__factory } from "./factories/Erc20Campaign__factory";
+export { Erc20CampaignFactory__factory } from "./factories/Erc20CampaignFactory__factory";
 export { EthCampaign__factory } from "./factories/EthCampaign__factory";
 export { EthCampaignFactory__factory } from "./factories/EthCampaignFactory__factory";
+export { TestErc20__factory } from "./factories/TestErc20__factory";

@@ -17,8 +17,8 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export interface EthCampaignInterface extends utils.Interface {
-  contractName: "EthCampaign";
+export interface Erc20CampaignInterface extends utils.Interface {
+  contractName: "Erc20Campaign";
   functions: {
     "campaignCancelled()": FunctionFragment;
     "cancelCampaign()": FunctionFragment;
@@ -28,14 +28,16 @@ export interface EthCampaignInterface extends utils.Interface {
     "funds(address)": FunctionFragment;
     "guardian()": FunctionFragment;
     "initCampaign(bytes32,bytes32,address,address,bool,uint256)": FunctionFragment;
-    "initEthCampaign(bytes32,bytes32,address,address,bool,uint256)": FunctionFragment;
+    "initErc20Campaign(bytes32,bytes32,address,address,bool,uint256,address)": FunctionFragment;
     "oracle()": FunctionFragment;
     "publishShares(bytes32)": FunctionFragment;
+    "rewardToken()": FunctionFragment;
     "sharesMerkleRoot()": FunctionFragment;
     "sharesPublished()": FunctionFragment;
     "totalClaimed()": FunctionFragment;
     "totalReward()": FunctionFragment;
     "totalShares()": FunctionFragment;
+    "transferValueIn(uint256)": FunctionFragment;
     "uri()": FunctionFragment;
     "withdrawFunds(address)": FunctionFragment;
   };
@@ -64,13 +66,25 @@ export interface EthCampaignInterface extends utils.Interface {
     values: [BytesLike, BytesLike, string, string, boolean, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "initEthCampaign",
-    values: [BytesLike, BytesLike, string, string, boolean, BigNumberish]
+    functionFragment: "initErc20Campaign",
+    values: [
+      BytesLike,
+      BytesLike,
+      string,
+      string,
+      boolean,
+      BigNumberish,
+      string
+    ]
   ): string;
   encodeFunctionData(functionFragment: "oracle", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "publishShares",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "rewardToken",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "sharesMerkleRoot",
@@ -91,6 +105,10 @@ export interface EthCampaignInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "totalShares",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferValueIn",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "uri", values?: undefined): string;
   encodeFunctionData(
@@ -119,12 +137,16 @@ export interface EthCampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "initEthCampaign",
+    functionFragment: "initErc20Campaign",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "oracle", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "publishShares",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "rewardToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -147,6 +169,10 @@ export interface EthCampaignInterface extends utils.Interface {
     functionFragment: "totalShares",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferValueIn",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "uri", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawFunds",
@@ -164,13 +190,13 @@ export type InitializedEvent = TypedEvent<[number], { version: number }>;
 
 export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
 
-export interface EthCampaign extends BaseContract {
-  contractName: "EthCampaign";
+export interface Erc20Campaign extends BaseContract {
+  contractName: "Erc20Campaign";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: EthCampaignInterface;
+  interface: Erc20CampaignInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -223,13 +249,14 @@ export interface EthCampaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    initEthCampaign(
+    initErc20Campaign(
       _sharesMerkleRoot: BytesLike,
       _uri: BytesLike,
       _guardian: string,
       _oracle: string,
       _sharesPublished: boolean,
       _claimPeriodStart: BigNumberish,
+      _rewardToken: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -240,6 +267,8 @@ export interface EthCampaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    rewardToken(overrides?: CallOverrides): Promise<[string]>;
+
     sharesMerkleRoot(overrides?: CallOverrides): Promise<[string]>;
 
     sharesPublished(overrides?: CallOverrides): Promise<[boolean]>;
@@ -249,6 +278,11 @@ export interface EthCampaign extends BaseContract {
     totalReward(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     totalShares(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    transferValueIn(
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     uri(overrides?: CallOverrides): Promise<[string]>;
 
@@ -289,13 +323,14 @@ export interface EthCampaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  initEthCampaign(
+  initErc20Campaign(
     _sharesMerkleRoot: BytesLike,
     _uri: BytesLike,
     _guardian: string,
     _oracle: string,
     _sharesPublished: boolean,
     _claimPeriodStart: BigNumberish,
+    _rewardToken: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -306,6 +341,8 @@ export interface EthCampaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  rewardToken(overrides?: CallOverrides): Promise<string>;
+
   sharesMerkleRoot(overrides?: CallOverrides): Promise<string>;
 
   sharesPublished(overrides?: CallOverrides): Promise<boolean>;
@@ -315,6 +352,11 @@ export interface EthCampaign extends BaseContract {
   totalReward(overrides?: CallOverrides): Promise<BigNumber>;
 
   totalShares(overrides?: CallOverrides): Promise<BigNumber>;
+
+  transferValueIn(
+    amount: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   uri(overrides?: CallOverrides): Promise<string>;
 
@@ -353,13 +395,14 @@ export interface EthCampaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    initEthCampaign(
+    initErc20Campaign(
       _sharesMerkleRoot: BytesLike,
       _uri: BytesLike,
       _guardian: string,
       _oracle: string,
       _sharesPublished: boolean,
       _claimPeriodStart: BigNumberish,
+      _rewardToken: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -370,6 +413,8 @@ export interface EthCampaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    rewardToken(overrides?: CallOverrides): Promise<string>;
+
     sharesMerkleRoot(overrides?: CallOverrides): Promise<string>;
 
     sharesPublished(overrides?: CallOverrides): Promise<boolean>;
@@ -379,6 +424,11 @@ export interface EthCampaign extends BaseContract {
     totalReward(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalShares(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferValueIn(
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     uri(overrides?: CallOverrides): Promise<string>;
 
@@ -422,13 +472,14 @@ export interface EthCampaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    initEthCampaign(
+    initErc20Campaign(
       _sharesMerkleRoot: BytesLike,
       _uri: BytesLike,
       _guardian: string,
       _oracle: string,
       _sharesPublished: boolean,
       _claimPeriodStart: BigNumberish,
+      _rewardToken: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -439,6 +490,8 @@ export interface EthCampaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    rewardToken(overrides?: CallOverrides): Promise<BigNumber>;
+
     sharesMerkleRoot(overrides?: CallOverrides): Promise<BigNumber>;
 
     sharesPublished(overrides?: CallOverrides): Promise<BigNumber>;
@@ -448,6 +501,11 @@ export interface EthCampaign extends BaseContract {
     totalReward(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalShares(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferValueIn(
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     uri(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -495,13 +553,14 @@ export interface EthCampaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    initEthCampaign(
+    initErc20Campaign(
       _sharesMerkleRoot: BytesLike,
       _uri: BytesLike,
       _guardian: string,
       _oracle: string,
       _sharesPublished: boolean,
       _claimPeriodStart: BigNumberish,
+      _rewardToken: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -512,6 +571,8 @@ export interface EthCampaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    rewardToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     sharesMerkleRoot(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     sharesPublished(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -521,6 +582,11 @@ export interface EthCampaign extends BaseContract {
     totalReward(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     totalShares(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferValueIn(
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     uri(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

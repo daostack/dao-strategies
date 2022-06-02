@@ -3,10 +3,11 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "./EthCampaign.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./Erc20Campaign.sol";
 
-contract EthCampaignFactory {
-    EthCampaign private master;
+contract Erc20CampaignFactory {
+    Erc20Campaign private master;
 
     event CampaignCreated(
         address creator,
@@ -17,14 +18,13 @@ contract EthCampaignFactory {
         address _oracle,
         bool _sharesPublished,
         uint256 _claimPeriodStart,
+        IERC20 _rewardToken,
         bytes32 salt
     );
 
     constructor(address payable _master) {
-        master = EthCampaign(_master);
+        master = Erc20Campaign(_master);
     }
-
-    receive() external payable {}
 
     function campaignAddress(bytes32 salt) public view returns (address) {
         return Clones.predictDeterministicAddress(address(master), salt);
@@ -37,11 +37,12 @@ contract EthCampaignFactory {
         address _oracle,
         bool _sharesPublished,
         uint256 _claimPeriodStart,
-        bytes32 salt
+        bytes32 salt,
+        IERC20 _rewardToken
     ) external {
         address payable proxy = payable(Clones.cloneDeterministic(address(master), salt));
-        Campaign(proxy).initCampaign(_sharesMerkleRoot, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart);
+        Erc20Campaign(proxy).initErc20Campaign(_sharesMerkleRoot, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart, _rewardToken);
 
-        emit CampaignCreated(msg.sender, proxy, _sharesMerkleRoot, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart, salt);
+        emit CampaignCreated(msg.sender, proxy, _sharesMerkleRoot, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart, _rewardToken, salt);
     }
 }

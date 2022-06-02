@@ -96,11 +96,7 @@ abstract contract Campaign is Initializable {
         totalClaimed += reward;
         totalReward -= reward;
 
-        bool success = transferValueOut(account, reward);
-
-        if (!success) {
-            revert RewardTransferFailed();
-        }
+        transferValueOut(account, reward);
     }
 
     function cancelCampaign() external onlyGuardian {
@@ -108,11 +104,6 @@ abstract contract Campaign is Initializable {
             revert OnlyDuringEvaluationPeriod();
         }
         campaignCancelled = true;
-    }
-
-    receive() external payable {
-        funds[msg.sender] += msg.value;
-        totalReward += msg.value;
     }
 
     function withdrawFunds(address account) external {
@@ -126,14 +117,13 @@ abstract contract Campaign is Initializable {
         }
         funds[account] = 0;
 
-        bool success = transferValueOut(account, amount);
-
-        if (!success) {
-            revert WithdrawTransferFailed();
-        }
+        transferValueOut(account, amount);
     }
 
-    function transferValueOut(address to, uint256 amount) internal virtual returns (bool);
+    /**
+    @dev recerts on failure
+     */
+    function transferValueOut(address to, uint256 amount) internal virtual;
 
     function withdrawAllowed() private view returns (bool) {
         return campaignCancelled || ((block.timestamp > claimPeriodStart) && !sharesPublished);

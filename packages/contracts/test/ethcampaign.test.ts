@@ -31,7 +31,7 @@ interface SetupData {
   campaign: EthCampaign;
 }
 
-describe('campaign', () => {
+describe('EthCampaign', () => {
   async function setup(sharesDistribution: BigNumber[], publishShares: boolean): Promise<SetupData> {
     const addresses = await ethers.getSigners();
     const admin = addresses[0];

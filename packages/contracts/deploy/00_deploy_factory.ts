@@ -6,19 +6,19 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  const campaign = await deploy('Campaign', {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
-    from: deployer,
-    args: [],
-    log: true,
-  });
-
-  await deploy('CampaignFactory', {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
-    from: deployer,
-    args: [campaign.address],
-    log: true,
-  });
+  //const campaign = await deploy('Campaign', {
+  //  // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+  //  from: deployer,
+  //  args: [],
+  //  log: true,
+  //});
+  //
+  //await deploy('CampaignFactory', {
+  //  // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+  //  from: deployer,
+  //  args: [campaign.address],
+  //  log: true,
+  //});
 };
 
 export default func;
