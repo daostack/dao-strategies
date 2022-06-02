@@ -8,7 +8,7 @@ import * as winston from 'winston';
 
 import { port } from './config';
 import { Routes } from './enpoints/routes';
-import { initServices } from './init';
+import { ServiceManager } from './service.manager';
 import { appLogger } from './logger';
 
 /* eslint-disable 
@@ -74,7 +74,7 @@ app.use(
 app.use(bodyParser.json());
 
 /** Services instantiation */
-const { services, execution } = initServices();
+const manager = new ServiceManager();
 
 /** --------------------- */
 
@@ -94,7 +94,7 @@ Routes.forEach((route) => {
           }
         }
 
-        const result = await new (route.controller as any)(services)[
+        const result = await new (route.controller as any)(manager.services)[
           route.action
         ](req, res, next, loggedUser);
 

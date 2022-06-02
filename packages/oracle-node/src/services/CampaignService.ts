@@ -189,4 +189,8 @@ export class CampaignService {
   findPending(time: number): Promise<Campaign[]> {
     return this.campaignRepo.findPending(time);
   }
+
+  deleteAll(): Promise<void> {
+    return this.campaignRepo.deleteAll();
+  }
 }

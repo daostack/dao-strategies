@@ -135,4 +135,8 @@ export class CampaignRepository {
     details.address = details.address.toLowerCase();
     await this.client.campaign.update({ where: { uri }, data: details });
   }
+
+  async deleteAll(): Promise<void> {
+    await this.client.campaign.deleteMany();
+  }
 }
