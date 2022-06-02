@@ -17,8 +17,31 @@
       "skipFiles": ["<node_internals>/**"],
       "cwd": "${workspaceFolder}/packages/oracle-node",
       "runtimeExecutable": "${workspaceFolder}/packages/oracle-node/node_modules/.bin/ts-node",
-      "args": ["src/index.ts"],
+      "args": ["src/server.ts"],
       "outputCapture": "std"
+    },
+    {
+      "name": "oracle-test",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}/packages/oracle-node",
+      "runtimeExecutable": "${workspaceFolder}/packages/oracle-node/node_modules/.bin/jest",
+      "args": ["test/main.test.ts"],
+      "outputCapture": "std"
+    },
+    {
+      "name": "oracle-test-2",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}/packages/oracle-node",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/packages/oracle-node/node_modules/.bin/jest",
+        "--runInBand"
+      ],
+      "args": ["test/main.test.ts"]
     },
     {
       "name": "test core",

@@ -1,5 +1,3 @@
-import { StrategyComputation } from '@dao-strategies/core';
-import { PrismaClient } from '@prisma/client';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as express from 'express';
@@ -8,15 +6,9 @@ import * as Session from 'express-session';
 import * as expressWinston from 'express-winston';
 import * as winston from 'winston';
 
-import { port, worldConfig } from './config';
+import { port } from './config';
 import { Routes } from './enpoints/routes';
-import { CampaignRepository } from './repositories/CampaignRepository';
-import { UserRepository } from './repositories/UserRepository';
-import { CampaignService } from './services/CampaignService';
-import { ExecuteService } from './services/ExecutionService';
-import { TimeService } from './services/TimeService';
-import { UserService } from './services/UserService';
-import { Services } from './types';
+import { initServices } from './init';
 
 /* eslint-disable 
   @typescript-eslint/no-unsafe-member-access,
@@ -88,21 +80,7 @@ app.use(
 app.use(bodyParser.json());
 
 /** Services instantiation */
-const client = new PrismaClient();
-
-const campaignRepo = new CampaignRepository(client);
-const userRepo = new UserRepository(client);
-
-const strategyComputation = new StrategyComputation(worldConfig);
-const timeService = new TimeService();
-
-const services: Services = {
-  campaign: new CampaignService(campaignRepo, timeService, strategyComputation),
-  time: new TimeService(),
-  user: new UserService(userRepo, worldConfig.GITHUB_TOKEN),
-};
-
-const execution = new ExecuteService(services);
+const { services, execution } = initServices();
 
 /** --------------------- */
 

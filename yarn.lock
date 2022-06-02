@@ -1963,6 +1963,7 @@ __metadata:
   dependencies:
     "@dao-strategies/core": ^0.0.0
     "@prisma/client": ^3.13.0
+    "@types/jest": ^28.1.0
     "@types/node": ^16.11.10
     "@typescript-eslint/eslint-plugin": ^5.12.0
     "@typescript-eslint/parser": ^5.12.0
@@ -1978,12 +1979,14 @@ __metadata:
     express: ^4.17.2
     express-session: ^1.17.3
     express-winston: ^4.2.0
+    jest: ^28.1.0
     multiformats: ^9.6.5
     nodemon: ^2.0.15
     octokit: ^1.7.1
     pg: ^8.4.0
     reflect-metadata: ^0.1.13
     siwe: ^1.1.6
+    ts-jest: ^28.0.3
     ts-node: 10.7.0
     typescript: 4.5.2
     winston: ^3.7.2
@@ -4753,6 +4756,16 @@ __metadata:
     jest-matcher-utils: ^27.0.0
     pretty-format: ^27.0.0
   checksum: be20e39f7aaf17179109c0060d0a0489cec2034d4e2e28a631284c7ecd13c5ae52f62697a33a0e89b03b6cfe54e9d5e8c2bd387ab2bd90d6071d68c63b86d1e3
+  languageName: node
+  linkType: hard
+
+"@types/jest@npm:^28.1.0":
+  version: 28.1.0
+  resolution: "@types/jest@npm:28.1.0"
+  dependencies:
+    jest-matcher-utils: ^27.0.0
+    pretty-format: ^27.0.0
+  checksum: be4d887b2452e8c1367cd19b23906ba4b64af95e22ca871f81c7af5e945bd39b370e124086356aa9380c4543123b1387448bc2c00a604c6f0a92bc3e4a24e9ce
   languageName: node
   linkType: hard
 
@@ -26270,6 +26283,39 @@ __metadata:
   bin:
     ts-jest: cli.js
   checksum: bb244015f947cf9a77c892691a8131116a86f4f1cc7a1ff045cd72f78c16485c07ac582b31117f8d722a0ebb9d51c27468c28e2f8eec8bbae6e2a09ee41066f2
+  languageName: node
+  linkType: hard
+
+"ts-jest@npm:^28.0.3":
+  version: 28.0.3
+  resolution: "ts-jest@npm:28.0.3"
+  dependencies:
+    bs-logger: 0.x
+    fast-json-stable-stringify: 2.x
+    jest-util: ^28.0.0
+    json5: ^2.2.1
+    lodash.memoize: 4.x
+    make-error: 1.x
+    semver: 7.x
+    yargs-parser: ^20.x
+  peerDependencies:
+    "@babel/core": ">=7.0.0-beta.0 <8"
+    "@types/jest": ^27.0.0
+    babel-jest: ^28.0.0
+    jest: ^28.0.0
+    typescript: ">=4.3"
+  peerDependenciesMeta:
+    "@babel/core":
+      optional: true
+    "@types/jest":
+      optional: true
+    babel-jest:
+      optional: true
+    esbuild:
+      optional: true
+  bin:
+    ts-jest: cli.js
+  checksum: dc6f49507cef996abb75d5870f6ce09c9f191d135a5bb2c38c46adac890f10fd4610b7697a0045b9b37315ce4e075f39d5578da8034d6791952eebc7951475c2
   languageName: node
   linkType: hard
 
