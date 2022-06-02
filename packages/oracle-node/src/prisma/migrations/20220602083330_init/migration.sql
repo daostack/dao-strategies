@@ -11,11 +11,15 @@ CREATE TABLE "Campaign" (
     "guardian" TEXT NOT NULL,
     "oracle" TEXT NOT NULL,
     "execDate" BIGINT NOT NULL,
+    "publishDate" BIGINT NOT NULL,
     "cancelDate" BIGINT NOT NULL,
     "stratID" TEXT NOT NULL,
     "stratParamsStr" TEXT NOT NULL,
-    "lastSimDate" BIGINT NOT NULL,
+    "lastRunDate" BIGINT NOT NULL,
     "registered" BOOLEAN NOT NULL,
+    "running" BOOLEAN NOT NULL,
+    "executed" BOOLEAN NOT NULL,
+    "published" BOOLEAN NOT NULL,
     "address" TEXT NOT NULL,
 
     CONSTRAINT "Campaign_pkey" PRIMARY KEY ("uri")

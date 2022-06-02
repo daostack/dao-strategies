@@ -18,7 +18,7 @@
       "cwd": "${workspaceFolder}/packages/oracle-node",
       "runtimeExecutable": "${workspaceFolder}/packages/oracle-node/node_modules/.bin/ts-node",
       "args": ["src/index.ts"],
-      "outputCapture": "console"
+      "outputCapture": "std"
     },
     {
       "name": "test core",

@@ -13,6 +13,7 @@ import { Routes } from './enpoints/routes';
 import { CampaignRepository } from './repositories/CampaignRepository';
 import { UserRepository } from './repositories/UserRepository';
 import { CampaignService } from './services/CampaignService';
+import { ExecuteService } from './services/ExecutionService';
 import { TimeService } from './services/TimeService';
 import { UserService } from './services/UserService';
 import { Services } from './types';
@@ -100,6 +101,9 @@ const services: Services = {
   time: new TimeService(),
   user: new UserService(userRepo, worldConfig.GITHUB_TOKEN),
 };
+
+const execution = new ExecuteService(services);
+
 /** --------------------- */
 
 /** Register routes */

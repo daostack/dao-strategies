@@ -59,7 +59,7 @@ export class CampaignController extends Controller {
     return {
       uri,
       rewards: balancesToObject(
-        await this.services.campaign.computeRewards(uri)
+        await this.services.campaign.runCampaignThrottled(uri)
       ),
     };
   }
@@ -88,7 +88,9 @@ export class CampaignController extends Controller {
     loggedUser: string | undefined
   ): Promise<BalancesObject> {
     const uri: string = request.body.uri;
-    return balancesToObject(await this.services.campaign.computeRewards(uri));
+    return balancesToObject(
+      await this.services.campaign.runCampaignThrottled(uri)
+    );
   }
 
   async register(
