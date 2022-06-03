@@ -176,4 +176,136 @@ describe('start', () => {
       });
     });
   });
+
+  describe.only('create future', () => {
+    const simDate = 1650000000;
+    let create;
+    let uri: string;
+
+    beforeAll(async () => {
+      /* eslint-disable */
+      (manager.services.time as any).set(simDate);
+      /* eslint-enable */
+
+      const end = simDate + months(4);
+
+      const details: CampaignUriDetails = {
+        creator: creator,
+        execDate: end,
+        nonce: 0,
+        strategyID: 'GH_PRS_REACTIONS_WEIGHED',
+        strategyParams: {
+          repositories: [{ owner: 'gershido', repo: 'test-github-api' }],
+          timeRange: {
+            start: simDate + months(1),
+            end,
+          },
+        },
+      };
+
+      const request: any = {
+        body: {
+          details,
+        },
+      };
+      create = await campaign.create(
+        request,
+        {} as Response,
+        () => {},
+        creator
+      );
+
+      /* eslint-disable */
+      uri = create.uri;
+      /* eslint-enable */
+    });
+
+    test('is not simulated', async () => {
+      const campaign = await manager.services.campaign.get(uri);
+
+      expect(campaign.executed).toBe(false);
+      expect(campaign.registered).toBe(false);
+      expect(campaign.lastRunDate).toBeNull();
+
+      const rewards = await manager.services.campaign.getRewards(uri);
+
+      expect(rewards.size).toBe(0);
+    });
+
+    describe('register future', () => {
+      let register;
+
+      beforeAll(async () => {
+        const details: CampaignCreateDetails = {
+          address: user5,
+          cancelDate: 0,
+          description: '',
+          guardian: user1,
+          oracle: user2,
+          registered: true,
+          title: 'title',
+        };
+
+        const request = {
+          params: { uri },
+          body: details,
+        };
+
+        register = await campaign.register(
+          request,
+          {} as Response,
+          () => {},
+          user0
+        );
+      });
+
+      test('is registered', async () => {
+        const campaign = await manager.services.campaign.get(uri);
+        expect(campaign.registered).toBe(true);
+      });
+
+      describe('try execute', () => {
+        beforeAll(async () => {
+          await manager.execution.checkIncoming();
+        });
+
+        test('is not executed', async () => {
+          const campaign = await manager.services.campaign.get(uri);
+          expect(campaign.executed).toBe(false);
+        });
+
+        describe('retry execute', () => {
+          beforeAll(async () => {
+            /** move time to 25 seconds before the schedulled execution time  */
+            /* eslint-disable */
+            (manager.services.time as any).set(simDate + months(4) - 25);
+            /* eslint-enable */
+
+            /** then check incoming, this should set a timeout to run the execution
+             * in about 25 seconds */
+            await manager.execution.checkIncoming();
+          });
+
+          test(
+            'is not executed',
+            async () => {
+              expect(manager.execution.running.has(uri)).toBe(true);
+
+              const campaign = await manager.services.campaign.get(uri);
+              expect(campaign.executed).toBe(false);
+
+              /** wait for 30 seconds, the campaign should have been executed */
+              await new Promise((resolve) => setTimeout(resolve, 30 * 1000));
+
+              const campaign2 = await manager.services.campaign.get(uri);
+
+              expect(manager.execution.running.has(uri)).toBe(false);
+              expect(campaign2.executed).toBe(true);
+            },
+            50 * 1000
+          );
+        });
+      });
+    });
+  });
 });

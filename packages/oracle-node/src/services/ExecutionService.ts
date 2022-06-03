@@ -67,10 +67,16 @@ export class ExecuteService {
               appLogger.info(`Executed ${campaign.uri}`);
             };
 
+            const delay =
+              toNumber(campaign.execDate) - this.services.time.now();
+
+            appLogger.info(
+              `Preparing execution of ${campaign.uri} in ${delay} seconds`
+            );
             setTimeout(
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               callback,
-              toNumber(campaign.execDate) - this.services.time.now()
+              delay * 1000
             );
           }
         }
