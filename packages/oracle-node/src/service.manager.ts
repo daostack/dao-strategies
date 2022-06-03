@@ -21,7 +21,7 @@ export class ServiceManager {
   public services: Services;
   public execution: ExecuteService;
 
-  constructor(initExecutor: boolean = false) {
+  constructor(enabled: boolean = false) {
     this.client = new PrismaClient();
 
     this.campaignRepo = new CampaignRepository(this.client);
@@ -36,13 +36,11 @@ export class ServiceManager {
         this.timeService,
         this.strategyComputation
       ),
-      time: new TimeService(),
+      time: this.timeService,
       user: new UserService(this.userRepo, worldConfig.GITHUB_TOKEN),
     };
 
-    if (initExecutor) {
-      this.execution = new ExecuteService(this.services);
-    }
+    this.execution = new ExecuteService(this.services, enabled);
   }
 
   async resetDB(): Promise<void> {

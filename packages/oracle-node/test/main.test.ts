@@ -1,11 +1,17 @@
 import { CampaignUriDetails } from '@dao-strategies/core';
+import { BigNumber } from 'ethers';
 import { Response } from 'express';
 
 import { CampaignController } from '../src/enpoints/CampaignController';
 import { ServiceManager } from '../src/service.manager';
 import { CampaignCreateDetails } from '../src/services/types';
+import { toNumber } from '../src/utils/utils';
 
-import { StrategyComputationMockFunctions } from './mocks/strategy.computation';
+import {
+  StrategyComputationMockFunctions,
+  TEST_REWARDS,
+} from './mocks/strategy.computation';
+import { months } from './utils';
 
 /** Mock the strategy computation */
 /* eslint-disable */
@@ -24,8 +30,9 @@ jest.mock('@dao-strategies/core', () => {
 
 jest.mock('../src/services/TimeService', () => {
   return {
-    TimeService: jest.fn().mockImplementation(() => {
-      let _now = 500;
+    TimeService: jest.fn(() => {
+      console.log('Initializing');
+      let _now = 0;
 
       return {
         now: (): number => {
@@ -61,8 +68,6 @@ describe('start', () => {
     manager = new ServiceManager();
     campaign = new CampaignController(manager.services);
 
-    console.log({ now: manager.services.time.now() });
-
     await manager.resetDB();
 
     await manager.services.user.getOrCreate({
@@ -71,19 +76,27 @@ describe('start', () => {
   });
 
   describe('simulate retro', () => {
+    const simDate = 1650000000;
     let create;
+    let uri: string;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
+      /* eslint-disable */
+      (manager.services.time as any).set(simDate);
+      /* eslint-enable */
+
+      const end = simDate - months(1);
+
       const details: CampaignUriDetails = {
         creator: creator,
-        execDate: 1654168561,
+        execDate: end,
         nonce: 0,
         strategyID: 'GH_PRS_REACTIONS_WEIGHED',
         strategyParams: {
           repositories: [{ owner: 'gershido', repo: 'test-github-api' }],
           timeRange: {
-            start: 1646133361,
-            end: 1654168561,
+            start: simDate - months(4),
+            end,
           },
         },
       };
@@ -99,17 +112,33 @@ describe('start', () => {
         () => {},
         creator
       );
+
+      uri = create.uri;
     });
 
-    test('valid simulate', () => {
-      console.log({ create });
+    test('is simulated', async () => {
+      const campaign = await manager.services.campaign.get(uri);
+
+      expect(campaign.executed).toBe(false);
+      expect(toNumber(campaign.lastRunDate)).toBe(manager.services.time.now());
+      expect(campaign.uri).toHaveLength(61);
+
+      const rewards = await manager.services.campaign.getRewards(uri);
+
+      const test_receivers = Object.getOwnPropertyNames(TEST_REWARDS);
+      expect(rewards.size).toBe(test_receivers.length);
+
+      test_receivers.forEach((user: string) => {
+        expect(rewards.get(user).eq(TEST_REWARDS[user] as BigNumber)).toBe(
+          true
+        );
+      });
     });
 
     describe('register retro', () => {
       let register;
 
-      beforeEach(async () => {
-        const uri = create.uri;
+      beforeAll(async () => {
         const details: CampaignCreateDetails = {
           address: user5,
           cancelDate: 0,
@@ -133,8 +162,17 @@ describe('start', () => {
         );
       });
 
-      test('valid registered', () => {
-        console.log({ register });
+      test('is registered', () => {});
+
+      describe('execute', () => {
+        beforeAll(async () => {
+          await manager.execution.checkIncoming();
+        });
+
+        test('is executed', async () => {
+          const campaign = await manager.services.campaign.get(uri);
+          expect(campaign.executed).toBe(true);
+        });
       });
     });
   });

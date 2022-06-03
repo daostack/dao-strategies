@@ -19,11 +19,13 @@ export class ExecuteService {
   cicle: NodeJS.Timer;
   running: Set<string> = new Set();
 
-  constructor(protected services: Services) {
-    void this.checkIncoming();
-    this.cicle = setInterval(() => {
+  constructor(protected services: Services, enabled: boolean = false) {
+    if (enabled) {
       void this.checkIncoming();
-    }, PERIOD_CHECK * 1000);
+      this.cicle = setInterval(() => {
+        void this.checkIncoming();
+      }, PERIOD_CHECK * 1000);
+    }
   }
 
   /**
