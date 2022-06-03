@@ -4,11 +4,8 @@ import { Response } from 'express';
 import { CampaignController } from '../src/enpoints/CampaignController';
 import { ServiceManager } from '../src/service.manager';
 import { CampaignCreateDetails } from '../src/services/types';
-import { TimeService } from '../src/services/TimeService';
 
-import { StrategyComputationMockFunctions } from './modules-mocks/strategy.computation';
-
-jest.mock('../src/services/TimeService');
+import { StrategyComputationMockFunctions } from './mocks/strategy.computation';
 
 /** Mock the strategy computation */
 /* eslint-disable */
@@ -24,6 +21,28 @@ jest.mock('@dao-strategies/core', () => {
   };
 });
 /* eslint-enable */
+
+jest.mock('../src/services/TimeService', () => {
+  return {
+    TimeService: jest.fn().mockImplementation(() => {
+      let _now = 500;
+
+      return {
+        now: (): number => {
+          return _now;
+        },
+
+        set: (n: number): void => {
+          _now = n;
+        },
+
+        advance: (n: number): void => {
+          _now += n;
+        },
+      };
+    }),
+  };
+});
 
 describe('start', () => {
   let manager: ServiceManager;
