@@ -177,7 +177,7 @@ describe('start', () => {
     });
   });
 
-  describe.only('create future', () => {
+  describe('create future', () => {
     const simDate = 1650000000;
     let create;
     let uri: string;
@@ -233,8 +233,6 @@ describe('start', () => {
     });
 
     describe('register future', () => {
-      let register;
-
       beforeAll(async () => {
         const details: CampaignCreateDetails = {
           address: user5,
@@ -251,12 +249,7 @@ describe('start', () => {
           body: details,
         };
 
-        register = await campaign.register(
-          request,
-          {} as Response,
-          () => {},
-          user0
-        );
+        await campaign.register(request, {} as Response, () => {}, user0);
       });
 
       test('is registered', async () => {
@@ -287,7 +280,7 @@ describe('start', () => {
           });
 
           test(
-            'is not executed',
+            'is executed after timeout',
             async () => {
               expect(manager.execution.running.has(uri)).toBe(true);
 
