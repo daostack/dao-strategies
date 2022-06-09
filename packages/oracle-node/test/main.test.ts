@@ -1,9 +1,14 @@
 import { CampaignUriDetails } from '@dao-strategies/core';
-import { BigNumber } from 'ethers';
+import { BigNumber, Contract, ContractInterface, ethers } from 'ethers';
 import { Response } from 'express';
+import { CID } from 'multiformats';
+import { base32 } from 'multiformats/bases/base32';
 
 import { CampaignController } from '../src/enpoints/CampaignController';
+import hardhatContractsJson from '../src/generated/hardhat_contracts.json';
+import { Campaign } from '../src/generated/typechain';
 import { ServiceManager } from '../src/service.manager';
+import { ExecutionConfig } from '../src/services/ExecutionService';
 import { CampaignCreateDetails } from '../src/services/types';
 import { toNumber } from '../src/utils/utils';
 
@@ -12,6 +17,14 @@ import {
   TEST_REWARDS,
 } from './mocks/strategy.computation';
 import { months } from './utils';
+
+/* eslint-disable */
+const CampaignJson: any = (hardhatContractsJson as any)['31337']['localhost'][
+  'contracts'
+]['Campaign'];
+/* eslint-enable */
+
+const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
 /** Mock the strategy computation */
 /* eslint-disable */
@@ -42,10 +55,6 @@ jest.mock('../src/services/TimeService', () => {
         set: (n: number): void => {
           _now = n;
         },
-
-        advance: (n: number): void => {
-          _now += n;
-        },
       };
     }),
   };
@@ -53,22 +62,37 @@ jest.mock('../src/services/TimeService', () => {
 
 describe('start', () => {
   let manager: ServiceManager;
-  let campaign: CampaignController;
+  let campaignController: CampaignController;
 
   const user0 = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
   const user1 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
   const user2 = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
   // const user3 = '0x90F79bf6EB2c4f870365E785982E1f101E93b906';
   // const user4 = '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65';
-  const user5 = '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc';
+  // const user5 = '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc';
 
   const creator = user0;
+  const oracle = user1;
+  const guardian = user2;
+
+  const now = new Date();
+  const seed = ethers.utils.arrayify(
+    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(now.toUTCString()))
+  );
+  const PERIOD_CHECK = 2; // >= 2
 
   beforeAll(async () => {
-    manager = new ServiceManager();
-    campaign = new CampaignController(manager.services);
+    const config: ExecutionConfig = {
+      enabled: false,
+      periodCheck: PERIOD_CHECK,
+    };
+    manager = new ServiceManager(config);
+    campaignController = new CampaignController(manager.services);
 
     await manager.resetDB();
+
+    const block = await manager.services.onchain.provider.getBlockNumber();
+    console.log({ block });
 
     await manager.services.user.getOrCreate({
       address: creator,
@@ -79,6 +103,7 @@ describe('start', () => {
     const simDate = 1650000000;
     let create;
     let uri: string;
+    let uriCid: CID;
 
     beforeAll(async () => {
       /* eslint-disable */
@@ -106,7 +131,7 @@ describe('start', () => {
           details,
         },
       };
-      create = await campaign.simulateFromDetails(
+      create = await campaignController.simulateFromDetails(
         request,
         {} as Response,
         () => {},
@@ -114,6 +139,7 @@ describe('start', () => {
       );
 
       uri = create.uri;
+      uriCid = CID.parse(uri, base32);
     });
 
     test('is simulated', async () => {
@@ -136,29 +162,41 @@ describe('start', () => {
     });
 
     describe('register retro', () => {
-      let register;
+      let address: string;
+      const shares: Campaign.SharesDataStruct = {
+        sharesMerkleRoot: ZERO_BYTES32,
+        totalShares: BigNumber.from(0),
+      };
 
       beforeAll(async () => {
         const details: CampaignCreateDetails = {
-          address: user5,
+          address: '',
           cancelDate: 0,
           description: '',
-          guardian: user1,
-          oracle: user2,
+          guardian,
+          oracle,
           registered: true,
           title: 'title',
         };
+
+        address = await manager.services.onchain.deploy(
+          uri,
+          shares,
+          details,
+          seed
+        );
+        details.address = address;
 
         const request = {
           params: { uri },
           body: details,
         };
 
-        register = await campaign.register(
+        await campaignController.register(
           request,
           {} as Response,
           () => {},
-          user0
+          user1
         );
       });
 
@@ -177,10 +215,11 @@ describe('start', () => {
     });
   });
 
-  describe('create future', () => {
+  describe.only('create future', () => {
     const simDate = 1650000000;
     let create;
     let uri: string;
+    let uriCid: CID;
 
     beforeAll(async () => {
       /* eslint-disable */
@@ -208,7 +247,7 @@ describe('start', () => {
           details,
         },
       };
-      create = await campaign.create(
+      create = await campaignController.create(
         request,
         {} as Response,
         () => {},
@@ -217,6 +256,7 @@ describe('start', () => {
 
       /* eslint-disable */
       uri = create.uri;
+      uriCid = CID.parse(uri, base32);
       /* eslint-enable */
     });
 
@@ -233,28 +273,70 @@ describe('start', () => {
     });
 
     describe('register future', () => {
+      let address: string;
+      let campaignContract: Campaign;
+      const shares: Campaign.SharesDataStruct = {
+        sharesMerkleRoot: ZERO_BYTES32,
+        totalShares: BigNumber.from(0),
+      };
+
       beforeAll(async () => {
         const details: CampaignCreateDetails = {
-          address: user5,
+          address: '',
           cancelDate: 0,
           description: '',
-          guardian: user1,
-          oracle: user2,
+          guardian,
+          oracle,
           registered: true,
           title: 'title',
         };
+
+        address = await manager.services.onchain.deploy(
+          uri,
+          shares,
+          details,
+          seed
+        );
+
+        details.address = address;
+        campaignContract = new Contract(
+          address,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          CampaignJson.abi as ContractInterface,
+          manager.services.onchain.provider
+        ) as Campaign;
 
         const request = {
           params: { uri },
           body: details,
         };
 
-        await campaign.register(request, {} as Response, () => {}, user0);
+        await campaignController.register(
+          request,
+          {} as Response,
+          () => {},
+          user1
+        );
       });
 
       test('is registered', async () => {
         const campaign = await manager.services.campaign.get(uri);
         expect(campaign.registered).toBe(true);
+
+        const read = {
+          guardian: await campaignContract.guardian(),
+          oracle: await campaignContract.oracle(),
+          uri: await campaignContract.uri(),
+          root: await campaignContract.shares(),
+        };
+
+        expect(read.guardian.toLowerCase()).toBe(guardian.toLowerCase());
+        expect(read.oracle.toLowerCase()).toBe(oracle.toLowerCase());
+        expect(read.root.sharesMerkleRoot).toBe(ZERO_BYTES32);
+        expect(read.root.totalShares.eq(BigNumber.from(0))).toBe(true);
+        expect(ethers.utils.arrayify(read.uri)).toStrictEqual(
+          uriCid.multihash.digest
+        );
       });
 
       describe('try execute', () => {
@@ -271,7 +353,9 @@ describe('start', () => {
           beforeAll(async () => {
             /** move time to 25 seconds before the schedulled execution time  */
             /* eslint-disable */
-            (manager.services.time as any).set(simDate + months(4) - 25);
+            (manager.services.time as any).set(
+              simDate + months(4) - (PERIOD_CHECK - 1)
+            );
             /* eslint-enable */
 
             /** then check incoming, this should set a timeout to run the execution
@@ -287,16 +371,18 @@ describe('start', () => {
               const campaign = await manager.services.campaign.get(uri);
               expect(campaign.executed).toBe(false);
 
-              /** wait for 30 seconds, the campaign should have been executed */
-              await new Promise((resolve) => setTimeout(resolve, 30 * 1000));
+              /** wait for the campaign to be executed */
+              await new Promise((resolve) => setTimeout(resolve, 2 * 1000));
 
               const campaign2 = await manager.services.campaign.get(uri);
 
               expect(manager.execution.running.has(uri)).toBe(false);
               expect(campaign2.executed).toBe(true);
             },
-            50 * 1000
+            3 * 1000
           );
+
+          test('smart contract has root set', () => {});
         });
       });
     });

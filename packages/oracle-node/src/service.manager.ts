@@ -5,7 +5,8 @@ import { worldConfig } from './config';
 import { CampaignRepository } from './repositories/CampaignRepository';
 import { UserRepository } from './repositories/UserRepository';
 import { CampaignService } from './services/CampaignService';
-import { ExecuteService } from './services/ExecutionService';
+import { ExecuteService, ExecutionConfig } from './services/ExecutionService';
+import { OnChainService } from './services/OnChainService';
 import { TimeService } from './services/TimeService';
 import { UserService } from './services/UserService';
 import { Services } from './types';
@@ -16,12 +17,14 @@ export class ServiceManager {
   public userRepo: UserRepository;
 
   public strategyComputation: StrategyComputation;
+
   private timeService: TimeService;
+  private onChainService: OnChainService;
 
   public services: Services;
   public execution: ExecuteService;
 
-  constructor(enabled: boolean = false) {
+  constructor(config: ExecutionConfig = { enabled: false, periodCheck: 0 }) {
     this.client = new PrismaClient();
 
     this.campaignRepo = new CampaignRepository(this.client);
@@ -29,18 +32,21 @@ export class ServiceManager {
 
     this.strategyComputation = new StrategyComputation(worldConfig);
     this.timeService = new TimeService();
+    this.onChainService = new OnChainService();
 
     this.services = {
       campaign: new CampaignService(
         this.campaignRepo,
         this.timeService,
-        this.strategyComputation
+        this.strategyComputation,
+        this.onChainService
       ),
-      time: this.timeService,
       user: new UserService(this.userRepo, worldConfig.GITHUB_TOKEN),
+      time: this.timeService,
+      onchain: this.onChainService,
     };
 
-    this.execution = new ExecuteService(this.services, enabled);
+    this.execution = new ExecuteService(this.services, config);
   }
 
   async resetDB(): Promise<void> {

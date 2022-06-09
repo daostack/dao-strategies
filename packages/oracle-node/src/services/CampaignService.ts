@@ -1,5 +1,6 @@
 import {
   Balances,
+  BalanceTree,
   CampaignUriDetails,
   getCampaignUri,
   StrategyComputation,
@@ -10,9 +11,10 @@ import { Campaign, Prisma } from '@prisma/client';
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
-import { toNumber } from '../utils/utils';
+import { hashReceivers, toNumber } from '../utils/utils';
 
 import { campaignToUriDetails } from './CampaignUri';
+import { OnChainService } from './OnChainService';
 import { TimeService } from './TimeService';
 import { CampaignCreateDetails } from './types';
 
@@ -36,7 +38,8 @@ export class CampaignService {
   constructor(
     protected campaignRepo: CampaignRepository,
     protected timeService: TimeService,
-    protected strategyComputation: StrategyComputation
+    protected strategyComputation: StrategyComputation,
+    protected onChainService: OnChainService
   ) {}
 
   async get(uri: string): Promise<Campaign | undefined> {
@@ -92,6 +95,14 @@ export class CampaignService {
 
   async create(details: Prisma.CampaignCreateInput): Promise<Campaign> {
     return this.campaignRepo.create(details);
+  }
+
+  async runAndPublishCampaign(uri: string): Promise<void> {
+    const campaign = await this.get(uri);
+
+    await this.runCampaign(campaign);
+    await this.setExecuted(uri);
+    await this.publishCampaign(uri);
   }
 
   /** runs the strategy, rewards are always stored on the DB overwriting the previous execution */
@@ -165,6 +176,35 @@ export class CampaignService {
     );
 
     return rewards;
+  }
+
+  /**  */
+  async publishCampaign(uri: string): Promise<void> {
+    const campaign = await this.get(uri);
+    const root = await this.getRoot(campaign);
+    await this.onChainService.publishShares(campaign.address, root);
+  }
+
+  async getRoot(campaign: Campaign): Promise<string> {
+    if (!campaign.registered) {
+      throw new Error(`campaign ${campaign.uri} not registered`);
+    }
+
+    if (!campaign.executed) {
+      throw new Error(`campaign ${campaign.uri} not executed`);
+    }
+
+    if (campaign.published) {
+      throw new Error(`campaign ${campaign.uri} alread published`);
+    }
+
+    const rewards = await this.getRewards(campaign.uri);
+    const rewardsHashes = await hashReceivers(rewards);
+
+    const tree = new BalanceTree(rewardsHashes);
+    const root = tree.getHexRoot();
+
+    return root;
   }
 
   async getRewards(uri: string): Promise<Balances> {

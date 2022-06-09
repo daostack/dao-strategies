@@ -2,7 +2,10 @@ import { appLogger } from '../logger';
 import { Services } from '../types';
 import { toNumber } from '../utils/utils';
 
-const PERIOD_CHECK = 30;
+export interface ExecutionConfig {
+  enabled: boolean;
+  periodCheck: number;
+}
 
 /**
  * A service that periodically fetches data about the campaigns and prepares for
@@ -19,12 +22,12 @@ export class ExecuteService {
   cicle: NodeJS.Timer;
   running: Set<string> = new Set();
 
-  constructor(protected services: Services, enabled: boolean = false) {
-    if (enabled) {
+  constructor(protected services: Services, protected config: ExecutionConfig) {
+    if (this.config.enabled) {
       void this.checkIncoming();
       this.cicle = setInterval(() => {
         void this.checkIncoming();
-      }, PERIOD_CHECK * 1000);
+      }, this.config.periodCheck * 1000);
     }
   }
 
@@ -36,7 +39,7 @@ export class ExecuteService {
     const now = this.services.time.now();
 
     const incoming = await this.services.campaign.findPending(
-      now + PERIOD_CHECK
+      now + this.config.periodCheck
     );
 
     const nowUTC = new Date(now * 1000);
@@ -60,8 +63,7 @@ export class ExecuteService {
             const callback = async (): Promise<void> => {
               appLogger.info(`Executing ${campaign.uri}`);
 
-              await this.services.campaign.runCampaign(campaign);
-              await this.services.campaign.setExecuted(campaign.uri);
+              await this.services.campaign.runAndPublishCampaign(campaign.uri);
 
               this.running.delete(campaign.uri);
               appLogger.info(`Executed ${campaign.uri}`);
