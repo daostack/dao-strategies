@@ -4,28 +4,32 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "prod": "ts-node src/index.ts",
+    "prod": "ts-node src/server.ts",
     "prisma-migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
     "prisma-reset": "rm -rf ./src/prisma/migrations && cd ./src &&  npx prisma migrate reset --preview-feature && cd ..",
     "prisma-generate": "cd ./src && npx prisma generate && cd ..",
-    "start": "nodemon src/index.ts",
+    "test": "jest test/main.test.ts",
+    "start": "nodemon src/server.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
   },
   "dependencies": {
     "@dao-strategies/core": "^0.0.0",
     "@prisma/client": "^3.13.0",
+    "@types/jest": "^28.1.0",
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
     "ethers": "^5.6.5",
     "express": "^4.17.2",
     "express-session": "^1.17.3",
     "express-winston": "^4.2.0",
+    "jest": "^28.1.0",
     "multiformats": "^9.6.5",
     "octokit": "^1.7.1",
     "pg": "^8.4.0",
     "reflect-metadata": "^0.1.13",
     "siwe": "^1.1.6",
+    "ts-jest": "^28.0.3",
     "winston": "^3.7.2"
   },
   "devDependencies": {
@@ -39,7 +43,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
     "nodemon": "^2.0.15",
-    "ts-node": "10.7.0",
+    "ts-node": "^10.8.1",
     "typescript": "4.5.2"
   }
 }

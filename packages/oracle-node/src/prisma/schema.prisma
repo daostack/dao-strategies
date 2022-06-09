@@ -16,13 +16,17 @@ model Campaign {
   nonce           Int
   guardian        String
   oracle          String
-  execDate        BigInt
-  cancelDate      BigInt
   stratID         String
   stratParamsStr  String    // For now, Params are stringified as they can have any structure
   rewards         Reward[] 
-  lastSimDate     BigInt
+  lastRunDate     BigInt?
+  execDate        BigInt?
+  publishDate     BigInt?
+  cancelDate      BigInt?
   registered      Boolean   // Registered campaigns are those live (with a smart contract). 
+  running         Boolean   // running campaigns are currently being run (execution can take a few seconds or minutes)
+  executed        Boolean   // executed campaigns are those whose final rewards have been computed 
+  published       Boolean   // published campaigns are those whose shares has been published in their smart contract
   address         String    // cannot be @unique since it is null for simulated campaigns - Smart contract address
 }
 

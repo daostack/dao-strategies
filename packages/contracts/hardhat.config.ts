@@ -163,18 +163,6 @@ const config: HardhatUserConfig = {
 };
 export default config;
 
-const DEBUG = false;
-
-function debug(text: string): void {
-  if (DEBUG) {
-    console.log(text);
-  }
-}
-
-async function send(signer: Signer, txparams: any): Promise<TransactionResponse> {
-  return await signer.sendTransaction(txparams);
-}
-
 task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
   const randomWallet = ethers.Wallet.createRandom();
   const { privateKey } = randomWallet._signingKey();
@@ -182,11 +170,6 @@ task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
   console.log(`🔗 http://localhost:3000/pk#${privateKey}`);
 });
 
-task('txEvents', 'Get tx receipt')
-  .addParam('txhash', 'Transaction hash')
-  .setAction(async (taskArgs: { txhash: string }, hre) => {
-    const { ethers } = hre;
-
-    const txReceipt = await ethers.provider.getTransactionReceipt(taskArgs.txhash);
-    console.log(txReceipt);
-  });
+task('reset', 'Get tx receipt').setAction(async (_, hre) => {
+  await hre.network.provider.send('hardhat_reset');
+});

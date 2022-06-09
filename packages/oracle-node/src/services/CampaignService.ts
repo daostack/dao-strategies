@@ -1,5 +1,6 @@
 import {
   Balances,
+  BalanceTree,
   CampaignUriDetails,
   getCampaignUri,
   StrategyComputation,
@@ -7,11 +8,13 @@ import {
 } from '@dao-strategies/core';
 import { Campaign, Prisma } from '@prisma/client';
 
-import { appLogger } from '..';
 import { resimulationPeriod } from '../config';
+import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
+import { hashReceivers, toNumber } from '../utils/utils';
 
 import { campaignToUriDetails } from './CampaignUri';
+import { OnChainService } from './OnChainService';
 import { TimeService } from './TimeService';
 import { CampaignCreateDetails } from './types';
 
@@ -35,7 +38,8 @@ export class CampaignService {
   constructor(
     protected campaignRepo: CampaignRepository,
     protected timeService: TimeService,
-    protected strategyComputation: StrategyComputation
+    protected strategyComputation: StrategyComputation,
+    protected onChainService: OnChainService
   ) {}
 
   async get(uri: string): Promise<Campaign | undefined> {
@@ -61,7 +65,7 @@ export class CampaignService {
         description: '',
         creator: {
           connect: {
-            address: by,
+            address: by.toLowerCase(),
           },
         },
         nonce: details.nonce,
@@ -71,8 +75,12 @@ export class CampaignService {
         cancelDate: 0,
         stratID: details.strategyID as Strategy_ID,
         stratParamsStr: JSON.stringify(details.strategyParams),
-        lastSimDate: 0,
+        lastRunDate: undefined,
+        publishDate: undefined,
         registered: false,
+        running: false,
+        executed: false,
+        published: false,
         address: '',
       };
 
@@ -89,49 +97,74 @@ export class CampaignService {
     return this.campaignRepo.create(details);
   }
 
-  /**
-   * A "cached" execution of a campaign from its URI.
-   *
-   * A retroactive campaign is executed only once, since it's result
-   * is not expected to depend on the execution date. Once executed,
-   * a retroactive campaign is never re-executed.
-   *
-   * An open campaign (non-retroactive) is also expected to be executed
-   * only once and in a future date, but it can be "simulated" many times
-   * before then.
-   *
-   * If a campaign was recently simulated, it is not executed again,
-   * instead the last-computed simulated rewards are read from the DB and
-   * returned.
-   *
-   * */
-  async computeRewards(uri: string): Promise<Balances> {
+  async runAndPublishCampaign(uri: string): Promise<void> {
+    const campaign = await this.get(uri);
+
+    await this.runCampaign(campaign);
+    await this.setExecuted(uri);
+    await this.publishCampaign(uri);
+  }
+
+  /** runs the strategy, rewards are always stored on the DB overwriting the previous execution */
+  async runCampaign(campaign: Campaign, _now?: number): Promise<Balances> {
+    const now = _now || this.timeService.now();
+
+    if (campaign.executed) {
+      throw new Error(
+        `Trying to run a campaign ${campaign.uri} that was already executed. This would had overwrite the final results`
+      );
+    }
+
+    /** if it has not been run yet, it will always be run now*/
+    const details = campaignToUriDetails(campaign);
+
+    await this.campaignRepo.setRunning(campaign.uri, true);
+
+    const rewards = await this.runStrategy(
+      details.strategyID as Strategy_ID,
+      details.strategyParams
+    );
+
+    await this.campaignRepo.setLastRunDate(campaign.uri, now);
+    await this.setRewards(campaign.uri, rewards);
+
+    await this.campaignRepo.setRunning(campaign.uri, false);
+
+    return rewards;
+  }
+
+  async runCampaignThrottled(uri: string): Promise<Balances> {
+    const campaign = await this.get(uri);
+
     /** check if this campaign was recently simulated */
-    const simDate = await this.getLastSimDate(uri);
+    const runDate = toNumber(campaign.lastRunDate);
+    const execDate = toNumber(campaign.execDate);
 
     let rewards: Balances;
+    const now = this.timeService.now();
 
     if (
-      simDate !== undefined &&
-      this.timeService.now() - simDate < resimulationPeriod
+      runDate !== undefined &&
+      (runDate >= execDate || now - runDate < resimulationPeriod)
     ) {
+      /** Dont run if:
+       * it has already been run and either
+       *   the runDate was the execDate or later, or
+       *   it was run very recently
+       * */
       rewards = await this.getRewards(uri);
       appLogger.info(`rewards for strategy ${uri} read from DB`);
     } else {
-      const details = campaignToUriDetails(await this.get(uri));
-      rewards = await this.run(
-        details.strategyID as Strategy_ID,
-        details.strategyParams
-      );
-
-      await this.setRewards(uri, rewards);
-      await this.campaignRepo.setLastSimDate(uri, this.timeService.now());
+      rewards = await this.runCampaign(campaign);
     }
 
     return rewards;
   }
 
-  async run(strategyId: Strategy_ID, strategyParams: any): Promise<Balances> {
+  async runStrategy(
+    strategyId: Strategy_ID,
+    strategyParams: any
+  ): Promise<Balances> {
     appLogger.info(`calling strategy ${strategyId}`);
     const rewards = await this.strategyComputation.runStrategy(
       strategyId,
@@ -145,16 +178,41 @@ export class CampaignService {
     return rewards;
   }
 
-  async getLastSimDate(uri: string): Promise<number | undefined> {
-    return this.campaignRepo.getLastSimDate(uri);
+  /**  */
+  async publishCampaign(uri: string): Promise<void> {
+    const campaign = await this.get(uri);
+    const root = await this.getRoot(campaign);
+    await this.onChainService.publishShares(campaign.address, root);
   }
 
-  async setLastSimDate(uri: string, date: number): Promise<void> {
-    return this.campaignRepo.setLastSimDate(uri, date);
+  async getRoot(campaign: Campaign): Promise<string> {
+    if (!campaign.registered) {
+      throw new Error(`campaign ${campaign.uri} not registered`);
+    }
+
+    if (!campaign.executed) {
+      throw new Error(`campaign ${campaign.uri} not executed`);
+    }
+
+    if (campaign.published) {
+      throw new Error(`campaign ${campaign.uri} alread published`);
+    }
+
+    const rewards = await this.getRewards(campaign.uri);
+    const rewardsHashes = await hashReceivers(rewards);
+
+    const tree = new BalanceTree(rewardsHashes);
+    const root = tree.getHexRoot();
+
+    return root;
   }
 
   async getRewards(uri: string): Promise<Balances> {
     return this.campaignRepo.getRewards(uri);
+  }
+
+  getRewardsToAddresses(uri: string): Promise<Balances> {
+    return this.campaignRepo.getRewardsToAddresses(uri);
   }
 
   async setRewards(uri: string, rewards: Balances): Promise<void> {
@@ -163,5 +221,17 @@ export class CampaignService {
 
   async register(uri: string, details: CampaignCreateDetails): Promise<void> {
     await this.campaignRepo.setDetails(uri, details);
+  }
+
+  setExecuted(uri: string): Promise<void> {
+    return this.campaignRepo.setExecuted(uri, true);
+  }
+
+  findPending(time: number): Promise<Campaign[]> {
+    return this.campaignRepo.findPending(time);
+  }
+
+  deleteAll(): Promise<void> {
+    return this.campaignRepo.deleteAll();
   }
 }

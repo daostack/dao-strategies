@@ -3,6 +3,7 @@ import { PrismaClient, Prisma, Campaign } from '@prisma/client';
 import { BigNumber } from 'ethers';
 
 import { CampaignCreateDetails } from '../services/types';
+import { toNumber } from '../utils/utils';
 
 export class CampaignRepository {
   constructor(protected client: PrismaClient) {}
@@ -30,10 +31,10 @@ export class CampaignRepository {
       .then(Boolean);
   }
 
-  async getLastSimDate(uri: string): Promise<number | undefined> {
+  async getLastRunDate(uri: string): Promise<number | undefined> {
     const result = await this.client.campaign.findUnique({
       where: { uri: uri },
-      select: { lastSimDate: true },
+      select: { lastRunDate: true },
     });
 
     if (result === null) {
@@ -41,13 +42,29 @@ export class CampaignRepository {
     }
 
     /** "BigInt" in the DB to support timestamps beyond 2038, "number" in JS */
-    return result.lastSimDate === null ? undefined : Number(result.lastSimDate);
+    return result.lastRunDate === null
+      ? undefined
+      : toNumber(result.lastRunDate);
   }
 
-  async setLastSimDate(uri: string, date: number): Promise<void> {
+  async setRunning(uri: string, value: boolean): Promise<void> {
     await this.client.campaign.update({
       where: { uri: uri },
-      data: { lastSimDate: date },
+      data: { running: value },
+    });
+  }
+
+  async setLastRunDate(uri: string, date: number): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { lastRunDate: date },
+    });
+  }
+
+  async setExecuted(uri: string, value: boolean): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { executed: value },
     });
   }
 
@@ -65,6 +82,36 @@ export class CampaignRepository {
     });
 
     return balances;
+  }
+
+  async getRewardsToAddresses(uri: string): Promise<Balances> {
+    const result = await this.client.$queryRaw`
+      SELECT account, address, amount FROM 
+      (
+        SELECT * FROM public."Reward" 
+        WHERE "campaignId" = '${uri}'
+      ) as rewards
+      LEFT JOIN 
+      public."User" 
+      ON rewards.account = "verifiedGithub"
+    `;
+
+    console.log(result);
+    return new Map();
+  }
+
+  /** campaigns whose execution date is older and has not been executed */
+  async findPending(now: number): Promise<Campaign[]> {
+    return this.client.campaign.findMany({
+      where: {
+        execDate: {
+          lte: now,
+        },
+        AND: {
+          executed: false,
+        },
+      },
+    });
   }
 
   async setRewards(uri: string, rewards: Balances): Promise<void> {
@@ -90,5 +137,9 @@ export class CampaignRepository {
   async setDetails(uri: string, details: CampaignCreateDetails): Promise<void> {
     details.address = details.address.toLowerCase();
     await this.client.campaign.update({ where: { uri }, data: details });
+  }
+
+  async deleteAll(): Promise<void> {
+    await this.client.campaign.deleteMany();
   }
 }

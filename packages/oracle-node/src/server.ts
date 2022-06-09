@@ -1,5 +1,3 @@
-import { StrategyComputation } from '@dao-strategies/core';
-import { PrismaClient } from '@prisma/client';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as express from 'express';
@@ -8,14 +6,10 @@ import * as Session from 'express-session';
 import * as expressWinston from 'express-winston';
 import * as winston from 'winston';
 
-import { port, worldConfig } from './config';
+import { port } from './config';
 import { Routes } from './enpoints/routes';
-import { CampaignRepository } from './repositories/CampaignRepository';
-import { UserRepository } from './repositories/UserRepository';
-import { CampaignService } from './services/CampaignService';
-import { TimeService } from './services/TimeService';
-import { UserService } from './services/UserService';
-import { Services } from './types';
+import { ServiceManager } from './service.manager';
+import { appLogger } from './logger';
 
 /* eslint-disable 
   @typescript-eslint/no-unsafe-member-access,
@@ -36,13 +30,6 @@ interface BigInt {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return this.toString();
 };
-
-export const appLogger = winston.createLogger({
-  transports: [
-    new winston.transports.Console(),
-    // new winston.transports.File({ filename: 'combined.log' }),
-  ],
-});
 
 // create express app
 const app = express();
@@ -87,19 +74,8 @@ app.use(
 app.use(bodyParser.json());
 
 /** Services instantiation */
-const client = new PrismaClient();
+const manager = new ServiceManager();
 
-const campaignRepo = new CampaignRepository(client);
-const userRepo = new UserRepository(client);
-
-const strategyComputation = new StrategyComputation(worldConfig);
-const timeService = new TimeService();
-
-const services: Services = {
-  campaign: new CampaignService(campaignRepo, timeService, strategyComputation),
-  time: new TimeService(),
-  user: new UserService(userRepo, worldConfig.GITHUB_TOKEN),
-};
 /** --------------------- */
 
 /** Register routes */
@@ -118,7 +94,7 @@ Routes.forEach((route) => {
           }
         }
 
-        const result = await new (route.controller as any)(services)[
+        const result = await new (route.controller as any)(manager.services)[
           route.action
         ](req, res, next, loggedUser);
 

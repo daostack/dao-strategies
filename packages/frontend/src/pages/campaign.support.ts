@@ -1,7 +1,7 @@
 import { BigNumber, ethers } from 'ethers';
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
-import { CampaignUriDetails, getCampaignUri } from '@dao-strategies/core';
+import { CampaignUriDetails } from '@dao-strategies/core';
 
 import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
 import { CampaignFactory } from '../generated/typechain';
@@ -87,6 +87,7 @@ export const deployCampaign = async (
     uriDefined = await createCampaign(details);
   }
 
+  /** raw hash 32-bit wide is exctracted from URI CID  */
   const uriCid = CID.parse(uriDefined, base32);
 
   if (uriCid == null) throw new Error(`uri ${uri} is not a CID`);

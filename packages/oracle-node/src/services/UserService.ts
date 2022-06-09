@@ -1,7 +1,6 @@
 import { Prisma, User } from '@prisma/client';
 import { verifyMessage } from 'ethers/lib/utils';
 import { Octokit } from 'octokit';
-import { ErrorTypes } from 'siwe';
 
 import { UserRepository } from '../repositories/UserRepository';
 
@@ -109,9 +108,7 @@ export class UserService {
       if (user.signedGithub !== gihub_username) {
         throw new Error(
           `Trying to verify github ${gihub_username} for address ${readAddress}, 
-          but that address current signed github account is ${
-            user.signedGithub as string
-          }`
+          but that address current signed github account is ${user.signedGithub}`
         );
       }
 
@@ -121,5 +118,9 @@ export class UserService {
     }
 
     return { address: readAddress };
+  }
+
+  deleteAll(): Promise<void> {
+    return this.userRepo.deleteAll();
   }
 }

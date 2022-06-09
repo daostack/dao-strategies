@@ -57,4 +57,8 @@ export class UserRepository {
       },
     });
   }
+
+  async deleteAll(): Promise<void> {
+    await this.client.user.deleteMany();
+  }
 }

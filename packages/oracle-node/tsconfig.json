@@ -4,9 +4,13 @@
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "outDir": "./build",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "sourceMap": true
-  }
+  },
+  "include": ["src", "test"],
+  "exclude": ["**/node_modules", "node_modules"]
 }
