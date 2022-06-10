@@ -1,8 +1,11 @@
+import { WorldConfig } from '@dao-strategies/core';
+
 import { appLogger } from '../logger';
 import { Services } from '../types';
 import { toNumber } from '../utils/utils';
 
 export interface ExecutionConfig {
+  world: WorldConfig;
   enabled: boolean;
   periodCheck: number;
 }

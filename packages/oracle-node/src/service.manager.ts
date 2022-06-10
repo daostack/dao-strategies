@@ -1,7 +1,6 @@
 import { StrategyComputation } from '@dao-strategies/core';
 import { PrismaClient } from '@prisma/client';
 
-import { worldConfig } from './config';
 import { CampaignRepository } from './repositories/CampaignRepository';
 import { UserRepository } from './repositories/UserRepository';
 import { CampaignService } from './services/CampaignService';
@@ -24,13 +23,13 @@ export class ServiceManager {
   public services: Services;
   public execution: ExecuteService;
 
-  constructor(config: ExecutionConfig = { enabled: false, periodCheck: 0 }) {
+  constructor(config: ExecutionConfig) {
     this.client = new PrismaClient();
 
     this.campaignRepo = new CampaignRepository(this.client);
     this.userRepo = new UserRepository(this.client);
 
-    this.strategyComputation = new StrategyComputation(worldConfig);
+    this.strategyComputation = new StrategyComputation(config.world);
     this.timeService = new TimeService();
     this.onChainService = new OnChainService();
 
@@ -41,7 +40,7 @@ export class ServiceManager {
         this.strategyComputation,
         this.onChainService
       ),
-      user: new UserService(this.userRepo, worldConfig.GITHUB_TOKEN),
+      user: new UserService(this.userRepo, config.world.GITHUB_TOKEN),
       time: this.timeService,
       onchain: this.onChainService,
     };
@@ -49,6 +48,7 @@ export class ServiceManager {
     this.execution = new ExecuteService(this.services, config);
   }
 
+  /** for testing only */
   async resetDB(): Promise<void> {
     await this.client.$executeRaw`
       TRUNCATE public."Campaign", public."User", public."Reward";

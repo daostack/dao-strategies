@@ -1,11 +1,18 @@
 import { Provider, createClient } from 'wagmi';
 import { ThemeSwitcherProvider } from 'react-css-theme-switcher';
+import { ThemeProvider } from 'styled-components';
 
-import './App.css';
 import { LoggedUserContext } from './hooks/useLoggedUser';
 import { MainPage } from './pages/MainPage';
+import { GlobalStyles } from './components/styles/GlobalStyles';
 
-const themes = {
+const theme = {
+  colors: {
+    body: '#ffffff',
+  },
+};
+
+const antThemes = {
   dark: './dark-theme.css',
   light: './light-theme.css',
 };
@@ -17,8 +24,11 @@ function App() {
     <div className="App">
       <Provider client={client}>
         <LoggedUserContext>
-          <ThemeSwitcherProvider themeMap={themes} defaultTheme={'dark'}>
-            <MainPage></MainPage>
+          <ThemeSwitcherProvider themeMap={antThemes} defaultTheme={'dark'}>
+            <ThemeProvider theme={theme}>
+              <GlobalStyles />
+              <MainPage></MainPage>
+            </ThemeProvider>
           </ThemeSwitcherProvider>
         </LoggedUserContext>
       </Provider>

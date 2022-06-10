@@ -5,6 +5,8 @@ import Session from 'express-session';
 import expressWinston from 'express-winston';
 import winston from 'winston';
 
+import { worldConfig } from './config';
+
 import { port } from './config';
 import { Routes } from './enpoints/routes';
 import { appLogger } from './logger';
@@ -73,7 +75,11 @@ app.use(
 app.use(bodyParser.json());
 
 /** Services instantiation */
-const manager = new ServiceManager();
+const manager = new ServiceManager({
+  world: worldConfig,
+  enabled: true,
+  periodCheck: 30,
+});
 
 /** --------------------- */
 
