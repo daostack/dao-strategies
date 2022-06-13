@@ -3,6 +3,8 @@ import { createGlobalStyle } from 'styled-components';
 export interface ThemeType {
   colors: {
     body: string;
+    primary: string;
+    normal: string;
   };
 }
 
@@ -24,5 +26,5 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
   }
   img {
     max-width: 100%;
-}
+  }
 `;

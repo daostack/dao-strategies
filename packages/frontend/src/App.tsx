@@ -1,16 +1,10 @@
 import { Provider, createClient } from 'wagmi';
-import { ThemeSwitcherProvider } from 'react-css-theme-switcher';
 import { ThemeProvider } from 'styled-components';
 
 import { LoggedUserContext } from './hooks/useLoggedUser';
 import { MainPage } from './pages/MainPage';
 import { GlobalStyles } from './components/styles/GlobalStyles';
-
-const theme = {
-  colors: {
-    body: '#ffffff',
-  },
-};
+import { theme } from './components/styles/themes';
 
 const client = createClient();
 

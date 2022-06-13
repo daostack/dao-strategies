@@ -1,4 +1,3 @@
-import { Button } from 'antd';
 import { FC } from 'react';
 import { VerticalFlex, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { CampaignsExplorer } from './CampaignsExplorer';
@@ -15,7 +14,7 @@ export const LandingPage: FC<ILandingPageProps> = (props: ILandingPageProps) => 
         <ViewportContainer>
           <WelcomeMessage />
         </ViewportContainer>
-        <ViewportContainer>
+        <ViewportContainer style={{ backgroundColor: '#f0f0f0' }}>
           <CampaignsExplorer />
         </ViewportContainer>
       </VerticalFlex>
