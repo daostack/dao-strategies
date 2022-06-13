@@ -12,11 +12,6 @@ const theme = {
   },
 };
 
-const antThemes = {
-  dark: './dark-theme.css',
-  light: './light-theme.css',
-};
-
 const client = createClient();
 
 function App() {
@@ -24,12 +19,10 @@ function App() {
     <div className="App">
       <Provider client={client}>
         <LoggedUserContext>
-          <ThemeSwitcherProvider themeMap={antThemes} defaultTheme={'dark'}>
-            <ThemeProvider theme={theme}>
-              <GlobalStyles />
-              <MainPage></MainPage>
-            </ThemeProvider>
-          </ThemeSwitcherProvider>
+          <ThemeProvider theme={theme}>
+            <GlobalStyles />
+            <MainPage></MainPage>
+          </ThemeProvider>
         </LoggedUserContext>
       </Provider>
     </div>

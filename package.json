@@ -10,7 +10,9 @@
   ],
   "private": true,
   "scripts": {
-    "prune": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +"
+    "reset-yarn": "yarn delete-yarn && yarn install",
+    "delete-yarn": "yarn delete-node-modules && rm -f",
+    "delete-node-modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +"
   },
   "workspaces": {
     "packages": [
