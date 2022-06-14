@@ -1,9 +1,10 @@
-import { Button, DatePicker, Form, Input, Select } from 'antd';
+import { Button, DatePicker, Form } from 'antd';
+import Select, { Option } from 'rc-select';
 import { RangeValue } from 'rc-picker/lib/interface';
 import { Moment } from 'moment';
 import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { DateManager } from '../../utils/time';
 import { useCampaignFactory } from '../../hooks/useContracts';
@@ -11,12 +12,14 @@ import { CampaignCreateDetails, deployCampaign, simulateCampaign, SimulationResu
 import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
 import { CampaignUriDetails } from '@dao-strategies/core';
 import { RouteNames } from '../MainPage';
+import { Columns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
+import { AppButton, AppForm, AppInput, AppSelect, AppTextArea } from '../../components/styles/BasicElements';
+import { useLoggedUser } from '../../hooks/useLoggedUser';
+import { FormProgress } from './FormProgress';
 
 export interface ICampaignCreateProps {
   dum?: any;
 }
-
-const { Option } = Select;
 
 const initialValues: CampaignFormValues = {
   campaignType: 'github',
@@ -37,7 +40,10 @@ export interface CampaignFormValues {
 }
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
+  const { account, connect } = useLoggedUser();
+
   const [today] = useState<DateManager>(new DateManager());
+  const [pageIx, setPageIx] = useState<number>(0);
 
   const [simulation, setSimulated] = useState<SimulationResult>({});
   const [simulating, setSimulating] = useState<boolean>(false);
@@ -94,7 +100,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return formValues;
   };
 
-  const onValuesUpdated = (old: any, values: CampaignFormValues) => {
+  const onValuesUpdated = (changedValues: any, values: CampaignFormValues) => {
+    console.log({ changedValues });
     setFormValues(values);
   };
 
@@ -117,7 +124,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           const [start, end] = getStartEnd(values);
 
           return {
-            creator: logged() as string,
+            creator: account as string,
             nonce: 0,
             execDate: end,
             strategyID: 'GH_PRS_REACTIONS_WEIGHED',
@@ -132,15 +139,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return undefined;
   };
 
-  const logged = (): string | undefined => {
-    if (accountHook.data !== undefined && accountHook.data != null && accountHook.data.address !== undefined) {
-      return accountHook.data.address;
-    }
-    return undefined;
-  };
-
   const isLogged = (): boolean => {
-    return logged() !== undefined;
+    return true; //account !== undefined;
   };
 
   const canBeSimulated = (): boolean => {
@@ -211,96 +211,136 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     wrapperCol: { offset: 8, span: 16 },
   };
 
-  if (!isLogged()) {
-    return <>please login</>;
-  }
-
-  return (
+  const pages: React.ReactNode[] = [
     <>
-      <Link to={RouteNames.Base}>Back</Link>
-      <br></br>
-      <br></br>
-      <Form {...layout} initialValues={initialValues} form={form} name="control-hooks" onValuesChange={onValuesUpdated}>
-        <Form.Item name="campaignType" label="Type" rules={[{ required: true }]}>
-          <Select onChange={onCampaignTypeSelected} allowClear>
-            <Option value="github">Github</Option>
-            <Option value="twitter">Twitter (coming soon)</Option>
+      <Columns padding="20" paddingCol="50">
+        <div>
+          <Form.Item name="title" label="Campaign Name" rules={[{ required: true }]}>
+            <AppInput></AppInput>
+          </Form.Item>
+          <Form.Item name="guardian" label="Guardian Address" rules={[{ required: true }]}>
+            <AppInput placeholder="0x...."></AppInput>
+          </Form.Item>
+          <Form.Item name="asset" label="Asset" rules={[{ required: true }]}>
+            <AppSelect value="ether" style={{ width: '100%' }}>
+              <Option value="ether">Ether</Option>
+              <Option value="dai">Dai</Option>
+            </AppSelect>
+          </Form.Item>
+        </div>
+        <div>
+          <Form.Item name="description" label="Description" rules={[{ required: false }]}>
+            <AppTextArea></AppTextArea>
+          </Form.Item>
+        </div>
+      </Columns>
+    </>,
+    <>
+      {/* This portion is strategy-specific, it should be used to build the strategyParams, the execDate, 
+            and a flag to determine if it makes sense for the strategy to be simulated up to now */}
+      <>
+        <Form.Item name="livePeriodChoice" label="Live period">
+          <Select onChange={onLivePeriodSelected}>
+            <Option value={'-3'}>Last 3 months</Option>
+            <Option value={'-6'}>Last 6 months</Option>
+            <Option value={'3'}>Next 3 months</Option>
+            <Option value={'6'}>Next 6 months</Option>
+            <Option value={'0'}>Custom</Option>
           </Select>
         </Form.Item>
-        <Form.Item name="title" label="Title" rules={[{ required: true }]}>
-          <Input></Input>
-        </Form.Item>
-        <Form.Item name="description" label="Description" rules={[{ required: false }]}>
-          <Input.TextArea></Input.TextArea>
-        </Form.Item>
-        <Form.Item name="guardian" label="Guardian" rules={[{ required: true }]}>
-          <Input placeholder="0x...."></Input>
-        </Form.Item>
 
-        <Form.Item name="repositoryURL" label="Repository URL" rules={[{ required: true }]}>
-          <Input placeholder="https://github.com/..."></Input>
-        </Form.Item>
-
-        {/* This portion is strategy-specific, it should be used to build the strategyParams, the execDate, 
-            and a flag to determine if it makes sense for the strategy to be simulated up to now */}
-        <>
-          <Form.Item name="livePeriodChoice" label="Live period">
-            <Select onChange={onLivePeriodSelected}>
-              <Option value={'-3'}>Last 3 months</Option>
-              <Option value={'-6'}>Last 6 months</Option>
-              <Option value={'3'}>Next 3 months</Option>
-              <Option value={'6'}>Next 6 months</Option>
-              <Option value={'0'}>Custom</Option>
-            </Select>
+        {livePeriodCustom ? (
+          <Form.Item name="customRange" label="Custom Range">
+            <DatePicker.RangePicker onChange={onRangePicker}></DatePicker.RangePicker>
           </Form.Item>
+        ) : (
+          <>
+            {' '}
+            <Form.Item {...tailLayout}>
+              {canBeSimulated() ? (
+                <Button
+                  type={isSimulated() ? 'default' : 'primary'}
+                  onClick={() => onSimulate()}
+                  disabled={simulating || isSimulated()}>
+                  {simulating ? 'Simulating...' : isSimulated() ? 'Simulated' : 'Simulate'}
+                </Button>
+              ) : (
+                <></>
+              )}
 
-          {livePeriodCustom ? (
-            <Form.Item name="customRange" label="Custom Range">
-              <DatePicker.RangePicker onChange={onRangePicker}></DatePicker.RangePicker>
+              <Button htmlType="button" onClick={onReset}>
+                Reset
+              </Button>
+              <Button type={isSimulated() ? 'primary' : 'default'} onClick={() => onCreate()} disabled={!canCreate()}>
+                Create
+              </Button>
             </Form.Item>
-          ) : (
-            <></>
-          )}
+          </>
+        )}
+      </>
+    </>,
+    <>4</>,
+  ];
+
+  return (
+    <ViewportContainer>
+      {!isLogged() ? (
+        <>
+          <p>Please login before creating the campaign</p>
+          <AppButton onClick={() => connect()} type="primary">
+            Login
+          </AppButton>
         </>
+      ) : (
+        <>
+          <FormProgress
+            stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
+            position={0}
+            onSelected={(ix) => setPageIx(ix)}
+          />
 
-        <Form.Item {...tailLayout}>
-          {canBeSimulated() ? (
-            <Button
-              type={isSimulated() ? 'default' : 'primary'}
-              onClick={() => onSimulate()}
-              disabled={simulating || isSimulated()}>
-              {simulating ? 'Simulating...' : isSimulated() ? 'Simulated' : 'Simulate'}
-            </Button>
-          ) : (
-            <></>
-          )}
+          <AppForm
+            {...layout}
+            initialValues={initialValues}
+            form={form}
+            name="control-hooks"
+            onValuesChange={onValuesUpdated as (changedValues: any, values: unknown) => void}>
+            <div
+              style={{
+                height: 'calc(100vh - 400px)',
+                minWidth: '600px',
+                maxWidth: '1200px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}>
+              <div style={{ margin: '30px 0px 20px 0px', fontSize: '24px', fontWeight: '700' }}>
+                Create New Campaign <span style={{ fontSize: '18px', fontWeight: 'normal' }}>(Github)</span>
+              </div>
+              <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
+              {pages[pageIx]}
+            </div>
+          </AppForm>
 
-          <Button htmlType="button" onClick={onReset}>
-            Reset
-          </Button>
-          <Button type={isSimulated() ? 'primary' : 'default'} onClick={() => onCreate()} disabled={!canCreate()}>
-            Create
-          </Button>
-        </Form.Item>
-      </Form>
-
-      <div>
-        <ul>
-          {simulation.rewards !== undefined ? (
-            Object.entries(simulation.rewards).map((entry) => {
-              return (
-                <li key={entry[0]}>
-                  <>
-                    {entry[0]}: {entry[1]}
-                  </>
-                </li>
-              );
-            })
-          ) : (
-            <></>
-          )}
-        </ul>
-      </div>
-    </>
+          <div>
+            <ul>
+              {simulation.rewards !== undefined ? (
+                Object.entries(simulation.rewards).map((entry) => {
+                  return (
+                    <li key={entry[0]}>
+                      <>
+                        {entry[0]}: {entry[1]}
+                      </>
+                    </li>
+                  );
+                })
+              ) : (
+                <></>
+              )}
+            </ul>
+          </div>
+        </>
+      )}
+    </ViewportContainer>
   );
 };

@@ -13303,6 +13303,7 @@ __metadata:
     date-fns: ^2.28.0
     ethers: ^5.6.6
     multiformats: ^9.6.5
+    rc-select: ^14.1.5
     react: ^18.1.0
     react-css-theme-switcher: ^0.3.0
     react-dom: ^18.1.0
@@ -22800,7 +22801,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-select@npm:~14.1.0, rc-select@npm:~14.1.1":
+"rc-select@npm:^14.1.5, rc-select@npm:~14.1.0, rc-select@npm:~14.1.1":
   version: 14.1.5
   resolution: "rc-select@npm:14.1.5"
   dependencies:

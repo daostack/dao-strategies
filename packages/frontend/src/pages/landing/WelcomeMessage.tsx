@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { AppButton } from '../../components/styles/BasicElements';
 import { VerticalFlex, HorizontalFlex } from '../../components/styles/LayoutComponents.styled';
@@ -20,9 +21,12 @@ const WelcomeMessageCore: FC<IWelcomeMessage> = (props: IWelcomeMessage) => {
         interesting strategies to reward value.
       </p>
       <HorizontalFlex>
-        <AppButton type="primary" style={{ marginRight: '52px' }}>
-          Create a campaign
-        </AppButton>
+        <Link to="./create">
+          <AppButton type="primary" style={{ marginRight: '52px' }}>
+            Create a campaign
+          </AppButton>
+        </Link>
+
         <AppButton>Explore campaigns</AppButton>
       </HorizontalFlex>
     </VerticalFlex>
