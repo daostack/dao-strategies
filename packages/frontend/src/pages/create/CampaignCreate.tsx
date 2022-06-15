@@ -318,7 +318,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                 Create New Campaign <span style={{ fontSize: '18px', fontWeight: 'normal' }}>(Github)</span>
               </div>
               <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
-              {pages[pageIx]}
+              {pages.map((page, ix) => {
+                return <div style={{ display: pageIx === ix ? 'block' : 'none' }}>{page}</div>;
+              })}
             </div>
           </AppForm>
 

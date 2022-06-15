@@ -29,18 +29,20 @@ const FormProgressCore: FC<IFormProgress> = (props: IFormProgress) => {
 
   const lines = props.stations.map((station, ix) => {
     const center = padding + ix * width;
-    return ix >= 1 ? (
+    return (
       <g key={ix}>
-        <line
-          x1={center}
-          y1={circleVert}
-          x2={center - width}
-          y2={circleVert}
-          style={{ stroke: 'green', strokeWidth: 2 }}
-        />
+        {ix >= 1 ? (
+          <line
+            x1={center}
+            y1={circleVert}
+            x2={center - width}
+            y2={circleVert}
+            style={{ stroke: 'green', strokeWidth: 2 }}
+          />
+        ) : (
+          <></>
+        )}
       </g>
-    ) : (
-      <></>
     );
   });
 
