@@ -9,22 +9,32 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
  * @title Campaign
  */
 abstract contract Campaign is Initializable {
-    uint256 public constant totalShares = 10**18;
+    uint256 public constant TOTAL_SHARES = 10**18;
+    uint256 public constant CHALLENGE_PERIOD = 604800;
 
-    bytes32 public sharesMerkleRoot;
-    bytes32 public uri;
+    struct SharesData {
+        bytes32 sharesMerkleRoot;
+        bytes32 sharesUri;
+        uint256 activationTime;
+    }
+
+    uint256 currentSharesId;
+    mapping(uint256 => SharesData) public shares;
+
+    bytes32 public strategyUri;
     address public guardian;
     address public oracle;
-    uint256 public claimPeriodStart;
+
     uint256 public totalClaimed;
     uint256 public totalReward;
-    bool public campaignCancelled;
-    bool public sharesPublished;
+
+    bool public locked;
 
     mapping(address => uint256) public claimed;
-    mapping(address => uint256) public funds;
+    mapping(address => uint256) public providers;
 
     error InvalidProof();
+    error ActiveChallengePeriod();
     error NoRewardAvailable();
     error RewardTransferFailed();
     error OnlyGuardian();
@@ -52,26 +62,42 @@ abstract contract Campaign is Initializable {
 
     function initCampaign(
         bytes32 _sharesMerkleRoot,
-        bytes32 _uri,
+        bytes32 _sharesUri,
+        bytes32 _strategyUri,
         address _guardian,
-        address _oracle,
-        bool _sharesPublished,
-        uint256 _claimPeriodStart
+        address _oracle
     ) public initializer {
-        sharesMerkleRoot = _sharesMerkleRoot;
-        uri = _uri;
+        currentSharesId += 1;
+        SharesData storage newShares = shares[currentSharesId];
+        newShares.sharesMerkleRoot = _sharesMerkleRoot;
+        newShares.sharesUri = _sharesUri;
+        newShares.activationTime = block.timestamp + CHALLENGE_PERIOD;
+
+        strategyUri = _strategyUri;
         guardian = _guardian;
         oracle = _oracle;
-        sharesPublished = _sharesPublished;
-        claimPeriodStart = _claimPeriodStart;
     }
 
-    function publishShares(bytes32 _sharesMerkleRoot) external onlyOracle {
-        if (sharesPublished) {
-            revert SharesAlreadyPublished();
+    function initCampaign(
+        bytes32 _strategyUri,
+        address _guardian,
+        address _oracle
+    ) public initializer {
+        strategyUri = _strategyUri;
+        guardian = _guardian;
+        oracle = _oracle;
+    }
+
+    function updateShares(bytes32 _sharesMerkleRoot, bytes32 _sharesUri) external onlyOracle {
+        if (block.timestamp < shares[currentSharesId].activationTime) {
+            revert ActiveChallengePeriod();
         }
-        sharesPublished = true;
-        sharesMerkleRoot = _sharesMerkleRoot;
+
+        currentSharesId += 1;
+        SharesData storage newShares = shares[currentSharesId];
+        newShares.sharesMerkleRoot = _sharesMerkleRoot;
+        newShares.sharesUri = _sharesUri;
+        newShares.activationTime = block.timestamp + CHALLENGE_PERIOD;
     }
 
     function claim(
@@ -79,16 +105,26 @@ abstract contract Campaign is Initializable {
         uint256 share,
         bytes32[] calldata proof
     ) external {
-        if (!claimAllowed()) {
+        if (currentSharesId == 0) {
             revert ClaimingNotAllowed();
         }
+
+        bytes32 claimingMerkleRoot;
+        if (block.timestamp > shares[currentSharesId].activationTime) {
+            claimingMerkleRoot = shares[currentSharesId].sharesMerkleRoot;
+        } else if (currentSharesId != 1 && block.timestamp > shares[currentSharesId - 1].activationTime) {
+            claimingMerkleRoot = shares[currentSharesId - 1].sharesMerkleRoot;
+        } else {
+            revert ClaimingNotAllowed();
+        }
+
         bytes32 leaf = keccak256(abi.encodePacked(account, share));
-        if (MerkleProof.verify(proof, sharesMerkleRoot, leaf) == false) {
+        if (MerkleProof.verify(proof, claimingMerkleRoot, leaf) == false) {
             revert InvalidProof();
         }
 
         uint256 totalFundsReceived = totalReward + totalClaimed;
-        uint256 reward = (totalFundsReceived * share) / totalShares - claimed[account];
+        uint256 reward = (totalFundsReceived * share) / TOTAL_SHARES - claimed[account];
         if (reward == 0) {
             revert NoRewardAvailable();
         }
@@ -99,37 +135,32 @@ abstract contract Campaign is Initializable {
         transferValueOut(account, reward);
     }
 
-    function cancelCampaign() external onlyGuardian {
-        if (block.timestamp > claimPeriodStart) {
-            revert OnlyDuringEvaluationPeriod();
+    function challenge() external onlyGuardian {
+        if (currentSharesId == 0) {
+            locked = true;
         }
-        campaignCancelled = true;
+        if (block.timestamp < shares[currentSharesId].activationTime) {
+            currentSharesId -= 1;
+            locked = true;
+        }
     }
 
     function withdrawFunds(address account) external {
-        if (!withdrawAllowed()) {
+        if (locked && currentSharesId == 0) {
+            uint256 amount = providers[account] / totalReward;
+            if (amount == 0) {
+                revert NoFunds();
+            }
+            providers[account] = 0;
+
+            transferValueOut(account, amount);
+        } else {
             revert WithdrawalNotAllowed();
         }
-
-        uint256 amount = funds[account];
-        if (amount == 0) {
-            revert NoFunds();
-        }
-        funds[account] = 0;
-
-        transferValueOut(account, amount);
     }
 
     /**
     @dev recerts on failure
      */
     function transferValueOut(address to, uint256 amount) internal virtual;
-
-    function withdrawAllowed() private view returns (bool) {
-        return campaignCancelled || ((block.timestamp > claimPeriodStart) && !sharesPublished);
-    }
-
-    function claimAllowed() private view returns (bool) {
-        return (block.timestamp > claimPeriodStart) && sharesPublished && !campaignCancelled;
-    }
 }
