@@ -1,5 +1,5 @@
-import { Button, Form, Text, TextInput, TextArea, Box, ButtonExtendedProps, Select } from 'grommet';
-import React from 'react';
+import { Button, Form, Text, TextInput, TextArea, Box, ButtonExtendedProps, Select, FileInput } from 'grommet';
+import React, { FC } from 'react';
 
 export interface IElement {
   onClick?: () => void;
@@ -34,3 +34,17 @@ export const AppInput = TextInput;
 export const AppTextArea = TextArea;
 
 export const AppSelect = Select;
+
+export const AppFileInput: FC = (props: IElement) => (
+  <Box fill justify="start">
+    <FileInput
+      onChange={(event, el: any) => {
+        const fileList = el.files;
+        for (let i = 0; i < fileList.length; i += 1) {
+          const file = fileList[i];
+          console.log(file.name);
+        }
+      }}
+    />
+  </Box>
+);

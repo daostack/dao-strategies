@@ -1,4 +1,4 @@
-import { Box, Button, DateInput, FormField } from 'grommet';
+import { Box, FormField, Text, TextInput } from 'grommet';
 import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,27 +9,41 @@ import { CampaignCreateDetails, deployCampaign, simulateCampaign, SimulationResu
 import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
 import { CampaignUriDetails } from '@dao-strategies/core';
 import { RouteNames } from '../MainPage';
-import { AppButton, AppForm, AppInput, AppSelect, AppTextArea } from '../../components/styles/BasicElements';
+import {
+  AppButton,
+  AppFileInput,
+  AppForm,
+  AppInput,
+  AppSelect,
+  AppTextArea,
+} from '../../components/styles/BasicElements';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
+import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
+import { Search } from 'grommet-icons';
 
 export interface ICampaignCreateProps {
   dum?: any;
 }
 
+export enum Asset {
+  Ether = 'ether',
+  DAI = 'dai',
+}
+
 const initialValues: CampaignFormValues = {
-  campaignType: 'github',
-  title: 'demo',
-  description: '',
-  repositoryURL: 'https://github.com/gershido/test-github-api',
-  livePeriodChoice: '-3',
+  title: '',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+  asset: Asset.Ether,
+  description: '',
+  repositoryURL: '',
+  livePeriodChoice: '-3',
 };
 
 export interface CampaignFormValues {
   title: string;
   description: string;
-  campaignType: string;
+  asset: Asset;
   repositoryURL: string;
   livePeriodChoice: string;
   guardian: string;
@@ -66,8 +80,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
       title: values.title,
-      description: values.description,
       guardian: values.guardian,
+      description: values.description,
       oracle: ORACLE_ADDRESS,
       address: '',
       cancelDate: details.execDate + CHALLENGE_PERIOD,
@@ -95,6 +109,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const onValuesUpdated = (values: CampaignFormValues) => {
+    console.log({ values });
     setFormValues(values);
   };
 
@@ -112,28 +127,24 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (values !== undefined && isLogged()) {
       const repo = getRepo(values);
 
-      switch (values.campaignType) {
-        case 'github':
-          const [start, end] = getStartEnd(values);
+      const [start, end] = getStartEnd(values);
 
-          return {
-            creator: account as string,
-            nonce: 0,
-            execDate: end,
-            strategyID: 'GH_PRS_REACTIONS_WEIGHED',
-            strategyParams: {
-              repositories: [repo],
-              timeRange: { start, end },
-            },
-          };
-      }
+      return {
+        creator: account as string,
+        nonce: 0,
+        execDate: end,
+        strategyID: 'GH_PRS_REACTIONS_WEIGHED',
+        strategyParams: {
+          repositories: [repo],
+          timeRange: { start, end },
+        },
+      };
     }
-
     return undefined;
   };
 
   const isLogged = (): boolean => {
-    return account !== undefined;
+    return true; // account !== undefined;
   };
 
   const canBeSimulated = (): boolean => {
@@ -205,59 +216,45 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const pages: React.ReactNode[] = [
-    <>
-      <Box>
-        <div>
-          <FormField name="title" label="Campaign Name" rules={[{ required: true }]}>
-            <AppInput></AppInput>
-          </FormField>
-          <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
-            <AppInput placeholder="0x...."></AppInput>
-          </FormField>
-          <FormField name="asset" label="Asset" rules={[{ required: true }]}>
-            <AppSelect value="ether" style={{ width: '100%' }} options={['ether', 'DAI']}></AppSelect>
-          </FormField>
-        </div>
-        <div>
-          <FormField name="description" label="Description" rules={[{ required: false }]}>
-            <AppTextArea></AppTextArea>
-          </FormField>
-        </div>
-      </Box>
-    </>,
-    <>
-      {/* This portion is strategy-specific, it should be used to build the strategyParams, the execDate, 
-            and a flag to determine if it makes sense for the strategy to be simulated up to now */}
+    <TwoColumns>
+      <>
+        <FormField name="title" label="Campaign Name" style={{ borderStyle: 'none' }}>
+          <AppInput name="title"></AppInput>
+        </FormField>
+        <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
+          <AppInput name="guardian" placeholder="0x...."></AppInput>
+        </FormField>
+        <FormField name="asset" label="Asset" style={{ border: '0px none' }}>
+          <AppSelect name="asset" style={{ border: '0px none' }} options={['ether', 'DAI']}></AppSelect>
+        </FormField>
+      </>
+      <>
+        <FormField label="File" name="file" component={AppFileInput} />
+
+        <FormField name="description" label="Description">
+          <AppTextArea name="description"></AppTextArea>
+        </FormField>
+      </>
+    </TwoColumns>,
+
+    <TwoColumns>
+      <>
+        <FormField name="repositoryURL" label="Repositories">
+          <Text>Search Github repositories</Text>
+          <Box fill align="center" justify="start" pad="large">
+            <Box width="medium" gap="medium">
+              <TextInput icon={<Search />} reverse placeholder="search ..." />
+            </Box>
+          </Box>
+        </FormField>
+      </>
+
       <>
         <FormField name="livePeriodChoice" label="Live period">
           <AppSelect value="small" onChange={onLivePeriodSelected} options={['small', 'medium', 'large']}></AppSelect>
         </FormField>
-
-        {livePeriodCustom ? (
-          <FormField name="customRange" label="Custom Range">
-            <DateInput onChange={onRangePicker}></DateInput>
-          </FormField>
-        ) : (
-          <>
-            {' '}
-            <FormField {...tailLayout}>
-              {canBeSimulated() ? (
-                <Button primary={isSimulated()} onClick={() => onSimulate()} disabled={simulating || isSimulated()}>
-                  {simulating ? 'Simulating...' : isSimulated() ? 'Simulated' : 'Simulate'}
-                </Button>
-              ) : (
-                <></>
-              )}
-
-              <Button onClick={onReset}>Reset</Button>
-              <Button primary={isSimulated()} onClick={() => onCreate()} disabled={!canCreate()}>
-                Create
-              </Button>
-            </FormField>
-          </>
-        )}
       </>
-    </>,
+    </TwoColumns>,
     <>4</>,
   ];
 
@@ -294,7 +291,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
               {pages.map((page, ix) => {
                 return (
-                  <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
+                  <div key={ix} style={{ display: pageIx === ix ? 'block' : 'block' }}>
                     {page}
                   </div>
                 );
