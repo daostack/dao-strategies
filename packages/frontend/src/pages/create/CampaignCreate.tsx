@@ -133,7 +133,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const isLogged = (): boolean => {
-    return true; //account !== undefined;
+    return account !== undefined;
   };
 
   const canBeSimulated = (): boolean => {
@@ -262,7 +262,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   ];
 
   return (
-    <Box>
+    <Box style={{ height: '100vh' }} justify="center" align="center">
       {!isLogged() ? (
         <>
           <p>Please login before creating the campaign</p>
