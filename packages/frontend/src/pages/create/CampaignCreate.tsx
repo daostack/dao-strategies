@@ -1,5 +1,4 @@
 import { Box, Button, DateInput, FormField } from 'grommet';
-import Select, { Option } from 'rc-select';
 import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -216,10 +215,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <AppInput placeholder="0x...."></AppInput>
           </FormField>
           <FormField name="asset" label="Asset" rules={[{ required: true }]}>
-            <AppSelect value="ether" style={{ width: '100%' }}>
-              <Option value="ether">Ether</Option>
-              <Option value="dai">Dai</Option>
-            </AppSelect>
+            <AppSelect value="ether" style={{ width: '100%' }} options={['ether', 'DAI']}></AppSelect>
           </FormField>
         </div>
         <div>
@@ -234,13 +230,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             and a flag to determine if it makes sense for the strategy to be simulated up to now */}
       <>
         <FormField name="livePeriodChoice" label="Live period">
-          <Select onChange={onLivePeriodSelected}>
-            <Option value={'-3'}>Last 3 months</Option>
-            <Option value={'-6'}>Last 6 months</Option>
-            <Option value={'3'}>Next 3 months</Option>
-            <Option value={'6'}>Next 6 months</Option>
-            <Option value={'0'}>Custom</Option>
-          </Select>
+          <AppSelect value="small" onChange={onLivePeriodSelected} options={['small', 'medium', 'large']}></AppSelect>
         </FormField>
 
         {livePeriodCustom ? (
@@ -303,7 +293,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               </div>
               <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
               {pages.map((page, ix) => {
-                return <div style={{ display: pageIx === ix ? 'block' : 'none' }}>{page}</div>;
+                return (
+                  <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
+                    {page}
+                  </div>
+                );
               })}
             </div>
           </AppForm>
