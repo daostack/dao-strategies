@@ -1,20 +1,12 @@
 import { createGlobalStyle } from 'styled-components';
 
-export interface ThemeType {
-  colors: {
-    body: string;
-    primary: string;
-    normal: string;
-  };
-}
-
-export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
+export const GlobalStyles = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans&display=swap');
   * {
     box-sizing: border-box;
   }
   body {
-    background-color: ${({ theme }) => theme.colors.body};
+    background-color: white;
     color: hsl(192, 100%, 9%);
     font-family: 'DM Sans', sans-serif;
     font-size: 1.15em;
@@ -26,5 +18,9 @@ export const GlobalStyles = createGlobalStyle<{ theme: ThemeType }>`
   }
   img {
     max-width: 100%;
+  }
+
+  h1 {
+    margin: 12px;
   }
 `;

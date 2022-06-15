@@ -1,4 +1,4 @@
-import { Button, PageHeader } from 'antd';
+import { Button } from 'grommet';
 import React, { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -30,7 +30,7 @@ export const MainPageHeader: FC<IMainPageHeaderProps> = (props) => {
   const left = (
     <>
       <div>
-        <PageHeader title="DAO-Strategies" />
+        <div title="DAO-Strategies" />
       </div>
       {props.children}
     </>

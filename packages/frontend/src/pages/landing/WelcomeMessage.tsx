@@ -1,9 +1,8 @@
+import { Box, Heading, Paragraph } from 'grommet';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { AppButton } from '../../components/styles/BasicElements';
-import { VerticalFlex, HorizontalFlex } from '../../components/styles/LayoutComponents.styled';
-import { styleConstants } from '../../components/styles/themes';
 
 export interface IWelcomeMessage {
   className?: string;
@@ -12,41 +11,24 @@ export interface IWelcomeMessage {
 
 const WelcomeMessageCore: FC<IWelcomeMessage> = (props: IWelcomeMessage) => {
   return (
-    <VerticalFlex className={props.className}>
-      <h1>
+    <>
+      <Heading size="xlarge">
         Where value is <br></br>been Rewarded
-      </h1>
-      <p className="slogan">
+      </Heading>
+      <Paragraph size="xlarge">
         The Decentralized Funding & Distribution Platform. Built for anyone and for everyone. <br></br>Create
         interesting strategies to reward value.
-      </p>
-      <HorizontalFlex>
-        <Link to="./create">
-          <AppButton type="primary" style={{ marginRight: '52px' }}>
-            Create a campaign
-          </AppButton>
+      </Paragraph>
+
+      <Box direction="row" style={{ marginTop: '32px' }}>
+        <Link to="./create" style={{ marginRight: '52px' }}>
+          <AppButton primary>Create a campaign</AppButton>
         </Link>
 
         <AppButton>Explore campaigns</AppButton>
-      </HorizontalFlex>
-    </VerticalFlex>
+      </Box>
+    </>
   );
 };
 
-export const WelcomeMessage = styled(WelcomeMessageCore)`
-  h1 {
-    font-style: normal;
-    font-size: 96px;
-    font-weight: 700;
-    line-height: 120px;
-    text-align: center;
-    margin: 0;
-  }
-
-  .slogan {
-    margin: 40px 0px 64px 0px;
-    font-size: ${styleConstants.fontSize};
-    font-weight: 700;
-    color: ${(props) => props.theme.colors.secondary_color};
-  }
-`;
+export const WelcomeMessage = styled(WelcomeMessageCore)``;

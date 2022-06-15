@@ -1,7 +1,5 @@
-import { Button, DatePicker, Form } from 'antd';
+import { Box, Button, DateInput, FormField } from 'grommet';
 import Select, { Option } from 'rc-select';
-import { RangeValue } from 'rc-picker/lib/interface';
-import { Moment } from 'moment';
 import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +10,6 @@ import { CampaignCreateDetails, deployCampaign, simulateCampaign, SimulationResu
 import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
 import { CampaignUriDetails } from '@dao-strategies/core';
 import { RouteNames } from '../MainPage';
-import { Columns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { AppButton, AppForm, AppInput, AppSelect, AppTextArea } from '../../components/styles/BasicElements';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
@@ -57,8 +54,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const accountHook = useAccount();
   const navigate = useNavigate();
 
-  const [form] = Form.useForm();
-
   const create = async (): Promise<void> => {
     const account = accountHook.data?.address;
     if (account === undefined) throw new Error('account undefined');
@@ -100,8 +95,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return formValues;
   };
 
-  const onValuesUpdated = (changedValues: any, values: CampaignFormValues) => {
-    console.log({ changedValues });
+  const onValuesUpdated = (values: CampaignFormValues) => {
     setFormValues(values);
   };
 
@@ -151,7 +145,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const onCampaignTypeSelected = (value: string): void => {
-    form.setFieldsValue({ campaignType: value });
+    // form.setFieldsValue({ campaignType: value });
   };
 
   const onLivePeriodSelected = (value: string): void => {
@@ -160,10 +154,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     } else {
       setLivePeriodCustom(false);
     }
-    form.setFieldsValue({ periodChoice: value });
+    // form.setFieldsValue({ periodChoice: value });
   };
 
-  const onRangePicker = (value: RangeValue<Moment>) => {
+  const onRangePicker = (value: any) => {
     console.log(value);
   };
 
@@ -186,7 +180,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const onReset = (): void => {
     setSimulated({ uri: '', rewards: {} });
-    form.resetFields();
+    // form.resetFields();
   };
 
   const onCreate = (): void => {
@@ -213,33 +207,33 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const pages: React.ReactNode[] = [
     <>
-      <Columns padding="20" paddingCol="50">
+      <Box>
         <div>
-          <Form.Item name="title" label="Campaign Name" rules={[{ required: true }]}>
+          <FormField name="title" label="Campaign Name" rules={[{ required: true }]}>
             <AppInput></AppInput>
-          </Form.Item>
-          <Form.Item name="guardian" label="Guardian Address" rules={[{ required: true }]}>
+          </FormField>
+          <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
             <AppInput placeholder="0x...."></AppInput>
-          </Form.Item>
-          <Form.Item name="asset" label="Asset" rules={[{ required: true }]}>
+          </FormField>
+          <FormField name="asset" label="Asset" rules={[{ required: true }]}>
             <AppSelect value="ether" style={{ width: '100%' }}>
               <Option value="ether">Ether</Option>
               <Option value="dai">Dai</Option>
             </AppSelect>
-          </Form.Item>
+          </FormField>
         </div>
         <div>
-          <Form.Item name="description" label="Description" rules={[{ required: false }]}>
+          <FormField name="description" label="Description" rules={[{ required: false }]}>
             <AppTextArea></AppTextArea>
-          </Form.Item>
+          </FormField>
         </div>
-      </Columns>
+      </Box>
     </>,
     <>
       {/* This portion is strategy-specific, it should be used to build the strategyParams, the execDate, 
             and a flag to determine if it makes sense for the strategy to be simulated up to now */}
       <>
-        <Form.Item name="livePeriodChoice" label="Live period">
+        <FormField name="livePeriodChoice" label="Live period">
           <Select onChange={onLivePeriodSelected}>
             <Option value={'-3'}>Last 3 months</Option>
             <Option value={'-6'}>Last 6 months</Option>
@@ -247,34 +241,29 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Option value={'6'}>Next 6 months</Option>
             <Option value={'0'}>Custom</Option>
           </Select>
-        </Form.Item>
+        </FormField>
 
         {livePeriodCustom ? (
-          <Form.Item name="customRange" label="Custom Range">
-            <DatePicker.RangePicker onChange={onRangePicker}></DatePicker.RangePicker>
-          </Form.Item>
+          <FormField name="customRange" label="Custom Range">
+            <DateInput onChange={onRangePicker}></DateInput>
+          </FormField>
         ) : (
           <>
             {' '}
-            <Form.Item {...tailLayout}>
+            <FormField {...tailLayout}>
               {canBeSimulated() ? (
-                <Button
-                  type={isSimulated() ? 'default' : 'primary'}
-                  onClick={() => onSimulate()}
-                  disabled={simulating || isSimulated()}>
+                <Button primary={isSimulated()} onClick={() => onSimulate()} disabled={simulating || isSimulated()}>
                   {simulating ? 'Simulating...' : isSimulated() ? 'Simulated' : 'Simulate'}
                 </Button>
               ) : (
                 <></>
               )}
 
-              <Button htmlType="button" onClick={onReset}>
-                Reset
-              </Button>
-              <Button type={isSimulated() ? 'primary' : 'default'} onClick={() => onCreate()} disabled={!canCreate()}>
+              <Button onClick={onReset}>Reset</Button>
+              <Button primary={isSimulated()} onClick={() => onCreate()} disabled={!canCreate()}>
                 Create
               </Button>
-            </Form.Item>
+            </FormField>
           </>
         )}
       </>
@@ -283,11 +272,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   ];
 
   return (
-    <ViewportContainer>
+    <Box>
       {!isLogged() ? (
         <>
           <p>Please login before creating the campaign</p>
-          <AppButton onClick={() => connect()} type="primary">
+          <AppButton onClick={() => connect()} primary>
             Login
           </AppButton>
         </>
@@ -299,12 +288,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             onSelected={(ix) => setPageIx(ix)}
           />
 
-          <AppForm
-            {...layout}
-            initialValues={initialValues}
-            form={form}
-            name="control-hooks"
-            onValuesChange={onValuesUpdated as (changedValues: any, values: unknown) => void}>
+          <AppForm {...layout} value={formValues} onChange={onValuesUpdated as any}>
             <div
               style={{
                 height: 'calc(100vh - 400px)',
@@ -343,6 +327,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </div>
         </>
       )}
-    </ViewportContainer>
+    </Box>
   );
 };

@@ -1,5 +1,5 @@
 import { Provider, createClient } from 'wagmi';
-import { ThemeProvider } from 'styled-components';
+import { Grommet } from 'grommet';
 
 import { LoggedUserContext } from './hooks/useLoggedUser';
 import { MainPage } from './pages/MainPage';
@@ -13,10 +13,10 @@ function App() {
     <div className="App">
       <Provider client={client}>
         <LoggedUserContext>
-          <ThemeProvider theme={theme}>
-            <GlobalStyles />
+          <GlobalStyles />
+          <Grommet theme={theme}>
             <MainPage></MainPage>
-          </ThemeProvider>
+          </Grommet>
         </LoggedUserContext>
       </Provider>
     </div>
