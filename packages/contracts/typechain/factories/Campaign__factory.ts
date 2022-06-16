@@ -9,12 +9,22 @@ import type { Campaign, CampaignInterface } from "../Campaign";
 const _abi = [
   {
     inputs: [],
+    name: "ActiveChallengePeriod",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "ClaimingNotAllowed",
     type: "error",
   },
   {
     inputs: [],
     name: "InvalidProof",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "Locked",
     type: "error",
   },
   {
@@ -29,11 +39,6 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "OnlyDuringEvaluationPeriod",
-    type: "error",
-  },
-  {
-    inputs: [],
     name: "OnlyGuardian",
     type: "error",
   },
@@ -44,23 +49,46 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "RewardTransferFailed",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "SharesAlreadyPublished",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "WithdrawTransferFailed",
-    type: "error",
-  },
-  {
-    inputs: [],
     name: "WithdrawalNotAllowed",
     type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "sharesMerkleRoot",
+        type: "bytes32",
+      },
+    ],
+    name: "Challenge",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "share",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "reward",
+        type: "uint256",
+      },
+    ],
+    name: "Claim",
+    type: "event",
   },
   {
     anonymous: false,
@@ -76,13 +104,57 @@ const _abi = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "sharesMerkleRoot",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "sharesUri",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "activationTime",
+        type: "uint256",
+      },
+    ],
+    name: "SharesMerkleRoot",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "Withdraw",
+    type: "event",
+  },
+  {
     inputs: [],
-    name: "campaignCancelled",
+    name: "CHALLENGE_PERIOD",
     outputs: [
       {
-        internalType: "bool",
+        internalType: "uint256",
         name: "",
-        type: "bool",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -90,7 +162,20 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "cancelCampaign",
+    name: "TOTAL_SHARES",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "challenge",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -119,19 +204,6 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "claimPeriodStart",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "address",
@@ -140,25 +212,6 @@ const _abi = [
       },
     ],
     name: "claimed",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "funds",
     outputs: [
       {
         internalType: "uint256",
@@ -191,7 +244,7 @@ const _abi = [
       },
       {
         internalType: "bytes32",
-        name: "_uri",
+        name: "_strategyUri",
         type: "bytes32",
       },
       {
@@ -204,20 +257,23 @@ const _abi = [
         name: "_oracle",
         type: "address",
       },
-      {
-        internalType: "bool",
-        name: "_sharesPublished",
-        type: "bool",
-      },
-      {
-        internalType: "uint256",
-        name: "_claimPeriodStart",
-        type: "uint256",
-      },
     ],
     name: "initCampaign",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "locked",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -240,20 +296,31 @@ const _abi = [
         name: "_sharesMerkleRoot",
         type: "bytes32",
       },
+      {
+        internalType: "bytes32",
+        name: "_sharesUri",
+        type: "bytes32",
+      },
     ],
-    name: "publishShares",
+    name: "proposeShares",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    inputs: [],
-    name: "sharesMerkleRoot",
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "providers",
     outputs: [
       {
-        internalType: "bytes32",
+        internalType: "uint256",
         name: "",
-        type: "bytes32",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -261,12 +328,12 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "sharesPublished",
+    name: "strategyUri",
     outputs: [
       {
-        internalType: "bool",
+        internalType: "bytes32",
         name: "",
-        type: "bool",
+        type: "bytes32",
       },
     ],
     stateMutability: "view",
@@ -293,32 +360,6 @@ const _abi = [
         internalType: "uint256",
         name: "",
         type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "totalShares",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "uri",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
       },
     ],
     stateMutability: "view",

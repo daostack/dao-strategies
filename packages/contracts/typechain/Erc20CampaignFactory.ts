@@ -4,7 +4,6 @@
 import {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -21,7 +20,7 @@ export interface Erc20CampaignFactoryInterface extends utils.Interface {
   contractName: "Erc20CampaignFactory";
   functions: {
     "campaignAddress(bytes32)": FunctionFragment;
-    "createCampaign(bytes32,bytes32,address,address,bool,uint256,bytes32,address)": FunctionFragment;
+    "createCampaign(bytes32,bytes32,bytes32,address,address,bytes32,address)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -30,16 +29,7 @@ export interface Erc20CampaignFactoryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createCampaign",
-    values: [
-      BytesLike,
-      BytesLike,
-      string,
-      string,
-      boolean,
-      BigNumberish,
-      BytesLike,
-      string
-    ]
+    values: [BytesLike, BytesLike, BytesLike, string, string, BytesLike, string]
   ): string;
 
   decodeFunctionResult(
@@ -52,34 +42,22 @@ export interface Erc20CampaignFactoryInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "CampaignCreated(address,address,bytes32,bytes32,address,address,bool,uint256,address,bytes32)": EventFragment;
+    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,address,bytes32)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "CampaignCreated"): EventFragment;
 }
 
 export type CampaignCreatedEvent = TypedEvent<
-  [
-    string,
-    string,
-    string,
-    string,
-    string,
-    string,
-    boolean,
-    BigNumber,
-    string,
-    string
-  ],
+  [string, string, string, string, string, string, string, string, string],
   {
     creator: string;
     newCampaign: string;
-    _sharesRoot: string;
-    _uri: string;
+    _sharesMerkleRoot: string;
+    _sharesUri: string;
+    _strategyUri: string;
     _guardian: string;
     _oracle: string;
-    _sharesPublished: boolean;
-    _claimPeriodStart: BigNumber;
     _rewardToken: string;
     salt: string;
   }
@@ -122,11 +100,10 @@ export interface Erc20CampaignFactory extends BaseContract {
 
     createCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _sharesUri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       salt: BytesLike,
       _rewardToken: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -137,11 +114,10 @@ export interface Erc20CampaignFactory extends BaseContract {
 
   createCampaign(
     _sharesMerkleRoot: BytesLike,
-    _uri: BytesLike,
+    _sharesUri: BytesLike,
+    _strategyUri: BytesLike,
     _guardian: string,
     _oracle: string,
-    _sharesPublished: boolean,
-    _claimPeriodStart: BigNumberish,
     salt: BytesLike,
     _rewardToken: string,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -155,11 +131,10 @@ export interface Erc20CampaignFactory extends BaseContract {
 
     createCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _sharesUri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       salt: BytesLike,
       _rewardToken: string,
       overrides?: CallOverrides
@@ -167,27 +142,25 @@ export interface Erc20CampaignFactory extends BaseContract {
   };
 
   filters: {
-    "CampaignCreated(address,address,bytes32,bytes32,address,address,bool,uint256,address,bytes32)"(
+    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,address,bytes32)"(
       creator?: null,
       newCampaign?: null,
-      _sharesRoot?: null,
-      _uri?: null,
+      _sharesMerkleRoot?: null,
+      _sharesUri?: null,
+      _strategyUri?: null,
       _guardian?: null,
       _oracle?: null,
-      _sharesPublished?: null,
-      _claimPeriodStart?: null,
       _rewardToken?: null,
       salt?: null
     ): CampaignCreatedEventFilter;
     CampaignCreated(
       creator?: null,
       newCampaign?: null,
-      _sharesRoot?: null,
-      _uri?: null,
+      _sharesMerkleRoot?: null,
+      _sharesUri?: null,
+      _strategyUri?: null,
       _guardian?: null,
       _oracle?: null,
-      _sharesPublished?: null,
-      _claimPeriodStart?: null,
       _rewardToken?: null,
       salt?: null
     ): CampaignCreatedEventFilter;
@@ -201,11 +174,10 @@ export interface Erc20CampaignFactory extends BaseContract {
 
     createCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _sharesUri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       salt: BytesLike,
       _rewardToken: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -220,11 +192,10 @@ export interface Erc20CampaignFactory extends BaseContract {
 
     createCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _sharesUri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       salt: BytesLike,
       _rewardToken: string,
       overrides?: Overrides & { from?: string | Promise<string> }

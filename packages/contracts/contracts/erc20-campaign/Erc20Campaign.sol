@@ -16,19 +16,17 @@ contract Erc20Campaign is Campaign {
 
     function initErc20Campaign(
         bytes32 _sharesMerkleRoot,
-        bytes32 _uri,
+        bytes32 _strategyUri,
         address _guardian,
         address _oracle,
-        bool _sharesPublished,
-        uint256 _claimPeriodStart,
         IERC20 _rewardToken
     ) public {
-        super.initCampaign(_sharesMerkleRoot, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart);
+        super.initCampaign(_sharesMerkleRoot, _strategyUri, _guardian, _oracle);
         rewardToken = _rewardToken;
     }
 
     function transferValueIn(uint256 amount) external {
-        funds[msg.sender] += amount;
+        providers[msg.sender] += amount;
         totalReward += amount;
         rewardToken.safeTransferFrom(msg.sender, address(this), amount);
     }

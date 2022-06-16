@@ -20,64 +20,56 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 export interface EthCampaignInterface extends utils.Interface {
   contractName: "EthCampaign";
   functions: {
-    "campaignCancelled()": FunctionFragment;
-    "cancelCampaign()": FunctionFragment;
+    "CHALLENGE_PERIOD()": FunctionFragment;
+    "TOTAL_SHARES()": FunctionFragment;
+    "challenge()": FunctionFragment;
     "claim(address,uint256,bytes32[])": FunctionFragment;
-    "claimPeriodStart()": FunctionFragment;
     "claimed(address)": FunctionFragment;
-    "funds(address)": FunctionFragment;
     "guardian()": FunctionFragment;
-    "initCampaign(bytes32,bytes32,address,address,bool,uint256)": FunctionFragment;
-    "initEthCampaign(bytes32,bytes32,address,address,bool,uint256)": FunctionFragment;
+    "initCampaign(bytes32,bytes32,address,address)": FunctionFragment;
+    "initEthCampaign(bytes32,bytes32,address,address)": FunctionFragment;
+    "locked()": FunctionFragment;
     "oracle()": FunctionFragment;
-    "publishShares(bytes32)": FunctionFragment;
-    "sharesMerkleRoot()": FunctionFragment;
-    "sharesPublished()": FunctionFragment;
+    "proposeShares(bytes32,bytes32)": FunctionFragment;
+    "providers(address)": FunctionFragment;
+    "strategyUri()": FunctionFragment;
     "totalClaimed()": FunctionFragment;
     "totalReward()": FunctionFragment;
-    "totalShares()": FunctionFragment;
-    "uri()": FunctionFragment;
     "withdrawFunds(address)": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "campaignCancelled",
+    functionFragment: "CHALLENGE_PERIOD",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "cancelCampaign",
+    functionFragment: "TOTAL_SHARES",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "challenge", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "claim",
     values: [string, BigNumberish, BytesLike[]]
   ): string;
-  encodeFunctionData(
-    functionFragment: "claimPeriodStart",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "claimed", values: [string]): string;
-  encodeFunctionData(functionFragment: "funds", values: [string]): string;
   encodeFunctionData(functionFragment: "guardian", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initCampaign",
-    values: [BytesLike, BytesLike, string, string, boolean, BigNumberish]
+    values: [BytesLike, BytesLike, string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "initEthCampaign",
-    values: [BytesLike, BytesLike, string, string, boolean, BigNumberish]
+    values: [BytesLike, BytesLike, string, string]
   ): string;
+  encodeFunctionData(functionFragment: "locked", values?: undefined): string;
   encodeFunctionData(functionFragment: "oracle", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "publishShares",
-    values: [BytesLike]
+    functionFragment: "proposeShares",
+    values: [BytesLike, BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "providers", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "sharesMerkleRoot",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "sharesPublished",
+    functionFragment: "strategyUri",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -89,30 +81,21 @@ export interface EthCampaignInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "totalShares",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "uri", values?: undefined): string;
-  encodeFunctionData(
     functionFragment: "withdrawFunds",
     values: [string]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "campaignCancelled",
+    functionFragment: "CHALLENGE_PERIOD",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "cancelCampaign",
+    functionFragment: "TOTAL_SHARES",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "claimPeriodStart",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "funds", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "guardian", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "initCampaign",
@@ -122,17 +105,15 @@ export interface EthCampaignInterface extends utils.Interface {
     functionFragment: "initEthCampaign",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "oracle", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "publishShares",
+    functionFragment: "proposeShares",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "providers", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "sharesMerkleRoot",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "sharesPublished",
+    functionFragment: "strategyUri",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -144,25 +125,54 @@ export interface EthCampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "totalShares",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "uri", data: BytesLike): Result;
-  decodeFunctionResult(
     functionFragment: "withdrawFunds",
     data: BytesLike
   ): Result;
 
   events: {
+    "Challenge(bytes32)": EventFragment;
+    "Claim(address,uint256,uint256)": EventFragment;
     "Initialized(uint8)": EventFragment;
+    "SharesMerkleRoot(bytes32,bytes32,uint256)": EventFragment;
+    "Withdraw(address,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "Challenge"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Claim"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SharesMerkleRoot"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
+
+export type ChallengeEvent = TypedEvent<[string], { sharesMerkleRoot: string }>;
+
+export type ChallengeEventFilter = TypedEventFilter<ChallengeEvent>;
+
+export type ClaimEvent = TypedEvent<
+  [string, BigNumber, BigNumber],
+  { account: string; share: BigNumber; reward: BigNumber }
+>;
+
+export type ClaimEventFilter = TypedEventFilter<ClaimEvent>;
 
 export type InitializedEvent = TypedEvent<[number], { version: number }>;
 
 export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
+
+export type SharesMerkleRootEvent = TypedEvent<
+  [string, string, BigNumber],
+  { sharesMerkleRoot: string; sharesUri: string; activationTime: BigNumber }
+>;
+
+export type SharesMerkleRootEventFilter =
+  TypedEventFilter<SharesMerkleRootEvent>;
+
+export type WithdrawEvent = TypedEvent<
+  [string, BigNumber],
+  { account: string; amount: BigNumber }
+>;
+
+export type WithdrawEventFilter = TypedEventFilter<WithdrawEvent>;
 
 export interface EthCampaign extends BaseContract {
   contractName: "EthCampaign";
@@ -192,9 +202,11 @@ export interface EthCampaign extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    campaignCancelled(overrides?: CallOverrides): Promise<[boolean]>;
+    CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    cancelCampaign(
+    TOTAL_SHARES(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    challenge(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -205,52 +217,43 @@ export interface EthCampaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    claimPeriodStart(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     claimed(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    funds(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     guardian(overrides?: CallOverrides): Promise<[string]>;
 
     initCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     initEthCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    locked(overrides?: CallOverrides): Promise<[boolean]>;
 
     oracle(overrides?: CallOverrides): Promise<[string]>;
 
-    publishShares(
+    proposeShares(
       _sharesMerkleRoot: BytesLike,
+      _sharesUri: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    sharesMerkleRoot(overrides?: CallOverrides): Promise<[string]>;
+    providers(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    sharesPublished(overrides?: CallOverrides): Promise<[boolean]>;
+    strategyUri(overrides?: CallOverrides): Promise<[string]>;
 
     totalClaimed(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     totalReward(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    totalShares(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    uri(overrides?: CallOverrides): Promise<[string]>;
 
     withdrawFunds(
       account: string,
@@ -258,9 +261,11 @@ export interface EthCampaign extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  campaignCancelled(overrides?: CallOverrides): Promise<boolean>;
+  CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
 
-  cancelCampaign(
+  TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
+
+  challenge(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -271,52 +276,43 @@ export interface EthCampaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  claimPeriodStart(overrides?: CallOverrides): Promise<BigNumber>;
-
   claimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-  funds(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   guardian(overrides?: CallOverrides): Promise<string>;
 
   initCampaign(
     _sharesMerkleRoot: BytesLike,
-    _uri: BytesLike,
+    _strategyUri: BytesLike,
     _guardian: string,
     _oracle: string,
-    _sharesPublished: boolean,
-    _claimPeriodStart: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   initEthCampaign(
     _sharesMerkleRoot: BytesLike,
-    _uri: BytesLike,
+    _strategyUri: BytesLike,
     _guardian: string,
     _oracle: string,
-    _sharesPublished: boolean,
-    _claimPeriodStart: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  locked(overrides?: CallOverrides): Promise<boolean>;
 
   oracle(overrides?: CallOverrides): Promise<string>;
 
-  publishShares(
+  proposeShares(
     _sharesMerkleRoot: BytesLike,
+    _sharesUri: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  sharesMerkleRoot(overrides?: CallOverrides): Promise<string>;
+  providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  sharesPublished(overrides?: CallOverrides): Promise<boolean>;
+  strategyUri(overrides?: CallOverrides): Promise<string>;
 
   totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
 
   totalReward(overrides?: CallOverrides): Promise<BigNumber>;
-
-  totalShares(overrides?: CallOverrides): Promise<BigNumber>;
-
-  uri(overrides?: CallOverrides): Promise<string>;
 
   withdrawFunds(
     account: string,
@@ -324,9 +320,11 @@ export interface EthCampaign extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    campaignCancelled(overrides?: CallOverrides): Promise<boolean>;
+    CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
 
-    cancelCampaign(overrides?: CallOverrides): Promise<void>;
+    TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
+
+    challenge(overrides?: CallOverrides): Promise<void>;
 
     claim(
       account: string,
@@ -335,65 +333,85 @@ export interface EthCampaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    claimPeriodStart(overrides?: CallOverrides): Promise<BigNumber>;
-
     claimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    funds(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     guardian(overrides?: CallOverrides): Promise<string>;
 
     initCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     initEthCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    locked(overrides?: CallOverrides): Promise<boolean>;
 
     oracle(overrides?: CallOverrides): Promise<string>;
 
-    publishShares(
+    proposeShares(
       _sharesMerkleRoot: BytesLike,
+      _sharesUri: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    sharesMerkleRoot(overrides?: CallOverrides): Promise<string>;
+    providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    sharesPublished(overrides?: CallOverrides): Promise<boolean>;
+    strategyUri(overrides?: CallOverrides): Promise<string>;
 
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalReward(overrides?: CallOverrides): Promise<BigNumber>;
 
-    totalShares(overrides?: CallOverrides): Promise<BigNumber>;
-
-    uri(overrides?: CallOverrides): Promise<string>;
-
     withdrawFunds(account: string, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
+    "Challenge(bytes32)"(sharesMerkleRoot?: null): ChallengeEventFilter;
+    Challenge(sharesMerkleRoot?: null): ChallengeEventFilter;
+
+    "Claim(address,uint256,uint256)"(
+      account?: null,
+      share?: null,
+      reward?: null
+    ): ClaimEventFilter;
+    Claim(account?: null, share?: null, reward?: null): ClaimEventFilter;
+
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
+
+    "SharesMerkleRoot(bytes32,bytes32,uint256)"(
+      sharesMerkleRoot?: null,
+      sharesUri?: null,
+      activationTime?: null
+    ): SharesMerkleRootEventFilter;
+    SharesMerkleRoot(
+      sharesMerkleRoot?: null,
+      sharesUri?: null,
+      activationTime?: null
+    ): SharesMerkleRootEventFilter;
+
+    "Withdraw(address,uint256)"(
+      account?: null,
+      amount?: null
+    ): WithdrawEventFilter;
+    Withdraw(account?: null, amount?: null): WithdrawEventFilter;
   };
 
   estimateGas: {
-    campaignCancelled(overrides?: CallOverrides): Promise<BigNumber>;
+    CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
 
-    cancelCampaign(
+    TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
+
+    challenge(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -404,52 +422,43 @@ export interface EthCampaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    claimPeriodStart(overrides?: CallOverrides): Promise<BigNumber>;
-
     claimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    funds(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     guardian(overrides?: CallOverrides): Promise<BigNumber>;
 
     initCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     initEthCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    locked(overrides?: CallOverrides): Promise<BigNumber>;
 
     oracle(overrides?: CallOverrides): Promise<BigNumber>;
 
-    publishShares(
+    proposeShares(
       _sharesMerkleRoot: BytesLike,
+      _sharesUri: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    sharesMerkleRoot(overrides?: CallOverrides): Promise<BigNumber>;
+    providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    sharesPublished(overrides?: CallOverrides): Promise<BigNumber>;
+    strategyUri(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalReward(overrides?: CallOverrides): Promise<BigNumber>;
-
-    totalShares(overrides?: CallOverrides): Promise<BigNumber>;
-
-    uri(overrides?: CallOverrides): Promise<BigNumber>;
 
     withdrawFunds(
       account: string,
@@ -458,9 +467,11 @@ export interface EthCampaign extends BaseContract {
   };
 
   populateTransaction: {
-    campaignCancelled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    cancelCampaign(
+    TOTAL_SHARES(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    challenge(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -471,14 +482,7 @@ export interface EthCampaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    claimPeriodStart(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     claimed(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    funds(
       arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -487,42 +491,40 @@ export interface EthCampaign extends BaseContract {
 
     initCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     initEthCampaign(
       _sharesMerkleRoot: BytesLike,
-      _uri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    locked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     oracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    publishShares(
+    proposeShares(
       _sharesMerkleRoot: BytesLike,
+      _sharesUri: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    sharesMerkleRoot(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    providers(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
-    sharesPublished(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    strategyUri(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     totalClaimed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     totalReward(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    totalShares(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    uri(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     withdrawFunds(
       account: string,

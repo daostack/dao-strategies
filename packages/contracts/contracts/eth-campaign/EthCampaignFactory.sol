@@ -11,12 +11,11 @@ contract EthCampaignFactory {
     event CampaignCreated(
         address creator,
         address newCampaign,
-        bytes32 _sharesRoot,
-        bytes32 _uri,
+        bytes32 _sharesMerkleRoot,
+        bytes32 _sharesUri,
+        bytes32 _strategyUri,
         address _guardian,
         address _oracle,
-        bool _sharesPublished,
-        uint256 _claimPeriodStart,
         bytes32 salt
     );
 
@@ -30,16 +29,15 @@ contract EthCampaignFactory {
 
     function createCampaign(
         bytes32 _sharesMerkleRoot,
-        bytes32 _uri,
+        bytes32 _sharesUri,
+        bytes32 _strategyUri,
         address _guardian,
         address _oracle,
-        bool _sharesPublished,
-        uint256 _claimPeriodStart,
         bytes32 salt
     ) external {
         address payable proxy = payable(Clones.cloneDeterministic(address(master), salt));
-        EthCampaign(proxy).initCampaign(_sharesMerkleRoot, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart);
+        EthCampaign(proxy).initEthCampaign(_sharesMerkleRoot, _strategyUri, _guardian, _oracle);
 
-        emit CampaignCreated(msg.sender, proxy, _sharesMerkleRoot, _uri, _guardian, _oracle, _sharesPublished, _claimPeriodStart, salt);
+        emit CampaignCreated(msg.sender, proxy, _sharesMerkleRoot, _sharesUri, _strategyUri, _guardian, _oracle, salt);
     }
 }
