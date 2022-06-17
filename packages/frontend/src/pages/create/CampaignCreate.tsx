@@ -58,7 +58,7 @@ export interface CampaignFormValues {
   title: string;
   description: string;
   asset: Asset;
-  repositoryURLs: string[];
+  repositoryFullnames: string[];
   guardian: string;
   livePeriodChoice: string;
   customPeriodChoiceFrom: string;
@@ -70,11 +70,11 @@ export interface ProcessedFormValues {
 }
 
 const initialValues: CampaignFormValues = {
-  title: '',
+  title: 'asdas',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
   asset: Asset.Ether,
   description: '',
-  repositoryURLs: [],
+  repositoryFullnames: ['ethereum/go-ethereum'],
   livePeriodChoice: PeriodOptions.custom,
   customPeriodChoiceFrom: '',
   customPeriodChoiceTo: '',
@@ -169,7 +169,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const getRepos = (values: CampaignFormValues): { owner: string; repo: string }[] => {
-    return values.repositoryURLs.map((repo) => {
+    return values.repositoryFullnames.map((repo) => {
       const parts = repo.split('/');
       return {
         owner: parts[0],
@@ -246,13 +246,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const addRepo = () => {
-    formValues.repositoryURLs.push(repo);
+    formValues.repositoryFullnames.push(repo);
     setFormValues({ ...formValues });
   };
 
   const clearRepo = (repo: string) => {
-    const ix = formValues.repositoryURLs.indexOf(repo);
-    formValues.repositoryURLs.splice(ix, 1);
+    const ix = formValues.repositoryFullnames.indexOf(repo);
+    formValues.repositoryFullnames.splice(ix, 1);
     setFormValues({ ...formValues });
   };
 
@@ -263,7 +263,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const validate = () => {
     const errors: string[] = [];
     if (formValues.title === '') errors.push('title cannot be empty');
-    if (formValues.repositoryURLs.length === 0) errors.push('no repositories specified');
+    if (formValues.repositoryFullnames.length === 0) errors.push('no repositories specified');
     setValidated(true);
     setErrors(errors);
     return errors;
@@ -374,7 +374,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </FormField>
 
         <>
-          {formValues.repositoryURLs.map((repo) => {
+          {formValues.repositoryFullnames.map((repo) => {
             return (
               <Box direction="row">
                 <a target="_blank" href={`${GITHUB_DOMAIN}${repo}`} rel="noreferrer">
@@ -423,7 +423,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </Box>
           <Box>
             <Paragraph>Github Repositories</Paragraph>
-            {formValues.repositoryURLs.map((repo) => (
+            {formValues.repositoryFullnames.map((repo) => (
               <Box>{repo}</Box>
             ))}
           </Box>
