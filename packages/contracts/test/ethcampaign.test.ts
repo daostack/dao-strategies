@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
-import { EthCampaign, EthCampaign__factory, EthCampaignFactory__factory } from './../typechain';
+import { EthCampaign, EthCampaignFactory, EthCampaign__factory, EthCampaignFactory__factory } from './../typechain';
 import { toWei, getTimestamp, fastForwardToTimestamp } from './support';
 
 const LOG = true;
@@ -58,10 +58,9 @@ describe('EthCampaign', () => {
     const campaignCreationTx = await campaignFactory.createCampaign(
       merkleRoot,
       URI,
+      URI,
       guardian.address,
       oracle.address,
-      publishShares,
-      currentTimestamp.add(SECONDS_IN_DAY),
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes('1'))
     );
     const campaignCreationReceipt = await campaignCreationTx.wait();
@@ -87,20 +86,19 @@ describe('EthCampaign', () => {
     const { admin, guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign } = await setup(sharesArray, true);
 
     // sanity checks
-    expect(await campaign.sharesMerkleRoot()).to.equal(merkleRoot);
+    expect(await campaign.pendingMerkleRoot()).to.equal(merkleRoot);
     expect(await campaign.guardian()).to.equal(guardian.address);
     expect(await campaign.oracle()).to.equal(oracle.address);
-    expect(await campaign.uri()).to.equal(URI);
-    expect(await campaign.sharesPublished()).to.equal(true);
+    expect(await campaign.strategyUri()).to.equal(URI);
 
     // funder sends 1 ether to the campaign
     const fundTransaction = await funders[0].sendTransaction({ to: campaign.address, value: toWei('1') });
-    expect(await campaign.funds(funders[0].address)).to.equal(toWei('1'));
+    expect(await campaign.providers(funders[0].address)).to.equal(toWei('1'));
     expect(await ethers.provider.getBalance(campaign.address)).to.equal(toWei('1'));
 
     // fast forward to claim period
-    const _claimPeriodStart = await campaign.claimPeriodStart();
-    await fastForwardToTimestamp(_claimPeriodStart.add(10));
+    const _activationTime = await campaign.activationTime();
+    await fastForwardToTimestamp(_activationTime.add(10));
 
     // claimer1 claims, should receive 1/6 ether
     const claimer1BalanceBefore = await ethers.provider.getBalance(claimers[0].address);

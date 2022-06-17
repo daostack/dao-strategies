@@ -18,12 +18,12 @@ abstract contract Campaign is Initializable {
         CancelCampaign
     }
 
-    bytes32 approvedMerkleRoot;
+    bytes32 public approvedMerkleRoot;
 
-    bytes32 pendingMerkleRoot;
-    uint256 activationTime;
+    bytes32 public pendingMerkleRoot;
+    uint256 public activationTime;
 
-    bytes32 public strategyUri; //event?
+    bytes32 public strategyUri;
     address public guardian;
     address public oracle;
 
@@ -91,7 +91,7 @@ abstract contract Campaign is Initializable {
     }
 
     function proposeShares(bytes32 _sharesMerkleRoot, bytes32 _sharesUri) external onlyOracle notLocked {
-        if (block.timestamp < activationTime) {
+        if (pendingMerkleRoot != bytes32(0) && block.timestamp < activationTime) {
             revert ActiveChallengePeriod();
         }
 

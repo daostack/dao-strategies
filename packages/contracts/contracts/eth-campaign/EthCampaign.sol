@@ -15,7 +15,7 @@ contract EthCampaign is Campaign {
         bytes32 _strategyUri,
         address _guardian,
         address _oracle
-    ) public initializer {
+    ) public {
         super.initCampaign(_sharesMerkleRoot, _strategyUri, _guardian, _oracle);
     }
 

@@ -22,6 +22,8 @@ export interface EthCampaignInterface extends utils.Interface {
   functions: {
     "CHALLENGE_PERIOD()": FunctionFragment;
     "TOTAL_SHARES()": FunctionFragment;
+    "activationTime()": FunctionFragment;
+    "approvedMerkleRoot()": FunctionFragment;
     "challenge(uint8)": FunctionFragment;
     "claim(address,uint256,bytes32[])": FunctionFragment;
     "claimed(address)": FunctionFragment;
@@ -30,6 +32,7 @@ export interface EthCampaignInterface extends utils.Interface {
     "initEthCampaign(bytes32,bytes32,address,address)": FunctionFragment;
     "locked()": FunctionFragment;
     "oracle()": FunctionFragment;
+    "pendingMerkleRoot()": FunctionFragment;
     "proposeShares(bytes32,bytes32)": FunctionFragment;
     "providers(address)": FunctionFragment;
     "setLock(bool)": FunctionFragment;
@@ -45,6 +48,14 @@ export interface EthCampaignInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "TOTAL_SHARES",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "activationTime",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "approvedMerkleRoot",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -67,6 +78,10 @@ export interface EthCampaignInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "locked", values?: undefined): string;
   encodeFunctionData(functionFragment: "oracle", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "pendingMerkleRoot",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "proposeShares",
     values: [BytesLike, BytesLike]
@@ -98,6 +113,14 @@ export interface EthCampaignInterface extends utils.Interface {
     functionFragment: "TOTAL_SHARES",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "activationTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "approvedMerkleRoot",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
@@ -112,6 +135,10 @@ export interface EthCampaignInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "oracle", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "pendingMerkleRoot",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "proposeShares",
     data: BytesLike
@@ -221,6 +248,10 @@ export interface EthCampaign extends BaseContract {
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    activationTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    approvedMerkleRoot(overrides?: CallOverrides): Promise<[string]>;
+
     challenge(
       action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -257,6 +288,8 @@ export interface EthCampaign extends BaseContract {
 
     oracle(overrides?: CallOverrides): Promise<[string]>;
 
+    pendingMerkleRoot(overrides?: CallOverrides): Promise<[string]>;
+
     proposeShares(
       _sharesMerkleRoot: BytesLike,
       _sharesUri: BytesLike,
@@ -285,6 +318,10 @@ export interface EthCampaign extends BaseContract {
   CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
 
   TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
+
+  activationTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+  approvedMerkleRoot(overrides?: CallOverrides): Promise<string>;
 
   challenge(
     action: BigNumberish,
@@ -322,6 +359,8 @@ export interface EthCampaign extends BaseContract {
 
   oracle(overrides?: CallOverrides): Promise<string>;
 
+  pendingMerkleRoot(overrides?: CallOverrides): Promise<string>;
+
   proposeShares(
     _sharesMerkleRoot: BytesLike,
     _sharesUri: BytesLike,
@@ -350,6 +389,10 @@ export interface EthCampaign extends BaseContract {
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
+
+    activationTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    approvedMerkleRoot(overrides?: CallOverrides): Promise<string>;
 
     challenge(action: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -383,6 +426,8 @@ export interface EthCampaign extends BaseContract {
     locked(overrides?: CallOverrides): Promise<boolean>;
 
     oracle(overrides?: CallOverrides): Promise<string>;
+
+    pendingMerkleRoot(overrides?: CallOverrides): Promise<string>;
 
     proposeShares(
       _sharesMerkleRoot: BytesLike,
@@ -446,6 +491,10 @@ export interface EthCampaign extends BaseContract {
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
+    activationTime(overrides?: CallOverrides): Promise<BigNumber>;
+
+    approvedMerkleRoot(overrides?: CallOverrides): Promise<BigNumber>;
+
     challenge(
       action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -482,6 +531,8 @@ export interface EthCampaign extends BaseContract {
 
     oracle(overrides?: CallOverrides): Promise<BigNumber>;
 
+    pendingMerkleRoot(overrides?: CallOverrides): Promise<BigNumber>;
+
     proposeShares(
       _sharesMerkleRoot: BytesLike,
       _sharesUri: BytesLike,
@@ -511,6 +562,12 @@ export interface EthCampaign extends BaseContract {
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    activationTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    approvedMerkleRoot(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     challenge(
       action: BigNumberish,
@@ -550,6 +607,8 @@ export interface EthCampaign extends BaseContract {
     locked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     oracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    pendingMerkleRoot(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     proposeShares(
       _sharesMerkleRoot: BytesLike,

@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { BaseContract, BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
-import { TestErc20, TestErc20__factory, Erc20Campaign, Erc20Campaign__factory, Erc20CampaignFactory__factory } from './../typechain';
+import { TestErc20, TestErc20__factory, Erc20Campaign, Erc20CampaignFactory, Erc20Campaign__factory, Erc20CampaignFactory__factory } from './../typechain';
 import { toWei, getTimestamp, fastForwardToTimestamp } from './support';
 import { MockContract } from '@ethereum-waffle/mock-contract';
 
@@ -63,10 +63,9 @@ describe('Erc20Campaign', () => {
         const campaignCreationTx = await campaignFactory.createCampaign(
             merkleRoot,
             URI,
+            URI,
             guardian.address,
             oracle.address,
-            publishShares,
-            currentTimestamp.add(SECONDS_IN_DAY),
             ethers.utils.keccak256(ethers.utils.toUtf8Bytes('1')),
             rewardToken.address
         );
@@ -94,24 +93,22 @@ describe('Erc20Campaign', () => {
         const { admin, guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign, rewardToken } = await setup(sharesArray, true);
 
         // sanity checks
-        expect(await campaign.sharesMerkleRoot()).to.equal(merkleRoot);
+        expect(await campaign.pendingMerkleRoot()).to.equal(merkleRoot);
         expect(await campaign.guardian()).to.equal(guardian.address);
         expect(await campaign.oracle()).to.equal(oracle.address);
-        expect(await campaign.uri()).to.equal(URI);
-        expect(await campaign.sharesPublished()).to.equal(true);
-        expect(await campaign.rewardToken()).to.equal(rewardToken.address);
+        expect(await campaign.strategyUri()).to.equal(URI);
 
         // funder sends 1000 tokens to the campaign
         await rewardToken.connect(admin).transfer(funders[0].address, BigNumber.from("1000000000000000000000"));
         await rewardToken.connect(funders[0]).increaseAllowance(campaign.address, BigNumber.from("1000000000000000000000"));
         await campaign.connect(funders[0]).transferValueIn(BigNumber.from("1000000000000000000000"));
-        expect(await campaign.funds(funders[0].address)).to.equal(BigNumber.from("1000000000000000000000"));
+        expect(await campaign.providers(funders[0].address)).to.equal(BigNumber.from("1000000000000000000000"));
         expect(await rewardToken.balanceOf(campaign.address)).to.equal(BigNumber.from("1000000000000000000000"));
         expect(await campaign.totalReward()).to.equal(BigNumber.from("1000000000000000000000"));
 
         // fast forward to claim period
-        const _claimPeriodStart = await campaign.claimPeriodStart();
-        await fastForwardToTimestamp(_claimPeriodStart.add(10));
+        const _activationTime = await campaign.activationTime();
+        await fastForwardToTimestamp(_activationTime.add(10));
 
         // claimer1 claims, should receive 1/6 of the tokens
         const claimer1BalanceBefore = await rewardToken.balanceOf(claimers[0].address);
