@@ -27,13 +27,6 @@ const extension: ThemeType = {
       weight: 700,
     },
     border: false,
-    extend: (props) => {
-      return css`
-        * {
-          color: 'red';
-        }
-      `;
-    },
   },
   textArea: {
     extend: (props) => {

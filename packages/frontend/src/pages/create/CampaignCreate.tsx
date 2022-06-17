@@ -1,4 +1,4 @@
-import { Box, FormField, Text, TextInput } from 'grommet';
+import { Box, FormField, Paragraph, Text, TextInput } from 'grommet';
 import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,8 @@ import {
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
 import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
-import { Search } from 'grommet-icons';
+import { FormTrash, Search } from 'grommet-icons';
+import { useGithubSearch } from '../../hooks/useGithubSearch';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -31,29 +32,34 @@ export enum Asset {
   DAI = 'dai',
 }
 
+export interface CampaignFormValues {
+  title: string;
+  description: string;
+  asset: Asset;
+  repositoryURLs: string[];
+  livePeriodChoice: string;
+  guardian: string;
+}
+
 const initialValues: CampaignFormValues = {
   title: '',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
   asset: Asset.Ether,
   description: '',
-  repositoryURL: '',
+  repositoryURLs: [],
   livePeriodChoice: '-3',
 };
 
-export interface CampaignFormValues {
-  title: string;
-  description: string;
-  asset: Asset;
-  repositoryURL: string;
-  livePeriodChoice: string;
-  guardian: string;
-}
+const GITHUB_DOMAIN = 'https://www.github.com/';
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
 
   const [today] = useState<DateManager>(new DateManager());
   const [pageIx, setPageIx] = useState<number>(0);
+
+  const { isValid, checking, checkExist, isValidName } = useGithubSearch();
+  const [repo, setRepo] = useState<string>('');
 
   const [simulation, setSimulated] = useState<SimulationResult>({});
   const [simulating, setSimulating] = useState<boolean>(false);
@@ -113,19 +119,26 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setFormValues(values);
   };
 
-  const getRepo = (values: CampaignFormValues): { owner: string; repo: string } => {
-    const url = new URL(values.repositoryURL);
-    const parts = url.pathname.split('/');
-    return {
-      owner: parts[1],
-      repo: parts[2],
-    };
+  const getRepos = (values: CampaignFormValues): { owner: string; repo: string }[] => {
+    return values.repositoryURLs.map((repo) => {
+      const url = new URL(repo);
+      const parts = url.pathname.split('/');
+      return {
+        owner: parts[1],
+        repo: parts[2],
+      };
+    });
+  };
+
+  const repoNameChanged = (name: string) => {
+    setRepo(name);
+    checkExist(name);
   };
 
   const strategyDetails = (): CampaignUriDetails | undefined => {
     const values = getFormValues();
     if (values !== undefined && isLogged()) {
-      const repo = getRepo(values);
+      const repos = getRepos(values);
 
       const [start, end] = getStartEnd(values);
 
@@ -135,7 +148,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         execDate: end,
         strategyID: 'GH_PRS_REACTIONS_WEIGHED',
         strategyParams: {
-          repositories: [repo],
+          repositories: repos,
           timeRange: { start, end },
         },
       };
@@ -144,7 +157,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const isLogged = (): boolean => {
-    return true; // account !== undefined;
+    return true; //account !== undefined;
   };
 
   const canBeSimulated = (): boolean => {
@@ -206,13 +219,27 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return simulation.rewards !== undefined && Object.keys(simulation.rewards).length !== 0;
   };
 
-  const layout = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 10 },
-  };
-
   const tailLayout = {
     wrapperCol: { offset: 8, span: 16 },
+  };
+
+  const buttonAction = (): string => {
+    return checking ? '...' : isValidName(repo) ? (isValid ? 'add' : 'not found') : '...';
+  };
+
+  const buttonDisabled = () => {
+    return buttonAction() !== 'add';
+  };
+
+  const addRepo = () => {
+    formValues.repositoryURLs.push(repo);
+    setFormValues({ ...formValues });
+  };
+
+  const clearRepo = (repo: string) => {
+    const ix = formValues.repositoryURLs.indexOf(repo);
+    formValues.repositoryURLs.splice(ix, 1);
+    setFormValues({ ...formValues });
   };
 
   const pages: React.ReactNode[] = [
@@ -239,14 +266,32 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
     <TwoColumns>
       <>
-        <FormField name="repositoryURL" label="Repositories">
-          <Text>Search Github repositories</Text>
-          <Box fill align="center" justify="start" pad="large">
-            <Box width="medium" gap="medium">
-              <TextInput icon={<Search />} reverse placeholder="search ..." />
+        <FormField name="description" label="Add Github Repos">
+          <Paragraph>
+            <Text>format: user/repo</Text>
+          </Paragraph>
+          <Box direction="row" width="medium" gap="medium">
+            <TextInput value={repo} onChange={(e) => repoNameChanged(e.target.value)} reverse />
+            <Box>
+              <AppButton primary disabled={buttonDisabled()} onClick={() => addRepo()}>
+                {buttonAction()}
+              </AppButton>
             </Box>
           </Box>
         </FormField>
+
+        <>
+          {formValues.repositoryURLs.map((repo) => {
+            return (
+              <Box direction="row">
+                <a target="_blank" href={`${GITHUB_DOMAIN}${repo}`} rel="noreferrer">
+                  {repo}
+                </a>
+                <FormTrash onClick={() => clearRepo(repo)}></FormTrash>
+              </Box>
+            );
+          })}
+        </>
       </>
 
       <>
@@ -275,7 +320,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             onSelected={(ix) => setPageIx(ix)}
           />
 
-          <AppForm {...layout} value={formValues} onChange={onValuesUpdated as any}>
+          <AppForm value={formValues} onChange={onValuesUpdated as any}>
             <div
               style={{
                 height: 'calc(100vh - 400px)',

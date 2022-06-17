@@ -6,6 +6,7 @@ import { UserRepository } from './repositories/UserRepository';
 import { CampaignService } from './services/CampaignService';
 import { ExecuteService, ExecutionConfig } from './services/ExecutionService';
 import { OnChainService } from './services/OnChainService';
+import { SocialApiService } from './services/SocialApiService';
 import { TimeService } from './services/TimeService';
 import { UserService } from './services/UserService';
 import { Services } from './types';
@@ -19,6 +20,7 @@ export class ServiceManager {
 
   private timeService: TimeService;
   private onChainService: OnChainService;
+  private socialApi: SocialApiService;
 
   public services: Services;
   public execution: ExecuteService;
@@ -32,6 +34,7 @@ export class ServiceManager {
     this.strategyComputation = new StrategyComputation(config.world);
     this.timeService = new TimeService();
     this.onChainService = new OnChainService();
+    this.socialApi = new SocialApiService(config.world.GITHUB_TOKEN);
 
     this.services = {
       campaign: new CampaignService(
@@ -43,6 +46,7 @@ export class ServiceManager {
       user: new UserService(this.userRepo, config.world.GITHUB_TOKEN),
       time: this.timeService,
       onchain: this.onChainService,
+      socialApi: this.socialApi,
     };
 
     this.execution = new ExecuteService(this.services, config);

@@ -1830,6 +1830,7 @@ __metadata:
   resolution: "@dao-strategies/oracle-node@workspace:packages/oracle-node"
   dependencies:
     "@dao-strategies/core": ^0.0.0
+    "@octokit/plugin-paginate-rest": ^2.18.0
     "@prisma/client": ^3.13.0
     "@types/jest": ^28.1.0
     "@types/node": ^16.11.10
@@ -3481,6 +3482,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@octokit/openapi-types@npm:^12.1.0":
+  version: 12.1.0
+  resolution: "@octokit/openapi-types@npm:12.1.0"
+  checksum: 449f21166d53bb6c88f9b01b45d8ac730aa4ce1aa4d8ca86fc7c06b552c94e7f01281c9a73b2902a4cd2e5ce88d24766e0338109d5aa35a8e0bfc514c6cfd2d7
+  languageName: node
+  linkType: hard
+
 "@octokit/plugin-paginate-rest@npm:^2.13.3, @octokit/plugin-paginate-rest@npm:^2.16.8":
   version: 2.17.0
   resolution: "@octokit/plugin-paginate-rest@npm:2.17.0"
@@ -3489,6 +3497,17 @@ __metadata:
   peerDependencies:
     "@octokit/core": ">=2"
   checksum: c8753cda6f7ede79d0e9df43a54e56020aa1c9c6887684e0e0d45cb6ee0dcabf460c3e4b8a18edabef711bb269fd826616e99e78dc29fb30d47c210c562603a0
+  languageName: node
+  linkType: hard
+
+"@octokit/plugin-paginate-rest@npm:^2.18.0":
+  version: 2.18.0
+  resolution: "@octokit/plugin-paginate-rest@npm:2.18.0"
+  dependencies:
+    "@octokit/types": ^6.35.0
+  peerDependencies:
+    "@octokit/core": ">=2"
+  checksum: e804e44f92a16a0cf5b32a4a05e1acb908d96c63b0e4340355a7f99876b2aee998f636b5ac11a360a4e33ab05ee1c1a384fa48c7f63a78ea5992bc2d8a55e4ce
   languageName: node
   linkType: hard
 
@@ -3557,6 +3576,15 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": ^11.2.0
   checksum: f122b9aee8f6baddd515e34a0913e73b21d4bc82d6ee59d77a8aaf01b4a02c10867dd013003d087a83dc96db23511893669015af6d30c27cece185e21cf1df89
+  languageName: node
+  linkType: hard
+
+"@octokit/types@npm:^6.35.0":
+  version: 6.35.0
+  resolution: "@octokit/types@npm:6.35.0"
+  dependencies:
+    "@octokit/openapi-types": ^12.1.0
+  checksum: 0f1949aece03733d1a45a9ee1c2162f8f35d58814e66ed2e00929b0fbb7cb315625203bf748ea7cb855b20b1c794c7f1add7203508a186289f489b7fb1143924
   languageName: node
   linkType: hard
 
@@ -13130,6 +13158,7 @@ __metadata:
     siwe: ^1.1.6
     styled-components: ^5.3.5
     typescript: ^4.6.4
+    use-debounce: ^8.0.1
     wagmi: ^0.3.5
     web-vitals: ^2.1.4
   languageName: unknown
@@ -26515,6 +26544,15 @@ __metadata:
     nan: ^2.14.2
     node-gyp: latest
   checksum: fd7b246352750fd5032e058ab14220e389bc08bd98d72e9d9f01ac443390435ac354735fb67739d57bb505bfdaeeb2359cd7b8c5d57abc9b82b16455d1be09a3
+  languageName: node
+  linkType: hard
+
+"use-debounce@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "use-debounce@npm:8.0.1"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: c66cb9a33b7b141232432dbdbdceb35573da8efd340e60c7f42e00f36e06c897818b731d9a9211d137a98dfb4acd5d686ff9bbe98b5990411ea6e67ee6e5a83d
   languageName: node
   linkType: hard
 
