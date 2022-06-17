@@ -44,6 +44,11 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "OnlyInChallengePeriod",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "OnlyOracle",
     type: "error",
   },
@@ -57,9 +62,9 @@ const _abi = [
     inputs: [
       {
         indexed: false,
-        internalType: "bytes32",
-        name: "sharesMerkleRoot",
-        type: "bytes32",
+        internalType: "enum Campaign.ChallengeAction",
+        name: "action",
+        type: "uint8",
       },
     ],
     name: "Challenge",
@@ -174,7 +179,13 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
+    inputs: [
+      {
+        internalType: "enum Campaign.ChallengeAction",
+        name: "action",
+        type: "uint8",
+      },
+    ],
     name: "challenge",
     outputs: [],
     stateMutability: "nonpayable",
@@ -324,6 +335,19 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bool",
+        name: "_lock",
+        type: "bool",
+      },
+    ],
+    name: "setLock",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

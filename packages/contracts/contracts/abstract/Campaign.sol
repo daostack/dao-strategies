@@ -12,12 +12,18 @@ abstract contract Campaign is Initializable {
     uint256 public constant TOTAL_SHARES = 10**18;
     uint256 public constant CHALLENGE_PERIOD = 604800;
 
+    enum ChallengeAction {
+        CancelPending,
+        CacncelPendingAndLockCurrent,
+        CancelCampaign
+    }
+
     bytes32 approvedMerkleRoot;
 
     bytes32 pendingMerkleRoot;
     uint256 activationTime;
 
-    bytes32 public strategyUri;
+    bytes32 public strategyUri; //event?
     address public guardian;
     address public oracle;
 
@@ -31,7 +37,7 @@ abstract contract Campaign is Initializable {
 
     event SharesMerkleRoot(bytes32 sharesMerkleRoot, bytes32 sharesUri, uint256 activationTime);
     event Claim(address account, uint256 share, uint256 reward);
-    event Challenge(bytes32 sharesMerkleRoot);
+    event Challenge(ChallengeAction action);
     event Withdraw(address account, uint256 amount);
 
     error InvalidProof();
@@ -43,6 +49,7 @@ abstract contract Campaign is Initializable {
     error NoFunds();
     error OnlyOracle();
     error Locked();
+    error OnlyInChallengePeriod();
 
     modifier onlyGuardian() {
         if (msg.sender != guardian) {
@@ -121,16 +128,25 @@ abstract contract Campaign is Initializable {
         emit Claim(account, share, reward);
     }
 
-    function challenge() external onlyGuardian notLocked {
-        if (block.timestamp > activationTime) {
-            approvedMerkleRoot = pendingMerkleRoot;
+    function setLock(bool _lock) external onlyGuardian {
+        locked = _lock;
+    }
+
+    function challenge(ChallengeAction action) external onlyGuardian notLocked {
+        if (pendingMerkleRoot != bytes32(0) && block.timestamp > activationTime) {
+            revert OnlyInChallengePeriod();
         }
 
         pendingMerkleRoot = bytes32(0);
         activationTime = type(uint256).max;
-        locked = true;
+        if (action == ChallengeAction.CacncelPendingAndLockCurrent) {
+            this.setLock(true);
+        } else if (action == ChallengeAction.CancelCampaign) {
+            this.setLock(true);
+            approvedMerkleRoot = bytes32(0);
+        }
 
-        emit Challenge(approvedMerkleRoot);
+        emit Challenge(action);
     }
 
     function withdrawFunds(address account) external {

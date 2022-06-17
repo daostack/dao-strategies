@@ -14,6 +14,8 @@ contract Erc20Campaign is Campaign {
     using SafeERC20 for IERC20;
     IERC20 public rewardToken;
 
+    event ValueIn(address provider, uint256 amount);
+
     function initErc20Campaign(
         bytes32 _sharesMerkleRoot,
         bytes32 _strategyUri,
@@ -29,6 +31,8 @@ contract Erc20Campaign is Campaign {
         providers[msg.sender] += amount;
         totalReward += amount;
         rewardToken.safeTransferFrom(msg.sender, address(this), amount);
+
+        emit ValueIn(msg.sender, amount);
     }
 
     function transferValueOut(address to, uint256 amount) internal override {

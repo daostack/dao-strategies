@@ -22,7 +22,7 @@ export interface Erc20CampaignInterface extends utils.Interface {
   functions: {
     "CHALLENGE_PERIOD()": FunctionFragment;
     "TOTAL_SHARES()": FunctionFragment;
-    "challenge()": FunctionFragment;
+    "challenge(uint8)": FunctionFragment;
     "claim(address,uint256,bytes32[])": FunctionFragment;
     "claimed(address)": FunctionFragment;
     "guardian()": FunctionFragment;
@@ -33,6 +33,7 @@ export interface Erc20CampaignInterface extends utils.Interface {
     "proposeShares(bytes32,bytes32)": FunctionFragment;
     "providers(address)": FunctionFragment;
     "rewardToken()": FunctionFragment;
+    "setLock(bool)": FunctionFragment;
     "strategyUri()": FunctionFragment;
     "totalClaimed()": FunctionFragment;
     "totalReward()": FunctionFragment;
@@ -48,7 +49,10 @@ export interface Erc20CampaignInterface extends utils.Interface {
     functionFragment: "TOTAL_SHARES",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "challenge", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "challenge",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "claim",
     values: [string, BigNumberish, BytesLike[]]
@@ -74,6 +78,7 @@ export interface Erc20CampaignInterface extends utils.Interface {
     functionFragment: "rewardToken",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "setLock", values: [boolean]): string;
   encodeFunctionData(
     functionFragment: "strategyUri",
     values?: undefined
@@ -126,6 +131,7 @@ export interface Erc20CampaignInterface extends utils.Interface {
     functionFragment: "rewardToken",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setLock", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "strategyUri",
     data: BytesLike
@@ -148,10 +154,11 @@ export interface Erc20CampaignInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "Challenge(bytes32)": EventFragment;
+    "Challenge(uint8)": EventFragment;
     "Claim(address,uint256,uint256)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "SharesMerkleRoot(bytes32,bytes32,uint256)": EventFragment;
+    "ValueIn(address,uint256)": EventFragment;
     "Withdraw(address,uint256)": EventFragment;
   };
 
@@ -159,10 +166,11 @@ export interface Erc20CampaignInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Claim"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SharesMerkleRoot"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ValueIn"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
 
-export type ChallengeEvent = TypedEvent<[string], { sharesMerkleRoot: string }>;
+export type ChallengeEvent = TypedEvent<[number], { action: number }>;
 
 export type ChallengeEventFilter = TypedEventFilter<ChallengeEvent>;
 
@@ -184,6 +192,13 @@ export type SharesMerkleRootEvent = TypedEvent<
 
 export type SharesMerkleRootEventFilter =
   TypedEventFilter<SharesMerkleRootEvent>;
+
+export type ValueInEvent = TypedEvent<
+  [string, BigNumber],
+  { provider: string; amount: BigNumber }
+>;
+
+export type ValueInEventFilter = TypedEventFilter<ValueInEvent>;
 
 export type WithdrawEvent = TypedEvent<
   [string, BigNumber],
@@ -225,6 +240,7 @@ export interface Erc20Campaign extends BaseContract {
     TOTAL_SHARES(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     challenge(
+      action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -270,6 +286,11 @@ export interface Erc20Campaign extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<[string]>;
 
+    setLock(
+      _lock: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     strategyUri(overrides?: CallOverrides): Promise<[string]>;
 
     totalClaimed(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -292,6 +313,7 @@ export interface Erc20Campaign extends BaseContract {
   TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
   challenge(
+    action: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -337,6 +359,11 @@ export interface Erc20Campaign extends BaseContract {
 
   rewardToken(overrides?: CallOverrides): Promise<string>;
 
+  setLock(
+    _lock: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   strategyUri(overrides?: CallOverrides): Promise<string>;
 
   totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
@@ -358,7 +385,7 @@ export interface Erc20Campaign extends BaseContract {
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
-    challenge(overrides?: CallOverrides): Promise<void>;
+    challenge(action: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     claim(
       account: string,
@@ -402,6 +429,8 @@ export interface Erc20Campaign extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<string>;
 
+    setLock(_lock: boolean, overrides?: CallOverrides): Promise<void>;
+
     strategyUri(overrides?: CallOverrides): Promise<string>;
 
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
@@ -417,8 +446,8 @@ export interface Erc20Campaign extends BaseContract {
   };
 
   filters: {
-    "Challenge(bytes32)"(sharesMerkleRoot?: null): ChallengeEventFilter;
-    Challenge(sharesMerkleRoot?: null): ChallengeEventFilter;
+    "Challenge(uint8)"(action?: null): ChallengeEventFilter;
+    Challenge(action?: null): ChallengeEventFilter;
 
     "Claim(address,uint256,uint256)"(
       account?: null,
@@ -441,6 +470,12 @@ export interface Erc20Campaign extends BaseContract {
       activationTime?: null
     ): SharesMerkleRootEventFilter;
 
+    "ValueIn(address,uint256)"(
+      provider?: null,
+      amount?: null
+    ): ValueInEventFilter;
+    ValueIn(provider?: null, amount?: null): ValueInEventFilter;
+
     "Withdraw(address,uint256)"(
       account?: null,
       amount?: null
@@ -454,6 +489,7 @@ export interface Erc20Campaign extends BaseContract {
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
     challenge(
+      action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -499,6 +535,11 @@ export interface Erc20Campaign extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<BigNumber>;
 
+    setLock(
+      _lock: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     strategyUri(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
@@ -522,6 +563,7 @@ export interface Erc20Campaign extends BaseContract {
     TOTAL_SHARES(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     challenge(
+      action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -572,6 +614,11 @@ export interface Erc20Campaign extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     rewardToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setLock(
+      _lock: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     strategyUri(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

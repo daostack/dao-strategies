@@ -22,7 +22,7 @@ export interface CampaignInterface extends utils.Interface {
   functions: {
     "CHALLENGE_PERIOD()": FunctionFragment;
     "TOTAL_SHARES()": FunctionFragment;
-    "challenge()": FunctionFragment;
+    "challenge(uint8)": FunctionFragment;
     "claim(address,uint256,bytes32[])": FunctionFragment;
     "claimed(address)": FunctionFragment;
     "guardian()": FunctionFragment;
@@ -31,6 +31,7 @@ export interface CampaignInterface extends utils.Interface {
     "oracle()": FunctionFragment;
     "proposeShares(bytes32,bytes32)": FunctionFragment;
     "providers(address)": FunctionFragment;
+    "setLock(bool)": FunctionFragment;
     "strategyUri()": FunctionFragment;
     "totalClaimed()": FunctionFragment;
     "totalReward()": FunctionFragment;
@@ -45,7 +46,10 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "TOTAL_SHARES",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "challenge", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "challenge",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "claim",
     values: [string, BigNumberish, BytesLike[]]
@@ -63,6 +67,7 @@ export interface CampaignInterface extends utils.Interface {
     values: [BytesLike, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "providers", values: [string]): string;
+  encodeFunctionData(functionFragment: "setLock", values: [boolean]): string;
   encodeFunctionData(
     functionFragment: "strategyUri",
     values?: undefined
@@ -103,6 +108,7 @@ export interface CampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "providers", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "setLock", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "strategyUri",
     data: BytesLike
@@ -121,7 +127,7 @@ export interface CampaignInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "Challenge(bytes32)": EventFragment;
+    "Challenge(uint8)": EventFragment;
     "Claim(address,uint256,uint256)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "SharesMerkleRoot(bytes32,bytes32,uint256)": EventFragment;
@@ -135,7 +141,7 @@ export interface CampaignInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
 
-export type ChallengeEvent = TypedEvent<[string], { sharesMerkleRoot: string }>;
+export type ChallengeEvent = TypedEvent<[number], { action: number }>;
 
 export type ChallengeEventFilter = TypedEventFilter<ChallengeEvent>;
 
@@ -198,6 +204,7 @@ export interface Campaign extends BaseContract {
     TOTAL_SHARES(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     challenge(
+      action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -232,6 +239,11 @@ export interface Campaign extends BaseContract {
 
     providers(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    setLock(
+      _lock: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     strategyUri(overrides?: CallOverrides): Promise<[string]>;
 
     totalClaimed(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -249,6 +261,7 @@ export interface Campaign extends BaseContract {
   TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
   challenge(
+    action: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -283,6 +296,11 @@ export interface Campaign extends BaseContract {
 
   providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+  setLock(
+    _lock: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   strategyUri(overrides?: CallOverrides): Promise<string>;
 
   totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
@@ -299,7 +317,7 @@ export interface Campaign extends BaseContract {
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
-    challenge(overrides?: CallOverrides): Promise<void>;
+    challenge(action: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     claim(
       account: string,
@@ -332,6 +350,8 @@ export interface Campaign extends BaseContract {
 
     providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    setLock(_lock: boolean, overrides?: CallOverrides): Promise<void>;
+
     strategyUri(overrides?: CallOverrides): Promise<string>;
 
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
@@ -342,8 +362,8 @@ export interface Campaign extends BaseContract {
   };
 
   filters: {
-    "Challenge(bytes32)"(sharesMerkleRoot?: null): ChallengeEventFilter;
-    Challenge(sharesMerkleRoot?: null): ChallengeEventFilter;
+    "Challenge(uint8)"(action?: null): ChallengeEventFilter;
+    Challenge(action?: null): ChallengeEventFilter;
 
     "Claim(address,uint256,uint256)"(
       account?: null,
@@ -379,6 +399,7 @@ export interface Campaign extends BaseContract {
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
     challenge(
+      action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -413,6 +434,11 @@ export interface Campaign extends BaseContract {
 
     providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    setLock(
+      _lock: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     strategyUri(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
@@ -431,6 +457,7 @@ export interface Campaign extends BaseContract {
     TOTAL_SHARES(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     challenge(
+      action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -469,6 +496,11 @@ export interface Campaign extends BaseContract {
     providers(
       arg0: string,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    setLock(
+      _lock: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     strategyUri(overrides?: CallOverrides): Promise<PopulatedTransaction>;
