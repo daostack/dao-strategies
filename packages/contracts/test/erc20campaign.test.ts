@@ -1,13 +1,13 @@
 import { Balances, BalanceTree } from '@dao-strategies/core';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { deployMockContract } from '@ethereum-waffle/mock-contract';
+// import { deployMockContract } from '@ethereum-waffle/mock-contract';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
-import { TestErc20, TestErc20__factory, Erc20Campaign, Erc20CampaignFactory, Erc20Campaign__factory, Erc20CampaignFactory__factory } from './../typechain';
+import { TestErc20, TestErc20__factory, Erc20Campaign, Erc20Campaign__factory, Erc20CampaignFactory__factory } from './../typechain';
 import { toBigNumber, fastForwardToTimestamp } from './support';
-import { MockContract } from '@ethereum-waffle/mock-contract';
+// import { MockContract } from '@ethereum-waffle/mock-contract';
 
 (BigNumber.prototype as any).toJSON = function () {
     // eslint-disable-next-line
@@ -15,7 +15,7 @@ import { MockContract } from '@ethereum-waffle/mock-contract';
 };
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000';
-const URI: string = '0x5fd924625f6ab16a19cc9807c7c506ae1813490e4ba675f843d5a10e0baacdb8';
+const URI = '0x5fd924625f6ab16a19cc9807c7c506ae1813490e4ba675f843d5a10e0baacdb8';
 const TOTAL_SHARES = toBigNumber('1', 18);
 
 interface SetupData {
@@ -32,7 +32,7 @@ interface SetupData {
 }
 
 describe('Erc20Campaign', () => {
-    async function setup(sharesDistribution: BigNumber[], publishShares: boolean): Promise<SetupData> {
+    async function setUp(sharesDistribution: BigNumber[], publishShares: boolean): Promise<SetupData> {
         const addresses = await ethers.getSigners();
         const admin = addresses[0];
         const guardian = addresses[1];
@@ -89,7 +89,7 @@ describe('Erc20Campaign', () => {
     it('predefined shares at creation', async () => {
         const sharesArray = [TOTAL_SHARES.div(6), TOTAL_SHARES.div(3), TOTAL_SHARES.div(2)];
 
-        const { admin, guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign, rewardToken } = await setup(sharesArray, true);
+        const { admin, guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign, rewardToken } = await setUp(sharesArray, true);
 
         // sanity checks
         expect(await campaign.pendingMerkleRoot()).to.equal(merkleRoot);
@@ -134,7 +134,7 @@ describe('Erc20Campaign', () => {
     it('publish shares ones after creation', async () => {
         const sharesArray = [TOTAL_SHARES.div(6), TOTAL_SHARES.div(3), TOTAL_SHARES.div(2)];
 
-        const { admin, guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign, rewardToken } = await setup(sharesArray, false);
+        const { admin, guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign, rewardToken } = await setUp(sharesArray, false);
 
         // sanity checks
         expect(await campaign.pendingMerkleRoot()).to.equal(ZERO_BYTES32);
@@ -151,7 +151,7 @@ describe('Erc20Campaign', () => {
         expect(await campaign.totalReward()).to.equal(toBigNumber('1000', 18));
 
         // oracle publishes shares
-        campaign.connect(oracle).proposeShares(merkleRoot, URI);
+        await campaign.connect(oracle).proposeShares(merkleRoot, URI);
 
         // fast forward to claim period
         const _activationTime = await campaign.activationTime();
