@@ -4,7 +4,6 @@
 import {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -17,23 +16,11 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export declare namespace Campaign {
-  export type SharesDataStruct = {
-    totalShares: BigNumberish;
-    sharesMerkleRoot: BytesLike;
-  };
-
-  export type SharesDataStructOutput = [BigNumber, string] & {
-    totalShares: BigNumber;
-    sharesMerkleRoot: string;
-  };
-}
-
-export interface CampaignFactoryInterface extends utils.Interface {
-  contractName: "CampaignFactory";
+export interface Erc20CampaignFactoryInterface extends utils.Interface {
+  contractName: "Erc20CampaignFactory";
   functions: {
     "campaignAddress(bytes32)": FunctionFragment;
-    "createCampaign((uint256,bytes32),bytes32,address,address,bool,uint256,bytes32)": FunctionFragment;
+    "createCampaign(bytes32,bytes32,bytes32,address,address,bytes32,address)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -42,15 +29,7 @@ export interface CampaignFactoryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createCampaign",
-    values: [
-      Campaign.SharesDataStruct,
-      BytesLike,
-      string,
-      string,
-      boolean,
-      BigNumberish,
-      BytesLike
-    ]
+    values: [BytesLike, BytesLike, BytesLike, string, string, BytesLike, string]
   ): string;
 
   decodeFunctionResult(
@@ -63,48 +42,36 @@ export interface CampaignFactoryInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "CampaignCreated(address,address,bytes32,uint256,bytes32,address,address,bool,uint256,bytes32)": EventFragment;
+    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,address,bytes32)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "CampaignCreated"): EventFragment;
 }
 
 export type CampaignCreatedEvent = TypedEvent<
-  [
-    string,
-    string,
-    string,
-    BigNumber,
-    string,
-    string,
-    string,
-    boolean,
-    BigNumber,
-    string
-  ],
+  [string, string, string, string, string, string, string, string, string],
   {
     creator: string;
     newCampaign: string;
-    _sharesRoot: string;
-    _sharesTotal: BigNumber;
-    _uri: string;
+    _sharesMerkleRoot: string;
+    _sharesUri: string;
+    _strategyUri: string;
     _guardian: string;
     _oracle: string;
-    _sharesPublished: boolean;
-    _claimPeriodStart: BigNumber;
+    _rewardToken: string;
     salt: string;
   }
 >;
 
 export type CampaignCreatedEventFilter = TypedEventFilter<CampaignCreatedEvent>;
 
-export interface CampaignFactory extends BaseContract {
-  contractName: "CampaignFactory";
+export interface Erc20CampaignFactory extends BaseContract {
+  contractName: "Erc20CampaignFactory";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CampaignFactoryInterface;
+  interface: Erc20CampaignFactoryInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -132,13 +99,13 @@ export interface CampaignFactory extends BaseContract {
     ): Promise<[string]>;
 
     createCampaign(
-      _shares: Campaign.SharesDataStruct,
-      _uri: BytesLike,
+      _sharesMerkleRoot: BytesLike,
+      _sharesUri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       salt: BytesLike,
+      _rewardToken: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
@@ -146,13 +113,13 @@ export interface CampaignFactory extends BaseContract {
   campaignAddress(salt: BytesLike, overrides?: CallOverrides): Promise<string>;
 
   createCampaign(
-    _shares: Campaign.SharesDataStruct,
-    _uri: BytesLike,
+    _sharesMerkleRoot: BytesLike,
+    _sharesUri: BytesLike,
+    _strategyUri: BytesLike,
     _guardian: string,
     _oracle: string,
-    _sharesPublished: boolean,
-    _claimPeriodStart: BigNumberish,
     salt: BytesLike,
+    _rewardToken: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -163,40 +130,38 @@ export interface CampaignFactory extends BaseContract {
     ): Promise<string>;
 
     createCampaign(
-      _shares: Campaign.SharesDataStruct,
-      _uri: BytesLike,
+      _sharesMerkleRoot: BytesLike,
+      _sharesUri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       salt: BytesLike,
+      _rewardToken: string,
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
-    "CampaignCreated(address,address,bytes32,uint256,bytes32,address,address,bool,uint256,bytes32)"(
+    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,address,bytes32)"(
       creator?: null,
       newCampaign?: null,
-      _sharesRoot?: null,
-      _sharesTotal?: null,
-      _uri?: null,
+      _sharesMerkleRoot?: null,
+      _sharesUri?: null,
+      _strategyUri?: null,
       _guardian?: null,
       _oracle?: null,
-      _sharesPublished?: null,
-      _claimPeriodStart?: null,
+      _rewardToken?: null,
       salt?: null
     ): CampaignCreatedEventFilter;
     CampaignCreated(
       creator?: null,
       newCampaign?: null,
-      _sharesRoot?: null,
-      _sharesTotal?: null,
-      _uri?: null,
+      _sharesMerkleRoot?: null,
+      _sharesUri?: null,
+      _strategyUri?: null,
       _guardian?: null,
       _oracle?: null,
-      _sharesPublished?: null,
-      _claimPeriodStart?: null,
+      _rewardToken?: null,
       salt?: null
     ): CampaignCreatedEventFilter;
   };
@@ -208,13 +173,13 @@ export interface CampaignFactory extends BaseContract {
     ): Promise<BigNumber>;
 
     createCampaign(
-      _shares: Campaign.SharesDataStruct,
-      _uri: BytesLike,
+      _sharesMerkleRoot: BytesLike,
+      _sharesUri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       salt: BytesLike,
+      _rewardToken: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
@@ -226,13 +191,13 @@ export interface CampaignFactory extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     createCampaign(
-      _shares: Campaign.SharesDataStruct,
-      _uri: BytesLike,
+      _sharesMerkleRoot: BytesLike,
+      _sharesUri: BytesLike,
+      _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
-      _sharesPublished: boolean,
-      _claimPeriodStart: BigNumberish,
       salt: BytesLike,
+      _rewardToken: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

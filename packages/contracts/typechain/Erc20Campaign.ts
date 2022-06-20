@@ -17,8 +17,8 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export interface CampaignInterface extends utils.Interface {
-  contractName: "Campaign";
+export interface Erc20CampaignInterface extends utils.Interface {
+  contractName: "Erc20Campaign";
   functions: {
     "CHALLENGE_PERIOD()": FunctionFragment;
     "TOTAL_SHARES()": FunctionFragment;
@@ -29,15 +29,18 @@ export interface CampaignInterface extends utils.Interface {
     "claimed(address)": FunctionFragment;
     "guardian()": FunctionFragment;
     "initCampaign(bytes32,bytes32,address,address)": FunctionFragment;
+    "initErc20Campaign(bytes32,bytes32,address,address,address)": FunctionFragment;
     "locked()": FunctionFragment;
     "oracle()": FunctionFragment;
     "pendingMerkleRoot()": FunctionFragment;
     "proposeShares(bytes32,bytes32)": FunctionFragment;
     "providers(address)": FunctionFragment;
+    "rewardToken()": FunctionFragment;
     "setLock(bool)": FunctionFragment;
     "strategyUri()": FunctionFragment;
     "totalClaimed()": FunctionFragment;
     "totalReward()": FunctionFragment;
+    "transferValueIn(uint256)": FunctionFragment;
     "withdrawFunds(address)": FunctionFragment;
   };
 
@@ -71,6 +74,10 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "initCampaign",
     values: [BytesLike, BytesLike, string, string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "initErc20Campaign",
+    values: [BytesLike, BytesLike, string, string, string]
+  ): string;
   encodeFunctionData(functionFragment: "locked", values?: undefined): string;
   encodeFunctionData(functionFragment: "oracle", values?: undefined): string;
   encodeFunctionData(
@@ -82,6 +89,10 @@ export interface CampaignInterface extends utils.Interface {
     values: [BytesLike, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "providers", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "rewardToken",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "setLock", values: [boolean]): string;
   encodeFunctionData(
     functionFragment: "strategyUri",
@@ -94,6 +105,10 @@ export interface CampaignInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "totalReward",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferValueIn",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawFunds",
@@ -124,6 +139,10 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "initCampaign",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "initErc20Campaign",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "oracle", data: BytesLike): Result;
   decodeFunctionResult(
@@ -135,6 +154,10 @@ export interface CampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "providers", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "rewardToken",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "setLock", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "strategyUri",
@@ -149,6 +172,10 @@ export interface CampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "transferValueIn",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "withdrawFunds",
     data: BytesLike
   ): Result;
@@ -158,6 +185,7 @@ export interface CampaignInterface extends utils.Interface {
     "Claim(address,uint256,uint256)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "SharesMerkleRoot(bytes32,bytes32,uint256)": EventFragment;
+    "ValueIn(address,uint256)": EventFragment;
     "Withdraw(address,uint256)": EventFragment;
   };
 
@@ -165,6 +193,7 @@ export interface CampaignInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Claim"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SharesMerkleRoot"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ValueIn"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
 
@@ -191,6 +220,13 @@ export type SharesMerkleRootEvent = TypedEvent<
 export type SharesMerkleRootEventFilter =
   TypedEventFilter<SharesMerkleRootEvent>;
 
+export type ValueInEvent = TypedEvent<
+  [string, BigNumber],
+  { provider: string; amount: BigNumber }
+>;
+
+export type ValueInEventFilter = TypedEventFilter<ValueInEvent>;
+
 export type WithdrawEvent = TypedEvent<
   [string, BigNumber],
   { account: string; amount: BigNumber }
@@ -198,13 +234,13 @@ export type WithdrawEvent = TypedEvent<
 
 export type WithdrawEventFilter = TypedEventFilter<WithdrawEvent>;
 
-export interface Campaign extends BaseContract {
-  contractName: "Campaign";
+export interface Erc20Campaign extends BaseContract {
+  contractName: "Erc20Campaign";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CampaignInterface;
+  interface: Erc20CampaignInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -258,6 +294,15 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    initErc20Campaign(
+      _sharesMerkleRoot: BytesLike,
+      _strategyUri: BytesLike,
+      _guardian: string,
+      _oracle: string,
+      _rewardToken: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     locked(overrides?: CallOverrides): Promise<[boolean]>;
 
     oracle(overrides?: CallOverrides): Promise<[string]>;
@@ -272,6 +317,8 @@ export interface Campaign extends BaseContract {
 
     providers(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    rewardToken(overrides?: CallOverrides): Promise<[string]>;
+
     setLock(
       _lock: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -282,6 +329,11 @@ export interface Campaign extends BaseContract {
     totalClaimed(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     totalReward(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    transferValueIn(
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     withdrawFunds(
       account: string,
@@ -321,6 +373,15 @@ export interface Campaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  initErc20Campaign(
+    _sharesMerkleRoot: BytesLike,
+    _strategyUri: BytesLike,
+    _guardian: string,
+    _oracle: string,
+    _rewardToken: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   locked(overrides?: CallOverrides): Promise<boolean>;
 
   oracle(overrides?: CallOverrides): Promise<string>;
@@ -335,6 +396,8 @@ export interface Campaign extends BaseContract {
 
   providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+  rewardToken(overrides?: CallOverrides): Promise<string>;
+
   setLock(
     _lock: boolean,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -345,6 +408,11 @@ export interface Campaign extends BaseContract {
   totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
 
   totalReward(overrides?: CallOverrides): Promise<BigNumber>;
+
+  transferValueIn(
+    amount: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   withdrawFunds(
     account: string,
@@ -381,6 +449,15 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    initErc20Campaign(
+      _sharesMerkleRoot: BytesLike,
+      _strategyUri: BytesLike,
+      _guardian: string,
+      _oracle: string,
+      _rewardToken: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     locked(overrides?: CallOverrides): Promise<boolean>;
 
     oracle(overrides?: CallOverrides): Promise<string>;
@@ -395,6 +472,8 @@ export interface Campaign extends BaseContract {
 
     providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    rewardToken(overrides?: CallOverrides): Promise<string>;
+
     setLock(_lock: boolean, overrides?: CallOverrides): Promise<void>;
 
     strategyUri(overrides?: CallOverrides): Promise<string>;
@@ -402,6 +481,11 @@ export interface Campaign extends BaseContract {
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalReward(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferValueIn(
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     withdrawFunds(account: string, overrides?: CallOverrides): Promise<void>;
   };
@@ -430,6 +514,12 @@ export interface Campaign extends BaseContract {
       sharesUri?: null,
       activationTime?: null
     ): SharesMerkleRootEventFilter;
+
+    "ValueIn(address,uint256)"(
+      provider?: null,
+      amount?: null
+    ): ValueInEventFilter;
+    ValueIn(provider?: null, amount?: null): ValueInEventFilter;
 
     "Withdraw(address,uint256)"(
       account?: null,
@@ -471,6 +561,15 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    initErc20Campaign(
+      _sharesMerkleRoot: BytesLike,
+      _strategyUri: BytesLike,
+      _guardian: string,
+      _oracle: string,
+      _rewardToken: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     locked(overrides?: CallOverrides): Promise<BigNumber>;
 
     oracle(overrides?: CallOverrides): Promise<BigNumber>;
@@ -485,6 +584,8 @@ export interface Campaign extends BaseContract {
 
     providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    rewardToken(overrides?: CallOverrides): Promise<BigNumber>;
+
     setLock(
       _lock: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -495,6 +596,11 @@ export interface Campaign extends BaseContract {
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalReward(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferValueIn(
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     withdrawFunds(
       account: string,
@@ -540,6 +646,15 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    initErc20Campaign(
+      _sharesMerkleRoot: BytesLike,
+      _strategyUri: BytesLike,
+      _guardian: string,
+      _oracle: string,
+      _rewardToken: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     locked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     oracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -557,6 +672,8 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    rewardToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     setLock(
       _lock: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -567,6 +684,11 @@ export interface Campaign extends BaseContract {
     totalClaimed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     totalReward(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferValueIn(
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     withdrawFunds(
       account: string,

@@ -17,8 +17,8 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export interface CampaignInterface extends utils.Interface {
-  contractName: "Campaign";
+export interface EthCampaignInterface extends utils.Interface {
+  contractName: "EthCampaign";
   functions: {
     "CHALLENGE_PERIOD()": FunctionFragment;
     "TOTAL_SHARES()": FunctionFragment;
@@ -29,6 +29,7 @@ export interface CampaignInterface extends utils.Interface {
     "claimed(address)": FunctionFragment;
     "guardian()": FunctionFragment;
     "initCampaign(bytes32,bytes32,address,address)": FunctionFragment;
+    "initEthCampaign(bytes32,bytes32,address,address)": FunctionFragment;
     "locked()": FunctionFragment;
     "oracle()": FunctionFragment;
     "pendingMerkleRoot()": FunctionFragment;
@@ -69,6 +70,10 @@ export interface CampaignInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "guardian", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initCampaign",
+    values: [BytesLike, BytesLike, string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "initEthCampaign",
     values: [BytesLike, BytesLike, string, string]
   ): string;
   encodeFunctionData(functionFragment: "locked", values?: undefined): string;
@@ -124,6 +129,10 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "initCampaign",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "initEthCampaign",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "oracle", data: BytesLike): Result;
   decodeFunctionResult(
@@ -158,6 +167,7 @@ export interface CampaignInterface extends utils.Interface {
     "Claim(address,uint256,uint256)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "SharesMerkleRoot(bytes32,bytes32,uint256)": EventFragment;
+    "ValueIn(address,uint256)": EventFragment;
     "Withdraw(address,uint256)": EventFragment;
   };
 
@@ -165,6 +175,7 @@ export interface CampaignInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Claim"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SharesMerkleRoot"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ValueIn"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
 
@@ -191,6 +202,13 @@ export type SharesMerkleRootEvent = TypedEvent<
 export type SharesMerkleRootEventFilter =
   TypedEventFilter<SharesMerkleRootEvent>;
 
+export type ValueInEvent = TypedEvent<
+  [string, BigNumber],
+  { provider: string; amount: BigNumber }
+>;
+
+export type ValueInEventFilter = TypedEventFilter<ValueInEvent>;
+
 export type WithdrawEvent = TypedEvent<
   [string, BigNumber],
   { account: string; amount: BigNumber }
@@ -198,13 +216,13 @@ export type WithdrawEvent = TypedEvent<
 
 export type WithdrawEventFilter = TypedEventFilter<WithdrawEvent>;
 
-export interface Campaign extends BaseContract {
-  contractName: "Campaign";
+export interface EthCampaign extends BaseContract {
+  contractName: "EthCampaign";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CampaignInterface;
+  interface: EthCampaignInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -251,6 +269,14 @@ export interface Campaign extends BaseContract {
     guardian(overrides?: CallOverrides): Promise<[string]>;
 
     initCampaign(
+      _sharesMerkleRoot: BytesLike,
+      _strategyUri: BytesLike,
+      _guardian: string,
+      _oracle: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    initEthCampaign(
       _sharesMerkleRoot: BytesLike,
       _strategyUri: BytesLike,
       _guardian: string,
@@ -321,6 +347,14 @@ export interface Campaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  initEthCampaign(
+    _sharesMerkleRoot: BytesLike,
+    _strategyUri: BytesLike,
+    _guardian: string,
+    _oracle: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   locked(overrides?: CallOverrides): Promise<boolean>;
 
   oracle(overrides?: CallOverrides): Promise<string>;
@@ -381,6 +415,14 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    initEthCampaign(
+      _sharesMerkleRoot: BytesLike,
+      _strategyUri: BytesLike,
+      _guardian: string,
+      _oracle: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     locked(overrides?: CallOverrides): Promise<boolean>;
 
     oracle(overrides?: CallOverrides): Promise<string>;
@@ -431,6 +473,12 @@ export interface Campaign extends BaseContract {
       activationTime?: null
     ): SharesMerkleRootEventFilter;
 
+    "ValueIn(address,uint256)"(
+      provider?: null,
+      amount?: null
+    ): ValueInEventFilter;
+    ValueIn(provider?: null, amount?: null): ValueInEventFilter;
+
     "Withdraw(address,uint256)"(
       account?: null,
       amount?: null
@@ -464,6 +512,14 @@ export interface Campaign extends BaseContract {
     guardian(overrides?: CallOverrides): Promise<BigNumber>;
 
     initCampaign(
+      _sharesMerkleRoot: BytesLike,
+      _strategyUri: BytesLike,
+      _guardian: string,
+      _oracle: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    initEthCampaign(
       _sharesMerkleRoot: BytesLike,
       _strategyUri: BytesLike,
       _guardian: string,
@@ -533,6 +589,14 @@ export interface Campaign extends BaseContract {
     guardian(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initCampaign(
+      _sharesMerkleRoot: BytesLike,
+      _strategyUri: BytesLike,
+      _guardian: string,
+      _oracle: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    initEthCampaign(
       _sharesMerkleRoot: BytesLike,
       _strategyUri: BytesLike,
       _guardian: string,

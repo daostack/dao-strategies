@@ -1,15 +1,15 @@
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
 import * as fs from 'fs';
-import path from 'path';
+// import path from 'path';
 
 import * as chalk from 'chalk';
-import * as hre from 'hardhat';
+// import * as hre from 'hardhat';
 
-const publishGenerated = '../frontend/src/generated/contracts';
-const publishDir = `${publishGenerated}/contracts`;
+// const publishGenerated = '../frontend/src/generated/contracts';
+// const publishDir = `${publishGenerated}/contracts`;
 const deploymentsDir = './generated/deployments';
-const typechainDir = './generated/typechain';
+// const typechainDir = './generated/typechain';
 const graphDir = '../subgraph';
 
 const publishContract = (contractName: string, networkName: string): boolean => {
