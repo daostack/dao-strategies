@@ -9,6 +9,10 @@ export const toWei = (str: string): BigNumber => {
   return ethers.utils.parseEther(numOf(str));
 };
 
+export const toBigNumber = (num: string, decimals: number): BigNumber => {
+  return ethers.utils.parseUnits(num, decimals);
+};
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const shouldFail = async (fun: Function): Promise<void> => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises

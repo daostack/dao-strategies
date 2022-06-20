@@ -5,7 +5,7 @@ import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
 import { EthCampaign, EthCampaignFactory, EthCampaign__factory, EthCampaignFactory__factory } from './../typechain';
-import { toWei, getTimestamp, fastForwardToTimestamp } from './support';
+import { toWei, toBigNumber, fastForwardToTimestamp } from './support';
 
 const LOG = true;
 
@@ -15,9 +15,10 @@ const LOG = true;
 };
 
 const RANDOM_BYTES32 = '0x5fd924625f6ab16a19cc9807c7c506ae1813490e4ba675f843d5a10e0baacdb8';
+const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000';
 const URI: string = RANDOM_BYTES32;
-// const SECONDS_IN_HOUR = 3600;
 const SECONDS_IN_DAY = 86400;
+const TOTAL_SHARES = toBigNumber('1', 18);
 
 interface SetupData {
   admin: SignerWithAddress;
@@ -39,25 +40,27 @@ describe('EthCampaign', () => {
     const oracle = addresses[2];
     const claimers = addresses.slice(4, 4 + sharesDistribution.length);
     const funders = addresses.slice(4 + sharesDistribution.length);
-    // eslint-disable-next-line no-param-reassign
-    //const totalShares = sharesDistribution.reduce((sum, currentNum) => (sum = sum.add(currentNum)), BigNumber.from(0));
+
+    // compute shares merkle root
     const claimersBalances: Balances = new Map();
     claimers.forEach((claimer, index) => {
       claimersBalances.set(claimer.address, sharesDistribution[index]);
     });
-
     const tree = new BalanceTree(claimersBalances);
     const merkleRoot = tree.getHexRoot();
 
-    const currentTimestamp = await getTimestamp();
+    // get deployers
     const campaignFactoryDeployer = await ethers.getContractFactory<EthCampaignFactory__factory>('EthCampaignFactory');
     const campaignDeployer = await ethers.getContractFactory<EthCampaign__factory>('EthCampaign');
 
+    // deploy contracts
     const campaignMaster = await campaignDeployer.deploy(); // deploy cmapign master implementation
     const campaignFactory = await campaignFactoryDeployer.deploy(campaignMaster.address);
+
+    // create new campaign
     const campaignCreationTx = await campaignFactory.createCampaign(
-      merkleRoot,
-      URI,
+      publishShares ? merkleRoot : ZERO_BYTES32,
+      publishShares ? URI : ZERO_BYTES32,
       URI,
       guardian.address,
       oracle.address,
@@ -80,8 +83,8 @@ describe('EthCampaign', () => {
     };
   }
 
-  it('Should reward claimers according to shares', async () => {
-    const sharesArray = [ethers.BigNumber.from('1000000000000000000').div(6), ethers.BigNumber.from('1000000000000000000').div(3), ethers.BigNumber.from('1000000000000000000').div(2)];
+  it('predefined shares at creation', async () => {
+    const sharesArray = [TOTAL_SHARES.div(6), TOTAL_SHARES.div(3), TOTAL_SHARES.div(2)];
 
     const { admin, guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign } = await setup(sharesArray, true);
 
@@ -95,6 +98,51 @@ describe('EthCampaign', () => {
     const fundTransaction = await funders[0].sendTransaction({ to: campaign.address, value: toWei('1') });
     expect(await campaign.providers(funders[0].address)).to.equal(toWei('1'));
     expect(await ethers.provider.getBalance(campaign.address)).to.equal(toWei('1'));
+
+    // fast forward to claim period
+    const _activationTime = await campaign.activationTime();
+    await fastForwardToTimestamp(_activationTime.add(10));
+
+    // claimer1 claims, should receive 1/6 ether
+    const claimer1BalanceBefore = await ethers.provider.getBalance(claimers[0].address);
+    const proofClaimer1 = tree.getProof(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber);
+    await campaign.claim(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber, proofClaimer1);
+    const claimer1BalanceAfter = await ethers.provider.getBalance(claimers[0].address);
+    expect(claimer1BalanceAfter.sub(claimer1BalanceBefore)).to.equal(toWei('1').div(6));
+
+    // claimer2 claims, should receive 1/3 ether
+    const claimer2BalanceBefore = await ethers.provider.getBalance(claimers[1].address);
+    const proofClaimer2 = tree.getProof(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber);
+    await campaign.claim(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber, proofClaimer2);
+    const claimer2BalanceAfter = await ethers.provider.getBalance(claimers[1].address);
+    expect(claimer2BalanceAfter.sub(claimer2BalanceBefore)).to.equal(toWei('1').div(3));
+
+    // claimer3 claims, should receive 1/2 ether
+    const claimer3BalanceBefore = await ethers.provider.getBalance(claimers[2].address);
+    const proofClaimer3 = tree.getProof(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber);
+    await campaign.claim(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber, proofClaimer3);
+    const claimer3BalanceAfter = await ethers.provider.getBalance(claimers[2].address);
+    expect(claimer3BalanceAfter.sub(claimer3BalanceBefore)).to.equal(toWei('1').div(2));
+  });
+
+  it('publish shares ones after creation', async () => {
+    const sharesArray = [TOTAL_SHARES.div(6), TOTAL_SHARES.div(3), TOTAL_SHARES.div(2)];
+
+    const { admin, guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign } = await setup(sharesArray, false);
+
+    // sanity checks
+    expect(await campaign.pendingMerkleRoot()).to.equal(ZERO_BYTES32);
+    expect(await campaign.guardian()).to.equal(guardian.address);
+    expect(await campaign.oracle()).to.equal(oracle.address);
+    expect(await campaign.strategyUri()).to.equal(URI);
+
+    // funder sends 1 ether to the campaign
+    const fundTransaction = await funders[0].sendTransaction({ to: campaign.address, value: toWei('1') });
+    expect(await campaign.providers(funders[0].address)).to.equal(toWei('1'));
+    expect(await ethers.provider.getBalance(campaign.address)).to.equal(toWei('1'));
+
+    // oracle publishes shares
+    campaign.connect(oracle).proposeShares(merkleRoot, URI);
 
     // fast forward to claim period
     const _activationTime = await campaign.activationTime();
