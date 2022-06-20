@@ -3,7 +3,7 @@ import * as json from 'multiformats/codecs/json';
 import { sha256 } from 'multiformats/hashes/sha2';
 
 import { Strategy_ID } from '../strategies';
-3;
+
 export interface CampaignUriDetails {
   creator: string;
   nonce: number;
