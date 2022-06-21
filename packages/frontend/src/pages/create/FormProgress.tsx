@@ -1,7 +1,9 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 
-export interface IFormProgress {
+import { IElement } from '../../components/styles/BasicElements';
+
+export interface IFormProgress extends IElement {
   position: number;
   stations: Array<{
     description: string;
@@ -76,11 +78,13 @@ const FormProgressCore: FC<IFormProgress> = (props: IFormProgress) => {
   });
 
   return (
-    <svg width={fullWidth} height={height} className={props.className}>
-      {lines}
-      {circles}
-      {clickAreas}
-    </svg>
+    <div className={props.className} style={props.style}>
+      <svg width={fullWidth} height={height}>
+        {lines}
+        {circles}
+        {clickAreas}
+      </svg>
+    </div>
   );
 };
 

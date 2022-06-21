@@ -105,6 +105,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const accountHook = useAccount();
   const navigate = useNavigate();
 
+  const isLogged = (): boolean => {
+    return account !== undefined;
+  };
+
   const create = async (): Promise<void> => {
     const account = accountHook.data?.address;
     if (account === undefined) throw new Error('account undefined');
@@ -203,10 +207,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return undefined;
   };
 
-  const isLogged = (): boolean => {
-    return true; // account !== undefined;
-  };
-
   const canBeSimulated = (): boolean => {
     const params = strategyDetails()?.strategyParams;
     return (
@@ -231,10 +231,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const isSimulated = () => {
     return simulation.rewards !== undefined && Object.keys(simulation.rewards).length !== 0;
-  };
-
-  const tailLayout = {
-    wrapperCol: { offset: 8, span: 16 },
   };
 
   const buttonAction = (): string => {
@@ -269,28 +265,41 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return errors;
   };
 
-  const nextPage = () => {
+  const rightClicked = () => {
     if (pageIx === 1) {
       const errors = validate();
       if (errors.length === 0) {
         setPageIx(2);
+        updateRewards();
       }
       return;
     }
-    if (pageIx < 2) setPageIx(pageIx + 1);
 
     /** simulate when passing to the last page */
-    if (pageIx === 1) updateRewards();
+    if (pageIx < 2) setPageIx(pageIx + 1);
+
+    if (pageIx === 2) {
+      create();
+    }
   };
 
-  const prevPage = () => {
+  const leftClicked = () => {
     if (pageIx > 0) setPageIx(pageIx - 1);
   };
 
-  const nextButtonText = () => {
+  const leftText = () => {
+    if (pageIx === 0) return 'Home';
+    return 'Back';
+  };
+
+  const righText = () => {
     if (pageIx === 1) return 'Review';
-    if (pageIx === 2) return 'Deploy Campaign';
+    if (pageIx === 2) return simulating ? 'Computing rewards' : 'Deploy Campaign';
     return 'Continue';
+  };
+
+  const rightDisabled = () => {
+    return simulating;
   };
 
   interface Column {
@@ -471,7 +480,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   ];
 
   return (
-    <Box style={{ height: '100vh', overflow: 'auto' }} justify="center" align="center">
+    <Box style={{ height: '100vh', padding: '45px 0px' }} justify="center" align="center">
       {!isLogged() ? (
         <>
           <p>Please login before creating the campaign</p>
@@ -480,26 +489,34 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </AppButton>
         </>
       ) : (
-        <>
-          <FormProgress
-            stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
-            position={0}
-            onSelected={(ix) => setPageIx(ix)}
-          />
+        <Box style={{ height: '100%', minWidth: '600px', maxWidth: '900px' }}>
+          <Box style={{ height: '80px', flexShrink: 0 }} direction="row" justify="center">
+            <FormProgress
+              stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
+              position={0}
+              onSelected={(ix) => setPageIx(ix)}
+            />
+          </Box>
 
-          <Box>
-            <div style={{ margin: '30px 0px 20px 0px', fontSize: '24px', fontWeight: '700' }}>
+          <Box style={{ height: '80px', flexShrink: 0, width: '100%' }}>
+            <div style={{ margin: '30px 0px 20px 0px', fontSize: '24px', fontWeight: '700', textAlign: 'center' }}>
               Create New Campaign <span style={{ fontSize: '18px', fontWeight: 'normal' }}>(Github)</span>
             </div>
             <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
           </Box>
 
-          <AppForm value={formValues} onChange={onValuesUpdated as any}>
+          <AppForm
+            style={{
+              flex: '1 1 auto',
+              overflowY: 'auto',
+              margin: '25px 0px',
+              width: '700px',
+            }}
+            value={formValues}
+            onChange={onValuesUpdated as any}>
             <div
               style={{
-                minHeight: 'calc(100vh - 400px)',
-                minWidth: '600px',
-                maxWidth: '1200px',
+                width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -522,13 +539,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             ))}
           </Box>
 
-          <Box direction="row" justify="between">
-            <AppButton onClick={() => prevPage()}>Back</AppButton>
-            <AppButton primary onClick={() => nextPage()}>
-              {nextButtonText()}
+          <Box style={{ width: '100%', height: '50px', flexShrink: '0' }} direction="row" justify="between">
+            <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
+            <AppButton primary onClick={() => rightClicked()} disabled={rightDisabled()}>
+              {righText()}
             </AppButton>
           </Box>
-        </>
+        </Box>
       )}
     </Box>
   );

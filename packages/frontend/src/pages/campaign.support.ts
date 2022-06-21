@@ -1,7 +1,7 @@
 import { BigNumber, ethers } from 'ethers';
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
-import { balancesToObject, CampaignUriDetails } from '@dao-strategies/core';
+import { Balances, balancesToObject, CampaignUriDetails, getCampaignUri } from '@dao-strategies/core';
 
 import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
 import { CampaignFactory } from '../generated/typechain';
@@ -45,10 +45,15 @@ export interface CampaignDetails {
 }
 
 export const simulateCampaign = async (details: CampaignUriDetails): Promise<SimulationResult> => {
-  const rewards = await StrategyComputationMockFunctions.runStrategy(details.strategyID, details.strategyParams);
+  const uri = await getCampaignUri(details);
+  const rewards = await new Promise<Balances>((resolve) => {
+    setTimeout(() => {
+      StrategyComputationMockFunctions.runStrategy(details.strategyID, details.strategyParams).then((r) => resolve(r));
+    }, 2000);
+  });
 
   return {
-    uri: '',
+    uri,
     rewards: balancesToObject(rewards),
     details,
   };
