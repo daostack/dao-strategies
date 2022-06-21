@@ -1,11 +1,12 @@
 import { BigNumber, ethers } from 'ethers';
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
-import { CampaignUriDetails } from '@dao-strategies/core';
+import { balancesToObject, CampaignUriDetails } from '@dao-strategies/core';
 
 import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
 import { CampaignFactory } from '../generated/typechain';
 import { ORACLE_NODE_URL } from '../config/appConfig';
+import { StrategyComputationMockFunctions } from '../mocks/strategy.computation';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
@@ -44,19 +45,27 @@ export interface CampaignDetails {
 }
 
 export const simulateCampaign = async (details: CampaignUriDetails): Promise<SimulationResult> => {
-  const response = await fetch(ORACLE_NODE_URL + '/campaign/simulateFromDetails', {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ details }),
-    credentials: 'include',
-  });
+  const rewards = await StrategyComputationMockFunctions.runStrategy(details.strategyID, details.strategyParams);
 
-  const result = await response.json();
   return {
-    uri: result.uri,
-    rewards: result.rewards,
+    uri: '',
+    rewards: balancesToObject(rewards),
     details,
   };
+
+  // const response = await fetch(ORACLE_NODE_URL + '/campaign/simulateFromDetails', {
+  //   method: 'post',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify({ details }),
+  //   credentials: 'include',
+  // });
+
+  // const result = await response.json();
+  // return {
+  //   uri: result.uri,
+  //   rewards: result.rewards,
+  //   details,
+  // };
 };
 
 export const createCampaign = async (details: CampaignUriDetails): Promise<string> => {

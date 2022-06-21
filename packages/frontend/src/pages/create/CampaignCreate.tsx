@@ -75,7 +75,7 @@ const initialValues: CampaignFormValues = {
   asset: Asset.Ether,
   description: '',
   repositoryFullnames: ['ethereum/go-ethereum'],
-  livePeriodChoice: PeriodOptions.custom,
+  livePeriodChoice: PeriodOptions.last3Months,
   customPeriodChoiceFrom: '',
   customPeriodChoiceTo: '',
 };
@@ -204,7 +204,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const isLogged = (): boolean => {
-    return true; //account !== undefined;
+    return true; // account !== undefined;
   };
 
   const canBeSimulated = (): boolean => {
@@ -278,6 +278,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       return;
     }
     if (pageIx < 2) setPageIx(pageIx + 1);
+
+    /** simulate when passing to the last page */
+    if (pageIx === 1) updateRewards();
   };
 
   const prevPage = () => {
@@ -289,20 +292,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (pageIx === 2) return 'Deploy Campaign';
     return 'Continue';
   };
-
-  const nextButtonDisabled = () => {
-    return errors.length > 0;
-  };
-
-  useEffect(() => {
-    const simulate = (): void => {
-      if (!simulating) {
-        void updateRewards();
-      }
-    };
-
-    if (pageIx === 2) simulate();
-  }, [pageIx, simulating, updateRewards]);
 
   interface Column {
     property: string;
@@ -482,7 +471,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   ];
 
   return (
-    <Box style={{ height: '100vh' }} justify="center" align="center">
+    <Box style={{ height: '100vh', overflow: 'auto' }} justify="center" align="center">
       {!isLogged() ? (
         <>
           <p>Please login before creating the campaign</p>
@@ -508,7 +497,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           <AppForm value={formValues} onChange={onValuesUpdated as any}>
             <div
               style={{
-                height: 'calc(100vh - 400px)',
+                minHeight: 'calc(100vh - 400px)',
                 minWidth: '600px',
                 maxWidth: '1200px',
                 display: 'flex',
@@ -526,8 +515,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </AppForm>
 
           <Box>
-            {errors.map((error) => (
-              <Box pad="small">{error}</Box>
+            {errors.map((error, ix) => (
+              <Box key={ix} pad="small">
+                {error}
+              </Box>
             ))}
           </Box>
 
