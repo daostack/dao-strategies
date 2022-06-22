@@ -14,13 +14,6 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
 
   return (
     <>
-      {signer ? (
-        <>
-          <Link to="./create">Create</Link>
-        </>
-      ) : (
-        <></>
-      )}
       <h1>Campaigns:</h1>
       {campaigns ? (
         campaigns.map((campaign: any) => {

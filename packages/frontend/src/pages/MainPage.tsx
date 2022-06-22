@@ -25,7 +25,7 @@ export const MainPage: FC = () => {
         <Routes>
           <Route path={RouteNames.Base} element={<LandingPage />}></Route>
           <Route path={RouteNames.Create} element={<CampaignCreate />}></Route>
-          <Route path={`${RouteNames.Base}/:campaignAddress`} element={<CampaignPage />}></Route>
+          <Route path={`${RouteNames.CampaignBase}/:campaignAddress`} element={<CampaignPage />}></Route>
           <Route path={RouteNames.Profile} element={<UserProfile />}></Route>
         </Routes>
         <MainPageFooter></MainPageFooter>
