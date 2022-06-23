@@ -1,18 +1,12 @@
-import { Balances, Strategy_ID } from '@dao-strategies/core';
-import { BigNumber } from 'ethers';
+import { Strategy_ID } from '@dao-strategies/core';
+import { RewardsMap } from '../pages/campaign.support';
 
-export const TEST_REWARDS: Record<string, BigNumber> = {
-  user1: BigNumber.from('10000'),
+export const TEST_REWARDS: RewardsMap = {
+  user1: '10000',
 };
 
 export const StrategyComputationMockFunctions = {
-  runStrategy: (strategyId: Strategy_ID, params: any): Promise<Balances> => {
-    const balances: Balances = new Map();
-
-    Object.getOwnPropertyNames(TEST_REWARDS).forEach((user: string) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      balances.set(user, TEST_REWARDS[user]);
-    });
-    return Promise.resolve(balances);
+  runStrategy: async (strategyId: Strategy_ID, params: any): Promise<RewardsMap> => {
+    return TEST_REWARDS;
   },
 };

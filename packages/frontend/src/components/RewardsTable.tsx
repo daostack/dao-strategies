@@ -1,7 +1,8 @@
 import { BigNumber, ethers } from 'ethers';
 import { Box, Table, TableBody, TableCell, TableHeader, TableRow, Text } from 'grommet';
 import { FC } from 'react';
-import { IElement } from './BasicElements';
+import { RewardsMap } from '../pages/campaign.support';
+import { IElement } from './styles/BasicElements';
 
 interface Column {
   property: string;
@@ -24,7 +25,7 @@ const columns: Column[] = [
 ];
 
 export interface RewardsTableI extends IElement {
-  rewards?: Record<string, BigNumber>;
+  rewards?: RewardsMap;
 }
 
 export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {

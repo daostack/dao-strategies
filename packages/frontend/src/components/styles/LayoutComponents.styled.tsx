@@ -12,6 +12,14 @@ export const ViewportContainer: FC<any> = (props: IElement) => {
   );
 };
 
+export const ColumnView: FC<any> = (props: IElement) => {
+  return (
+    <Box style={{ maxWidth: '900px', margin: '0 auto' }} align="center">
+      {props.children}
+    </Box>
+  );
+};
+
 export const TwoColumns = (props: IElement) => {
   return (
     <Grid
@@ -21,7 +29,8 @@ export const TwoColumns = (props: IElement) => {
       areas={[
         { name: 'left', start: [0, 0], end: [0, 0] },
         { name: 'right', start: [1, 0], end: [1, 0] },
-      ]}>
+      ]}
+      {...props}>
       <Box
         gridArea="left"
         direction="column"

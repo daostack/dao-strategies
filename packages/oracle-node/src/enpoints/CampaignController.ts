@@ -8,6 +8,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { CampaignCreateDetails } from '../services/types';
 import { Services } from '../types';
+import { toNumber } from '../utils/utils';
 
 import { Controller } from './Controller';
 
@@ -87,7 +88,7 @@ export class CampaignController extends Controller {
     next: NextFunction,
     loggedUser: string | undefined
   ): Promise<BalancesObject> {
-    const uri: string = request.body.uri;
+    const uri: string = request.params.uri as string;
     return balancesToObject(
       await this.services.campaign.runCampaignThrottled(uri)
     );
@@ -111,9 +112,18 @@ export class CampaignController extends Controller {
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
-  ): Promise<Campaign> {
-    return this.services.campaign.getFromAddress(
+  ): Promise<any> {
+    /* eslint-disable */
+    const campaign = await (this.services.campaign.getFromAddress(
       request.params.address as string
-    );
+    ) as any);
+
+    campaign.lastRunDate = toNumber(campaign.lastRunDate);
+    campaign.execDate = toNumber(campaign.execDate);
+    campaign.publishDate = toNumber(campaign.publishDate);
+    campaign.cancelDate = toNumber(campaign.cancelDate);
+
+    return campaign;
+    /* eslint-enable */
   }
 }

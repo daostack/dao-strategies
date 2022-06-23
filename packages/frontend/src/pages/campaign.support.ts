@@ -11,10 +11,12 @@ import { DateManager } from '../utils/time';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
+export type RewardsMap = Record<string, string>;
+
 export interface SimulationResult {
   uri?: string;
   details?: CampaignUriDetails;
-  rewards?: Record<string, BigNumber>;
+  rewards?: RewardsMap;
 }
 
 /** the details of a campaign that are not used as part of the URI */

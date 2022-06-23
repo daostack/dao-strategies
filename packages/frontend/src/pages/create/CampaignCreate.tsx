@@ -1,17 +1,4 @@
-import {
-  Box,
-  DateInput,
-  FormField,
-  Paragraph,
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHeader,
-  TableRow,
-  Text,
-  TextInput,
-} from 'grommet';
+import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
 import { useAccount } from 'wagmi';
 import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +32,7 @@ import { FormProgress } from './FormProgress';
 import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
 import { FormTrash } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
-import { RewardsTable } from '../../components/styles/RewardsTable';
+import { RewardsTable } from '../../components/RewardsTable';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -462,63 +449,72 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   return (
     <Box style={{ height: '100vh', padding: '45px 0px' }} justify="center" align="center">
-      <Box style={{ height: '100%', minWidth: '600px', maxWidth: '900px' }}>
-        <Box style={{ height: '80px', flexShrink: 0 }} direction="row" justify="center">
-          <FormProgress
-            stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
-            position={0}
-            onSelected={(ix) => setPageIx(ix)}
-          />
-        </Box>
-
-        <Box style={{ height: '80px', flexShrink: 0, width: '100%' }}>
-          <div style={{ margin: '30px 0px 20px 0px', fontSize: '24px', fontWeight: '700', textAlign: 'center' }}>
-            Create New Campaign <span style={{ fontSize: '18px', fontWeight: 'normal' }}>(Github)</span>
-          </div>
-          <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
-        </Box>
-
-        <AppForm
-          style={{
-            flex: '1 1 auto',
-            overflowY: 'auto',
-            margin: '25px 0px',
-            width: '700px',
-          }}
-          value={formValues}
-          onChange={onValuesUpdated as any}>
-          <div
-            style={{
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}>
-            {pages.map((page, ix) => {
-              return (
-                <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
-                  {page}
-                </div>
-              );
-            })}
-          </div>
-        </AppForm>
-
-        <Box>
-          {errors.map((error, ix) => (
-            <Box key={ix} pad="small">
-              {error}
-            </Box>
-          ))}
-        </Box>
-
-        <Box style={{ width: '100%', height: '50px', flexShrink: '0' }} direction="row" justify="between">
-          <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
-          <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
-            {rightText}
+      {!isLogged && false ? (
+        <>
+          <p>Please login before creating the campaign</p>
+          <AppButton onClick={() => connect()} primary>
+            Login
           </AppButton>
+        </>
+      ) : (
+        <Box style={{ height: '100%', minWidth: '600px', maxWidth: '900px' }}>
+          <Box style={{ height: '80px', flexShrink: 0 }} direction="row" justify="center">
+            <FormProgress
+              stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
+              position={0}
+              onSelected={(ix) => setPageIx(ix)}
+            />
+          </Box>
+
+          <Box style={{ height: '80px', flexShrink: 0, width: '100%' }}>
+            <div style={{ margin: '30px 0px 20px 0px', fontSize: '24px', fontWeight: '700', textAlign: 'center' }}>
+              Create New Campaign <span style={{ fontSize: '18px', fontWeight: 'normal' }}>(Github)</span>
+            </div>
+            <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
+          </Box>
+
+          <AppForm
+            style={{
+              flex: '1 1 auto',
+              overflowY: 'auto',
+              margin: '25px 0px',
+              width: '700px',
+            }}
+            value={formValues}
+            onChange={onValuesUpdated as any}>
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}>
+              {pages.map((page, ix) => {
+                return (
+                  <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
+                    {page}
+                  </div>
+                );
+              })}
+            </div>
+          </AppForm>
+
+          <Box>
+            {errors.map((error, ix) => (
+              <Box key={ix} pad="small">
+                {error}
+              </Box>
+            ))}
+          </Box>
+
+          <Box style={{ width: '100%', height: '50px', flexShrink: '0' }} direction="row" justify="between">
+            <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
+            <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
+              {rightText}
+            </AppButton>
+          </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };
