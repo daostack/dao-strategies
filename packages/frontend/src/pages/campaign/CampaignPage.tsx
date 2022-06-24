@@ -1,4 +1,4 @@
-import { Box, Header, Paragraph, Spinner } from 'grommet';
+import { Box, Header, Paragraph, Spinner, Tabs, Tab } from 'grommet';
 import { FC, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Countdown } from '../../components/Countdown';
@@ -22,7 +22,9 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   useEffect(() => {
     getRewards();
-  }, [getRewards]);
+    /** we want to react when campaign is loaded only */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [campaign]);
 
   if (campaign === undefined || isLoading) return <Spinner />;
   return (
@@ -63,11 +65,46 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           </TwoColumns>
         </Box>
 
-        <Box>
+        <Box style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '36px' }}>
           <Paragraph>{campaign.description}</Paragraph>
         </Box>
 
-        <RewardsTable rewards={rewards}></RewardsTable>
+        <Tabs style={{ height: '500px', overflow: 'auto' }}>
+          <Tab title="Leader Board">
+            <RewardsTable rewards={rewards} style={{ marginBottom: '36px' }}></RewardsTable>
+          </Tab>
+          <Tab title="More Info">
+            <TwoColumns>
+              <Box>
+                <Box>
+                  <Paragraph>Guardian</Paragraph>
+                  <Paragraph>{campaign.guardian}</Paragraph>
+                </Box>
+                <Box>
+                  <Paragraph>Address</Paragraph>
+                  <Paragraph>{campaign.address}</Paragraph>
+                </Box>
+                <Box>
+                  <Paragraph>Asset</Paragraph>
+                  <Paragraph>TBD</Paragraph>
+                </Box>
+              </Box>
+
+              <Box>
+                <Box>
+                  <Paragraph>Repositories</Paragraph>
+                  {campaign.strategyParams.repositories.map((repo: { owner: string; repo: string }) => {
+                    return (
+                      <Paragraph>
+                        {repo.owner}/{repo.repo}
+                      </Paragraph>
+                    );
+                  })}
+                </Box>
+              </Box>
+            </TwoColumns>
+          </Tab>
+        </Tabs>
       </ColumnView>
     </>
   );

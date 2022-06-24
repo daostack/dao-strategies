@@ -44,8 +44,8 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
         });
 
   return (
-    <Box>
-      <Table caption="Default Table">
+    <Box style={props.style}>
+      <Table>
         <TableHeader>
           <TableRow>
             {columns.map((c) => (

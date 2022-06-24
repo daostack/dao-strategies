@@ -11,6 +11,7 @@ import { Services } from '../types';
 import { toNumber } from '../utils/utils';
 
 import { Controller } from './Controller';
+import { toCampaignExternal } from './toCampaignExternal';
 
 /**
  * On Retroactive Campaign
@@ -118,12 +119,7 @@ export class CampaignController extends Controller {
       request.params.address as string
     ) as any);
 
-    campaign.lastRunDate = toNumber(campaign.lastRunDate);
-    campaign.execDate = toNumber(campaign.execDate);
-    campaign.publishDate = toNumber(campaign.publishDate);
-    campaign.cancelDate = toNumber(campaign.cancelDate);
-
-    return campaign;
+    return toCampaignExternal(campaign);
     /* eslint-enable */
   }
 }

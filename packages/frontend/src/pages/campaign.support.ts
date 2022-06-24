@@ -33,12 +33,13 @@ export interface CampaignCreateDetails {
  * not all of them are part of the campaign URI and can be edited
  * by the campaign creator.
  */
+/** should be the same as CampaignExternal in oracle */
 export interface CampaignDetails {
   uri: string;
   title: string;
   description: string;
   creator: string;
-  guardina: string;
+  guardian: string;
   oracle: string;
   execDate: number;
   cancelDate: number;

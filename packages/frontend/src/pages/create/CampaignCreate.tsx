@@ -1,6 +1,6 @@
 import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
 import { useAccount } from 'wagmi';
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DateManager } from '../../utils/time';
@@ -17,7 +17,7 @@ import {
   strategyDetails,
 } from '../campaign.support';
 import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
-import { CampaignUriDetails, getCampaignUri } from '@dao-strategies/core';
+import { getCampaignUri } from '@dao-strategies/core';
 import { RouteNames } from '../MainPage';
 import {
   AppButton,

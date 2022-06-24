@@ -23,8 +23,8 @@ export const useCampaign = (
       credentials: 'include',
     });
 
-    const result = await response.json();
-    setRewards(result.rewards);
+    const rewards = await response.json();
+    setRewards(rewards);
   };
 
   useEffect(() => {
