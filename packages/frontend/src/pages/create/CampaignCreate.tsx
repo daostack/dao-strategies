@@ -17,7 +17,7 @@ import {
   strategyDetails,
 } from '../campaign.support';
 import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
-import { CampaignUriDetails } from '@dao-strategies/core';
+import { CampaignUriDetails, getCampaignUri } from '@dao-strategies/core';
 import { RouteNames } from '../MainPage';
 import {
   AppButton,
@@ -33,6 +33,7 @@ import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
 import { FormTrash } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
+import { FormStatus, getButtonActions } from './buttons.actions';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -71,6 +72,8 @@ const initialValues: CampaignFormValues = {
 
 const GITHUB_DOMAIN = 'https://www.github.com/';
 
+const DEBUG = true;
+
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
 
@@ -89,8 +92,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
    * When the user steps into the final page, a simulation is triggered depending
    * on wheather the start date of the strategy is older than today.
    */
-  const [formValues, setFormValues] = useState<CampaignFormValues>(initialValues);
-  const [details, setDetails] = useState<CampaignUriDetails | undefined>(undefined);
+  const [formValues, setFormValuesState] = useState<CampaignFormValues>(initialValues);
   const [simulation, setSimulated] = useState<SimulationResult | undefined>();
   const [simulating, setSimulating] = useState<boolean>(false);
 
@@ -98,9 +100,14 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const accountHook = useAccount();
   const navigate = useNavigate();
 
+  /** details is a derived value */
+  const details = strategyDetails(formValues, today, account);
+
   const periodType = getPeriodType(details, today);
 
   const isLogged = account !== undefined;
+
+  if (DEBUG) console.log('CampaignCreate - render');
 
   /** Prepare all the parameters to deply the campaign and call the deployCampaign function */
   const create = async (): Promise<void> => {
@@ -135,13 +142,36 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   /** Processed values from the form that are cheap to compute and useful */
   const formValuesProcessed = (): ProcessedFormValues => {
+    if (DEBUG) console.log('CampaignCreate - formValuesProcessed()');
     return {
       periodCustom: formValues.livePeriodChoice === periodOptions.get(PeriodKeys.custom),
     };
   };
 
+  /** single wrapper of setFormValues to detect details changes */
+  const setFormValues = (nextFormValues: CampaignFormValues) => {
+    if (formValues === undefined) return;
+
+    const oldDetails = strategyDetails(formValues, today, account);
+
+    /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
+    if (oldDetails !== undefined && simulation !== undefined) {
+      const nextDetails = strategyDetails(nextFormValues, today, account);
+      if (nextDetails !== undefined) {
+        const currentUri = getCampaignUri(oldDetails);
+        const nextUri = getCampaignUri(nextDetails);
+        if (nextUri !== currentUri) {
+          setSimulated(undefined);
+        }
+      }
+    }
+
+    setFormValuesState(nextFormValues);
+  };
+
   /** Hook called everytime any field in the form is updated, it keeps the formValues state in synch */
   const onValuesUpdated = (values: CampaignFormValues) => {
+    if (DEBUG) console.log('CampaignCreate - onValuesUpdated()');
     if (validated) {
       // validate every change after the first time
       validate();
@@ -149,7 +179,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setFormValues(values);
   };
 
-  const validate = () => {
+  const validate = (): string[] => {
+    if (DEBUG) console.log('CampaignCreate - validate()');
     const errors: string[] = [];
     if (formValues.title === '') errors.push('title cannot be empty');
     if (formValues.repositoryFullnames.length === 0) errors.push('no repositories specified');
@@ -158,14 +189,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return errors;
   };
 
-  /** useEffect to keep strategy details always in synch with formValues */
-  useEffect(() => {
-    if (formValues === undefined) return;
-
-    setDetails(strategyDetails(formValues, today, account));
-  }, [formValues, today, account]);
-
   const simulate = async (): Promise<void> => {
+    if (DEBUG) console.log('CampaignCreate - simulate()');
     setSimulating(true);
 
     if (details === undefined) throw new Error();
@@ -195,21 +220,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setFormValues({ ...formValues });
   };
 
-  /**  */
-  interface FormStatus {
-    page: {
-      isFirstPage: boolean;
-      isLastFormPage: boolean;
-      isReview: boolean;
-    };
-    shouldSimulate: boolean;
-    canSimulate: boolean;
-    mustSimulate: boolean;
-    isSimulating: boolean;
-    wasSimulated: boolean;
-    canCreate: boolean;
-  }
-
   const status: FormStatus = {
     page: {
       isFirstPage: pageIx === 0,
@@ -224,81 +234,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     canCreate: isLogged,
   };
 
-  /** Sefault values */
-  let rightAction: () => void = () => setPageIx(pageIx + 1);
-  let rightText: string = 'Continue';
-  const rightDisabled = false;
-
-  /** Special values */
-  if (status.page.isLastFormPage) {
-    rightText = 'Review';
-    rightAction = () => {
-      const errors = validate();
-      if (errors.length === 0) {
-        setPageIx(pageIx + 1);
-        if (status.shouldSimulate && status.canSimulate) {
-          simulate();
-        }
-      }
-    };
-  }
-
-  // on the review page
-  if (status.page.isReview) {
-    if (!status.shouldSimulate) {
-      /** should not simulate */
-      if (status.canCreate) {
-        /** Should not simulate and can create*/
-        rightText = `Deploy Campaign`;
-        rightAction = () => create();
-      } else {
-        /** Should not simulate and can't create*/
-        rightText = `Connect Wallet to Deploy`;
-        rightAction = () => connect();
-      }
-    } else {
-      /** should simulate */
-      if (!status.wasSimulated) {
-        /** was not simulated */
-        if (status.canSimulate) {
-          /** can simulate */
-          if (status.mustSimulate) {
-            /** should simulate, was not simulated, can simualte and must simulate */
-            rightText = 'Calculate rewards';
-            rightAction = () => simulate();
-          } else {
-            /** should simulate, was not simulated, can simualte but does not must simulate */
-            rightText = 'Deploy Campaign';
-            rightAction = () => create();
-          }
-        } else {
-          /** cannot simulate */
-          if (status.mustSimulate) {
-            /** should simulate, was not simulated, cannot simulate and must simulate */
-            rightText = 'Connect Wallet';
-            rightAction = () => connect();
-          }
-        }
-      } else {
-        /** was simulated */
-        if (status.canCreate) {
-          /** should simulate, was simulated, can create */
-          rightText = `Deploy Campaign`;
-          rightAction = () => create();
-        } else {
-          /** should simulate, was simulated, cannot create */
-          rightText = `Connect Wallet to Deploy`;
-          rightAction = () => connect();
-        }
-      }
-    }
-  }
-
-  /** overwrite */
-  if (status.isSimulating) {
-    rightText = `Computing rewards`;
-    rightAction = () => {};
-  }
+  const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
+    connect,
+    create,
+    setPageIx,
+    simulate,
+    validate,
+  });
 
   const leftClicked = () => {
     if (pageIx > 0) setPageIx(pageIx - 1);
@@ -449,72 +391,63 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   return (
     <Box style={{ height: '100vh', padding: '45px 0px' }} justify="center" align="center">
-      {!isLogged && false ? (
-        <>
-          <p>Please login before creating the campaign</p>
-          <AppButton onClick={() => connect()} primary>
-            Login
-          </AppButton>
-        </>
-      ) : (
-        <Box style={{ height: '100%', minWidth: '600px', maxWidth: '900px' }}>
-          <Box style={{ height: '80px', flexShrink: 0 }} direction="row" justify="center">
-            <FormProgress
-              stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
-              position={0}
-              onSelected={(ix) => setPageIx(ix)}
-            />
-          </Box>
-
-          <Box style={{ height: '80px', flexShrink: 0, width: '100%' }}>
-            <div style={{ margin: '30px 0px 20px 0px', fontSize: '24px', fontWeight: '700', textAlign: 'center' }}>
-              Create New Campaign <span style={{ fontSize: '18px', fontWeight: 'normal' }}>(Github)</span>
-            </div>
-            <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
-          </Box>
-
-          <AppForm
-            style={{
-              flex: '1 1 auto',
-              overflowY: 'auto',
-              margin: '25px 0px',
-              width: '700px',
-            }}
-            value={formValues}
-            onChange={onValuesUpdated as any}>
-            <div
-              style={{
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}>
-              {pages.map((page, ix) => {
-                return (
-                  <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
-                    {page}
-                  </div>
-                );
-              })}
-            </div>
-          </AppForm>
-
-          <Box>
-            {errors.map((error, ix) => (
-              <Box key={ix} pad="small">
-                {error}
-              </Box>
-            ))}
-          </Box>
-
-          <Box style={{ width: '100%', height: '50px', flexShrink: '0' }} direction="row" justify="between">
-            <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
-            <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
-              {rightText}
-            </AppButton>
-          </Box>
+      <Box style={{ height: '100%', minWidth: '600px', maxWidth: '900px' }}>
+        <Box style={{ height: '80px', flexShrink: 0 }} direction="row" justify="center">
+          <FormProgress
+            stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
+            position={0}
+            onSelected={(ix) => setPageIx(ix)}
+          />
         </Box>
-      )}
+
+        <Box style={{ height: '80px', flexShrink: 0, width: '100%' }}>
+          <div style={{ margin: '30px 0px 20px 0px', fontSize: '24px', fontWeight: '700', textAlign: 'center' }}>
+            Create New Campaign <span style={{ fontSize: '18px', fontWeight: 'normal' }}>(Github)</span>
+          </div>
+          <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
+        </Box>
+
+        <AppForm
+          style={{
+            flex: '1 1 auto',
+            overflowY: 'auto',
+            margin: '25px 0px',
+            width: '700px',
+          }}
+          value={formValues}
+          onChange={onValuesUpdated as any}>
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+            {pages.map((page, ix) => {
+              return (
+                <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
+                  {page}
+                </div>
+              );
+            })}
+          </div>
+        </AppForm>
+
+        <Box>
+          {errors.map((error, ix) => (
+            <Box key={ix} pad="small">
+              {error}
+            </Box>
+          ))}
+        </Box>
+
+        <Box style={{ width: '100%', height: '50px', flexShrink: '0' }} direction="row" justify="between">
+          <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
+          <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
+            {rightText}
+          </AppButton>
+        </Box>
+      </Box>
     </Box>
   );
 };

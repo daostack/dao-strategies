@@ -67,7 +67,7 @@ export const periodOptions: Map<PeriodKeys, string> = new Map();
 periodOptions.set(PeriodKeys.last3Months, `${LAST} 3 months`);
 periodOptions.set(PeriodKeys.last6Months, `${LAST} 6 months`);
 periodOptions.set(PeriodKeys.next3Months, `${NEXT} 3 months`);
-periodOptions.set(PeriodKeys.next6Months, `${NEXT} 3 months`);
+periodOptions.set(PeriodKeys.next6Months, `${NEXT} 6 months`);
 periodOptions.set(PeriodKeys.custom, CUSTOM);
 
 export enum PeriodType {
