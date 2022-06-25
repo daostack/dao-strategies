@@ -3,11 +3,11 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: CampaignFactory
+    name: EthCampaignFactory
     network: hardhat
     source:
-      address: "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512"
-      abi: CampaignFactory
+      address: '0xe7f1725e7734ce288f8367e1bb143e90bb3f0512'
+      abi: EthCampaignFactory
       startBlock: 1
     mapping:
       kind: ethereum/events
@@ -16,9 +16,29 @@ dataSources:
       entities:
         - Campaign
       abis:
-        - name: CampaignFactory
-          file: ./abis/CampaignFactory.sol/CampaignFactory.json
+        - name: EthCampaignFactory
+          file: ./abis/eth-campaign/EthCampaignFactory.sol/EthCampaignFactory.json
       eventHandlers:
-        - event: CampaignCreated(address,address,bytes32,uint256,bytes32,address,address,bool,uint256,bytes32)
-          handler: handleCampaignCreated
+        - event: CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,bytes32)
+          handler: handleEthCampaignCreated
+      file: ./mapping.ts
+  - kind: ethereum/contract
+    name: Erc20CampaignFactory
+    network: hardhat
+    source:
+      address: '0xe7f1725e7734ce288f8367e1bb143e90bb3f0512'
+      abi: Erc20CampaignFactory
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Campaign
+      abis:
+        - name: Erc20CampaignFactory
+          file: ./abis/erc20-campaign/Erc20CampaignFactory.sol/Erc20CampaignFactory.json
+      eventHandlers:
+        - event: CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,address,bytes32)
+          handler: handleEthCampaignCreated
       file: ./mapping.ts
