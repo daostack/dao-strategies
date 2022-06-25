@@ -1,0 +1,665 @@
+{
+  "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ActiveChallengePeriod",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ClaimingNotAllowed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidProof",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Locked",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoFunds",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoRewardAvailable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OnlyGuardian",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OnlyInChallengePeriod",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OnlyOracle",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WithdrawalNotAllowed",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "enum Campaign.ChallengeAction",
+          "name": "action",
+          "type": "uint8"
+        }
+      ],
+      "name": "Challenge",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "share",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        }
+      ],
+      "name": "Claim",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "version",
+          "type": "uint8"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "sharesMerkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "sharesUri",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "activationTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "SharesMerkleRoot",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "provider",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "ValueIn",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "Withdraw",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "CHALLENGE_PERIOD",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TOTAL_SHARES",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "activationTime",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "approvedMerkleRoot",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum Campaign.ChallengeAction",
+          "name": "action",
+          "type": "uint8"
+        }
+      ],
+      "name": "challenge",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "share",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "proof",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "claim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "claimed",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "guardian",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_sharesMerkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_strategyUri",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_guardian",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_oracle",
+          "type": "address"
+        }
+      ],
+      "name": "initCampaign",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_sharesMerkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_strategyUri",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_guardian",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_oracle",
+          "type": "address"
+        }
+      ],
+      "name": "initEthCampaign",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "locked",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "oracle",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pendingMerkleRoot",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_sharesMerkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_sharesUri",
+          "type": "bytes32"
+        }
+      ],
+      "name": "proposeShares",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "providers",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "_lock",
+          "type": "bool"
+        }
+      ],
+      "name": "setLock",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "strategyUri",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalClaimed",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalReward",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "withdrawFunds",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ],
+  "transactionHash": "0xcb0a90c99493dae67b1cb2536ef3880d363f4e827f5530656b94db99d34dce2a",
+  "receipt": {
+    "to": null,
+    "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "contractAddress": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "transactionIndex": 0,
+    "gasUsed": "894288",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x355c57c8e93059e24c23bafa4af969dffa6c1c9069d8767f04d7e0b3007dc4ad",
+    "transactionHash": "0xcb0a90c99493dae67b1cb2536ef3880d363f4e827f5530656b94db99d34dce2a",
+    "logs": [],
+    "blockNumber": 3,
+    "cumulativeGasUsed": "894288",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "a052df09dd36a12f90b4fe8e363e80f2",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.6+commit.11564f7e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"ActiveChallengePeriod\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ClaimingNotAllowed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidProof\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"Locked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoFunds\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoRewardAvailable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OnlyGuardian\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OnlyInChallengePeriod\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OnlyOracle\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"WithdrawalNotAllowed\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"enum Campaign.ChallengeAction\",\"name\":\"action\",\"type\":\"uint8\"}],\"name\":\"Challenge\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"share\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"reward\",\"type\":\"uint256\"}],\"name\":\"Claim\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"sharesMerkleRoot\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"sharesUri\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"activationTime\",\"type\":\"uint256\"}],\"name\":\"SharesMerkleRoot\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"ValueIn\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Withdraw\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"CHALLENGE_PERIOD\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"TOTAL_SHARES\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"activationTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"approvedMerkleRoot\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enum Campaign.ChallengeAction\",\"name\":\"action\",\"type\":\"uint8\"}],\"name\":\"challenge\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"share\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"proof\",\"type\":\"bytes32[]\"}],\"name\":\"claim\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"claimed\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"guardian\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_sharesMerkleRoot\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_strategyUri\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"_guardian\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_oracle\",\"type\":\"address\"}],\"name\":\"initCampaign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_sharesMerkleRoot\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_strategyUri\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"_guardian\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_oracle\",\"type\":\"address\"}],\"name\":\"initEthCampaign\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"locked\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"oracle\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pendingMerkleRoot\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_sharesMerkleRoot\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"_sharesUri\",\"type\":\"bytes32\"}],\"name\":\"proposeShares\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"providers\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bool\",\"name\":\"_lock\",\"type\":\"bool\"}],\"name\":\"setLock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"strategyUri\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalClaimed\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalReward\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"withdrawFunds\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"title\":\"EthCampaign\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/eth-campaign/EthCampaign.sol\":\"EthCampaign\"},\"evmVersion\":\"berlin\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/proxy/utils/Initializable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.6.0) (proxy/utils/Initializable.sol)\\n\\npragma solidity ^0.8.2;\\n\\nimport \\\"../../utils/Address.sol\\\";\\n\\n/**\\n * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed\\n * behind a proxy. Since proxied contracts do not make use of a constructor, it's common to move constructor logic to an\\n * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer\\n * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.\\n *\\n * The initialization functions use a version number. Once a version number is used, it is consumed and cannot be\\n * reused. This mechanism prevents re-execution of each \\\"step\\\" but allows the creation of new initialization steps in\\n * case an upgrade adds a module that needs to be initialized.\\n *\\n * For example:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```\\n * contract MyToken is ERC20Upgradeable {\\n *     function initialize() initializer public {\\n *         __ERC20_init(\\\"MyToken\\\", \\\"MTK\\\");\\n *     }\\n * }\\n * contract MyTokenV2 is MyToken, ERC20PermitUpgradeable {\\n *     function initializeV2() reinitializer(2) public {\\n *         __ERC20Permit_init(\\\"MyToken\\\");\\n *     }\\n * }\\n * ```\\n *\\n * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as\\n * possible by providing the encoded function call as the `_data` argument to {ERC1967Proxy-constructor}.\\n *\\n * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure\\n * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.\\n *\\n * [CAUTION]\\n * ====\\n * Avoid leaving a contract uninitialized.\\n *\\n * An uninitialized contract can be taken over by an attacker. This applies to both a proxy and its implementation\\n * contract, which may impact the proxy. To prevent the implementation contract from being used, you should invoke\\n * the {_disableInitializers} function in the constructor to automatically lock it when it is deployed:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```\\n * /// @custom:oz-upgrades-unsafe-allow constructor\\n * constructor() {\\n *     _disableInitializers();\\n * }\\n * ```\\n * ====\\n */\\nabstract contract Initializable {\\n    /**\\n     * @dev Indicates that the contract has been initialized.\\n     * @custom:oz-retyped-from bool\\n     */\\n    uint8 private _initialized;\\n\\n    /**\\n     * @dev Indicates that the contract is in the process of being initialized.\\n     */\\n    bool private _initializing;\\n\\n    /**\\n     * @dev Triggered when the contract has been initialized or reinitialized.\\n     */\\n    event Initialized(uint8 version);\\n\\n    /**\\n     * @dev A modifier that defines a protected initializer function that can be invoked at most once. In its scope,\\n     * `onlyInitializing` functions can be used to initialize parent contracts. Equivalent to `reinitializer(1)`.\\n     */\\n    modifier initializer() {\\n        bool isTopLevelCall = _setInitializedVersion(1);\\n        if (isTopLevelCall) {\\n            _initializing = true;\\n        }\\n        _;\\n        if (isTopLevelCall) {\\n            _initializing = false;\\n            emit Initialized(1);\\n        }\\n    }\\n\\n    /**\\n     * @dev A modifier that defines a protected reinitializer function that can be invoked at most once, and only if the\\n     * contract hasn't been initialized to a greater version before. In its scope, `onlyInitializing` functions can be\\n     * used to initialize parent contracts.\\n     *\\n     * `initializer` is equivalent to `reinitializer(1)`, so a reinitializer may be used after the original\\n     * initialization step. This is essential to configure modules that are added through upgrades and that require\\n     * initialization.\\n     *\\n     * Note that versions can jump in increments greater than 1; this implies that if multiple reinitializers coexist in\\n     * a contract, executing them in the right order is up to the developer or operator.\\n     */\\n    modifier reinitializer(uint8 version) {\\n        bool isTopLevelCall = _setInitializedVersion(version);\\n        if (isTopLevelCall) {\\n            _initializing = true;\\n        }\\n        _;\\n        if (isTopLevelCall) {\\n            _initializing = false;\\n            emit Initialized(version);\\n        }\\n    }\\n\\n    /**\\n     * @dev Modifier to protect an initialization function so that it can only be invoked by functions with the\\n     * {initializer} and {reinitializer} modifiers, directly or indirectly.\\n     */\\n    modifier onlyInitializing() {\\n        require(_initializing, \\\"Initializable: contract is not initializing\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.\\n     * Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized\\n     * to any version. It is recommended to use this to lock implementation contracts that are designed to be called\\n     * through proxies.\\n     */\\n    function _disableInitializers() internal virtual {\\n        _setInitializedVersion(type(uint8).max);\\n    }\\n\\n    function _setInitializedVersion(uint8 version) private returns (bool) {\\n        // If the contract is initializing we ignore whether _initialized is set in order to support multiple\\n        // inheritance patterns, but we only do this in the context of a constructor, and for the lowest level\\n        // of initializers, because in other contexts the contract may have been reentered.\\n        if (_initializing) {\\n            require(\\n                version == 1 && !Address.isContract(address(this)),\\n                \\\"Initializable: contract is already initialized\\\"\\n            );\\n            return false;\\n        } else {\\n            require(_initialized < version, \\\"Initializable: contract is already initialized\\\");\\n            _initialized = version;\\n            return true;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xb68c2016cd41840646addd6f79f17f80f42a6279acb0cd4d9d85cab6e8d9b777\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Address.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.5.0) (utils/Address.sol)\\n\\npragma solidity ^0.8.1;\\n\\n/**\\n * @dev Collection of functions related to the address type\\n */\\nlibrary Address {\\n    /**\\n     * @dev Returns true if `account` is a contract.\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * It is unsafe to assume that an address for which this function returns\\n     * false is an externally-owned account (EOA) and not a contract.\\n     *\\n     * Among others, `isContract` will return false for the following\\n     * types of addresses:\\n     *\\n     *  - an externally-owned account\\n     *  - a contract in construction\\n     *  - an address where a contract will be created\\n     *  - an address where a contract lived, but was destroyed\\n     * ====\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * You shouldn't rely on `isContract` to protect against flash loan attacks!\\n     *\\n     * Preventing calls from contracts is highly discouraged. It breaks composability, breaks support for smart wallets\\n     * like Gnosis Safe, and does not provide security since it can be circumvented by calling from a contract\\n     * constructor.\\n     * ====\\n     */\\n    function isContract(address account) internal view returns (bool) {\\n        // This method relies on extcodesize/address.code.length, which returns 0\\n        // for contracts in construction, since the code is only stored at the end\\n        // of the constructor execution.\\n\\n        return account.code.length > 0;\\n    }\\n\\n    /**\\n     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to\\n     * `recipient`, forwarding all available gas and reverting on errors.\\n     *\\n     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost\\n     * of certain opcodes, possibly making contracts go over the 2300 gas limit\\n     * imposed by `transfer`, making them unable to receive funds via\\n     * `transfer`. {sendValue} removes this limitation.\\n     *\\n     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].\\n     *\\n     * IMPORTANT: because control is transferred to `recipient`, care must be\\n     * taken to not create reentrancy vulnerabilities. Consider using\\n     * {ReentrancyGuard} or the\\n     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].\\n     */\\n    function sendValue(address payable recipient, uint256 amount) internal {\\n        require(address(this).balance >= amount, \\\"Address: insufficient balance\\\");\\n\\n        (bool success, ) = recipient.call{value: amount}(\\\"\\\");\\n        require(success, \\\"Address: unable to send value, recipient may have reverted\\\");\\n    }\\n\\n    /**\\n     * @dev Performs a Solidity function call using a low level `call`. A\\n     * plain `call` is an unsafe replacement for a function call: use this\\n     * function instead.\\n     *\\n     * If `target` reverts with a revert reason, it is bubbled up by this\\n     * function (like regular Solidity function calls).\\n     *\\n     * Returns the raw returned data. To convert to the expected return value,\\n     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].\\n     *\\n     * Requirements:\\n     *\\n     * - `target` must be a contract.\\n     * - calling `target` with `data` must not revert.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionCall(target, data, \\\"Address: low-level call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with\\n     * `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, 0, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but also transferring `value` wei to `target`.\\n     *\\n     * Requirements:\\n     *\\n     * - the calling contract must have an ETH balance of at least `value`.\\n     * - the called Solidity function must be `payable`.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, value, \\\"Address: low-level call with value failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but\\n     * with `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        require(address(this).balance >= value, \\\"Address: insufficient balance for call\\\");\\n        require(isContract(target), \\\"Address: call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.call{value: value}(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {\\n        return functionStaticCall(target, data, \\\"Address: low-level static call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal view returns (bytes memory) {\\n        require(isContract(target), \\\"Address: static call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.staticcall(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a delegate call.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionDelegateCall(target, data, \\\"Address: low-level delegate call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a delegate call.\\n     *\\n     * _Available since v3.4._\\n     */\\n    function functionDelegateCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        require(isContract(target), \\\"Address: delegate call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.delegatecall(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Tool to verifies that a low level call was successful, and revert if it wasn't, either by bubbling the\\n     * revert reason using the provided one.\\n     *\\n     * _Available since v4.3._\\n     */\\n    function verifyCallResult(\\n        bool success,\\n        bytes memory returndata,\\n        string memory errorMessage\\n    ) internal pure returns (bytes memory) {\\n        if (success) {\\n            return returndata;\\n        } else {\\n            // Look for revert reason and bubble it up if present\\n            if (returndata.length > 0) {\\n                // The easiest way to bubble the revert reason is using memory via assembly\\n\\n                assembly {\\n                    let returndata_size := mload(returndata)\\n                    revert(add(32, returndata), returndata_size)\\n                }\\n            } else {\\n                revert(errorMessage);\\n            }\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x2ccf9d2313a313d41a791505f2b5abfdc62191b5d4334f7f7a82691c088a1c87\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/cryptography/MerkleProof.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.6.0) (utils/cryptography/MerkleProof.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev These functions deal with verification of Merkle Trees proofs.\\n *\\n * The proofs can be generated using the JavaScript library\\n * https://github.com/miguelmota/merkletreejs[merkletreejs].\\n * Note: the hashing algorithm should be keccak256 and pair sorting should be enabled.\\n *\\n * See `test/utils/cryptography/MerkleProof.test.js` for some examples.\\n *\\n * WARNING: You should avoid using leaf values that are 64 bytes long prior to\\n * hashing, or use a hash function other than keccak256 for hashing leaves.\\n * This is because the concatenation of a sorted pair of internal nodes in\\n * the merkle tree could be reinterpreted as a leaf value.\\n */\\nlibrary MerkleProof {\\n    /**\\n     * @dev Returns true if a `leaf` can be proved to be a part of a Merkle tree\\n     * defined by `root`. For this, a `proof` must be provided, containing\\n     * sibling hashes on the branch from the leaf to the root of the tree. Each\\n     * pair of leaves and each pair of pre-images are assumed to be sorted.\\n     */\\n    function verify(\\n        bytes32[] memory proof,\\n        bytes32 root,\\n        bytes32 leaf\\n    ) internal pure returns (bool) {\\n        return processProof(proof, leaf) == root;\\n    }\\n\\n    /**\\n     * @dev Returns the rebuilt hash obtained by traversing a Merkle tree up\\n     * from `leaf` using `proof`. A `proof` is valid if and only if the rebuilt\\n     * hash matches the root of the tree. When processing the proof, the pairs\\n     * of leafs & pre-images are assumed to be sorted.\\n     *\\n     * _Available since v4.4._\\n     */\\n    function processProof(bytes32[] memory proof, bytes32 leaf) internal pure returns (bytes32) {\\n        bytes32 computedHash = leaf;\\n        for (uint256 i = 0; i < proof.length; i++) {\\n            bytes32 proofElement = proof[i];\\n            if (computedHash <= proofElement) {\\n                // Hash(current computed hash + current element of the proof)\\n                computedHash = _efficientHash(computedHash, proofElement);\\n            } else {\\n                // Hash(current element of the proof + current computed hash)\\n                computedHash = _efficientHash(proofElement, computedHash);\\n            }\\n        }\\n        return computedHash;\\n    }\\n\\n    function _efficientHash(bytes32 a, bytes32 b) private pure returns (bytes32 value) {\\n        assembly {\\n            mstore(0x00, a)\\n            mstore(0x20, b)\\n            value := keccak256(0x00, 0x40)\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xaaa504ac17eb0298dcdf5733ce24021b4914f035b97f4400b92827341d3facb3\",\"license\":\"MIT\"},\"contracts/abstract/Campaign.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"@openzeppelin/contracts/utils/cryptography/MerkleProof.sol\\\";\\nimport \\\"@openzeppelin/contracts/proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @title Campaign\\n */\\nabstract contract Campaign is Initializable {\\n    uint256 public constant TOTAL_SHARES = 10**18;\\n    uint256 public constant CHALLENGE_PERIOD = 604800;\\n\\n    enum ChallengeAction {\\n        CancelPending,\\n        CacncelPendingAndLockCurrent,\\n        CancelCampaign\\n    }\\n\\n    bytes32 public approvedMerkleRoot;\\n\\n    bytes32 public pendingMerkleRoot;\\n    uint256 public activationTime;\\n\\n    bytes32 public strategyUri;\\n    address public guardian;\\n    address public oracle;\\n\\n    uint256 public totalClaimed;\\n    uint256 public totalReward;\\n\\n    bool public locked;\\n\\n    mapping(address => uint256) public claimed;\\n    mapping(address => uint256) public providers;\\n\\n    event SharesMerkleRoot(bytes32 sharesMerkleRoot, bytes32 sharesUri, uint256 activationTime);\\n    event Claim(address account, uint256 share, uint256 reward);\\n    event Challenge(ChallengeAction action);\\n    event Withdraw(address account, uint256 amount);\\n\\n    error InvalidProof();\\n    error ActiveChallengePeriod();\\n    error NoRewardAvailable();\\n    error OnlyGuardian();\\n    error WithdrawalNotAllowed();\\n    error ClaimingNotAllowed();\\n    error NoFunds();\\n    error OnlyOracle();\\n    error Locked();\\n    error OnlyInChallengePeriod();\\n\\n    modifier onlyGuardian() {\\n        if (msg.sender != guardian) {\\n            revert OnlyGuardian();\\n        }\\n        _;\\n    }\\n\\n    modifier onlyOracle() {\\n        if (msg.sender != oracle) {\\n            revert OnlyOracle();\\n        }\\n        _;\\n    }\\n\\n    modifier notLocked() {\\n        if (locked) {\\n            revert Locked();\\n        }\\n        _;\\n    }\\n\\n    function initCampaign(\\n        bytes32 _sharesMerkleRoot,\\n        bytes32 _strategyUri,\\n        address _guardian,\\n        address _oracle\\n    ) public initializer {\\n        strategyUri = _strategyUri;\\n        guardian = _guardian;\\n        oracle = _oracle;\\n\\n        if (_sharesMerkleRoot != bytes32(0)) {\\n            pendingMerkleRoot = _sharesMerkleRoot;\\n            activationTime = block.timestamp + CHALLENGE_PERIOD;\\n        } else {\\n            activationTime = type(uint256).max;\\n        }\\n    }\\n\\n    function proposeShares(bytes32 _sharesMerkleRoot, bytes32 _sharesUri) external onlyOracle notLocked {\\n        if (pendingMerkleRoot != bytes32(0) && block.timestamp < activationTime) {\\n            revert ActiveChallengePeriod();\\n        }\\n\\n        approvedMerkleRoot = pendingMerkleRoot;\\n        pendingMerkleRoot = _sharesMerkleRoot;\\n        activationTime = block.timestamp + CHALLENGE_PERIOD;\\n\\n        emit SharesMerkleRoot(_sharesMerkleRoot, _sharesUri, activationTime);\\n    }\\n\\n    function claim(\\n        address account,\\n        uint256 share,\\n        bytes32[] calldata proof\\n    ) external {\\n        bytes32 claimingMerkleRoot = block.timestamp > activationTime ? pendingMerkleRoot : approvedMerkleRoot;\\n\\n        bytes32 leaf = keccak256(abi.encodePacked(account, share));\\n        if (MerkleProof.verify(proof, claimingMerkleRoot, leaf) == false) {\\n            revert InvalidProof();\\n        }\\n\\n        uint256 totalFundsReceived = totalReward + totalClaimed;\\n        uint256 reward = (totalFundsReceived * share) / TOTAL_SHARES - claimed[account];\\n        if (reward == 0) {\\n            revert NoRewardAvailable();\\n        }\\n        claimed[account] += reward;\\n        totalClaimed += reward;\\n        totalReward -= reward;\\n\\n        transferValueOut(account, reward);\\n\\n        emit Claim(account, share, reward);\\n    }\\n\\n    function setLock(bool _lock) external onlyGuardian {\\n        locked = _lock;\\n    }\\n\\n    function challenge(ChallengeAction action) external onlyGuardian notLocked {\\n        if (pendingMerkleRoot != bytes32(0) && block.timestamp > activationTime) {\\n            revert OnlyInChallengePeriod();\\n        }\\n\\n        pendingMerkleRoot = bytes32(0);\\n        activationTime = type(uint256).max;\\n        if (action == ChallengeAction.CacncelPendingAndLockCurrent) {\\n            this.setLock(true);\\n        } else if (action == ChallengeAction.CancelCampaign) {\\n            this.setLock(true);\\n            approvedMerkleRoot = bytes32(0);\\n        }\\n\\n        emit Challenge(action);\\n    }\\n\\n    function withdrawFunds(address account) external {\\n        if (locked && approvedMerkleRoot == bytes32(0)) {\\n            uint256 amount = providers[account] / totalReward;\\n            if (amount == 0) {\\n                revert NoFunds();\\n            }\\n            providers[account] = 0;\\n\\n            transferValueOut(account, amount);\\n\\n            emit Withdraw(account, amount);\\n        } else {\\n            revert WithdrawalNotAllowed();\\n        }\\n    }\\n\\n    /**\\n    @dev recerts on failure\\n     */\\n    function transferValueOut(address to, uint256 amount) internal virtual;\\n}\\n\",\"keccak256\":\"0xd52361c0a6c405ef01cbf7cace12dad0cc8e911db7e898efc171f1f1628464ac\",\"license\":\"MIT\"},\"contracts/eth-campaign/EthCampaign.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../abstract/Campaign.sol\\\";\\n\\n/**\\n * @title EthCampaign\\n */\\ncontract EthCampaign is Campaign {\\n    event ValueIn(address provider, uint256 amount);\\n\\n    function initEthCampaign(\\n        bytes32 _sharesMerkleRoot,\\n        bytes32 _strategyUri,\\n        address _guardian,\\n        address _oracle\\n    ) public {\\n        super.initCampaign(_sharesMerkleRoot, _strategyUri, _guardian, _oracle);\\n    }\\n\\n    receive() external payable {\\n        providers[msg.sender] += msg.value;\\n        totalReward += msg.value;\\n\\n        emit ValueIn(msg.sender, msg.value);\\n    }\\n\\n    function transferValueOut(address to, uint256 amount) internal override {\\n        (bool success, ) = to.call{ value: amount }(\\\"\\\");\\n        require(success, \\\"ether transfer failed\\\");\\n    }\\n}\\n\",\"keccak256\":\"0x46e57180354b1e577c32e085336df78aa7ea23f7a6ec43ea6fda959f5f5cc4d5\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610f38806100206000396000f3fe6080604052600436106101235760003560e01c80637dc0d1d0116100a0578063c884ef8311610064578063c884ef8314610389578063cf309012146103b6578063d3f32357146103e0578063d54ad2a114610400578063da4493f61461041657600080fd5b80637dc0d1d01461030a57806385e3f9971461032a5780639637f47514610346578063a9ec3a1b1461035c578063c3a079ed1461037257600080fd5b8063452a9320116100e7578063452a932014610266578063619d51941461029e57806368742da6146102be578063717f9092146102de578063750142e6146102f457600080fd5b80630787bc27146101a457806317b9d05e146101e45780633d13f874146102065780634009634114610226578063414f33dd1461024657600080fd5b3661019f57336000908152600b602052604081208054349290610147908490610e35565b9250508190555034600860008282546101609190610e35565b9091555050604080513381523460208201527fa8044513073c23047a922f0bf7142f18c341a73184b9f8055349b4415fb9d6ca910160405180910390a1005b600080fd5b3480156101b057600080fd5b506101d16101bf366004610c68565b600b6020526000908152604090205481565b6040519081526020015b60405180910390f35b3480156101f057600080fd5b506102046101ff366004610d36565b61042c565b005b34801561021257600080fd5b50610204610221366004610c8a565b61050e565b34801561023257600080fd5b50610204610241366004610d58565b6106fa565b34801561025257600080fd5b50610204610261366004610d58565b61070c565b34801561027257600080fd5b50600554610286906001600160a01b031681565b6040516001600160a01b0390911681526020016101db565b3480156102aa57600080fd5b506102046102b9366004610d14565b6107d9565b3480156102ca57600080fd5b506102046102d9366004610c68565b610817565b3480156102ea57600080fd5b506101d160045481565b34801561030057600080fd5b506101d160085481565b34801561031657600080fd5b50600654610286906001600160a01b031681565b34801561033657600080fd5b506101d1670de0b6b3a764000081565b34801561035257600080fd5b506101d160025481565b34801561036857600080fd5b506101d160015481565b34801561037e57600080fd5b506101d162093a8081565b34801561039557600080fd5b506101d16103a4366004610c68565b600a6020526000908152604090205481565b3480156103c257600080fd5b506009546103d09060ff1681565b60405190151581526020016101db565b3480156103ec57600080fd5b506102046103fb366004610d9e565b6108f0565b34801561040c57600080fd5b506101d160075481565b34801561042257600080fd5b506101d160035481565b6006546001600160a01b03163314610457576040516380fee10560e01b815260040160405180910390fd5b60095460ff161561047b576040516303cb96db60e21b815260040160405180910390fd5b6002541580159061048d575060035442105b156104ab57604051633420251360e11b815260040160405180910390fd5b600280546001558290556104c262093a8042610e35565b60038190556040805184815260208101849052908101919091527ff538af40d5ad77456cbcd96a5be317d724e66e0e08eb217c14812308bd43d35e906060015b60405180910390a15050565b6000600354421161052157600154610525565b6002545b6040516bffffffffffffffffffffffff19606088901b166020820152603481018690529091506000906054016040516020818303038152906040528051906020012090506105a9848480806020026020016040519081016040528093929190818152602001838360200280828437600092019190915250869250859150610a959050565b6105c6576040516309bde33960e01b815260040160405180910390fd5b60006007546008546105d89190610e35565b6001600160a01b0388166000908152600a602052604081205491925090670de0b6b3a76400006106088985610e6f565b6106129190610e4d565b61061c9190610e8e565b90508061063c57604051636d363c4560e01b815260040160405180910390fd5b6001600160a01b0388166000908152600a602052604081208054839290610664908490610e35565b92505081905550806007600082825461067d9190610e35565b9250508190555080600860008282546106969190610e8e565b909155506106a690508882610aab565b604080516001600160a01b038a168152602081018990529081018290527f34fcbac0073d7c3d388e51312faf357774904998eeb8fca628b9e6f65ee1cbf79060600160405180910390a15050505050505050565b6107068484848461070c565b50505050565b60006107186001610b50565b90508015610730576000805461ff0019166101001790555b6004849055600580546001600160a01b038086166001600160a01b0319928316179092556006805492851692909116919091179055841561078557600285905561077d62093a8042610e35565b60035561078c565b6000196003555b80156107d2576000805461ff0019169055604051600181527f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb38474024989060200160405180910390a15b5050505050565b6005546001600160a01b0316331461080457604051636570ecab60e11b815260040160405180910390fd5b6009805460ff1916911515919091179055565b60095460ff1680156108295750600154155b156108d7576008546001600160a01b0382166000908152600b6020526040812054909161085591610e4d565b9050806108755760405163043f9e1160e41b815260040160405180910390fd5b6001600160a01b0382166000908152600b60205260408120556108988282610aab565b604080516001600160a01b0384168152602081018390527f884edad9ce6fa2440d8a54cc123490eb96d2768479d49ff9c7366125a94243649101610502565b60405163209a769d60e11b815260040160405180910390fd5b6005546001600160a01b0316331461091b57604051636570ecab60e11b815260040160405180910390fd5b60095460ff161561093f576040516303cb96db60e21b815260040160405180910390fd5b60025415801590610951575060035442115b1561096f57604051631b69dd1760e21b815260040160405180910390fd5b6000600255600019600355600181600281111561098e5761098e610ed6565b14156109ea57604051631867546560e21b815260016004820152309063619d519490602401600060405180830381600087803b1580156109cd57600080fd5b505af11580156109e1573d6000803e3d6000fd5b50505050610a5b565b60028160028111156109fe576109fe610ed6565b1415610a5b57604051631867546560e21b815260016004820152309063619d519490602401600060405180830381600087803b158015610a3d57600080fd5b505af1158015610a51573d6000803e3d6000fd5b5050600060015550505b7f0b700a39eebc9d322d0a5829d3d6447d9e000f73a89a7baa6a0fa28a5ec9c8d081604051610a8a9190610dbf565b60405180910390a150565b600082610aa28584610bdd565b14949350505050565b6000826001600160a01b03168260405160006040518083038185875af1925050503d8060008114610af8576040519150601f19603f3d011682016040523d82523d6000602084013e610afd565b606091505b5050905080610b4b5760405162461bcd60e51b8152602060048201526015602482015274195d1a195c881d1c985b9cd9995c8819985a5b1959605a1b60448201526064015b60405180910390fd5b505050565b60008054610100900460ff1615610b97578160ff166001148015610b735750303b155b610b8f5760405162461bcd60e51b8152600401610b4290610de7565b506000919050565b60005460ff808416911610610bbe5760405162461bcd60e51b8152600401610b4290610de7565b506000805460ff191660ff92909216919091179055600190565b919050565b600081815b8451811015610c49576000858281518110610bff57610bff610eec565b60200260200101519050808311610c255760008381526020829052604090209250610c36565b600081815260208490526040902092505b5080610c4181610ea5565b915050610be2565b509392505050565b80356001600160a01b0381168114610bd857600080fd5b600060208284031215610c7a57600080fd5b610c8382610c51565b9392505050565b60008060008060608587031215610ca057600080fd5b610ca985610c51565b935060208501359250604085013567ffffffffffffffff80821115610ccd57600080fd5b818701915087601f830112610ce157600080fd5b813581811115610cf057600080fd5b8860208260051b8501011115610d0557600080fd5b95989497505060200194505050565b600060208284031215610d2657600080fd5b81358015158114610c8357600080fd5b60008060408385031215610d4957600080fd5b50508035926020909101359150565b60008060008060808587031215610d6e57600080fd5b8435935060208501359250610d8560408601610c51565b9150610d9360608601610c51565b905092959194509250565b600060208284031215610db057600080fd5b813560038110610c8357600080fd5b6020810160038310610de157634e487b7160e01b600052602160045260246000fd5b91905290565b6020808252602e908201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160408201526d191e481a5b9a5d1a585b1a5e995960921b606082015260800190565b60008219821115610e4857610e48610ec0565b500190565b600082610e6a57634e487b7160e01b600052601260045260246000fd5b500490565b6000816000190483118215151615610e8957610e89610ec0565b500290565b600082821015610ea057610ea0610ec0565b500390565b6000600019821415610eb957610eb9610ec0565b5060010190565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052602160045260246000fd5b634e487b7160e01b600052603260045260246000fdfea2646970667358221220e8be299df985fc11e392942102cbba89563ffb06fd491a105fac5b58bdb1c51f64736f6c63430008060033",
+  "deployedBytecode": "0x6080604052600436106101235760003560e01c80637dc0d1d0116100a0578063c884ef8311610064578063c884ef8314610389578063cf309012146103b6578063d3f32357146103e0578063d54ad2a114610400578063da4493f61461041657600080fd5b80637dc0d1d01461030a57806385e3f9971461032a5780639637f47514610346578063a9ec3a1b1461035c578063c3a079ed1461037257600080fd5b8063452a9320116100e7578063452a932014610266578063619d51941461029e57806368742da6146102be578063717f9092146102de578063750142e6146102f457600080fd5b80630787bc27146101a457806317b9d05e146101e45780633d13f874146102065780634009634114610226578063414f33dd1461024657600080fd5b3661019f57336000908152600b602052604081208054349290610147908490610e35565b9250508190555034600860008282546101609190610e35565b9091555050604080513381523460208201527fa8044513073c23047a922f0bf7142f18c341a73184b9f8055349b4415fb9d6ca910160405180910390a1005b600080fd5b3480156101b057600080fd5b506101d16101bf366004610c68565b600b6020526000908152604090205481565b6040519081526020015b60405180910390f35b3480156101f057600080fd5b506102046101ff366004610d36565b61042c565b005b34801561021257600080fd5b50610204610221366004610c8a565b61050e565b34801561023257600080fd5b50610204610241366004610d58565b6106fa565b34801561025257600080fd5b50610204610261366004610d58565b61070c565b34801561027257600080fd5b50600554610286906001600160a01b031681565b6040516001600160a01b0390911681526020016101db565b3480156102aa57600080fd5b506102046102b9366004610d14565b6107d9565b3480156102ca57600080fd5b506102046102d9366004610c68565b610817565b3480156102ea57600080fd5b506101d160045481565b34801561030057600080fd5b506101d160085481565b34801561031657600080fd5b50600654610286906001600160a01b031681565b34801561033657600080fd5b506101d1670de0b6b3a764000081565b34801561035257600080fd5b506101d160025481565b34801561036857600080fd5b506101d160015481565b34801561037e57600080fd5b506101d162093a8081565b34801561039557600080fd5b506101d16103a4366004610c68565b600a6020526000908152604090205481565b3480156103c257600080fd5b506009546103d09060ff1681565b60405190151581526020016101db565b3480156103ec57600080fd5b506102046103fb366004610d9e565b6108f0565b34801561040c57600080fd5b506101d160075481565b34801561042257600080fd5b506101d160035481565b6006546001600160a01b03163314610457576040516380fee10560e01b815260040160405180910390fd5b60095460ff161561047b576040516303cb96db60e21b815260040160405180910390fd5b6002541580159061048d575060035442105b156104ab57604051633420251360e11b815260040160405180910390fd5b600280546001558290556104c262093a8042610e35565b60038190556040805184815260208101849052908101919091527ff538af40d5ad77456cbcd96a5be317d724e66e0e08eb217c14812308bd43d35e906060015b60405180910390a15050565b6000600354421161052157600154610525565b6002545b6040516bffffffffffffffffffffffff19606088901b166020820152603481018690529091506000906054016040516020818303038152906040528051906020012090506105a9848480806020026020016040519081016040528093929190818152602001838360200280828437600092019190915250869250859150610a959050565b6105c6576040516309bde33960e01b815260040160405180910390fd5b60006007546008546105d89190610e35565b6001600160a01b0388166000908152600a602052604081205491925090670de0b6b3a76400006106088985610e6f565b6106129190610e4d565b61061c9190610e8e565b90508061063c57604051636d363c4560e01b815260040160405180910390fd5b6001600160a01b0388166000908152600a602052604081208054839290610664908490610e35565b92505081905550806007600082825461067d9190610e35565b9250508190555080600860008282546106969190610e8e565b909155506106a690508882610aab565b604080516001600160a01b038a168152602081018990529081018290527f34fcbac0073d7c3d388e51312faf357774904998eeb8fca628b9e6f65ee1cbf79060600160405180910390a15050505050505050565b6107068484848461070c565b50505050565b60006107186001610b50565b90508015610730576000805461ff0019166101001790555b6004849055600580546001600160a01b038086166001600160a01b0319928316179092556006805492851692909116919091179055841561078557600285905561077d62093a8042610e35565b60035561078c565b6000196003555b80156107d2576000805461ff0019169055604051600181527f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb38474024989060200160405180910390a15b5050505050565b6005546001600160a01b0316331461080457604051636570ecab60e11b815260040160405180910390fd5b6009805460ff1916911515919091179055565b60095460ff1680156108295750600154155b156108d7576008546001600160a01b0382166000908152600b6020526040812054909161085591610e4d565b9050806108755760405163043f9e1160e41b815260040160405180910390fd5b6001600160a01b0382166000908152600b60205260408120556108988282610aab565b604080516001600160a01b0384168152602081018390527f884edad9ce6fa2440d8a54cc123490eb96d2768479d49ff9c7366125a94243649101610502565b60405163209a769d60e11b815260040160405180910390fd5b6005546001600160a01b0316331461091b57604051636570ecab60e11b815260040160405180910390fd5b60095460ff161561093f576040516303cb96db60e21b815260040160405180910390fd5b60025415801590610951575060035442115b1561096f57604051631b69dd1760e21b815260040160405180910390fd5b6000600255600019600355600181600281111561098e5761098e610ed6565b14156109ea57604051631867546560e21b815260016004820152309063619d519490602401600060405180830381600087803b1580156109cd57600080fd5b505af11580156109e1573d6000803e3d6000fd5b50505050610a5b565b60028160028111156109fe576109fe610ed6565b1415610a5b57604051631867546560e21b815260016004820152309063619d519490602401600060405180830381600087803b158015610a3d57600080fd5b505af1158015610a51573d6000803e3d6000fd5b5050600060015550505b7f0b700a39eebc9d322d0a5829d3d6447d9e000f73a89a7baa6a0fa28a5ec9c8d081604051610a8a9190610dbf565b60405180910390a150565b600082610aa28584610bdd565b14949350505050565b6000826001600160a01b03168260405160006040518083038185875af1925050503d8060008114610af8576040519150601f19603f3d011682016040523d82523d6000602084013e610afd565b606091505b5050905080610b4b5760405162461bcd60e51b8152602060048201526015602482015274195d1a195c881d1c985b9cd9995c8819985a5b1959605a1b60448201526064015b60405180910390fd5b505050565b60008054610100900460ff1615610b97578160ff166001148015610b735750303b155b610b8f5760405162461bcd60e51b8152600401610b4290610de7565b506000919050565b60005460ff808416911610610bbe5760405162461bcd60e51b8152600401610b4290610de7565b506000805460ff191660ff92909216919091179055600190565b919050565b600081815b8451811015610c49576000858281518110610bff57610bff610eec565b60200260200101519050808311610c255760008381526020829052604090209250610c36565b600081815260208490526040902092505b5080610c4181610ea5565b915050610be2565b509392505050565b80356001600160a01b0381168114610bd857600080fd5b600060208284031215610c7a57600080fd5b610c8382610c51565b9392505050565b60008060008060608587031215610ca057600080fd5b610ca985610c51565b935060208501359250604085013567ffffffffffffffff80821115610ccd57600080fd5b818701915087601f830112610ce157600080fd5b813581811115610cf057600080fd5b8860208260051b8501011115610d0557600080fd5b95989497505060200194505050565b600060208284031215610d2657600080fd5b81358015158114610c8357600080fd5b60008060408385031215610d4957600080fd5b50508035926020909101359150565b60008060008060808587031215610d6e57600080fd5b8435935060208501359250610d8560408601610c51565b9150610d9360608601610c51565b905092959194509250565b600060208284031215610db057600080fd5b813560038110610c8357600080fd5b6020810160038310610de157634e487b7160e01b600052602160045260246000fd5b91905290565b6020808252602e908201527f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160408201526d191e481a5b9a5d1a585b1a5e995960921b606082015260800190565b60008219821115610e4857610e48610ec0565b500190565b600082610e6a57634e487b7160e01b600052601260045260246000fd5b500490565b6000816000190483118215151615610e8957610e89610ec0565b500290565b600082821015610ea057610ea0610ec0565b500390565b6000600019821415610eb957610eb9610ec0565b5060010190565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052602160045260246000fd5b634e487b7160e01b600052603260045260246000fdfea2646970667358221220e8be299df985fc11e392942102cbba89563ffb06fd491a105fac5b58bdb1c51f64736f6c63430008060033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "title": "EthCampaign",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 86,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "_initialized",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint8"
+      },
+      {
+        "astId": 89,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "_initializing",
+        "offset": 1,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 1565,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "approvedMerkleRoot",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_bytes32"
+      },
+      {
+        "astId": 1567,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "pendingMerkleRoot",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_bytes32"
+      },
+      {
+        "astId": 1569,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "activationTime",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 1571,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "strategyUri",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_bytes32"
+      },
+      {
+        "astId": 1573,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "guardian",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_address"
+      },
+      {
+        "astId": 1575,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "oracle",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_address"
+      },
+      {
+        "astId": 1577,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "totalClaimed",
+        "offset": 0,
+        "slot": "7",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 1579,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "totalReward",
+        "offset": 0,
+        "slot": "8",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 1581,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "locked",
+        "offset": 0,
+        "slot": "9",
+        "type": "t_bool"
+      },
+      {
+        "astId": 1585,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "claimed",
+        "offset": 0,
+        "slot": "10",
+        "type": "t_mapping(t_address,t_uint256)"
+      },
+      {
+        "astId": 1589,
+        "contract": "contracts/eth-campaign/EthCampaign.sol:EthCampaign",
+        "label": "providers",
+        "offset": 0,
+        "slot": "11",
+        "type": "t_mapping(t_address,t_uint256)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      }
+    }
+  }
+}

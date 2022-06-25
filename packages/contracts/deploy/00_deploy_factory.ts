@@ -6,23 +6,36 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  const campaign = await deploy('Erc20Campaign', {
+  const campaignERC20 = await deploy('Erc20Campaign', {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     args: [],
     log: true,
   });
 
-  await deploy('CampaignFactory', {
+  await deploy('Erc20CampaignFactory', {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    args: [campaign.address],
+    args: [campaignERC20.address],
+    log: true,
+  });
+
+  const campaignEth = await deploy('EthCampaign', {
+    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+    from: deployer,
+    args: [],
+    log: true,
+  });
+
+  await deploy('EthCampaignFactory', {
+    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+    from: deployer,
+    args: [campaignEth.address],
     log: true,
   });
 };
 
 export default func;
-func.tags = ['Campaign'];
 
 /*
 Tenderly verification
