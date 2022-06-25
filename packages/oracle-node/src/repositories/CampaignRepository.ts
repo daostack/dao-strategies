@@ -72,7 +72,11 @@ export class CampaignRepository {
     const result = await this.client.campaign.findUnique({
       where: { uri: uri },
       include: {
-        rewards: true,
+        rewards: {
+          orderBy: {
+            amount: 'desc',
+          },
+        },
       },
     });
 

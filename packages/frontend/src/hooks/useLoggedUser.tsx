@@ -32,7 +32,6 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
   });
 
   const { disconnect } = useDisconnect();
-  const { data: signer } = useSigner();
 
   const { data: account, isFetching } = useAccount();
   const [user, setUser] = useState<UserDetails | undefined>(undefined);
@@ -93,9 +92,18 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, isFetching]);
 
+  /** the connected account is the connected metamask user and the read user from the backend (obtained by
+   * signing the siwe) */
+  const accountAddress =
+    account !== undefined && user !== undefined
+      ? account.address?.toLowerCase() === user.address.toLowerCase()
+        ? account.address
+        : undefined
+      : undefined;
+
   return (
     <LoggedUserContextValue.Provider
-      value={{ account: account?.address, checkAndLogin, user, connect, startLogout, refresh }}>
+      value={{ account: accountAddress, checkAndLogin, user, connect, startLogout, refresh }}>
       {props.children}
     </LoggedUserContextValue.Provider>
   );

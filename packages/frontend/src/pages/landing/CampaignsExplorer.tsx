@@ -4,25 +4,16 @@ import { useSigner } from 'wagmi';
 
 import { useCampaigns } from '../../hooks/campaigns.queries';
 
-export interface ICampaignListProps {
+export interface ICampaignsExplorerProps {
   dum?: any;
 }
 
-export const CampaignsList: FC<ICampaignListProps> = (props: ICampaignListProps) => {
+export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaignsExplorerProps) => {
   const { data: signer } = useSigner();
-  const { isLoading, campaigns } = useCampaigns();
-
-  // console.log({ isLoading, campaigns });
+  const { campaigns } = useCampaigns();
 
   return (
     <>
-      {signer ? (
-        <>
-          <Link to="./create">Create</Link>
-        </>
-      ) : (
-        <></>
-      )}
       <h1>Campaigns:</h1>
       {campaigns ? (
         campaigns.map((campaign: any) => {

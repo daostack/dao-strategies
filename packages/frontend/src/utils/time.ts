@@ -20,4 +20,16 @@ export class DateManager {
     this.date = add(this.date, { months: n });
     return this;
   }
+
+  addDays(n: number): DateManager {
+    this.date = add(this.date, { days: n });
+    return this;
+  }
+
+  setTimeOfDay(time: string): DateManager {
+    const str = this.date.toUTCString();
+    const newDate = str.substring(0, 10) + time;
+    this.date = new Date(newDate);
+    return this;
+  }
 }

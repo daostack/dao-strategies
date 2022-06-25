@@ -1,176 +1,198 @@
-import { Button, DatePicker, Form, Input, Select } from 'antd';
-import { RangeValue } from 'rc-picker/lib/interface';
-import { Moment } from 'moment';
+import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
 import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { DateManager } from '../../utils/time';
 import { useCampaignFactory } from '../../hooks/useContracts';
-import { CampaignCreateDetails, deployCampaign, simulateCampaign, SimulationResult } from '../campaign.support';
+import {
+  CampaignCreateDetails,
+  deployCampaign,
+  PeriodKeys,
+  periodOptions,
+  getPeriodType,
+  PeriodType,
+  simulateCampaign,
+  SimulationResult,
+  strategyDetails,
+} from '../campaign.support';
 import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
-import { CampaignUriDetails } from '@dao-strategies/core';
+import { getCampaignUri } from '@dao-strategies/core';
 import { RouteNames } from '../MainPage';
+import {
+  AppButton,
+  AppFileInput,
+  AppForm,
+  AppInput,
+  AppSelect,
+  AppTextArea,
+} from '../../components/styles/BasicElements';
+import { useLoggedUser } from '../../hooks/useLoggedUser';
+import { FormProgress } from './FormProgress';
+import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
+import { FormTrash } from 'grommet-icons';
+import { useGithubSearch } from '../../hooks/useGithubSearch';
+import { RewardsTable } from '../../components/RewardsTable';
+import { FormStatus, getButtonActions } from './buttons.actions';
 
 export interface ICampaignCreateProps {
   dum?: any;
 }
 
-const { Option } = Select;
-
-const initialValues: CampaignFormValues = {
-  campaignType: 'github',
-  title: 'demo',
-  description: '',
-  repositoryURL: 'https://github.com/gershido/test-github-api',
-  livePeriodChoice: '-3',
-  guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-};
+export enum Asset {
+  Ether = 'ether',
+  DAI = 'dai',
+}
 
 export interface CampaignFormValues {
   title: string;
   description: string;
-  campaignType: string;
-  repositoryURL: string;
-  livePeriodChoice: string;
+  asset: Asset;
+  repositoryFullnames: string[];
   guardian: string;
+  livePeriodChoice: string;
+  customPeriodChoiceFrom: string;
+  customPeriodChoiceTo: string;
 }
 
+export interface ProcessedFormValues {
+  periodCustom: boolean;
+}
+
+const initialValues: CampaignFormValues = {
+  title: 'asdas',
+  guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+  asset: Asset.Ether,
+  description: '',
+  repositoryFullnames: ['gershido/test-github-api'],
+  livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
+  customPeriodChoiceFrom: '',
+  customPeriodChoiceTo: '',
+};
+
+const GITHUB_DOMAIN = 'https://www.github.com/';
+
+const DEBUG = true;
+
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
+  const { account, connect } = useLoggedUser();
+
   const [today] = useState<DateManager>(new DateManager());
+  const [pageIx, setPageIx] = useState<number>(0);
 
-  const [simulation, setSimulated] = useState<SimulationResult>({});
+  const { isValid, checking, checkExist, isValidName } = useGithubSearch();
+  const [repo, setRepo] = useState<string>('');
+
+  const [validated, setValidated] = useState<boolean>(false);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  /** Form data is kept in the formValues state. The strategy details is a computed
+   * property that should change everytime the formValues change.
+   *
+   * When the user steps into the final page, a simulation is triggered depending
+   * on wheather the start date of the strategy is older than today.
+   */
+  const [formValues, setFormValuesState] = useState<CampaignFormValues>(initialValues);
+  const [simulation, setSimulated] = useState<SimulationResult | undefined>();
   const [simulating, setSimulating] = useState<boolean>(false);
-
-  const [livePeriodCustom, setLivePeriodCustom] = useState<boolean>(false);
-
-  // a local state to react to values changes
-  const [formValues, setFormValues] = useState<CampaignFormValues>(initialValues);
 
   const campaignFactory = useCampaignFactory();
   const accountHook = useAccount();
   const navigate = useNavigate();
 
-  const [form] = Form.useForm();
+  /** details is a derived value */
+  const details = strategyDetails(formValues, today, account);
 
+  const periodType = getPeriodType(details, today);
+
+  const isLogged = account !== undefined;
+
+  if (DEBUG) console.log('CampaignCreate - render');
+
+  /** Prepare all the parameters to deply the campaign and call the deployCampaign function */
   const create = async (): Promise<void> => {
     const account = accountHook.data?.address;
     if (account === undefined) throw new Error('account undefined');
     if (campaignFactory === undefined) throw new Error('campaignFactoryContract undefined');
 
-    const values = getFormValues();
-    const details = simulation.details !== undefined ? simulation.details : strategyDetails();
-
-    if (details === undefined) throw new Error();
+    /** the strategy details are the same used for simulation, unless no simulation was done */
+    const finalDetails = simulation !== undefined ? simulation.details : details;
+    if (finalDetails === undefined) throw new Error();
 
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
-      title: values.title,
-      description: values.description,
-      guardian: values.guardian,
+      title: formValues.title,
+      guardian: formValues.guardian,
+      description: formValues.description,
       oracle: ORACLE_ADDRESS,
       address: '',
-      cancelDate: details.execDate + CHALLENGE_PERIOD,
+      cancelDate: finalDetails.execDate + CHALLENGE_PERIOD,
     };
 
     /** if the campaign was not simulated it must be created first */
-    const campaignAddress = await deployCampaign(campaignFactory, simulation.uri, otherDetails, details);
+    const campaignAddress = await deployCampaign(
+      campaignFactory,
+      (simulation as SimulationResult).uri,
+      otherDetails,
+      finalDetails
+    );
 
     navigate(RouteNames.Campaign(campaignAddress));
   };
 
-  const getStartEnd = (values: CampaignFormValues): [number, number] => {
-    const livePeriod = +values.livePeriodChoice;
-    if (livePeriod === 0) {
-      return [0, 0];
-    } else {
-      return livePeriod < 0
-        ? [today.clone().addMonths(livePeriod).getTime(), today.getTime()]
-        : [today.getTime(), today.clone().addMonths(livePeriod).getTime()];
-    }
-  };
-
-  const getFormValues = (): CampaignFormValues => {
-    return formValues;
-  };
-
-  const onValuesUpdated = (old: any, values: CampaignFormValues) => {
-    setFormValues(values);
-  };
-
-  const getRepo = (values: CampaignFormValues): { owner: string; repo: string } => {
-    const url = new URL(values.repositoryURL);
-    const parts = url.pathname.split('/');
+  /** Processed values from the form that are cheap to compute and useful */
+  const formValuesProcessed = (): ProcessedFormValues => {
+    if (DEBUG) console.log('CampaignCreate - formValuesProcessed()');
     return {
-      owner: parts[1],
-      repo: parts[2],
+      periodCustom: formValues.livePeriodChoice === periodOptions.get(PeriodKeys.custom),
     };
   };
 
-  const strategyDetails = (): CampaignUriDetails | undefined => {
-    const values = getFormValues();
-    if (values !== undefined && isLogged()) {
-      const repo = getRepo(values);
+  /** single wrapper of setFormValues to detect details changes */
+  const setFormValues = (nextFormValues: CampaignFormValues) => {
+    if (formValues === undefined) return;
 
-      switch (values.campaignType) {
-        case 'github':
-          const [start, end] = getStartEnd(values);
+    const oldDetails = strategyDetails(formValues, today, account);
 
-          return {
-            creator: logged() as string,
-            nonce: 0,
-            execDate: end,
-            strategyID: 'GH_PRS_REACTIONS_WEIGHED',
-            strategyParams: {
-              repositories: [repo],
-              timeRange: { start, end },
-            },
-          };
+    /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
+    if (oldDetails !== undefined && simulation !== undefined) {
+      const nextDetails = strategyDetails(nextFormValues, today, account);
+      if (nextDetails !== undefined) {
+        const currentUri = getCampaignUri(oldDetails);
+        const nextUri = getCampaignUri(nextDetails);
+        if (nextUri !== currentUri) {
+          setSimulated(undefined);
+        }
       }
     }
 
-    return undefined;
+    setFormValuesState(nextFormValues);
   };
 
-  const logged = (): string | undefined => {
-    if (accountHook.data !== undefined && accountHook.data != null && accountHook.data.address !== undefined) {
-      return accountHook.data.address;
+  /** Hook called everytime any field in the form is updated, it keeps the formValues state in synch */
+  const onValuesUpdated = (values: CampaignFormValues) => {
+    if (DEBUG) console.log('CampaignCreate - onValuesUpdated()');
+    if (validated) {
+      // validate every change after the first time
+      validate();
     }
-    return undefined;
+    setFormValues(values);
   };
 
-  const isLogged = (): boolean => {
-    return logged() !== undefined;
+  const validate = (): string[] => {
+    if (DEBUG) console.log('CampaignCreate - validate()');
+    const errors: string[] = [];
+    if (formValues.title === '') errors.push('title cannot be empty');
+    if (formValues.repositoryFullnames.length === 0) errors.push('no repositories specified');
+    setValidated(true);
+    setErrors(errors);
+    return errors;
   };
 
-  const canBeSimulated = (): boolean => {
-    const params = strategyDetails()?.strategyParams;
-    return (
-      params !== undefined && params.timeRange !== undefined && params.timeRange.start < today.getTime() && isLogged()
-    );
-  };
-
-  const onCampaignTypeSelected = (value: string): void => {
-    form.setFieldsValue({ campaignType: value });
-  };
-
-  const onLivePeriodSelected = (value: string): void => {
-    if (value === '0') {
-      setLivePeriodCustom(true);
-    } else {
-      setLivePeriodCustom(false);
-    }
-    form.setFieldsValue({ periodChoice: value });
-  };
-
-  const onRangePicker = (value: RangeValue<Moment>) => {
-    console.log(value);
-  };
-
-  const updateRewards = async (values: CampaignFormValues): Promise<void> => {
+  const simulate = async (): Promise<void> => {
+    if (DEBUG) console.log('CampaignCreate - simulate()');
     setSimulating(true);
 
-    const details = strategyDetails();
     if (details === undefined) throw new Error();
     const sim = await simulateCampaign(details);
 
@@ -178,129 +200,254 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setSimulating(false);
   };
 
-  const onSimulate = (): void => {
-    if (!simulating) {
-      void updateRewards(getFormValues());
-    }
+  /** Repo selection */
+  const repoNameChanged = (name: string) => {
+    setRepo(name);
+    checkExist(name);
   };
 
-  const onReset = (): void => {
-    setSimulated({ uri: '', rewards: {} });
-    form.resetFields();
+  const buttonAction = checking ? '...' : isValidName(repo) ? (isValid ? 'add' : 'not found') : '...';
+  const buttonDisabled = buttonAction !== 'add';
+
+  const addRepo = () => {
+    formValues.repositoryFullnames.push(repo);
+    setFormValues({ ...formValues });
   };
 
-  const onCreate = (): void => {
-    console.log('create');
-    void create();
+  const clearRepo = (repo: string) => {
+    const ix = formValues.repositoryFullnames.indexOf(repo);
+    formValues.repositoryFullnames.splice(ix, 1);
+    setFormValues({ ...formValues });
   };
 
-  const canCreate = () => {
-    return (canBeSimulated() ? isSimulated() : true) && isLogged();
+  const status: FormStatus = {
+    page: {
+      isFirstPage: pageIx === 0,
+      isLastFormPage: pageIx === 1, // before the review page
+      isReview: pageIx === 2,
+    },
+    shouldSimulate: periodType !== PeriodType.future,
+    canSimulate: isLogged,
+    mustSimulate: periodType === PeriodType.retroactive,
+    isSimulating: simulating,
+    wasSimulated: simulation !== undefined,
+    canCreate: isLogged,
   };
 
-  const isSimulated = () => {
-    return simulation.rewards !== undefined && Object.keys(simulation.rewards).length !== 0;
+  const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
+    connect,
+    create,
+    setPageIx,
+    simulate,
+    validate,
+  });
+
+  const leftClicked = () => {
+    if (pageIx > 0) setPageIx(pageIx - 1);
+    else navigate('/');
   };
 
-  const layout = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 10 },
+  const leftText = () => {
+    if (pageIx === 0) return 'Home';
+    return 'Back';
   };
 
-  const tailLayout = {
-    wrapperCol: { offset: 8, span: 16 },
-  };
+  const simulationText =
+    periodType === PeriodType.retroactive
+      ? `The rewards for this campaign will be:`
+      : periodType === PeriodType.ongoing
+      ? `So far, the rewards for this campaign would be. Final rewards will be computed once the campaign ends.`
+      : '';
 
-  if (!isLogged()) {
-    return <>please login</>;
-  }
+  const pages: React.ReactNode[] = [
+    <TwoColumns>
+      <>
+        <FormField name="title" label="Campaign Name" style={{ borderStyle: 'none' }}>
+          <AppInput name="title"></AppInput>
+        </FormField>
+        <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
+          <AppInput name="guardian" placeholder="0x...."></AppInput>
+        </FormField>
+        <FormField name="asset" label="Asset" style={{ border: '0px none' }}>
+          <AppSelect name="asset" style={{ border: '0px none' }} options={['ether', 'DAI']}></AppSelect>
+        </FormField>
+      </>
+      <>
+        <FormField label="File" name="file" component={AppFileInput} />
+
+        <FormField name="description" label="Description">
+          <AppTextArea name="description"></AppTextArea>
+        </FormField>
+      </>
+    </TwoColumns>,
+
+    <TwoColumns>
+      <>
+        <FormField name="description" label="Add Github Repos">
+          <Paragraph>
+            <Text>format: user/repo</Text>
+          </Paragraph>
+          <Box direction="row" width="medium" gap="medium">
+            <TextInput value={repo} onChange={(e) => repoNameChanged(e.target.value)} reverse />
+            <Box>
+              <AppButton primary disabled={buttonDisabled} onClick={() => addRepo()}>
+                {buttonAction}
+              </AppButton>
+            </Box>
+          </Box>
+        </FormField>
+
+        <>
+          {formValues.repositoryFullnames.map((repo) => {
+            return (
+              <Box direction="row">
+                <a target="_blank" href={`${GITHUB_DOMAIN}${repo}`} rel="noreferrer">
+                  {repo}
+                </a>
+                <FormTrash onClick={() => clearRepo(repo)}></FormTrash>
+              </Box>
+            );
+          })}
+        </>
+      </>
+
+      <>
+        <FormField name="livePeriodChoice" label="Live period">
+          <AppSelect name="livePeriodChoice" options={Array.from(periodOptions.values())}></AppSelect>
+        </FormField>
+
+        {formValuesProcessed().periodCustom ? (
+          <>
+            <FormField name="customPeriodChoiceFrom" label="From">
+              <DateInput name="customPeriodChoiceFrom" format="mm/dd/yyyy"></DateInput>
+            </FormField>
+            <FormField name="customPeriodChoiceTo" label="To">
+              <DateInput name="customPeriodChoiceTo" format="mm/dd/yyyy"></DateInput>
+            </FormField>
+          </>
+        ) : (
+          <></>
+        )}
+      </>
+    </TwoColumns>,
+    <Box>
+      <TwoColumns>
+        <Box>
+          <Box>
+            <Paragraph>Campaign Name</Paragraph>
+            <Paragraph>{formValues.title}</Paragraph>
+          </Box>
+          <Box>
+            <Paragraph>Creator</Paragraph>
+            <Paragraph>{account}</Paragraph>
+          </Box>
+          <Box>
+            <Paragraph>Guardian</Paragraph>
+            <Paragraph>{formValues.guardian}</Paragraph>
+          </Box>
+          <Box>
+            <Paragraph>Github Repositories</Paragraph>
+            {formValues.repositoryFullnames.map((repo) => (
+              <Box>{repo}</Box>
+            ))}
+          </Box>
+          <Box>
+            <Paragraph>Live Period</Paragraph>
+            <Paragraph>{details?.strategyParams.from}</Paragraph>
+            <Paragraph>{details?.strategyParams.to}</Paragraph>
+          </Box>
+        </Box>
+
+        <Box>
+          <Box>
+            <Paragraph>Logo</Paragraph>
+          </Box>
+          <Box>
+            <Paragraph>Description</Paragraph>
+          </Box>
+          <Box>
+            <Paragraph>Asset</Paragraph>
+            <Paragraph>{formValues.asset}</Paragraph>
+          </Box>
+        </Box>
+      </TwoColumns>
+      ,
+      <Box>
+        {status.isSimulating ? (
+          'simulating'
+        ) : (
+          <Box>
+            <Box>{simulation !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
+            {status.wasSimulated ? (
+              <RewardsTable rewards={(simulation as SimulationResult).rewards}></RewardsTable>
+            ) : (
+              ''
+            )}
+          </Box>
+        )}
+      </Box>
+    </Box>,
+  ];
 
   return (
-    <>
-      <Link to={RouteNames.Base}>Back</Link>
-      <br></br>
-      <br></br>
-      <Form {...layout} initialValues={initialValues} form={form} name="control-hooks" onValuesChange={onValuesUpdated}>
-        <Form.Item name="campaignType" label="Type" rules={[{ required: true }]}>
-          <Select onChange={onCampaignTypeSelected} allowClear>
-            <Option value="github">Github</Option>
-            <Option value="twitter">Twitter (coming soon)</Option>
-          </Select>
-        </Form.Item>
-        <Form.Item name="title" label="Title" rules={[{ required: true }]}>
-          <Input></Input>
-        </Form.Item>
-        <Form.Item name="description" label="Description" rules={[{ required: false }]}>
-          <Input.TextArea></Input.TextArea>
-        </Form.Item>
-        <Form.Item name="guardian" label="Guardian" rules={[{ required: true }]}>
-          <Input placeholder="0x...."></Input>
-        </Form.Item>
+    <Box style={{ height: '100vh', padding: '45px 0px' }} justify="center" align="center">
+      <Box style={{ height: '100%', minWidth: '600px', maxWidth: '900px' }}>
+        <Box style={{ height: '80px', flexShrink: 0 }} direction="row" justify="center">
+          <FormProgress
+            stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
+            position={0}
+            onSelected={(ix) => setPageIx(ix)}
+          />
+        </Box>
 
-        <Form.Item name="repositoryURL" label="Repository URL" rules={[{ required: true }]}>
-          <Input placeholder="https://github.com/..."></Input>
-        </Form.Item>
+        <Box style={{ height: '80px', flexShrink: 0, width: '100%' }}>
+          <div style={{ margin: '30px 0px 20px 0px', fontSize: '24px', fontWeight: '700', textAlign: 'center' }}>
+            Create New Campaign <span style={{ fontSize: '18px', fontWeight: 'normal' }}>(Github)</span>
+          </div>
+          <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
+        </Box>
 
-        {/* This portion is strategy-specific, it should be used to build the strategyParams, the execDate, 
-            and a flag to determine if it makes sense for the strategy to be simulated up to now */}
-        <>
-          <Form.Item name="livePeriodChoice" label="Live period">
-            <Select onChange={onLivePeriodSelected}>
-              <Option value={'-3'}>Last 3 months</Option>
-              <Option value={'-6'}>Last 6 months</Option>
-              <Option value={'3'}>Next 3 months</Option>
-              <Option value={'6'}>Next 6 months</Option>
-              <Option value={'0'}>Custom</Option>
-            </Select>
-          </Form.Item>
-
-          {livePeriodCustom ? (
-            <Form.Item name="customRange" label="Custom Range">
-              <DatePicker.RangePicker onChange={onRangePicker}></DatePicker.RangePicker>
-            </Form.Item>
-          ) : (
-            <></>
-          )}
-        </>
-
-        <Form.Item {...tailLayout}>
-          {canBeSimulated() ? (
-            <Button
-              type={isSimulated() ? 'default' : 'primary'}
-              onClick={() => onSimulate()}
-              disabled={simulating || isSimulated()}>
-              {simulating ? 'Simulating...' : isSimulated() ? 'Simulated' : 'Simulate'}
-            </Button>
-          ) : (
-            <></>
-          )}
-
-          <Button htmlType="button" onClick={onReset}>
-            Reset
-          </Button>
-          <Button type={isSimulated() ? 'primary' : 'default'} onClick={() => onCreate()} disabled={!canCreate()}>
-            Create
-          </Button>
-        </Form.Item>
-      </Form>
-
-      <div>
-        <ul>
-          {simulation.rewards !== undefined ? (
-            Object.entries(simulation.rewards).map((entry) => {
+        <AppForm
+          style={{
+            flex: '1 1 auto',
+            overflowY: 'auto',
+            margin: '25px 0px',
+            width: '700px',
+          }}
+          value={formValues}
+          onChange={onValuesUpdated as any}>
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+            {pages.map((page, ix) => {
               return (
-                <li key={entry[0]}>
-                  <>
-                    {entry[0]}: {entry[1]}
-                  </>
-                </li>
+                <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
+                  {page}
+                </div>
               );
-            })
-          ) : (
-            <></>
-          )}
-        </ul>
-      </div>
-    </>
+            })}
+          </div>
+        </AppForm>
+
+        <Box>
+          {errors.map((error, ix) => (
+            <Box key={ix} pad="small">
+              {error}
+            </Box>
+          ))}
+        </Box>
+
+        <Box style={{ width: '100%', height: '50px', flexShrink: '0' }} direction="row" justify="between">
+          <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
+          <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
+            {rightText}
+          </AppButton>
+        </Box>
+      </Box>
+    </Box>
   );
 };

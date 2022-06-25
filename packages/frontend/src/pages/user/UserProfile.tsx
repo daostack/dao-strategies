@@ -1,4 +1,4 @@
-import { Button, Col, Input, Row } from 'antd';
+import { Button, TextInput } from 'grommet';
 import { FC, useState } from 'react';
 import { useSignMessage } from 'wagmi';
 
@@ -110,53 +110,51 @@ export const UserProfile: FC<IUserProfileProps> = () => {
       {isLogged() ? (
         !isVerified() ? (
           <>
-            <Row gutter={16}>
-              <Col className="gutter-row" span={14}>
+            <div>
+              <div className="gutter-row">
                 {!handleWasSet ? (
-                  <Input value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></Input>
+                  <TextInput value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></TextInput>
                 ) : (
                   <>{handle}</>
                 )}
-              </Col>
-              <Col className="gutter-row" span={2}>
+              </div>
+              <div className="gutter-row">
                 {!handleWasSet ? (
                   <Button onClick={handleSet}>Set</Button>
                 ) : (
                   <Button onClick={handleClear}>Clear</Button>
                 )}
-              </Col>
-            </Row>
+              </div>
+            </div>
             <br></br>
-            <Row gutter={16}>
-              <Col className="gutter-row" span={14}>
+            <div>
+              <div className="gutter-row">
                 <>{user?.address}</>
-              </Col>
-              <Col className="gutter-row" span={2}>
+              </div>
+              <div className="gutter-row">
                 {!verifiedSig ? (
                   <Button onClick={sign}>{!verifyingSig ? <>Sign</> : <>Signing...</>}</Button>
                 ) : (
                   <>verified</>
                 )}
-              </Col>
-            </Row>
+              </div>
+            </div>
             <br></br>
-            <Row gutter={16}>
-              <Col className="gutter-row" span={14}>
+            <div>
+              <div className="gutter-row">
                 Please create a <b>public</b> gist on github pasting your Ethereum address in it's body.
-              </Col>
-              <Col className="gutter-row" span={2}>
+              </div>
+              <div className="gutter-row">
                 <Button onClick={goToGithub}>Open Github</Button>
-              </Col>
-            </Row>
+              </div>
+            </div>
             <br></br>
-            <Row gutter={16}>
-              <Col className="gutter-row" span={14}>
-                Once you have created the gist, click below to verify it.
-              </Col>
-              <Col className="gutter-row" span={2}>
+            <div>
+              <div className="gutter-row">Once you have created the gist, click below to verify it.</div>
+              <div className="gutter-row">
                 <Button onClick={verifyAddressOfGithub}>{!verifying ? <>Verify</> : <>Verifying...</>}</Button>
-              </Col>
-            </Row>
+              </div>
+            </div>
 
             <br></br>
             {verifyingError ? <>Error verifying</> : <></>}
