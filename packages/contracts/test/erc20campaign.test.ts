@@ -5,7 +5,15 @@ import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
-import { TestErc20, TestErc20__factory, Erc20Campaign, Erc20Campaign__factory, Erc20CampaignFactory__factory } from './../typechain';
+import {
+  TestErc20,
+  TestErc20__factory,
+  Erc20Campaign,
+  Erc20Campaign__factory,
+  Erc20CampaignFactory__factory,
+  CampaignFactory__factory,
+  EthCampaign__factory,
+} from './../typechain';
 import { toBigNumber, fastForwardToTimestamp } from './support';
 // import { MockContract } from '@ethereum-waffle/mock-contract';
 
@@ -49,17 +57,19 @@ describe('Erc20Campaign', () => {
     const merkleRoot = tree.getHexRoot();
 
     // get deployers
-    const campaignFactoryDeployer = await ethers.getContractFactory<Erc20CampaignFactory__factory>('Erc20CampaignFactory');
-    const campaignDeployer = await ethers.getContractFactory<Erc20Campaign__factory>('Erc20Campaign');
+    const campaignFactoryDeployer = await ethers.getContractFactory<CampaignFactory__factory>('CampaignFactory');
+    const erc20CampaignDeployer = await ethers.getContractFactory<Erc20Campaign__factory>('Erc20Campaign');
+    const ethCampaignDeployer = await ethers.getContractFactory<EthCampaign__factory>('EthCampaign');
     const rewardTokenDeployer = await ethers.getContractFactory<TestErc20__factory>('TestErc20');
 
     // deploy contracts
-    const campaignMaster = await campaignDeployer.deploy(); // deploy cmapign master implementation
-    const campaignFactory = await campaignFactoryDeployer.deploy(campaignMaster.address);
+    const erc20CampaignMaster = await erc20CampaignDeployer.deploy(); // deploy cmapign master implementation
+    const ethCampaignMaster = await ethCampaignDeployer.deploy(); // deploy cmapign master implementation
+    const campaignFactory = await campaignFactoryDeployer.deploy(erc20CampaignMaster.address, ethCampaignMaster.address);
     const rewardToken = await rewardTokenDeployer.deploy(toBigNumber('1000', 18), admin.address);
 
     // create new campaign
-    const campaignCreationTx = await campaignFactory.createCampaign(
+    const campaignCreationTx = await campaignFactory.createErc20Campaign(
       publishShares ? merkleRoot : ZERO_BYTES32,
       publishShares ? URI : ZERO_BYTES32,
       URI,
@@ -70,7 +80,7 @@ describe('Erc20Campaign', () => {
     );
     const campaignCreationReceipt = await campaignCreationTx.wait();
     const campaignAddress: string = (campaignCreationReceipt as any).events[1].args[1]; // get campaign proxy address from the CampaignCreated event
-    const campaign = campaignDeployer.attach(campaignAddress);
+    const campaign = erc20CampaignDeployer.attach(campaignAddress);
 
     return {
       admin,

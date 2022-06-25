@@ -6,17 +6,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  const campaignERC20 = await deploy('Erc20Campaign', {
+  const campaignErc20 = await deploy('Erc20Campaign', {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     args: [],
-    log: true,
-  });
-
-  await deploy('Erc20CampaignFactory', {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
-    from: deployer,
-    args: [campaignERC20.address],
     log: true,
   });
 
@@ -27,10 +20,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     log: true,
   });
 
-  await deploy('EthCampaignFactory', {
+  await deploy('CampaignFactory', {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    args: [campaignEth.address],
+    args: [campaignErc20.address, campaignEth.address],
     log: true,
   });
 };

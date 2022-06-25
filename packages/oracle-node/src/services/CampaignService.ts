@@ -203,10 +203,8 @@ export class CampaignService {
       throw new Error(`campaign ${campaign.uri} alread published`);
     }
 
-    const rewards = await this.getRewards(campaign.uri);
-    const rewardsHashes = await hashReceivers(rewards);
-
-    const tree = new BalanceTree(rewardsHashes);
+    const rewards = await this.getRewardsToAddresses(campaign.uri);
+    const tree = new BalanceTree(rewards);
     const root = tree.getHexRoot();
 
     return root;

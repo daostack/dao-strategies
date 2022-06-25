@@ -10,16 +10,16 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
-export class CampaignCreated extends ethereum.Event {
-  get params(): CampaignCreated__Params {
-    return new CampaignCreated__Params(this);
+export class Erc20CampaignCreated extends ethereum.Event {
+  get params(): Erc20CampaignCreated__Params {
+    return new Erc20CampaignCreated__Params(this);
   }
 }
 
-export class CampaignCreated__Params {
-  _event: CampaignCreated;
+export class Erc20CampaignCreated__Params {
+  _event: Erc20CampaignCreated;
 
-  constructor(event: CampaignCreated) {
+  constructor(event: Erc20CampaignCreated) {
     this._event = event;
   }
 
@@ -31,15 +31,15 @@ export class CampaignCreated__Params {
     return this._event.parameters[1].value.toAddress();
   }
 
-  get _sharesRoot(): Bytes {
+  get _sharesMerkleRoot(): Bytes {
     return this._event.parameters[2].value.toBytes();
   }
 
-  get _sharesTotal(): BigInt {
-    return this._event.parameters[3].value.toBigInt();
+  get _sharesUri(): Bytes {
+    return this._event.parameters[3].value.toBytes();
   }
 
-  get _uri(): Bytes {
+  get _strategyUri(): Bytes {
     return this._event.parameters[4].value.toBytes();
   }
 
@@ -51,16 +51,58 @@ export class CampaignCreated__Params {
     return this._event.parameters[6].value.toAddress();
   }
 
-  get _sharesPublished(): boolean {
-    return this._event.parameters[7].value.toBoolean();
-  }
-
-  get _claimPeriodStart(): BigInt {
-    return this._event.parameters[8].value.toBigInt();
+  get _rewardToken(): Address {
+    return this._event.parameters[7].value.toAddress();
   }
 
   get salt(): Bytes {
-    return this._event.parameters[9].value.toBytes();
+    return this._event.parameters[8].value.toBytes();
+  }
+}
+
+export class EthCampaignCreated extends ethereum.Event {
+  get params(): EthCampaignCreated__Params {
+    return new EthCampaignCreated__Params(this);
+  }
+}
+
+export class EthCampaignCreated__Params {
+  _event: EthCampaignCreated;
+
+  constructor(event: EthCampaignCreated) {
+    this._event = event;
+  }
+
+  get creator(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get newCampaign(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get _sharesMerkleRoot(): Bytes {
+    return this._event.parameters[2].value.toBytes();
+  }
+
+  get _sharesUri(): Bytes {
+    return this._event.parameters[3].value.toBytes();
+  }
+
+  get _strategyUri(): Bytes {
+    return this._event.parameters[4].value.toBytes();
+  }
+
+  get _guardian(): Address {
+    return this._event.parameters[5].value.toAddress();
+  }
+
+  get _oracle(): Address {
+    return this._event.parameters[6].value.toAddress();
+  }
+
+  get salt(): Bytes {
+    return this._event.parameters[7].value.toBytes();
   }
 }
 
@@ -69,20 +111,69 @@ export class CampaignFactory extends ethereum.SmartContract {
     return new CampaignFactory("CampaignFactory", address);
   }
 
-  campaignAddress(salt: Bytes): Address {
+  campaignAddress(master: Address, salt: Bytes): Address {
     let result = super.call(
       "campaignAddress",
-      "campaignAddress(bytes32):(address)",
+      "campaignAddress(address,bytes32):(address)",
+      [ethereum.Value.fromAddress(master), ethereum.Value.fromFixedBytes(salt)]
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_campaignAddress(
+    master: Address,
+    salt: Bytes
+  ): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "campaignAddress",
+      "campaignAddress(address,bytes32):(address)",
+      [ethereum.Value.fromAddress(master), ethereum.Value.fromFixedBytes(salt)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  erc20CampaignAddress(salt: Bytes): Address {
+    let result = super.call(
+      "erc20CampaignAddress",
+      "erc20CampaignAddress(bytes32):(address)",
       [ethereum.Value.fromFixedBytes(salt)]
     );
 
     return result[0].toAddress();
   }
 
-  try_campaignAddress(salt: Bytes): ethereum.CallResult<Address> {
+  try_erc20CampaignAddress(salt: Bytes): ethereum.CallResult<Address> {
     let result = super.tryCall(
-      "campaignAddress",
-      "campaignAddress(bytes32):(address)",
+      "erc20CampaignAddress",
+      "erc20CampaignAddress(bytes32):(address)",
+      [ethereum.Value.fromFixedBytes(salt)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  ethCampaignAddress(salt: Bytes): Address {
+    let result = super.call(
+      "ethCampaignAddress",
+      "ethCampaignAddress(bytes32):(address)",
+      [ethereum.Value.fromFixedBytes(salt)]
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_ethCampaignAddress(salt: Bytes): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "ethCampaignAddress",
+      "ethCampaignAddress(bytes32):(address)",
       [ethereum.Value.fromFixedBytes(salt)]
     );
     if (result.reverted) {
@@ -110,8 +201,12 @@ export class ConstructorCall__Inputs {
     this._call = call;
   }
 
-  get _master(): Address {
+  get _masterErc20(): Address {
     return this._call.inputValues[0].value.toAddress();
+  }
+
+  get _masterEth(): Address {
+    return this._call.inputValues[1].value.toAddress();
   }
 }
 
@@ -123,68 +218,106 @@ export class ConstructorCall__Outputs {
   }
 }
 
-export class CreateCampaignCall extends ethereum.Call {
-  get inputs(): CreateCampaignCall__Inputs {
-    return new CreateCampaignCall__Inputs(this);
+export class CreateErc20CampaignCall extends ethereum.Call {
+  get inputs(): CreateErc20CampaignCall__Inputs {
+    return new CreateErc20CampaignCall__Inputs(this);
   }
 
-  get outputs(): CreateCampaignCall__Outputs {
-    return new CreateCampaignCall__Outputs(this);
+  get outputs(): CreateErc20CampaignCall__Outputs {
+    return new CreateErc20CampaignCall__Outputs(this);
   }
 }
 
-export class CreateCampaignCall__Inputs {
-  _call: CreateCampaignCall;
+export class CreateErc20CampaignCall__Inputs {
+  _call: CreateErc20CampaignCall;
 
-  constructor(call: CreateCampaignCall) {
+  constructor(call: CreateErc20CampaignCall) {
     this._call = call;
   }
 
-  get _shares(): CreateCampaignCall_sharesStruct {
-    return changetype<CreateCampaignCall_sharesStruct>(
-      this._call.inputValues[0].value.toTuple()
-    );
+  get _sharesMerkleRoot(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
   }
 
-  get _uri(): Bytes {
+  get _sharesUri(): Bytes {
     return this._call.inputValues[1].value.toBytes();
   }
 
-  get _guardian(): Address {
-    return this._call.inputValues[2].value.toAddress();
+  get _strategyUri(): Bytes {
+    return this._call.inputValues[2].value.toBytes();
   }
 
-  get _oracle(): Address {
+  get _guardian(): Address {
     return this._call.inputValues[3].value.toAddress();
   }
 
-  get _sharesPublished(): boolean {
-    return this._call.inputValues[4].value.toBoolean();
-  }
-
-  get _claimPeriodStart(): BigInt {
-    return this._call.inputValues[5].value.toBigInt();
+  get _oracle(): Address {
+    return this._call.inputValues[4].value.toAddress();
   }
 
   get salt(): Bytes {
-    return this._call.inputValues[6].value.toBytes();
+    return this._call.inputValues[5].value.toBytes();
+  }
+
+  get _rewardToken(): Address {
+    return this._call.inputValues[6].value.toAddress();
   }
 }
 
-export class CreateCampaignCall__Outputs {
-  _call: CreateCampaignCall;
+export class CreateErc20CampaignCall__Outputs {
+  _call: CreateErc20CampaignCall;
 
-  constructor(call: CreateCampaignCall) {
+  constructor(call: CreateErc20CampaignCall) {
     this._call = call;
   }
 }
 
-export class CreateCampaignCall_sharesStruct extends ethereum.Tuple {
-  get totalShares(): BigInt {
-    return this[0].toBigInt();
+export class CreateEthCampaignCall extends ethereum.Call {
+  get inputs(): CreateEthCampaignCall__Inputs {
+    return new CreateEthCampaignCall__Inputs(this);
   }
 
-  get sharesMerkleRoot(): Bytes {
-    return this[1].toBytes();
+  get outputs(): CreateEthCampaignCall__Outputs {
+    return new CreateEthCampaignCall__Outputs(this);
+  }
+}
+
+export class CreateEthCampaignCall__Inputs {
+  _call: CreateEthCampaignCall;
+
+  constructor(call: CreateEthCampaignCall) {
+    this._call = call;
+  }
+
+  get _sharesMerkleRoot(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+
+  get _sharesUri(): Bytes {
+    return this._call.inputValues[1].value.toBytes();
+  }
+
+  get _strategyUri(): Bytes {
+    return this._call.inputValues[2].value.toBytes();
+  }
+
+  get _guardian(): Address {
+    return this._call.inputValues[3].value.toAddress();
+  }
+
+  get _oracle(): Address {
+    return this._call.inputValues[4].value.toAddress();
+  }
+
+  get salt(): Bytes {
+    return this._call.inputValues[5].value.toBytes();
+  }
+}
+
+export class CreateEthCampaignCall__Outputs {
+  _call: CreateEthCampaignCall;
+
+  constructor(call: CreateEthCampaignCall) {
+    this._call = call;
   }
 }
