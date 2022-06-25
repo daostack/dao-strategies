@@ -153,9 +153,14 @@ export class CampaignService {
        *   it was run very recently
        * */
       rewards = await this.getRewards(uri);
-      appLogger.info(`rewards for strategy ${uri} read from DB`);
+      appLogger.info(
+        `rewards for strategy ${uri} read from DB. ${rewards.size} rewarded found`
+      );
     } else {
       rewards = await this.runCampaign(campaign);
+      appLogger.info(
+        `rewards for strategy ${uri} computed. ${rewards.size} rewarded found`
+      );
     }
 
     return rewards;

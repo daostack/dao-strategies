@@ -2,6 +2,7 @@ import { Services } from '../types';
 
 import { CampaignController } from './CampaignController';
 import { Controller } from './Controller';
+import { SocialApiController } from './SocialApiController';
 import { UserController } from './UserController';
 
 export interface RouteConfig {
@@ -26,6 +27,13 @@ export const Routes: RouteConfig[] = [
     controller: CampaignController,
     action: 'simulateFromDetails',
     protected: true,
+  },
+  {
+    method: 'post',
+    route: '/campaign/simulateFromUri/:uri',
+    controller: CampaignController,
+    action: 'simulateFromUri',
+    protected: false,
   },
   {
     method: 'post',
@@ -89,5 +97,12 @@ export const Routes: RouteConfig[] = [
     controller: UserController,
     action: 'verifyGithubOfAddress',
     protected: false,
+  },
+  {
+    method: 'post',
+    route: '/social/github/exist',
+    controller: SocialApiController,
+    action: 'repoIsValid',
+    protected: false, // TODO, change to true
   },
 ];

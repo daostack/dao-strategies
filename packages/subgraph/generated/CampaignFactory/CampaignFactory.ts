@@ -68,6 +68,29 @@ export class CampaignFactory extends ethereum.SmartContract {
   static bind(address: Address): CampaignFactory {
     return new CampaignFactory("CampaignFactory", address);
   }
+
+  campaignAddress(salt: Bytes): Address {
+    let result = super.call(
+      "campaignAddress",
+      "campaignAddress(bytes32):(address)",
+      [ethereum.Value.fromFixedBytes(salt)]
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_campaignAddress(salt: Bytes): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "campaignAddress",
+      "campaignAddress(bytes32):(address)",
+      [ethereum.Value.fromFixedBytes(salt)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
 }
 
 export class ConstructorCall extends ethereum.Call {

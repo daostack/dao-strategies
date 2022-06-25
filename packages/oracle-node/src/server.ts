@@ -1,15 +1,16 @@
-import * as bodyParser from 'body-parser';
-import * as cors from 'cors';
-import * as express from 'express';
-import { Request, Response } from 'express';
-import * as Session from 'express-session';
-import * as expressWinston from 'express-winston';
-import * as winston from 'winston';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import express, { Request, Response } from 'express';
+import Session from 'express-session';
+import expressWinston from 'express-winston';
+import winston from 'winston';
+
+import { worldConfig } from './config';
 
 import { port } from './config';
 import { Routes } from './enpoints/routes';
-import { ServiceManager } from './service.manager';
 import { appLogger } from './logger';
+import { ServiceManager } from './service.manager';
 
 /* eslint-disable 
   @typescript-eslint/no-unsafe-member-access,
@@ -74,7 +75,11 @@ app.use(
 app.use(bodyParser.json());
 
 /** Services instantiation */
-const manager = new ServiceManager();
+const manager = new ServiceManager({
+  world: worldConfig,
+  enabled: true,
+  periodCheck: 30,
+});
 
 /** --------------------- */
 
