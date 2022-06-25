@@ -17,6 +17,7 @@ import '@nomiclabs/hardhat-ethers';
 import '@tenderly/hardhat-tenderly';
 import 'hardhat-deploy';
 import 'solidity-coverage';
+import "hardhat-gas-reporter";
 
 import * as fs from 'fs';
 import * as path from 'path';
