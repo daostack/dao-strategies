@@ -18,6 +18,7 @@ model Campaign {
   oracle          String
   stratID         String
   stratParamsStr  String    // For now, Params are stringified as they can have any structure
+  asset           String
   rewards         Reward[] 
   lastRunDate     BigInt?
   execDate        BigInt?

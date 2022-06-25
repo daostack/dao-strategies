@@ -1,28 +1,35 @@
-import {
-  Wallet,
-  Signer,
-  Contract,
-  BigNumber,
-  ContractInterface,
-  providers,
-} from 'ethers';
+import { Wallet, Signer, Contract, ContractInterface, providers } from 'ethers';
 import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
 
 import hardhatContractsJson from '../generated/hardhat_contracts.json';
-import { Campaign, CampaignFactory } from '../generated/typechain';
-import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
+import {
+  CampaignFactory,
+  Erc20Campaign,
+  EthCampaign,
+} from '../generated/typechain';
+import {
+  EthCampaignCreatedEvent,
+  Erc20CampaignCreatedEvent,
+} from '../generated/typechain/CampaignFactory';
 
 import { CampaignCreateDetails } from './types';
+
+const ZERO_BYTES32 =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 /* eslint-disable */
 const CampaignFactoryJson: any = (hardhatContractsJson as any)['31337'][
   'localhost'
 ]['contracts']['CampaignFactory'];
 
-const CampaignJson: any = (hardhatContractsJson as any)['31337']['localhost'][
-  'contracts'
-]['Campaign'];
+const Erc20CampaignJson: any = (hardhatContractsJson as any)['31337'][
+  'localhost'
+]['contracts']['Erc20Campaign'];
+
+const EthCampaignJson: any = (hardhatContractsJson as any)['31337'][
+  'localhost'
+]['contracts']['EthCampaign'];
 /* eslint-enable */
 
 export class OnChainService {
@@ -57,30 +64,51 @@ export class OnChainService {
 
   async deploy(
     uri: string,
-    shares: Campaign.SharesDataStruct,
+    root: string,
+    file: string,
     details: CampaignCreateDetails,
     _salt?: Uint8Array
   ): Promise<string> {
     const uriCid = CID.parse(uri, base32);
     const salt = _salt || uriCid.multihash.digest;
 
-    const tx = await this.campaignFactory.createCampaign(
-      shares,
-      uriCid.multihash.digest,
-      details.guardian,
-      details.oracle,
-      false,
-      0,
-      salt
-    );
+    /** TODO: What happens if two campaigns are deployed on the same block?
+     * Anyway, this method is only for tests  */
+
+    const tx =
+      details.asset === 'eth'
+        ? await this.campaignFactory.createEthCampaign(
+            root,
+            ZERO_BYTES32,
+            uriCid.multihash.digest,
+            details.guardian,
+            details.oracle,
+            salt
+          )
+        : await this.campaignFactory.createErc20Campaign(
+            root,
+            ZERO_BYTES32,
+            uriCid.multihash.digest,
+            details.guardian,
+            details.oracle,
+            salt,
+            details.asset
+          );
 
     const txReceipt = await tx.wait();
 
     if (txReceipt.events === undefined)
       throw new Error('txReceipt.events undefined');
-    const event = txReceipt.events.find(
-      (e) => e.event === 'CampaignCreated'
-    ) as CampaignCreatedEvent;
+
+    const ethEvent = txReceipt.events.find(
+      (e) => e.event === 'EthCampaignCreated'
+    ) as EthCampaignCreatedEvent;
+
+    const erc20Cvent = txReceipt.events.find(
+      (e) => e.event === 'Erc20CampaignCreated'
+    ) as Erc20CampaignCreatedEvent;
+
+    const event = details.asset === 'eth' ? ethEvent : erc20Cvent;
 
     if (event === undefined) throw new Error('event undefined');
     if (event.args === undefined) throw new Error('event.args undefined');
@@ -88,17 +116,25 @@ export class OnChainService {
     return event.args.newCampaign;
   }
 
-  async publishShares(address: string, root: string): Promise<void> {
-    const campaign = new Contract(
-      address,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      CampaignJson.abi as ContractInterface,
-      this.signer
-    ) as Campaign;
-    const tx = await campaign.publishShares({
-      sharesMerkleRoot: root,
-      totalShares: BigNumber.from('1000000000000000000'),
-    });
+  async publishShares(
+    address: string,
+    root: string,
+    asset: string
+  ): Promise<void> {
+    const campaign =
+      asset === 'eth'
+        ? (new Contract(
+            address,
+            EthCampaignJson.abi as ContractInterface,
+            this.signer
+          ) as EthCampaign)
+        : (new Contract(
+            address,
+            Erc20CampaignJson.abi as ContractInterface,
+            this.signer
+          ) as Erc20Campaign);
+
+    const tx = await campaign.proposeShares(root, ZERO_BYTES32);
     const rec = await tx.wait();
     console.log({ rec });
   }
