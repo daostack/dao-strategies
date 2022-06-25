@@ -261,6 +261,19 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "getValidRoot",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "root",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "guardian",
     outputs: [
       {
@@ -379,6 +392,35 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "share",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes32[]",
+        name: "proof",
+        type: "bytes32[]",
+      },
+    ],
+    name: "rewardsAvailableToClaimer",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "total",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "bool",
         name: "_lock",
         type: "bool",
@@ -409,6 +451,19 @@ const _abi = [
       {
         internalType: "uint256",
         name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "totalFundsReceived",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "total",
         type: "uint256",
       },
     ],

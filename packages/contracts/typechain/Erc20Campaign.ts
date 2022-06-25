@@ -27,6 +27,7 @@ export interface Erc20CampaignInterface extends utils.Interface {
     "challenge(uint8)": FunctionFragment;
     "claim(address,uint256,bytes32[])": FunctionFragment;
     "claimed(address)": FunctionFragment;
+    "getValidRoot()": FunctionFragment;
     "guardian()": FunctionFragment;
     "initCampaign(bytes32,bytes32,address,address)": FunctionFragment;
     "initErc20Campaign(bytes32,bytes32,address,address,address)": FunctionFragment;
@@ -36,9 +37,11 @@ export interface Erc20CampaignInterface extends utils.Interface {
     "proposeShares(bytes32,bytes32)": FunctionFragment;
     "providers(address)": FunctionFragment;
     "rewardToken()": FunctionFragment;
+    "rewardsAvailableToClaimer(address,uint256,bytes32[])": FunctionFragment;
     "setLock(bool)": FunctionFragment;
     "strategyUri()": FunctionFragment;
     "totalClaimed()": FunctionFragment;
+    "totalFundsReceived()": FunctionFragment;
     "totalReward()": FunctionFragment;
     "transferValueIn(uint256)": FunctionFragment;
     "withdrawFunds(address)": FunctionFragment;
@@ -69,6 +72,10 @@ export interface Erc20CampaignInterface extends utils.Interface {
     values: [string, BigNumberish, BytesLike[]]
   ): string;
   encodeFunctionData(functionFragment: "claimed", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "getValidRoot",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "guardian", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initCampaign",
@@ -93,6 +100,10 @@ export interface Erc20CampaignInterface extends utils.Interface {
     functionFragment: "rewardToken",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "rewardsAvailableToClaimer",
+    values: [string, BigNumberish, BytesLike[]]
+  ): string;
   encodeFunctionData(functionFragment: "setLock", values: [boolean]): string;
   encodeFunctionData(
     functionFragment: "strategyUri",
@@ -100,6 +111,10 @@ export interface Erc20CampaignInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "totalClaimed",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "totalFundsReceived",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -134,6 +149,10 @@ export interface Erc20CampaignInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getValidRoot",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "guardian", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "initCampaign",
@@ -158,6 +177,10 @@ export interface Erc20CampaignInterface extends utils.Interface {
     functionFragment: "rewardToken",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "rewardsAvailableToClaimer",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "setLock", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "strategyUri",
@@ -165,6 +188,10 @@ export interface Erc20CampaignInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "totalClaimed",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "totalFundsReceived",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -284,6 +311,10 @@ export interface Erc20Campaign extends BaseContract {
 
     claimed(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    getValidRoot(
+      overrides?: CallOverrides
+    ): Promise<[string] & { root: string }>;
+
     guardian(overrides?: CallOverrides): Promise<[string]>;
 
     initCampaign(
@@ -319,6 +350,13 @@ export interface Erc20Campaign extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<[string]>;
 
+    rewardsAvailableToClaimer(
+      account: string,
+      share: BigNumberish,
+      proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { total: BigNumber }>;
+
     setLock(
       _lock: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -327,6 +365,10 @@ export interface Erc20Campaign extends BaseContract {
     strategyUri(overrides?: CallOverrides): Promise<[string]>;
 
     totalClaimed(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    totalFundsReceived(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { total: BigNumber }>;
 
     totalReward(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -363,6 +405,8 @@ export interface Erc20Campaign extends BaseContract {
 
   claimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+  getValidRoot(overrides?: CallOverrides): Promise<string>;
+
   guardian(overrides?: CallOverrides): Promise<string>;
 
   initCampaign(
@@ -398,6 +442,13 @@ export interface Erc20Campaign extends BaseContract {
 
   rewardToken(overrides?: CallOverrides): Promise<string>;
 
+  rewardsAvailableToClaimer(
+    account: string,
+    share: BigNumberish,
+    proof: BytesLike[],
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   setLock(
     _lock: boolean,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -406,6 +457,8 @@ export interface Erc20Campaign extends BaseContract {
   strategyUri(overrides?: CallOverrides): Promise<string>;
 
   totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
+
+  totalFundsReceived(overrides?: CallOverrides): Promise<BigNumber>;
 
   totalReward(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -438,6 +491,8 @@ export interface Erc20Campaign extends BaseContract {
     ): Promise<void>;
 
     claimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    getValidRoot(overrides?: CallOverrides): Promise<string>;
 
     guardian(overrides?: CallOverrides): Promise<string>;
 
@@ -474,11 +529,20 @@ export interface Erc20Campaign extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<string>;
 
+    rewardsAvailableToClaimer(
+      account: string,
+      share: BigNumberish,
+      proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     setLock(_lock: boolean, overrides?: CallOverrides): Promise<void>;
 
     strategyUri(overrides?: CallOverrides): Promise<string>;
 
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
+
+    totalFundsReceived(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalReward(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -551,6 +615,8 @@ export interface Erc20Campaign extends BaseContract {
 
     claimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    getValidRoot(overrides?: CallOverrides): Promise<BigNumber>;
+
     guardian(overrides?: CallOverrides): Promise<BigNumber>;
 
     initCampaign(
@@ -586,6 +652,13 @@ export interface Erc20Campaign extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<BigNumber>;
 
+    rewardsAvailableToClaimer(
+      account: string,
+      share: BigNumberish,
+      proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     setLock(
       _lock: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -594,6 +667,8 @@ export interface Erc20Campaign extends BaseContract {
     strategyUri(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
+
+    totalFundsReceived(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalReward(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -636,6 +711,8 @@ export interface Erc20Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getValidRoot(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     guardian(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initCampaign(
@@ -674,6 +751,13 @@ export interface Erc20Campaign extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    rewardsAvailableToClaimer(
+      account: string,
+      share: BigNumberish,
+      proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     setLock(
       _lock: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -682,6 +766,10 @@ export interface Erc20Campaign extends BaseContract {
     strategyUri(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     totalClaimed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    totalFundsReceived(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     totalReward(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

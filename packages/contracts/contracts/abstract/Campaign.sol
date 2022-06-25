@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
  * @title Campaign
  */
 abstract contract Campaign is Initializable {
+    /** Shares are considered a ratio [0-1] with 18 digits where 1E18 = 1 */
     uint256 public constant TOTAL_SHARES = 10**18;
     uint256 public constant CHALLENGE_PERIOD = 604800;
 
@@ -20,6 +21,9 @@ abstract contract Campaign is Initializable {
 
     bytes32 public approvedMerkleRoot;
 
+    /** Optimistic flow used to update merkleRoot.
+     * - Oracle propose update and Guardian can block
+     * - Guardian cannot initiate an update */
     bytes32 public pendingMerkleRoot;
     uint256 public activationTime;
 
@@ -27,9 +31,13 @@ abstract contract Campaign is Initializable {
     address public guardian;
     address public oracle;
 
-    uint256 public totalClaimed;
+    /** Counters of the total amount of funds provided by all providers
+     * and claimed by all claimers */
     uint256 public totalReward;
+    uint256 public totalClaimed;
 
+    /** Once locked, the merkleRoot cannot be updated anymore.
+     * Once locked, it cannot be un-locked  */
     bool public locked;
 
     mapping(address => uint256) public claimed;
@@ -72,6 +80,8 @@ abstract contract Campaign is Initializable {
         _;
     }
 
+    /** called at deploy (using the campaign factory). It may or may not
+     * include a non-zero merkleRoot */
     function initCampaign(
         bytes32 _sharesMerkleRoot,
         bytes32 _strategyUri,
@@ -90,6 +100,8 @@ abstract contract Campaign is Initializable {
         }
     }
 
+    /** Only the oracle can propose new merkleRoot. The proposal is stored and becomes active only
+     * after a CHALLENGE_PERIOD */
     function proposeShares(bytes32 _sharesMerkleRoot, bytes32 _sharesUri) external onlyOracle notLocked {
         if (pendingMerkleRoot != bytes32(0) && block.timestamp < activationTime) {
             revert ActiveChallengePeriod();
@@ -102,20 +114,39 @@ abstract contract Campaign is Initializable {
         emit SharesMerkleRoot(_sharesMerkleRoot, _sharesUri, activationTime);
     }
 
-    function claim(
+    /** Valid root is either the approved or pending one depending on the activation time */
+    function getValidRoot() public view returns (bytes32 root) {
+        return block.timestamp > activationTime ? pendingMerkleRoot : approvedMerkleRoot;
+    }
+
+    /** Total funds received by the contract */
+    function totalFundsReceived() public view returns (uint256 total) {
+        return totalReward + totalClaimed;
+    }
+
+    /** Validates the shares of an account and computes the available rewards it */
+    function rewardsAvailableToClaimer(
         address account,
         uint256 share,
         bytes32[] calldata proof
-    ) external {
-        bytes32 claimingMerkleRoot = block.timestamp > activationTime ? pendingMerkleRoot : approvedMerkleRoot;
+    ) public view returns (uint256 total) {
+        bytes32 claimingMerkleRoot = getValidRoot();
 
         bytes32 leaf = keccak256(abi.encodePacked(account, share));
         if (MerkleProof.verify(proof, claimingMerkleRoot, leaf) == false) {
             revert InvalidProof();
         }
+        /** Rewards by claimer are a portion of the total funds received. If new funds are received, new rewards will become available */
+        return (totalFundsReceived() * share) / TOTAL_SHARES - claimed[account];
+    }
 
-        uint256 totalFundsReceived = totalReward + totalClaimed;
-        uint256 reward = (totalFundsReceived * share) / TOTAL_SHARES - claimed[account];
+    /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
+    function claim(
+        address account,
+        uint256 share,
+        bytes32[] calldata proof
+    ) external {
+        uint256 reward = rewardsAvailableToClaimer(account, share, proof);
         if (reward == 0) {
             revert NoRewardAvailable();
         }
