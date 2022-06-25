@@ -76,3 +76,5 @@ Then we can run the app from the root folder with
 ```
 yarn start
 ```
+
+|
