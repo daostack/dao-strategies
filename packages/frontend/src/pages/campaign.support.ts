@@ -1,13 +1,12 @@
-import { BigNumber, ethers } from 'ethers';
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
 import { CampaignUriDetails } from '@dao-strategies/core';
 
-import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
 import { CampaignFactory } from '../generated/typechain';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/time';
+import { ChainsDetails, nameOfFullName } from './create/chains.map';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
@@ -26,6 +25,8 @@ export interface CampaignCreateDetails {
   guardian: string;
   oracle: string;
   cancelDate: number;
+  chain: string;
+  asset: string;
   address: string;
 }
 
@@ -205,23 +206,34 @@ export const deployCampaign = async (
 
   /** raw hash 32-bit wide is exctracted from URI CID  */
   const uriCid = CID.parse(uriDefined, base32);
-
   if (uriCid == null) throw new Error(`uri ${uri} is not a CID`);
 
-  const ex = await campaignFactory.createCampaign(
-    { sharesMerkleRoot: ZERO_BYTES32, totalShares: BigNumber.from(0) },
-    uriCid.multihash.digest,
-    otherDetails.guardian,
-    otherDetails.oracle,
-    false,
-    ethers.BigNumber.from(1000),
-    /** the campaign uri uniquely and deterministically determines the campaign contract address */
-    uriCid.multihash.digest
-  );
+  const isNative = otherDetails.asset === ChainsDetails[nameOfFullName(otherDetails.chain)].assets.native.name;
+
+  const ex = isNative
+    ? await campaignFactory.createEthCampaign(
+        ZERO_BYTES32,
+        ZERO_BYTES32,
+        uriCid.multihash.digest,
+        otherDetails.guardian,
+        otherDetails.oracle,
+        uriCid.multihash.digest
+      )
+    : await campaignFactory.createErc20Campaign(
+        ZERO_BYTES32,
+        ZERO_BYTES32,
+        uriCid.multihash.digest,
+        otherDetails.guardian,
+        otherDetails.oracle,
+        uriCid.multihash.digest,
+        otherDetails.asset
+      );
   const txReceipt = await ex.wait();
 
   if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
-  const event = txReceipt.events.find((e) => e.event === 'CampaignCreated') as CampaignCreatedEvent;
+  const event = txReceipt.events.find((e) =>
+    isNative ? e.event === 'EthCampaignCreated' : e.event === 'Erc20CampaignCreated'
+  );
 
   if (event === undefined) throw new Error('event undefined');
   if (event.args === undefined) throw new Error('event.args undefined');

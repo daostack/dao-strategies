@@ -1,5 +1,5 @@
 import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
-import { useAccount } from 'wagmi';
+import { chain, useAccount, useNetwork } from 'wagmi';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,20 +34,17 @@ import { FormTrash } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
+import { ChainName, ChainsDetails, nameOfFullName } from './chains.map';
 
 export interface ICampaignCreateProps {
   dum?: any;
 }
 
-export enum Asset {
-  Ether = 'ether',
-  DAI = 'dai',
-}
-
 export interface CampaignFormValues {
   title: string;
   description: string;
-  asset: Asset;
+  asset: string;
+  chain: string;
   repositoryFullnames: string[];
   guardian: string;
   livePeriodChoice: string;
@@ -62,7 +59,8 @@ export interface ProcessedFormValues {
 const initialValues: CampaignFormValues = {
   title: 'asdas',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-  asset: Asset.Ether,
+  chain: ChainsDetails[ChainName.Localhost].fullName,
+  asset: ChainsDetails[ChainName.Localhost].assets.native.name,
   description: '',
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
@@ -76,6 +74,7 @@ const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
+  const { activeChain } = useNetwork();
 
   const [today] = useState<DateManager>(new DateManager());
   const [pageIx, setPageIx] = useState<number>(0);
@@ -102,10 +101,14 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   /** details is a derived value */
   const details = strategyDetails(formValues, today, account);
-
   const periodType = getPeriodType(details, today);
-
   const isLogged = account !== undefined;
+
+  const chainOptions = Object.values(ChainsDetails).map((details) => details.fullName);
+
+  const name = nameOfFullName(formValues.chain);
+  const assets = ChainsDetails[name].assets;
+  const assetsOptions = Object.keys(assets).map((assetId) => assets[assetId].name);
 
   if (DEBUG) console.log('CampaignCreate - render');
 
@@ -126,6 +129,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       description: formValues.description,
       oracle: ORACLE_ADDRESS,
       address: '',
+      chain: formValues.chain,
+      asset: formValues.asset,
       cancelDate: finalDetails.execDate + CHALLENGE_PERIOD,
     };
 
@@ -268,8 +273,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
           <AppInput name="guardian" placeholder="0x...."></AppInput>
         </FormField>
+        <FormField name="chain" label="Chain" style={{ border: '0px none' }}>
+          <AppSelect name="chain" style={{ border: '0px none' }} options={chainOptions}></AppSelect>
+        </FormField>
         <FormField name="asset" label="Asset" style={{ border: '0px none' }}>
-          <AppSelect name="asset" style={{ border: '0px none' }} options={['ether', 'DAI']}></AppSelect>
+          <AppSelect name="asset" style={{ border: '0px none' }} options={assetsOptions}></AppSelect>
         </FormField>
       </>
       <>

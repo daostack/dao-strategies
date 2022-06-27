@@ -17,18 +17,11 @@ import '@nomiclabs/hardhat-ethers';
 import '@tenderly/hardhat-tenderly';
 import 'hardhat-deploy';
 import 'solidity-coverage';
-import "hardhat-gas-reporter";
+import 'hardhat-gas-reporter';
 
 import * as fs from 'fs';
-import * as path from 'path';
-import * as chalk from 'chalk';
-
-import { Provider, TransactionRequest, TransactionResponse } from '@ethersproject/providers';
 
 import { HardhatUserConfig, task } from 'hardhat/config';
-import { HttpNetworkUserConfig } from 'hardhat/types';
-import { THardhatDeployEthers } from 'helpers/types/hardhat-type-extensions';
-import { create } from 'ipfs-http-client';
 
 import { config as envConfig } from 'dotenv';
 envConfig({ path: '../frontend/.env' });
@@ -38,7 +31,6 @@ envConfig({ path: '../frontend/.env' });
  */
 console.log('HARDHAT_TARGET_NETWORK: ', process.env.HARDHAT_TARGET_NETWORK);
 
-const { isAddress, getAddress, formatUnits, parseUnits } = utils;
 //
 // Select the network you want to deploy to here:
 //

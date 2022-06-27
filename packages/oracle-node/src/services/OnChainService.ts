@@ -116,26 +116,16 @@ export class OnChainService {
     return event.args.newCampaign;
   }
 
-  async publishShares(
-    address: string,
-    root: string,
-    asset: string
-  ): Promise<void> {
-    const campaign =
-      asset === 'eth'
-        ? (new Contract(
-            address,
-            EthCampaignJson.abi as ContractInterface,
-            this.signer
-          ) as EthCampaign)
-        : (new Contract(
-            address,
-            Erc20CampaignJson.abi as ContractInterface,
-            this.signer
-          ) as Erc20Campaign);
+  async publishShares(address: string, root: string): Promise<void> {
+    const campaign = new Contract(
+      address,
+      ['function proposeShares(bytes32,bytes32) external'],
+      this.signer
+    );
 
+    /* eslint-disable */
     const tx = await campaign.proposeShares(root, ZERO_BYTES32);
     const rec = await tx.wait();
-    console.log({ rec });
+    /* eslint-enable */
   }
 }
