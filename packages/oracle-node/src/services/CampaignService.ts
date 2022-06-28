@@ -69,6 +69,8 @@ export class CampaignService {
           },
         },
         nonce: details.nonce,
+        asset: '',
+        chain: '',
         guardian: '',
         oracle: '',
         execDate: details.execDate,

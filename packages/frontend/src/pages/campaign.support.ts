@@ -6,7 +6,8 @@ import { CampaignFactory } from '../generated/typechain';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/time';
-import { ChainsDetails, nameOfFullName } from './create/chains.map';
+import { assetAddress, assetKeyOfName, ChainsDetails, isNative, keyOfName } from './create/chains.map';
+import { ethers } from 'ethers';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
@@ -42,6 +43,8 @@ export interface CampaignDetails {
   creator: string;
   guardian: string;
   oracle: string;
+  chain: string;
+  asset: string;
   execDate: number;
   cancelDate: number;
   strategyID: string;
@@ -208,31 +211,37 @@ export const deployCampaign = async (
   const uriCid = CID.parse(uriDefined, base32);
   if (uriCid == null) throw new Error(`uri ${uri} is not a CID`);
 
-  const isNative = otherDetails.asset === ChainsDetails[nameOfFullName(otherDetails.chain)].assets.native.name;
+  const chainKey = keyOfName(otherDetails.chain);
 
-  const ex = isNative
+  const _assetAddress = assetAddress(chainKey, otherDetails.asset);
+
+  const uriHex = ethers.utils.hexlify(uriCid.multihash.digest);
+  const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Date.now().toString())); // uriHex;
+
+  const _isNative = isNative(chainKey, otherDetails.asset);
+  const ex = _isNative
     ? await campaignFactory.createEthCampaign(
         ZERO_BYTES32,
         ZERO_BYTES32,
-        uriCid.multihash.digest,
+        uriHex,
         otherDetails.guardian,
         otherDetails.oracle,
-        uriCid.multihash.digest
+        salt
       )
     : await campaignFactory.createErc20Campaign(
         ZERO_BYTES32,
         ZERO_BYTES32,
-        uriCid.multihash.digest,
+        uriHex,
         otherDetails.guardian,
         otherDetails.oracle,
-        uriCid.multihash.digest,
-        otherDetails.asset
+        salt,
+        _assetAddress
       );
   const txReceipt = await ex.wait();
 
   if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
   const event = txReceipt.events.find((e) =>
-    isNative ? e.event === 'EthCampaignCreated' : e.event === 'Erc20CampaignCreated'
+    _isNative ? e.event === 'EthCampaignCreated' : e.event === 'Erc20CampaignCreated'
   );
 
   if (event === undefined) throw new Error('event undefined');

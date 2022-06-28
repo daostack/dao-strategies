@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import { useContract, useSigner } from 'wagmi';
 
 import hardhatContractsJson from '../generated/hardhat_contracts.json';
@@ -16,7 +17,7 @@ export const useCampaignFactory = (): CampaignFactory | undefined => {
   const contractJson = (hardhatContractsJson as any)['31337']['localhost']['contracts']['CampaignFactory'];
 
   return useContract<CampaignFactory>({
-    addressOrName: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512', // contractJson ? contractJson['address'] : undefined,
+    addressOrName: contractJson ? contractJson['address'] : ethers.constants.AddressZero,
     contractInterface: contractJson.abi,
     signerOrProvider: signer,
   });

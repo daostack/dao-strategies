@@ -4,6 +4,7 @@ export interface CampaignCreateDetails {
   description: string;
   guardian: string;
   oracle: string;
+  chain: string;
   asset: string;
   cancelDate: number;
   address: string;

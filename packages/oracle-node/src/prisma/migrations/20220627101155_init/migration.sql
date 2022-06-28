@@ -8,6 +8,8 @@ CREATE TABLE "Campaign" (
     "description" TEXT NOT NULL,
     "creatorId" TEXT NOT NULL,
     "nonce" INTEGER NOT NULL,
+    "chain" TEXT NOT NULL,
+    "asset" TEXT NOT NULL,
     "guardian" TEXT NOT NULL,
     "oracle" TEXT NOT NULL,
     "stratID" TEXT NOT NULL,

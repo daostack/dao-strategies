@@ -18,7 +18,7 @@ type RouteParams = {
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const params = useParams<RouteParams>();
-  const { isLoading, campaign, getRewards, rewards } = useCampaign(params.campaignAddress);
+  const { isLoading, campaign, getRewards, rewards, otherDetails } = useCampaign(params.campaignAddress);
 
   useEffect(() => {
     getRewards();
@@ -54,7 +54,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           <TwoColumns style={{ border: 'solid 2px #ccc', borderRadius: '20px', padding: '20px 30px' }}>
             <>
               <Box direction="row" align="center">
-                Campaign Funding <AppButton>Fund Campaign</AppButton>
+                Campaign Funding {otherDetails.fundsRaised !== undefined ? otherDetails.fundsRaised.toString() : ''}{' '}
+                <AppButton>Fund Campaign</AppButton>
               </Box>
             </>
             <>

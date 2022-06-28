@@ -14,11 +14,12 @@ model Campaign {
   creator         User      @relation(fields: [creatorId], references: [address])
   creatorId       String    
   nonce           Int
+  chain           String
+  asset           String
   guardian        String
   oracle          String
   stratID         String
   stratParamsStr  String    // For now, Params are stringified as they can have any structure
-  asset           String
   rewards         Reward[] 
   lastRunDate     BigInt?
   execDate        BigInt?

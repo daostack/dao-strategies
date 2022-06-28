@@ -2,7 +2,7 @@ import hardhatContractsJson from '../../generated/hardhat_contracts.json';
 
 const ERC20Json: any = (hardhatContractsJson as any)['31337']['localhost']['contracts']['TestErc20'];
 
-export enum ChainName {
+export enum ChainKey {
   Ethereum = 'ethereum-mainnet',
   GnosisChain = 'gnosis-chain',
   Avalanche = 'avalanche-c-chain',
@@ -13,7 +13,7 @@ export enum ChainName {
 export const ChainsDetails: {
   [chain: string]: {
     id: number;
-    fullName: string;
+    name: string;
     assets: {
       [assetId: string]: {
         address: string;
@@ -22,9 +22,9 @@ export const ChainsDetails: {
     };
   };
 } = {
-  [ChainName.Localhost]: {
+  [ChainKey.Localhost]: {
     id: 31337,
-    fullName: 'Localhost',
+    name: 'Localhost',
     assets: {
       native: {
         address: '',
@@ -38,8 +38,19 @@ export const ChainsDetails: {
   },
 };
 
-export const nameOfFullName = (fullName: string): string => {
-  const entry = Object.entries(ChainsDetails).find(([_, details]) => details.fullName === fullName);
-  if (entry === undefined) throw new Error(`chain with fullname ${fullName} not found`);
+export const keyOfName = (name: string): ChainKey => {
+  const entry = Object.entries(ChainsDetails).find(([_, details]) => details.name === name);
+  if (entry === undefined) throw new Error(`chain with name ${name} not found`);
+  return entry[0] as ChainKey;
+};
+
+export const assetKeyOfName = (chainKey: ChainKey, assetName: string): string => {
+  const entry = Object.entries(ChainsDetails[chainKey].assets).find(([_, details]) => details.name === assetName);
+  if (entry === undefined) throw new Error(`asset with name ${assetName} not found`);
   return entry[0];
 };
+
+export const isNative = (chainKey: ChainKey, asset: string) => asset === ChainsDetails[chainKey].assets.native.name;
+
+export const assetAddress = (chainKey: ChainKey, asset: string) =>
+  ChainsDetails[chainKey].assets[assetKeyOfName(chainKey, asset)].address;

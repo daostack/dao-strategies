@@ -34,7 +34,7 @@ import { FormTrash } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
-import { ChainName, ChainsDetails, nameOfFullName } from './chains.map';
+import { ChainsDetails, ChainKey, keyOfName } from './chains.map';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -59,8 +59,8 @@ export interface ProcessedFormValues {
 const initialValues: CampaignFormValues = {
   title: 'asdas',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-  chain: ChainsDetails[ChainName.Localhost].fullName,
-  asset: ChainsDetails[ChainName.Localhost].assets.native.name,
+  chain: ChainsDetails[ChainKey.Localhost].name,
+  asset: ChainsDetails[ChainKey.Localhost].assets.native.name,
   description: '',
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
@@ -74,7 +74,6 @@ const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
-  const { activeChain } = useNetwork();
 
   const [today] = useState<DateManager>(new DateManager());
   const [pageIx, setPageIx] = useState<number>(0);
@@ -104,17 +103,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const periodType = getPeriodType(details, today);
   const isLogged = account !== undefined;
 
-  const chainOptions = Object.values(ChainsDetails).map((details) => details.fullName);
+  const chainOptions = Object.values(ChainsDetails).map((details) => details.name);
 
-  const name = nameOfFullName(formValues.chain);
-  const assets = ChainsDetails[name].assets;
+  const key = keyOfName(formValues.chain);
+  const assets = ChainsDetails[key].assets;
   const assetsOptions = Object.keys(assets).map((assetId) => assets[assetId].name);
 
   if (DEBUG) console.log('CampaignCreate - render');
 
   /** Prepare all the parameters to deply the campaign and call the deployCampaign function */
   const create = async (): Promise<void> => {
-    const account = accountHook.data?.address;
+    const account = accountHook?.address;
     if (account === undefined) throw new Error('account undefined');
     if (campaignFactory === undefined) throw new Error('campaignFactoryContract undefined');
 

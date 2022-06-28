@@ -29,6 +29,8 @@ interface SetupData {
   campaign: Campaign;
 }
 
+let counter = 0;
+
 describe('EthCampaign', () => {
   async function setUp(sharesDistribution: BigNumber[], publishShares: boolean): Promise<SetupData> {
     const addresses = await ethers.getSigners();
@@ -61,8 +63,9 @@ describe('EthCampaign', () => {
       URI,
       guardian.address,
       oracle.address,
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('1'))
+      ethers.utils.keccak256(ethers.utils.toUtf8Bytes(counter.toString()))
     );
+    counter++;
     const campaignCreationReceipt = await campaignCreationTx.wait();
     const campaignAddress: string = (campaignCreationReceipt as any).events[1].args[1]; // get campaign proxy address from the CampaignCreated event
 

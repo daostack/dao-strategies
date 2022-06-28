@@ -1,11 +1,11 @@
-// import { BigInt, Address } from "@graphprotocol/graph-ts";
+import { log } from '@graphprotocol/graph-ts';
 import {
   EthCampaignCreated,
   Erc20CampaignCreated,
 } from './generated/CampaignFactory/CampaignFactory';
 import { Campaign } from './generated/schema';
 
-export function handleEthCampaignCreated(event: Erc20CampaignCreated): void {
+export function handleEthCampaignCreated(event: EthCampaignCreated): void {
   let campaign = new Campaign(
     event.params.creator.toHex() + event.params.salt.toHex()
   );
@@ -16,7 +16,7 @@ export function handleEthCampaignCreated(event: Erc20CampaignCreated): void {
   campaign.save();
 }
 
-export function handleErc20CampaignCreated(event: EthCampaignCreated): void {
+export function handleErc20CampaignCreated(event: Erc20CampaignCreated): void {
   let campaign = new Campaign(
     event.params.creator.toHex() + event.params.salt.toHex()
   );

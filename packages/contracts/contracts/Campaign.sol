@@ -110,9 +110,12 @@ contract Campaign is Initializable {
         address asset,
         address from
     ) internal {
+        /** Not sure if this assigmations should be done after the funds where received. JIC */
         providers[asset][from] += amount;
         totalReward[asset] += amount;
-        IERC20(asset).safeTransferFrom(from, address(this), amount);
+        if (asset != address(0)) {
+            IERC20(asset).safeTransferFrom(from, address(this), amount);
+        }
         emit Fund(from, amount, address(asset));
     }
 
