@@ -25,6 +25,7 @@ export interface CampaignInterface extends utils.Interface {
     "TOTAL_SHARES()": FunctionFragment;
     "activationTime()": FunctionFragment;
     "approvedMerkleRoot()": FunctionFragment;
+    "balanceOfAsset(address)": FunctionFragment;
     "challenge(uint8)": FunctionFragment;
     "claim(address,uint256,bytes32[],address)": FunctionFragment;
     "claimed(address,address)": FunctionFragment;
@@ -62,6 +63,10 @@ export interface CampaignInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "approvedMerkleRoot",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "balanceOfAsset",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "challenge",
@@ -143,6 +148,10 @@ export interface CampaignInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "approvedMerkleRoot",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "balanceOfAsset",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
@@ -289,6 +298,11 @@ export interface Campaign extends BaseContract {
 
     approvedMerkleRoot(overrides?: CallOverrides): Promise<[string]>;
 
+    balanceOfAsset(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     challenge(
       action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -390,6 +404,8 @@ export interface Campaign extends BaseContract {
 
   approvedMerkleRoot(overrides?: CallOverrides): Promise<string>;
 
+  balanceOfAsset(asset: string, overrides?: CallOverrides): Promise<BigNumber>;
+
   challenge(
     action: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -488,6 +504,11 @@ export interface Campaign extends BaseContract {
     activationTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     approvedMerkleRoot(overrides?: CallOverrides): Promise<string>;
+
+    balanceOfAsset(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     challenge(action: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -626,6 +647,11 @@ export interface Campaign extends BaseContract {
 
     approvedMerkleRoot(overrides?: CallOverrides): Promise<BigNumber>;
 
+    balanceOfAsset(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     challenge(
       action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -725,6 +751,11 @@ export interface Campaign extends BaseContract {
     activationTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     approvedMerkleRoot(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    balanceOfAsset(
+      asset: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
