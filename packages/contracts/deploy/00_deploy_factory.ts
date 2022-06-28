@@ -17,14 +17,7 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const signers = await hre.ethers.getSigners();
   const deployer = signers[0];
 
-  const campaignErc20 = await deploy('Erc20Campaign', {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
-    from: deployer.address,
-    args: [],
-    log: true,
-  });
-
-  const campaignEth = await deploy('EthCampaign', {
+  const campaign = await deploy('Campaign', {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer.address,
     args: [],
@@ -41,7 +34,7 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   await deploy('CampaignFactory', {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer.address,
-    args: [campaignErc20.address, campaignEth.address],
+    args: [campaign.address],
     log: true,
   });
 

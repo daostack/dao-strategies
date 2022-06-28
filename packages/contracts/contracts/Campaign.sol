@@ -4,11 +4,15 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title Campaign
  */
-abstract contract Campaign is Initializable {
+contract Campaign is Initializable {
+    using SafeERC20 for IERC20;
+
     /** Shares are considered a ratio [0-1] with 18 digits where 1E18 = 1 */
     uint256 public constant TOTAL_SHARES = 10**18;
     uint256 public constant CHALLENGE_PERIOD = 604800;
@@ -33,20 +37,21 @@ abstract contract Campaign is Initializable {
 
     /** Counters of the total amount of funds provided by all providers
      * and claimed by all claimers */
-    uint256 public totalReward;
-    uint256 public totalClaimed;
+    mapping(address => uint256) public totalReward;
+    mapping(address => uint256) public totalClaimed;
 
     /** Once locked, the merkleRoot cannot be updated anymore.
      * Once locked, it cannot be un-locked  */
     bool public locked;
 
-    mapping(address => uint256) public claimed;
-    mapping(address => uint256) public providers;
+    mapping(address => mapping(address => uint256)) public claimed;
+    mapping(address => mapping(address => uint256)) public providers;
 
+    event Fund(address provider, uint256 amount, address asset);
     event SharesMerkleRoot(bytes32 sharesMerkleRoot, bytes32 sharesUri, uint256 activationTime);
-    event Claim(address account, uint256 share, uint256 reward);
+    event Claim(address account, uint256 share, uint256 reward, address assset);
     event Challenge(ChallengeAction action);
-    event Withdraw(address account, uint256 amount);
+    event Withdraw(address account, uint256 amount, address asset);
 
     error InvalidProof();
     error ActiveChallengePeriod();
@@ -100,6 +105,49 @@ abstract contract Campaign is Initializable {
         }
     }
 
+    function _fund(
+        uint256 amount,
+        address asset,
+        address from
+    ) internal {
+        providers[asset][from] += amount;
+        totalReward[asset] += amount;
+        IERC20(asset).safeTransferFrom(from, address(this), amount);
+        emit Fund(from, amount, address(asset));
+    }
+
+    receive() external payable {
+        _fund(msg.value, address(0), msg.sender);
+    }
+
+    /** Fund campaign with ETH or any ERC20 token */
+    function fund(address asset, uint256 amount) public payable {
+        if (asset == address(0)) {
+            _fund(msg.value, asset, msg.sender);
+        } else {
+            _fund(amount, asset, msg.sender);
+        }
+    }
+
+    function convertToReward(address asset) external {
+        uint256 balance = asset == address(0) ? address(this).balance : IERC20(asset).balanceOf(address(this));
+        uint256 available = totalFundsReceived(asset) - balance;
+        _fund(available, asset, address(this));
+    }
+
+    function transferValueOut(
+        address to,
+        uint256 amount,
+        address asset
+    ) internal {
+        if (asset == address(0)) {
+            (bool success, ) = to.call{ value: amount }("");
+            require(success, "ether transfer failed");
+        } else {
+            IERC20(asset).safeTransfer(to, amount);
+        }
+    }
+
     /** Only the oracle can propose new merkleRoot. The proposal is stored and becomes active only
      * after a CHALLENGE_PERIOD */
     function proposeShares(bytes32 _sharesMerkleRoot, bytes32 _sharesUri) external onlyOracle notLocked {
@@ -120,15 +168,16 @@ abstract contract Campaign is Initializable {
     }
 
     /** Total funds received by the contract */
-    function totalFundsReceived() public view returns (uint256 total) {
-        return totalReward + totalClaimed;
+    function totalFundsReceived(address asset) public view returns (uint256 total) {
+        return totalReward[asset] + totalClaimed[asset];
     }
 
     /** Validates the shares of an account and computes the available rewards it */
     function rewardsAvailableToClaimer(
         address account,
         uint256 share,
-        bytes32[] calldata proof
+        bytes32[] calldata proof,
+        address asset
     ) public view returns (uint256 total) {
         bytes32 claimingMerkleRoot = getValidRoot();
 
@@ -137,26 +186,27 @@ abstract contract Campaign is Initializable {
             revert InvalidProof();
         }
         /** Rewards by claimer are a portion of the total funds received. If new funds are received, new rewards will become available */
-        return (totalFundsReceived() * share) / TOTAL_SHARES - claimed[account];
+        return (totalFundsReceived(asset) * share) / TOTAL_SHARES - claimed[asset][account];
     }
 
     /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
     function claim(
         address account,
         uint256 share,
-        bytes32[] calldata proof
+        bytes32[] calldata proof,
+        address asset
     ) external {
-        uint256 reward = rewardsAvailableToClaimer(account, share, proof);
+        uint256 reward = rewardsAvailableToClaimer(account, share, proof, asset);
         if (reward == 0) {
             revert NoRewardAvailable();
         }
-        claimed[account] += reward;
-        totalClaimed += reward;
-        totalReward -= reward;
+        claimed[asset][account] += reward;
+        totalClaimed[asset] += reward;
+        totalReward[asset] -= reward;
 
-        transferValueOut(account, reward);
+        transferValueOut(account, reward, asset);
 
-        emit Claim(account, share, reward);
+        emit Claim(account, share, reward, asset);
     }
 
     function setLock(bool _lock) external onlyGuardian {
@@ -180,24 +230,19 @@ abstract contract Campaign is Initializable {
         emit Challenge(action);
     }
 
-    function withdrawFunds(address account) external {
+    function withdrawFunds(address account, address asset) external {
         if (locked && approvedMerkleRoot == bytes32(0)) {
-            uint256 amount = providers[account] / totalReward;
+            uint256 amount = providers[asset][account] / totalReward[asset];
             if (amount == 0) {
                 revert NoFunds();
             }
-            providers[account] = 0;
+            providers[asset][account] = 0;
 
-            transferValueOut(account, amount);
+            transferValueOut(account, amount, asset);
 
-            emit Withdraw(account, amount);
+            emit Withdraw(account, amount, asset);
         } else {
             revert WithdrawalNotAllowed();
         }
     }
-
-    /**
-    @dev recerts on failure
-     */
-    function transferValueOut(address to, uint256 amount) internal virtual;
 }

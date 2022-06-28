@@ -19,32 +19,17 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 export interface CampaignFactoryInterface extends utils.Interface {
   contractName: "CampaignFactory";
   functions: {
-    "campaignAddress(address,bytes32)": FunctionFragment;
-    "createErc20Campaign(bytes32,bytes32,bytes32,address,address,bytes32,address)": FunctionFragment;
-    "createEthCampaign(bytes32,bytes32,bytes32,address,address,bytes32)": FunctionFragment;
-    "erc20CampaignAddress(bytes32)": FunctionFragment;
-    "ethCampaignAddress(bytes32)": FunctionFragment;
+    "campaignAddress(bytes32)": FunctionFragment;
+    "createCampaign(bytes32,bytes32,bytes32,address,address,bytes32)": FunctionFragment;
   };
 
   encodeFunctionData(
     functionFragment: "campaignAddress",
-    values: [string, BytesLike]
+    values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "createErc20Campaign",
-    values: [BytesLike, BytesLike, BytesLike, string, string, BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "createEthCampaign",
+    functionFragment: "createCampaign",
     values: [BytesLike, BytesLike, BytesLike, string, string, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "erc20CampaignAddress",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "ethCampaignAddress",
-    values: [BytesLike]
   ): string;
 
   decodeFunctionResult(
@@ -52,50 +37,18 @@ export interface CampaignFactoryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "createErc20Campaign",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "createEthCampaign",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "erc20CampaignAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "ethCampaignAddress",
+    functionFragment: "createCampaign",
     data: BytesLike
   ): Result;
 
   events: {
-    "Erc20CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,address,bytes32)": EventFragment;
-    "EthCampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,bytes32)": EventFragment;
+    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,bytes32)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "Erc20CampaignCreated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EthCampaignCreated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "CampaignCreated"): EventFragment;
 }
 
-export type Erc20CampaignCreatedEvent = TypedEvent<
-  [string, string, string, string, string, string, string, string, string],
-  {
-    creator: string;
-    newCampaign: string;
-    _sharesMerkleRoot: string;
-    _sharesUri: string;
-    _strategyUri: string;
-    _guardian: string;
-    _oracle: string;
-    _rewardToken: string;
-    salt: string;
-  }
->;
-
-export type Erc20CampaignCreatedEventFilter =
-  TypedEventFilter<Erc20CampaignCreatedEvent>;
-
-export type EthCampaignCreatedEvent = TypedEvent<
+export type CampaignCreatedEvent = TypedEvent<
   [string, string, string, string, string, string, string, string],
   {
     creator: string;
@@ -109,8 +62,7 @@ export type EthCampaignCreatedEvent = TypedEvent<
   }
 >;
 
-export type EthCampaignCreatedEventFilter =
-  TypedEventFilter<EthCampaignCreatedEvent>;
+export type CampaignCreatedEventFilter = TypedEventFilter<CampaignCreatedEvent>;
 
 export interface CampaignFactory extends BaseContract {
   contractName: "CampaignFactory";
@@ -141,23 +93,11 @@ export interface CampaignFactory extends BaseContract {
 
   functions: {
     campaignAddress(
-      master: string,
       salt: BytesLike,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    createErc20Campaign(
-      _sharesMerkleRoot: BytesLike,
-      _sharesUri: BytesLike,
-      _strategyUri: BytesLike,
-      _guardian: string,
-      _oracle: string,
-      salt: BytesLike,
-      _rewardToken: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    createEthCampaign(
+    createCampaign(
       _sharesMerkleRoot: BytesLike,
       _sharesUri: BytesLike,
       _strategyUri: BytesLike,
@@ -166,36 +106,11 @@ export interface CampaignFactory extends BaseContract {
       salt: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    erc20CampaignAddress(
-      salt: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    ethCampaignAddress(
-      salt: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
   };
 
-  campaignAddress(
-    master: string,
-    salt: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<string>;
+  campaignAddress(salt: BytesLike, overrides?: CallOverrides): Promise<string>;
 
-  createErc20Campaign(
-    _sharesMerkleRoot: BytesLike,
-    _sharesUri: BytesLike,
-    _strategyUri: BytesLike,
-    _guardian: string,
-    _oracle: string,
-    salt: BytesLike,
-    _rewardToken: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  createEthCampaign(
+  createCampaign(
     _sharesMerkleRoot: BytesLike,
     _sharesUri: BytesLike,
     _strategyUri: BytesLike,
@@ -204,36 +119,14 @@ export interface CampaignFactory extends BaseContract {
     salt: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  erc20CampaignAddress(
-    salt: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  ethCampaignAddress(
-    salt: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<string>;
 
   callStatic: {
     campaignAddress(
-      master: string,
       salt: BytesLike,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    createErc20Campaign(
-      _sharesMerkleRoot: BytesLike,
-      _sharesUri: BytesLike,
-      _strategyUri: BytesLike,
-      _guardian: string,
-      _oracle: string,
-      salt: BytesLike,
-      _rewardToken: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    createEthCampaign(
+    createCampaign(
       _sharesMerkleRoot: BytesLike,
       _sharesUri: BytesLike,
       _strategyUri: BytesLike,
@@ -242,43 +135,10 @@ export interface CampaignFactory extends BaseContract {
       salt: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    erc20CampaignAddress(
-      salt: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    ethCampaignAddress(
-      salt: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<string>;
   };
 
   filters: {
-    "Erc20CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,address,bytes32)"(
-      creator?: null,
-      newCampaign?: null,
-      _sharesMerkleRoot?: null,
-      _sharesUri?: null,
-      _strategyUri?: null,
-      _guardian?: null,
-      _oracle?: null,
-      _rewardToken?: null,
-      salt?: null
-    ): Erc20CampaignCreatedEventFilter;
-    Erc20CampaignCreated(
-      creator?: null,
-      newCampaign?: null,
-      _sharesMerkleRoot?: null,
-      _sharesUri?: null,
-      _strategyUri?: null,
-      _guardian?: null,
-      _oracle?: null,
-      _rewardToken?: null,
-      salt?: null
-    ): Erc20CampaignCreatedEventFilter;
-
-    "EthCampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,bytes32)"(
+    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,bytes32)"(
       creator?: null,
       newCampaign?: null,
       _sharesMerkleRoot?: null,
@@ -287,8 +147,8 @@ export interface CampaignFactory extends BaseContract {
       _guardian?: null,
       _oracle?: null,
       salt?: null
-    ): EthCampaignCreatedEventFilter;
-    EthCampaignCreated(
+    ): CampaignCreatedEventFilter;
+    CampaignCreated(
       creator?: null,
       newCampaign?: null,
       _sharesMerkleRoot?: null,
@@ -297,28 +157,16 @@ export interface CampaignFactory extends BaseContract {
       _guardian?: null,
       _oracle?: null,
       salt?: null
-    ): EthCampaignCreatedEventFilter;
+    ): CampaignCreatedEventFilter;
   };
 
   estimateGas: {
     campaignAddress(
-      master: string,
       salt: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    createErc20Campaign(
-      _sharesMerkleRoot: BytesLike,
-      _sharesUri: BytesLike,
-      _strategyUri: BytesLike,
-      _guardian: string,
-      _oracle: string,
-      salt: BytesLike,
-      _rewardToken: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    createEthCampaign(
+    createCampaign(
       _sharesMerkleRoot: BytesLike,
       _sharesUri: BytesLike,
       _strategyUri: BytesLike,
@@ -326,38 +174,16 @@ export interface CampaignFactory extends BaseContract {
       _oracle: string,
       salt: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    erc20CampaignAddress(
-      salt: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    ethCampaignAddress(
-      salt: BytesLike,
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     campaignAddress(
-      master: string,
       salt: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    createErc20Campaign(
-      _sharesMerkleRoot: BytesLike,
-      _sharesUri: BytesLike,
-      _strategyUri: BytesLike,
-      _guardian: string,
-      _oracle: string,
-      salt: BytesLike,
-      _rewardToken: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    createEthCampaign(
+    createCampaign(
       _sharesMerkleRoot: BytesLike,
       _sharesUri: BytesLike,
       _strategyUri: BytesLike,
@@ -365,16 +191,6 @@ export interface CampaignFactory extends BaseContract {
       _oracle: string,
       salt: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    erc20CampaignAddress(
-      salt: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    ethCampaignAddress(
-      salt: BytesLike,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }
