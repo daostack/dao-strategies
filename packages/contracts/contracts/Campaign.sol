@@ -132,9 +132,12 @@ contract Campaign is Initializable {
         }
     }
 
+    function balanceOfAsset(address asset) public view returns (uint256) {
+        return asset == address(0) ? address(this).balance : IERC20(asset).balanceOf(address(this));
+    }
+
     function convertToReward(address asset) external {
-        uint256 balance = asset == address(0) ? address(this).balance : IERC20(asset).balanceOf(address(this));
-        uint256 available = totalFundsReceived(asset) - balance;
+        uint256 available = totalFundsReceived(asset) - balanceOfAsset(asset);
         _fund(available, asset, address(this));
     }
 
