@@ -9,6 +9,7 @@ import {
   CallOverrides,
   ContractTransaction,
   Overrides,
+  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -24,9 +25,12 @@ export interface CampaignInterface extends utils.Interface {
     "TOTAL_SHARES()": FunctionFragment;
     "activationTime()": FunctionFragment;
     "approvedMerkleRoot()": FunctionFragment;
+    "balanceOfAsset(address)": FunctionFragment;
     "challenge(uint8)": FunctionFragment;
-    "claim(address,uint256,bytes32[])": FunctionFragment;
-    "claimed(address)": FunctionFragment;
+    "claim(address,uint256,bytes32[],address)": FunctionFragment;
+    "claimed(address,address)": FunctionFragment;
+    "convertToReward(address)": FunctionFragment;
+    "fund(address,uint256)": FunctionFragment;
     "getValidRoot()": FunctionFragment;
     "guardian()": FunctionFragment;
     "initCampaign(bytes32,bytes32,address,address)": FunctionFragment;
@@ -34,14 +38,14 @@ export interface CampaignInterface extends utils.Interface {
     "oracle()": FunctionFragment;
     "pendingMerkleRoot()": FunctionFragment;
     "proposeShares(bytes32,bytes32)": FunctionFragment;
-    "providers(address)": FunctionFragment;
-    "rewardsAvailableToClaimer(address,uint256,bytes32[])": FunctionFragment;
+    "providers(address,address)": FunctionFragment;
+    "rewardsAvailableToClaimer(address,uint256,bytes32[],address)": FunctionFragment;
     "setLock(bool)": FunctionFragment;
     "strategyUri()": FunctionFragment;
-    "totalClaimed()": FunctionFragment;
-    "totalFundsReceived()": FunctionFragment;
-    "totalReward()": FunctionFragment;
-    "withdrawFunds(address)": FunctionFragment;
+    "totalClaimed(address)": FunctionFragment;
+    "totalFundsReceived(address)": FunctionFragment;
+    "totalReward(address)": FunctionFragment;
+    "withdrawFunds(address,address)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -61,14 +65,29 @@ export interface CampaignInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "balanceOfAsset",
+    values: [string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "challenge",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "claim",
-    values: [string, BigNumberish, BytesLike[]]
+    values: [string, BigNumberish, BytesLike[], string]
   ): string;
-  encodeFunctionData(functionFragment: "claimed", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "claimed",
+    values: [string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "convertToReward",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "fund",
+    values: [string, BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "getValidRoot",
     values?: undefined
@@ -88,10 +107,13 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "proposeShares",
     values: [BytesLike, BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "providers", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "providers",
+    values: [string, string]
+  ): string;
   encodeFunctionData(
     functionFragment: "rewardsAvailableToClaimer",
-    values: [string, BigNumberish, BytesLike[]]
+    values: [string, BigNumberish, BytesLike[], string]
   ): string;
   encodeFunctionData(functionFragment: "setLock", values: [boolean]): string;
   encodeFunctionData(
@@ -100,19 +122,16 @@ export interface CampaignInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "totalClaimed",
-    values?: undefined
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "totalFundsReceived",
-    values?: undefined
+    values: [string]
   ): string;
-  encodeFunctionData(
-    functionFragment: "totalReward",
-    values?: undefined
-  ): string;
+  encodeFunctionData(functionFragment: "totalReward", values: [string]): string;
   encodeFunctionData(
     functionFragment: "withdrawFunds",
-    values: [string]
+    values: [string, string]
   ): string;
 
   decodeFunctionResult(
@@ -131,9 +150,18 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "approvedMerkleRoot",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "balanceOfAsset",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "convertToReward",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "fund", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getValidRoot",
     data: BytesLike
@@ -182,14 +210,16 @@ export interface CampaignInterface extends utils.Interface {
 
   events: {
     "Challenge(uint8)": EventFragment;
-    "Claim(address,uint256,uint256)": EventFragment;
+    "Claim(address,uint256,uint256,address)": EventFragment;
+    "Fund(address,uint256,address)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "SharesMerkleRoot(bytes32,bytes32,uint256)": EventFragment;
-    "Withdraw(address,uint256)": EventFragment;
+    "Withdraw(address,uint256,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Challenge"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Claim"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Fund"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SharesMerkleRoot"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
@@ -200,11 +230,18 @@ export type ChallengeEvent = TypedEvent<[number], { action: number }>;
 export type ChallengeEventFilter = TypedEventFilter<ChallengeEvent>;
 
 export type ClaimEvent = TypedEvent<
-  [string, BigNumber, BigNumber],
-  { account: string; share: BigNumber; reward: BigNumber }
+  [string, BigNumber, BigNumber, string],
+  { account: string; share: BigNumber; reward: BigNumber; assset: string }
 >;
 
 export type ClaimEventFilter = TypedEventFilter<ClaimEvent>;
+
+export type FundEvent = TypedEvent<
+  [string, BigNumber, string],
+  { provider: string; amount: BigNumber; asset: string }
+>;
+
+export type FundEventFilter = TypedEventFilter<FundEvent>;
 
 export type InitializedEvent = TypedEvent<[number], { version: number }>;
 
@@ -219,8 +256,8 @@ export type SharesMerkleRootEventFilter =
   TypedEventFilter<SharesMerkleRootEvent>;
 
 export type WithdrawEvent = TypedEvent<
-  [string, BigNumber],
-  { account: string; amount: BigNumber }
+  [string, BigNumber, string],
+  { account: string; amount: BigNumber; asset: string }
 >;
 
 export type WithdrawEventFilter = TypedEventFilter<WithdrawEvent>;
@@ -261,6 +298,11 @@ export interface Campaign extends BaseContract {
 
     approvedMerkleRoot(overrides?: CallOverrides): Promise<[string]>;
 
+    balanceOfAsset(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     challenge(
       action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -270,10 +312,26 @@ export interface Campaign extends BaseContract {
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
+      asset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    claimed(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+    claimed(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    convertToReward(
+      asset: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    fund(
+      asset: string,
+      amount: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     getValidRoot(
       overrides?: CallOverrides
@@ -301,12 +359,17 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    providers(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+    providers(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     rewardsAvailableToClaimer(
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
+      asset: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { total: BigNumber }>;
 
@@ -317,16 +380,18 @@ export interface Campaign extends BaseContract {
 
     strategyUri(overrides?: CallOverrides): Promise<[string]>;
 
-    totalClaimed(overrides?: CallOverrides): Promise<[BigNumber]>;
+    totalClaimed(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     totalFundsReceived(
+      asset: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { total: BigNumber }>;
 
-    totalReward(overrides?: CallOverrides): Promise<[BigNumber]>;
+    totalReward(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     withdrawFunds(
       account: string,
+      asset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
@@ -339,6 +404,8 @@ export interface Campaign extends BaseContract {
 
   approvedMerkleRoot(overrides?: CallOverrides): Promise<string>;
 
+  balanceOfAsset(asset: string, overrides?: CallOverrides): Promise<BigNumber>;
+
   challenge(
     action: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -348,10 +415,26 @@ export interface Campaign extends BaseContract {
     account: string,
     share: BigNumberish,
     proof: BytesLike[],
+    asset: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  claimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+  claimed(
+    arg0: string,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  convertToReward(
+    asset: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  fund(
+    asset: string,
+    amount: BigNumberish,
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   getValidRoot(overrides?: CallOverrides): Promise<string>;
 
@@ -377,12 +460,17 @@ export interface Campaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+  providers(
+    arg0: string,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   rewardsAvailableToClaimer(
     account: string,
     share: BigNumberish,
     proof: BytesLike[],
+    asset: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -393,14 +481,18 @@ export interface Campaign extends BaseContract {
 
   strategyUri(overrides?: CallOverrides): Promise<string>;
 
-  totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
+  totalClaimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  totalFundsReceived(overrides?: CallOverrides): Promise<BigNumber>;
+  totalFundsReceived(
+    asset: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
-  totalReward(overrides?: CallOverrides): Promise<BigNumber>;
+  totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   withdrawFunds(
     account: string,
+    asset: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -413,16 +505,34 @@ export interface Campaign extends BaseContract {
 
     approvedMerkleRoot(overrides?: CallOverrides): Promise<string>;
 
+    balanceOfAsset(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     challenge(action: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     claim(
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
+      asset: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    claimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    claimed(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    convertToReward(asset: string, overrides?: CallOverrides): Promise<void>;
+
+    fund(
+      asset: string,
+      amount: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     getValidRoot(overrides?: CallOverrides): Promise<string>;
 
@@ -448,12 +558,17 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    providers(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     rewardsAvailableToClaimer(
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
+      asset: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -461,25 +576,45 @@ export interface Campaign extends BaseContract {
 
     strategyUri(overrides?: CallOverrides): Promise<string>;
 
-    totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
+    totalClaimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    totalFundsReceived(overrides?: CallOverrides): Promise<BigNumber>;
+    totalFundsReceived(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    totalReward(overrides?: CallOverrides): Promise<BigNumber>;
+    totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    withdrawFunds(account: string, overrides?: CallOverrides): Promise<void>;
+    withdrawFunds(
+      account: string,
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
     "Challenge(uint8)"(action?: null): ChallengeEventFilter;
     Challenge(action?: null): ChallengeEventFilter;
 
-    "Claim(address,uint256,uint256)"(
+    "Claim(address,uint256,uint256,address)"(
       account?: null,
       share?: null,
-      reward?: null
+      reward?: null,
+      assset?: null
     ): ClaimEventFilter;
-    Claim(account?: null, share?: null, reward?: null): ClaimEventFilter;
+    Claim(
+      account?: null,
+      share?: null,
+      reward?: null,
+      assset?: null
+    ): ClaimEventFilter;
+
+    "Fund(address,uint256,address)"(
+      provider?: null,
+      amount?: null,
+      asset?: null
+    ): FundEventFilter;
+    Fund(provider?: null, amount?: null, asset?: null): FundEventFilter;
 
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
@@ -495,11 +630,12 @@ export interface Campaign extends BaseContract {
       activationTime?: null
     ): SharesMerkleRootEventFilter;
 
-    "Withdraw(address,uint256)"(
+    "Withdraw(address,uint256,address)"(
       account?: null,
-      amount?: null
+      amount?: null,
+      asset?: null
     ): WithdrawEventFilter;
-    Withdraw(account?: null, amount?: null): WithdrawEventFilter;
+    Withdraw(account?: null, amount?: null, asset?: null): WithdrawEventFilter;
   };
 
   estimateGas: {
@@ -511,6 +647,11 @@ export interface Campaign extends BaseContract {
 
     approvedMerkleRoot(overrides?: CallOverrides): Promise<BigNumber>;
 
+    balanceOfAsset(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     challenge(
       action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -520,10 +661,26 @@ export interface Campaign extends BaseContract {
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
+      asset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    claimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    claimed(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    convertToReward(
+      asset: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    fund(
+      asset: string,
+      amount: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     getValidRoot(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -549,12 +706,17 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    providers(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    providers(
+      arg0: string,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     rewardsAvailableToClaimer(
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
+      asset: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -565,14 +727,18 @@ export interface Campaign extends BaseContract {
 
     strategyUri(overrides?: CallOverrides): Promise<BigNumber>;
 
-    totalClaimed(overrides?: CallOverrides): Promise<BigNumber>;
+    totalClaimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    totalFundsReceived(overrides?: CallOverrides): Promise<BigNumber>;
+    totalFundsReceived(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    totalReward(overrides?: CallOverrides): Promise<BigNumber>;
+    totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     withdrawFunds(
       account: string,
+      asset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
@@ -588,6 +754,11 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    balanceOfAsset(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     challenge(
       action: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -597,12 +768,25 @@ export interface Campaign extends BaseContract {
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
+      asset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     claimed(
       arg0: string,
+      arg1: string,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    convertToReward(
+      asset: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    fund(
+      asset: string,
+      amount: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     getValidRoot(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -631,6 +815,7 @@ export interface Campaign extends BaseContract {
 
     providers(
       arg0: string,
+      arg1: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -638,6 +823,7 @@ export interface Campaign extends BaseContract {
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
+      asset: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -648,16 +834,24 @@ export interface Campaign extends BaseContract {
 
     strategyUri(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    totalClaimed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    totalFundsReceived(
+    totalClaimed(
+      arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    totalReward(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    totalFundsReceived(
+      asset: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    totalReward(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     withdrawFunds(
       account: string,
+      asset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };
