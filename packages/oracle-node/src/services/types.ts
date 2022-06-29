@@ -9,3 +9,14 @@ export interface CampaignCreateDetails {
   cancelDate: number;
   address: string;
 }
+
+export interface TokenBalances {
+  [tokenName: string]: {
+    address: string;
+    balance: string;
+  };
+}
+
+export interface CampaignOnchainDetails {
+  tokens: TokenBalances;
+}

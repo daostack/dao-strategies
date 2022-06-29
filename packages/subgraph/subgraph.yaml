@@ -6,7 +6,7 @@ dataSources:
     name: CampaignFactory
     network: hardhat
     source:
-      address: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9'
+      address: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'
       abi: CampaignFactory
       startBlock: 1
     mapping:
@@ -19,8 +19,7 @@ dataSources:
         - name: CampaignFactory
           file: ./abis/CampaignFactory.sol/CampaignFactory.json
       eventHandlers:
-        - event: EthCampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,bytes32)
-          handler: handleEthCampaignCreated
-        - event: Erc20CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,address,bytes32)
-          handler: handleErc20CampaignCreated
+        - event: CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,bytes32)
+          handler: handleCampaignCreated
+
       file: ./mapping.ts

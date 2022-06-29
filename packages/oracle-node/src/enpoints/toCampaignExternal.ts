@@ -10,7 +10,6 @@ interface CampaignExternal {
   guardian: string;
   oracle: string;
   chain: string;
-  asset: string;
   execDate: number;
   cancelDate: number;
   strategyID: string;
@@ -27,7 +26,6 @@ export const toCampaignExternal = (campaign: Campaign): CampaignExternal => {
     guardian: campaign.guardian,
     oracle: campaign.oracle,
     chain: campaign.chain,
-    asset: campaign.asset,
     execDate: toNumber(campaign.execDate),
     cancelDate: toNumber(campaign.cancelDate),
     strategyID: campaign.stratID,

@@ -1,22 +1,7 @@
-import { log } from '@graphprotocol/graph-ts';
-import {
-  EthCampaignCreated,
-  Erc20CampaignCreated,
-} from './generated/CampaignFactory/CampaignFactory';
+import { CampaignCreated } from './generated/CampaignFactory/CampaignFactory';
 import { Campaign } from './generated/schema';
 
-export function handleEthCampaignCreated(event: EthCampaignCreated): void {
-  let campaign = new Campaign(
-    event.params.creator.toHex() + event.params.salt.toHex()
-  );
-
-  campaign.creator = event.params.creator;
-  campaign.address = event.params.newCampaign;
-
-  campaign.save();
-}
-
-export function handleErc20CampaignCreated(event: Erc20CampaignCreated): void {
+export function handleCampaignCreated(event: CampaignCreated): void {
   let campaign = new Campaign(
     event.params.creator.toHex() + event.params.salt.toHex()
   );

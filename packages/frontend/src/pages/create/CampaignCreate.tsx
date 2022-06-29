@@ -129,7 +129,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       oracle: ORACLE_ADDRESS,
       address: '',
       chain: formValues.chain,
-      asset: formValues.asset,
       cancelDate: finalDetails.execDate + CHALLENGE_PERIOD,
     };
 

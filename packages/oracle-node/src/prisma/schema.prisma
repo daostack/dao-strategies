@@ -15,7 +15,6 @@ model Campaign {
   creatorId       String    
   nonce           Int
   chain           String
-  asset           String
   guardian        String
   oracle          String
   stratID         String

@@ -3,17 +3,10 @@ import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
 
 import hardhatContractsJson from '../generated/hardhat_contracts.json';
-import {
-  CampaignFactory,
-  Erc20Campaign,
-  EthCampaign,
-} from '../generated/typechain';
-import {
-  EthCampaignCreatedEvent,
-  Erc20CampaignCreatedEvent,
-} from '../generated/typechain/CampaignFactory';
+import { CampaignFactory } from '../generated/typechain';
+import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
 
-import { CampaignCreateDetails } from './types';
+import { CampaignCreateDetails, CampaignOnchainDetails } from './types';
 
 const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -75,40 +68,23 @@ export class OnChainService {
     /** TODO: What happens if two campaigns are deployed on the same block?
      * Anyway, this method is only for tests  */
 
-    const tx =
-      details.asset === 'eth'
-        ? await this.campaignFactory.createEthCampaign(
-            root,
-            ZERO_BYTES32,
-            uriCid.multihash.digest,
-            details.guardian,
-            details.oracle,
-            salt
-          )
-        : await this.campaignFactory.createErc20Campaign(
-            root,
-            ZERO_BYTES32,
-            uriCid.multihash.digest,
-            details.guardian,
-            details.oracle,
-            salt,
-            details.asset
-          );
+    const tx = await this.campaignFactory.createCampaign(
+      root,
+      ZERO_BYTES32,
+      uriCid.multihash.digest,
+      details.guardian,
+      details.oracle,
+      salt
+    );
 
     const txReceipt = await tx.wait();
 
     if (txReceipt.events === undefined)
       throw new Error('txReceipt.events undefined');
 
-    const ethEvent = txReceipt.events.find(
-      (e) => e.event === 'EthCampaignCreated'
-    ) as EthCampaignCreatedEvent;
-
-    const erc20Cvent = txReceipt.events.find(
-      (e) => e.event === 'Erc20CampaignCreated'
-    ) as Erc20CampaignCreatedEvent;
-
-    const event = details.asset === 'eth' ? ethEvent : erc20Cvent;
+    const event = txReceipt.events.find(
+      (e) => e.event === 'CampaignCreated'
+    ) as CampaignCreatedEvent;
 
     if (event === undefined) throw new Error('event undefined');
     if (event.args === undefined) throw new Error('event.args undefined');

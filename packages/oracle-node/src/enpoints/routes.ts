@@ -58,6 +58,13 @@ export const Routes: RouteConfig[] = [
   },
   {
     method: 'get',
+    route: '/campaign/:address/otherDetails',
+    controller: CampaignController,
+    action: 'getOtherDetails',
+    protected: false,
+  },
+  {
+    method: 'get',
     route: '/user/me',
     controller: UserController,
     action: 'me',

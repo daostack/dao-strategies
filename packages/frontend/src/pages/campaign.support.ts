@@ -1,12 +1,10 @@
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
-import { CampaignUriDetails } from '@dao-strategies/core';
+import { CampaignUriDetails, Typechain } from '@dao-strategies/core';
 
-import { CampaignFactory } from '../generated/typechain';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/time';
-import { assetAddress, assetKeyOfName, ChainsDetails, isNative, keyOfName } from './create/chains.map';
 import { ethers } from 'ethers';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
@@ -27,7 +25,6 @@ export interface CampaignCreateDetails {
   oracle: string;
   cancelDate: number;
   chain: string;
-  asset: string;
   address: string;
 }
 
@@ -44,7 +41,6 @@ export interface CampaignDetails {
   guardian: string;
   oracle: string;
   chain: string;
-  asset: string;
   execDate: number;
   cancelDate: number;
   strategyID: string;
@@ -192,7 +188,7 @@ export const createCampaign = async (details: CampaignUriDetails): Promise<strin
 };
 
 export const deployCampaign = async (
-  campaignFactory: CampaignFactory,
+  campaignFactory: Typechain.CampaignFactory,
   uri: string | undefined,
   otherDetails: CampaignCreateDetails,
   details: CampaignUriDetails | undefined
@@ -211,38 +207,21 @@ export const deployCampaign = async (
   const uriCid = CID.parse(uriDefined, base32);
   if (uriCid == null) throw new Error(`uri ${uri} is not a CID`);
 
-  const chainKey = keyOfName(otherDetails.chain);
-
-  const _assetAddress = assetAddress(chainKey, otherDetails.asset);
-
   const uriHex = ethers.utils.hexlify(uriCid.multihash.digest);
   const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Date.now().toString())); // uriHex;
 
-  const _isNative = isNative(chainKey, otherDetails.asset);
-  const ex = _isNative
-    ? await campaignFactory.createEthCampaign(
-        ZERO_BYTES32,
-        ZERO_BYTES32,
-        uriHex,
-        otherDetails.guardian,
-        otherDetails.oracle,
-        salt
-      )
-    : await campaignFactory.createErc20Campaign(
-        ZERO_BYTES32,
-        ZERO_BYTES32,
-        uriHex,
-        otherDetails.guardian,
-        otherDetails.oracle,
-        salt,
-        _assetAddress
-      );
+  const ex = await campaignFactory.createCampaign(
+    ZERO_BYTES32,
+    ZERO_BYTES32,
+    uriHex,
+    otherDetails.guardian,
+    otherDetails.oracle,
+    salt
+  );
   const txReceipt = await ex.wait();
 
   if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
-  const event = txReceipt.events.find((e) =>
-    _isNative ? e.event === 'EthCampaignCreated' : e.event === 'Erc20CampaignCreated'
-  );
+  const event = txReceipt.events.find((e) => e.event === 'CampaignCreated');
 
   if (event === undefined) throw new Error('event undefined');
   if (event.args === undefined) throw new Error('event.args undefined');

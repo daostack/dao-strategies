@@ -3,12 +3,10 @@ import {
   balancesToObject,
   CampaignUriDetails,
 } from '@dao-strategies/core';
-import { Campaign } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
 import { CampaignCreateDetails } from '../services/types';
 import { Services } from '../types';
-import { toNumber } from '../utils/utils';
 
 import { Controller } from './Controller';
 import { toCampaignExternal } from './toCampaignExternal';
@@ -121,5 +119,16 @@ export class CampaignController extends Controller {
 
     return toCampaignExternal(campaign);
     /* eslint-enable */
+  }
+
+  async getOtherDetails(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<> {
+    const details = await this.services.onchain.getCampaignDetails(
+      request.params.address as string
+    );
   }
 }
