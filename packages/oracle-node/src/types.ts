@@ -1,3 +1,4 @@
+import { CampaignOnChainService } from './services/CampaignOnChainService';
 import { CampaignService } from './services/CampaignService';
 import { OnChainService } from './services/OnChainService';
 import { SocialApiService } from './services/SocialApiService';
@@ -10,4 +11,5 @@ export interface Services {
   user: UserService;
   onchain: OnChainService;
   socialApi: SocialApiService;
+  campaignOnChain: CampaignOnChainService;
 }

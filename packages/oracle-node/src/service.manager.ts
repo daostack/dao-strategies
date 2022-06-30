@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 import { CampaignRepository } from './repositories/CampaignRepository';
 import { UserRepository } from './repositories/UserRepository';
+import { CampaignOnChainService } from './services/CampaignOnChainService';
 import { CampaignService } from './services/CampaignService';
 import { ExecuteService, ExecutionConfig } from './services/ExecutionService';
 import { OnChainService } from './services/OnChainService';
@@ -20,7 +21,9 @@ export class ServiceManager {
 
   private timeService: TimeService;
   private onChainService: OnChainService;
+  private campaignOnChain: CampaignOnChainService;
   private socialApi: SocialApiService;
+  private campaignService: CampaignService;
 
   public services: Services;
   public execution: ExecuteService;
@@ -34,19 +37,25 @@ export class ServiceManager {
     this.strategyComputation = new StrategyComputation(config.world);
     this.timeService = new TimeService();
     this.onChainService = new OnChainService();
+
     this.socialApi = new SocialApiService(config.world.GITHUB_TOKEN);
 
+    this.campaignService = new CampaignService(
+      this.campaignRepo,
+      this.timeService,
+      this.strategyComputation,
+      this.onChainService
+    );
+
+    this.campaignOnChain = new CampaignOnChainService(this.campaignService);
+
     this.services = {
-      campaign: new CampaignService(
-        this.campaignRepo,
-        this.timeService,
-        this.strategyComputation,
-        this.onChainService
-      ),
+      campaign: this.campaignService,
       user: new UserService(this.userRepo, config.world.GITHUB_TOKEN),
       time: this.timeService,
       onchain: this.onChainService,
       socialApi: this.socialApi,
+      campaignOnChain: this.campaignOnChain,
     };
 
     this.execution = new ExecuteService(this.services, config);

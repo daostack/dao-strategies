@@ -14,7 +14,8 @@ model Campaign {
   creator         User      @relation(fields: [creatorId], references: [address])
   creatorId       String    
   nonce           Int
-  chain           String
+  chain           String    // store the ChainKey as defined in @dao-strategies/core ChainsDetails
+  asset           String    // store the Asset key as defined in @dao-strategies/core ChainsDetails
   guardian        String
   oracle          String
   stratID         String

@@ -1,6 +1,7 @@
 import {
   Balances,
   BalanceTree,
+  CampaignCreateDetails,
   CampaignUriDetails,
   getCampaignUri,
   StrategyComputation,
@@ -11,12 +12,11 @@ import { Campaign, Prisma } from '@prisma/client';
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
-import { hashReceivers, toNumber } from '../utils/utils';
+import { toNumber } from '../utils/utils';
 
 import { campaignToUriDetails } from './CampaignUri';
 import { OnChainService } from './OnChainService';
 import { TimeService } from './TimeService';
-import { CampaignCreateDetails, CampaignOnchainDetails } from './types';
 
 /**
  * On Retroactive Campaign
@@ -238,9 +238,5 @@ export class CampaignService {
 
   deleteAll(): Promise<void> {
     return this.campaignRepo.deleteAll();
-  }
-
-  async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
-    const campaign = await this.getFromAddress(address);
   }
 }

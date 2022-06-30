@@ -5,4 +5,4 @@ export * from './strategies';
 export * from './support';
 export * from './types';
 export * as Typechain from './generated/typechain';
-export * from './common/chains.map';
+export * from './common';

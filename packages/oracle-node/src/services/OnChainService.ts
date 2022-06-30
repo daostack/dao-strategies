@@ -2,33 +2,33 @@ import { Wallet, Signer, Contract, ContractInterface, providers } from 'ethers';
 import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
 
-import hardhatContractsJson from '../generated/hardhat_contracts.json';
-import { CampaignFactory } from '../generated/typechain';
-import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
-
-import { CampaignCreateDetails, CampaignOnchainDetails } from './types';
+import {
+  CampaignCreateDetails,
+  contractsJson,
+  Typechain,
+} from '@dao-strategies/core';
 
 const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 /* eslint-disable */
-const CampaignFactoryJson: any = (hardhatContractsJson as any)['31337'][
-  'localhost'
-]['contracts']['CampaignFactory'];
+const CampaignFactoryJson: any = (contractsJson as any)['31337']['localhost'][
+  'contracts'
+]['CampaignFactory'];
 
-const Erc20CampaignJson: any = (hardhatContractsJson as any)['31337'][
-  'localhost'
-]['contracts']['Erc20Campaign'];
+const Erc20CampaignJson: any = (contractsJson as any)['31337']['localhost'][
+  'contracts'
+]['Erc20Campaign'];
 
-const EthCampaignJson: any = (hardhatContractsJson as any)['31337'][
-  'localhost'
-]['contracts']['EthCampaign'];
+const EthCampaignJson: any = (contractsJson as any)['31337']['localhost'][
+  'contracts'
+]['EthCampaign'];
 /* eslint-enable */
 
 export class OnChainService {
   readonly signer: Signer;
   readonly provider: providers.JsonRpcProvider;
-  readonly campaignFactory: CampaignFactory;
+  readonly campaignFactory: Typechain.CampaignFactory;
 
   constructor(_signer?: Signer, _provider?: providers.JsonRpcProvider) {
     const signer = _signer || new Wallet(process.env.ORACLE_PRIVATE_KEY);
@@ -43,7 +43,7 @@ export class OnChainService {
       CampaignFactoryJson.address,
       CampaignFactoryJson.abi,
       this.signer
-    ) as CampaignFactory;
+    ) as Typechain.CampaignFactory;
     /* eslint-enable */
   }
 
@@ -82,14 +82,16 @@ export class OnChainService {
     if (txReceipt.events === undefined)
       throw new Error('txReceipt.events undefined');
 
+    /* eslint-disable */
     const event = txReceipt.events.find(
       (e) => e.event === 'CampaignCreated'
-    ) as CampaignCreatedEvent;
+    ) as any;
 
     if (event === undefined) throw new Error('event undefined');
     if (event.args === undefined) throw new Error('event.args undefined');
 
     return event.args.newCampaign;
+    /* eslint-enable */
   }
 
   async publishShares(address: string, root: string): Promise<void> {

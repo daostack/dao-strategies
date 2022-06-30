@@ -1,7 +1,9 @@
 import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
-import { chain, useAccount, useNetwork } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { ChainsDetails, getCampaignUri, ChainId } from '@dao-strategies/core';
 
 import { DateManager } from '../../utils/time';
 import { useCampaignFactory } from '../../hooks/useContracts';
@@ -17,7 +19,6 @@ import {
   strategyDetails,
 } from '../campaign.support';
 import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
-import { getCampaignUri } from '@dao-strategies/core';
 import { RouteNames } from '../MainPage';
 import {
   AppButton,
@@ -34,7 +35,6 @@ import { FormTrash } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
-import { ChainsDetails, ChainKey, keyOfName } from './chains.map';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -59,8 +59,8 @@ export interface ProcessedFormValues {
 const initialValues: CampaignFormValues = {
   title: 'asdas',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-  chain: ChainsDetails[ChainKey.Localhost].name,
-  asset: ChainsDetails[ChainKey.Localhost].assets.native.name,
+  chain: ChainsDetails.chain(ChainId.Localhost).name,
+  asset: ChainsDetails.chain(ChainId.Localhost).assets.native.name,
   description: '',
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
@@ -103,11 +103,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const periodType = getPeriodType(details, today);
   const isLogged = account !== undefined;
 
-  const chainOptions = Object.values(ChainsDetails).map((details) => details.name);
+  const chainOptions = ChainsDetails.chainsArray().map((chain) => chain.name);
 
-  const key = keyOfName(formValues.chain);
-  const assets = ChainsDetails[key].assets;
-  const assetsOptions = Object.keys(assets).map((assetId) => assets[assetId].name);
+  const key = ChainsDetails.chainKeyOfName(formValues.chain);
+  const assetsOptions = ChainsDetails.chainAssetsArray(key).map((asset) => asset.name);
 
   if (DEBUG) console.log('CampaignCreate - render');
 

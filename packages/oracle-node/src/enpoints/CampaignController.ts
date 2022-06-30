@@ -2,10 +2,11 @@ import {
   BalancesObject,
   balancesToObject,
   CampaignUriDetails,
+  CampaignCreateDetails,
+  CampaignOnchainDetails,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
 
-import { CampaignCreateDetails } from '../services/types';
 import { Services } from '../types';
 
 import { Controller } from './Controller';
@@ -126,9 +127,11 @@ export class CampaignController extends Controller {
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
-  ): Promise<> {
-    const details = await this.services.onchain.getCampaignDetails(
+  ): Promise<CampaignOnchainDetails> {
+    /* eslint-disable */
+    return this.services.campaignOnChain.getCampaignDetails(
       request.params.address as string
     );
+    /* eslint-enable */
   }
 }

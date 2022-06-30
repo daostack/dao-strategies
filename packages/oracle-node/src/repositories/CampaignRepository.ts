@@ -1,8 +1,7 @@
-import { Balances } from '@dao-strategies/core';
+import { CampaignCreateDetails, Balances } from '@dao-strategies/core';
 import { PrismaClient, Prisma, Campaign } from '@prisma/client';
 import { BigNumber } from 'ethers';
 
-import { CampaignCreateDetails } from '../services/types';
 import { toNumber } from '../utils/utils';
 
 export class CampaignRepository {

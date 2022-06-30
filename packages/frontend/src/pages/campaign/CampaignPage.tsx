@@ -1,10 +1,11 @@
+import { ethers } from 'ethers';
 import { Box, Header, Paragraph, Spinner, Tabs, Tab } from 'grommet';
 import { FC, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
 import { AppButton } from '../../components/styles/BasicElements';
-import { ColumnView, TwoColumns } from '../../components/styles/LayoutComponents.styled';
+import { ColumnView, TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaign } from '../../hooks/useCampaign';
 import { AppHeader } from '../AppHeader';
 
@@ -18,15 +19,49 @@ type RouteParams = {
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const params = useParams<RouteParams>();
-  const { isLoading, campaign, getRewards, rewards, otherDetails } = useCampaign(params.campaignAddress);
+  const { isLoading, campaign, getRewards, rewards, getOtherDetails, otherDetails } = useCampaign(
+    params.campaignAddress
+  );
 
   useEffect(() => {
     getRewards();
+    getOtherDetails();
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
 
-  if (campaign === undefined || isLoading) return <Spinner />;
+  const balances =
+    otherDetails !== undefined ? (
+      <Box direction="row">
+        {' '}
+        {Object.keys(otherDetails.tokens).map((token: any) => {
+          return (
+            <Box
+              direction="column"
+              style={{
+                width: '120px',
+                backgroundColor: '#ccc',
+                borderRadius: '10px',
+                marginLeft: '16px',
+              }}>
+              <Box style={{ textAlign: 'center' }}>{otherDetails.tokens[token].address.substr(0, 3)}</Box>
+              <Box style={{ textAlign: 'center' }}>{otherDetails.tokens[token].balance}</Box>
+            </Box>
+          );
+        })}
+      </Box>
+    ) : (
+      <></>
+    );
+
+  if (campaign === undefined || isLoading)
+    return (
+      <ViewportContainer>
+        please wait...
+        <br></br>
+        <Spinner />
+      </ViewportContainer>
+    );
   return (
     <>
       <AppHeader></AppHeader>
@@ -54,8 +89,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           <TwoColumns style={{ border: 'solid 2px #ccc', borderRadius: '20px', padding: '20px 30px' }}>
             <>
               <Box direction="row" align="center">
-                Campaign Funding {otherDetails.fundsRaised !== undefined ? otherDetails.fundsRaised.toString() : ''}{' '}
+                Campaign Funding
                 <AppButton>Fund Campaign</AppButton>
+              </Box>
+              <Box direction="row" align="center">
+                {balances}
               </Box>
             </>
             <>
