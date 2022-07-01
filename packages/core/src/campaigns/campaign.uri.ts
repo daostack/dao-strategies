@@ -2,15 +2,7 @@ import { CID } from 'multiformats/cid';
 import * as json from 'multiformats/codecs/json';
 import { sha256 } from 'multiformats/hashes/sha2';
 
-import { Strategy_ID } from '../strategies';
-
-export interface CampaignUriDetails {
-  creator: string;
-  nonce: number;
-  execDate: number;
-  strategyID: Strategy_ID;
-  strategyParams: Record<string, any>;
-}
+import { CampaignUriDetails } from '../common/types';
 
 export const getCampaignUriCid = async (
   details: CampaignUriDetails

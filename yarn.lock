@@ -1808,6 +1808,7 @@ __metadata:
     "@types/node": ^17.0.31
     "@typescript-eslint/eslint-plugin": ^5.12.0
     "@typescript-eslint/parser": ^5.12.0
+    "@wagmi/core": ^0.4.4
     dotenv: ^16.0.0
     eslint: ^8.9.0
     eslint-config-prettier: ^8.4.0
@@ -5355,9 +5356,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wagmi/core@npm:^0.4.0":
-  version: 0.4.0
-  resolution: "@wagmi/core@npm:0.4.0"
+"@wagmi/core@npm:^0.4.4":
+  version: 0.4.4
+  resolution: "@wagmi/core@npm:0.4.4"
   dependencies:
     eventemitter3: ^4.0.7
     zustand: ^4.0.0-rc.1
@@ -5370,7 +5371,7 @@ __metadata:
       optional: true
     "@walletconnect/ethereum-provider":
       optional: true
-  checksum: 504c3c44056a1e052a47c046bf2f1c6def5dd1f45b3d0704ce95a6ad3c2a7754e0aba604c0dd1293c0ee6e4dbdd3be043a8939e3bcfb2c3280e839eb9616f661
+  checksum: c9959c5ffa7d3682932e2ddcd12332d1148f81a9c395349a0c40bba693cc700843a30920212d9e5724d8889a13ac926ce7ce1f49a5cc95e48a75e5f3e9022c8e
   languageName: node
   linkType: hard
 
@@ -13392,7 +13393,7 @@ __metadata:
     styled-components: ^5.3.5
     typescript: ^4.6.4
     use-debounce: ^8.0.1
-    wagmi: ^0.5.0
+    wagmi: ^0.5.5
     web-vitals: ^2.1.4
   languageName: unknown
   linkType: soft
@@ -27356,19 +27357,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wagmi@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "wagmi@npm:0.5.0"
+"wagmi@npm:^0.5.5":
+  version: 0.5.5
+  resolution: "wagmi@npm:0.5.5"
   dependencies:
     "@coinbase/wallet-sdk": ^3.3.0
-    "@wagmi/core": ^0.4.0
+    "@wagmi/core": ^0.4.4
     "@walletconnect/ethereum-provider": ^1.7.8
     react-query: ^4.0.0-beta.23
     use-sync-external-store: ^1.1.0
   peerDependencies:
     ethers: ">=5.5.1"
     react: ">=17.0.0"
-  checksum: 46b61f801b903484aa7b5aa32256c47c5d821bbca203b5b4cfae614055154ce5cdbe030a563e05a8f5327c364d38c95ff90f16613311588a225843bae708662f
+  checksum: ea6ad4b8aa8aac5943d622f0a0aec18b7fd54f5477abb579ae944e67efa116634eb6f009889cdf5bdee1742d677f0e0fb5a9891301f5ca36e36aea944d9451c6
   languageName: node
   linkType: hard
 

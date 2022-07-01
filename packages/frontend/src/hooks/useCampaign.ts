@@ -1,23 +1,21 @@
 import { useEffect, useState } from 'react';
-import { CampaignOnchainDetails, contractsJson } from '@dao-strategies/core';
+import { CampaignOnchainDetails, CampaignReadDetails } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
-import { CampaignDetails, RewardsMap } from '../pages/campaign.support';
-
-const EthCampaignJSON: any = (contractsJson as any)['31337']['localhost']['contracts']['EthCampaign'];
+import { RewardsMap } from '../pages/campaign.support';
 
 export const useCampaign = (
   address: string | undefined
 ): {
   isLoading: boolean;
-  campaign: CampaignDetails | undefined;
+  campaign: CampaignReadDetails | undefined;
   getRewards: () => void;
   rewards: RewardsMap | undefined;
   getOtherDetails: () => void;
   otherDetails: CampaignOnchainDetails | undefined;
 } => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [campaign, setCampaign] = useState<CampaignDetails>();
+  const [campaign, setCampaign] = useState<CampaignReadDetails>();
   const [rewards, setRewards] = useState<RewardsMap>();
   const [otherDetails, setOtherDetails] = useState<CampaignOnchainDetails>();
 

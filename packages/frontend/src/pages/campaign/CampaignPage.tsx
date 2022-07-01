@@ -1,13 +1,16 @@
-import { ethers } from 'ethers';
-import { Box, Header, Paragraph, Spinner, Tabs, Tab } from 'grommet';
-import { FC, useEffect } from 'react';
+import { Box, Header, Paragraph, Spinner, Tabs, Tab, Layer } from 'grommet';
+import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
 import { AppButton } from '../../components/styles/BasicElements';
 import { ColumnView, TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaign } from '../../hooks/useCampaign';
 import { AppHeader } from '../AppHeader';
+import { FundCampaign } from '../../components/FundCampaign';
+import { ethers } from 'ethers';
+import { formatEther } from '../../utils/ethers';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -19,6 +22,8 @@ type RouteParams = {
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const params = useParams<RouteParams>();
+  const [showFund, setShowFund] = useState<boolean>(false);
+
   const { isLoading, campaign, getRewards, rewards, getOtherDetails, otherDetails } = useCampaign(
     params.campaignAddress
   );
@@ -30,11 +35,22 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
 
+  if (campaign === undefined || isLoading)
+    return (
+      <ViewportContainer>
+        please wait...
+        <br></br>
+        <Spinner />
+      </ViewportContainer>
+    );
+
   const balances =
     otherDetails !== undefined ? (
       <Box direction="row">
         {' '}
-        {Object.keys(otherDetails.tokens).map((token: any) => {
+        {Object.keys(otherDetails.tokens).map((key: any) => {
+          const token = otherDetails.tokens[key];
+
           return (
             <Box
               direction="column"
@@ -44,8 +60,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
                 borderRadius: '10px',
                 marginLeft: '16px',
               }}>
-              <Box style={{ textAlign: 'center' }}>{otherDetails.tokens[token].address.substr(0, 3)}</Box>
-              <Box style={{ textAlign: 'center' }}>{otherDetails.tokens[token].balance}</Box>
+              <Box style={{ textAlign: 'center', height: '40px', width: '40px' }}>
+                <img src={(token as any).icon} alt={(token as any).name} />
+              </Box>
+              <Box style={{ textAlign: 'center' }}>{(token as any).name}</Box>
+              <Box style={{ textAlign: 'center' }}>{formatEther(token.balance)}</Box>
             </Box>
           );
         })}
@@ -54,16 +73,22 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       <></>
     );
 
-  if (campaign === undefined || isLoading)
-    return (
-      <ViewportContainer>
-        please wait...
-        <br></br>
-        <Spinner />
-      </ViewportContainer>
-    );
   return (
     <>
+      {showFund ? (
+        <Layer onEsc={() => setShowFund(false)} onClickOutside={() => setShowFund(false)}>
+          <FundCampaign
+            onSuccess={() => {
+              setShowFund(false);
+              getOtherDetails();
+            }}
+            asset={campaign.asset}
+            chainId={campaign.chainId}
+            address={campaign.address}></FundCampaign>
+        </Layer>
+      ) : (
+        <></>
+      )}
       <AppHeader></AppHeader>
       <ColumnView>
         <Countdown to-date={campaign?.execDate}></Countdown>
@@ -90,7 +115,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             <>
               <Box direction="row" align="center">
                 Campaign Funding
-                <AppButton>Fund Campaign</AppButton>
+                <AppButton onClick={() => setShowFund(true)}>Fund Campaign</AppButton>
               </Box>
               <Box direction="row" align="center">
                 {balances}

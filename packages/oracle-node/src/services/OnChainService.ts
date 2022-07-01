@@ -1,28 +1,18 @@
-import { Wallet, Signer, Contract, ContractInterface, providers } from 'ethers';
-import { CID } from 'multiformats';
-import { base32 } from 'multiformats/bases/base32';
-
 import {
   CampaignCreateDetails,
-  contractsJson,
+  ContractsJson,
   Typechain,
 } from '@dao-strategies/core';
+import { Wallet, Signer, Contract, providers } from 'ethers';
+import { CID } from 'multiformats';
+import { base32 } from 'multiformats/bases/base32';
 
 const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 /* eslint-disable */
-const CampaignFactoryJson: any = (contractsJson as any)['31337']['localhost'][
-  'contracts'
-]['CampaignFactory'];
-
-const Erc20CampaignJson: any = (contractsJson as any)['31337']['localhost'][
-  'contracts'
-]['Erc20Campaign'];
-
-const EthCampaignJson: any = (contractsJson as any)['31337']['localhost'][
-  'contracts'
-]['EthCampaign'];
+const CampaignFactoryJson =
+  ContractsJson.jsonOfChain().contracts.CampaignFactory;
 /* eslint-enable */
 
 export class OnChainService {

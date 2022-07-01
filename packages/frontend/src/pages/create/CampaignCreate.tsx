@@ -3,12 +3,11 @@ import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { ChainsDetails, getCampaignUri, ChainId } from '@dao-strategies/core';
+import { ChainsDetails, getCampaignUri, CampaignCreateDetails } from '@dao-strategies/core';
 
 import { DateManager } from '../../utils/time';
 import { useCampaignFactory } from '../../hooks/useContracts';
 import {
-  CampaignCreateDetails,
   deployCampaign,
   PeriodKeys,
   periodOptions,
@@ -43,8 +42,8 @@ export interface ICampaignCreateProps {
 export interface CampaignFormValues {
   title: string;
   description: string;
-  asset: string;
-  chain: string;
+  assetName: string;
+  chainName: string;
   repositoryFullnames: string[];
   guardian: string;
   livePeriodChoice: string;
@@ -56,11 +55,13 @@ export interface ProcessedFormValues {
   periodCustom: boolean;
 }
 
+const initChain = ChainsDetails.chains()[0];
+
 const initialValues: CampaignFormValues = {
-  title: 'asdas',
+  title: 'My Campaign',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-  chain: ChainsDetails.chain(ChainId.Localhost).name,
-  asset: ChainsDetails.chain(ChainId.Localhost).assets.native.name,
+  chainName: initChain.name,
+  assetName: ChainsDetails.chainAssets(initChain.id)[0].name,
   description: '',
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
@@ -95,7 +96,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const [simulating, setSimulating] = useState<boolean>(false);
 
   const campaignFactory = useCampaignFactory();
-  const accountHook = useAccount();
   const navigate = useNavigate();
 
   /** details is a derived value */
@@ -103,16 +103,15 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const periodType = getPeriodType(details, today);
   const isLogged = account !== undefined;
 
-  const chainOptions = ChainsDetails.chainsArray().map((chain) => chain.name);
+  const chainOptions = ChainsDetails.chains().map((chain) => chain.name);
 
-  const key = ChainsDetails.chainKeyOfName(formValues.chain);
-  const assetsOptions = ChainsDetails.chainAssetsArray(key).map((asset) => asset.name);
+  const chain = ChainsDetails.chainOfName(formValues.chainName);
+  const assetsOptions = ChainsDetails.chainAssets(chain.chain.id).map((asset) => asset.name);
 
   if (DEBUG) console.log('CampaignCreate - render');
 
   /** Prepare all the parameters to deply the campaign and call the deployCampaign function */
   const create = async (): Promise<void> => {
-    const account = accountHook?.address;
     if (account === undefined) throw new Error('account undefined');
     if (campaignFactory === undefined) throw new Error('campaignFactoryContract undefined');
 
@@ -120,6 +119,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     const finalDetails = simulation !== undefined ? simulation.details : details;
     if (finalDetails === undefined) throw new Error();
 
+    const chainId = ChainsDetails.chainOfName(formValues.chainName).chain.id;
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
       title: formValues.title,
@@ -127,7 +127,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       description: formValues.description,
       oracle: ORACLE_ADDRESS,
       address: '',
-      chain: formValues.chain,
+      chainId,
+      asset: ChainsDetails.assetOfName(chainId, formValues.assetName).id,
       cancelDate: finalDetails.execDate + CHALLENGE_PERIOD,
     };
 
@@ -270,11 +271,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
           <AppInput name="guardian" placeholder="0x...."></AppInput>
         </FormField>
-        <FormField name="chain" label="Chain" style={{ border: '0px none' }}>
-          <AppSelect name="chain" style={{ border: '0px none' }} options={chainOptions}></AppSelect>
+        <FormField name="chainName" label="Chain" style={{ border: '0px none' }}>
+          <AppSelect name="chainName" style={{ border: '0px none' }} options={chainOptions}></AppSelect>
         </FormField>
-        <FormField name="asset" label="Asset" style={{ border: '0px none' }}>
-          <AppSelect name="asset" style={{ border: '0px none' }} options={assetsOptions}></AppSelect>
+        <FormField name="assetName" label="Asset" style={{ border: '0px none' }}>
+          <AppSelect name="assetName" style={{ border: '0px none' }} options={assetsOptions}></AppSelect>
         </FormField>
       </>
       <>
@@ -372,7 +373,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </Box>
           <Box>
             <Paragraph>Asset</Paragraph>
-            <Paragraph>{formValues.asset}</Paragraph>
+            <Paragraph>{formValues.assetName}</Paragraph>
           </Box>
         </Box>
       </TwoColumns>

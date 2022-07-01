@@ -54,8 +54,7 @@ export class CampaignController extends Controller {
     }
 
     const uri = await this.services.campaign.getOrCreate(
-      request.body.details as CampaignUriDetails,
-      loggedUser
+      request.body.details as CampaignUriDetails
     );
     return {
       uri,
@@ -76,8 +75,7 @@ export class CampaignController extends Controller {
     }
 
     const uri = await this.services.campaign.getOrCreate(
-      request.body.details as CampaignUriDetails,
-      loggedUser
+      request.body.details as CampaignUriDetails
     );
     return { uri };
   }

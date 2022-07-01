@@ -1,5 +1,6 @@
-import { WagmiConfig, createClient, defaultChains, configureChains } from 'wagmi';
+import { WagmiConfig, createClient, configureChains } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
+import { ChainsDetails } from '@dao-strategies/core';
 
 import { Grommet } from 'grommet';
 
@@ -8,7 +9,9 @@ import { MainPage } from './pages/MainPage';
 import { GlobalStyles } from './components/styles/GlobalStyles';
 import { theme } from './components/styles/themes';
 
-const { provider } = configureChains(defaultChains, [publicProvider()]);
+export const LOCALHOST_CHAIN_ID = 3177;
+
+const { provider } = configureChains(ChainsDetails.chains(), [publicProvider()]);
 const client = createClient({ provider });
 
 function App() {

@@ -1,6 +1,6 @@
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
-import { CampaignUriDetails, Typechain } from '@dao-strategies/core';
+import { CampaignCreateDetails, CampaignReadDetails, CampaignUriDetails, Typechain } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
@@ -15,37 +15,6 @@ export interface SimulationResult {
   uri?: string;
   details?: CampaignUriDetails;
   rewards?: RewardsMap;
-}
-
-/** the details of a campaign that are not used as part of the URI */
-export interface CampaignCreateDetails {
-  title: string;
-  description: string;
-  guardian: string;
-  oracle: string;
-  cancelDate: number;
-  chain: string;
-  address: string;
-}
-
-/** The details of a read campaign that are available on the frontend,
- * not all of them are part of the campaign URI and can be edited
- * by the campaign creator.
- */
-/** should be the same as CampaignExternal in oracle */
-export interface CampaignDetails {
-  uri: string;
-  title: string;
-  description: string;
-  creator: string;
-  guardian: string;
-  oracle: string;
-  chain: string;
-  execDate: number;
-  cancelDate: number;
-  strategyID: string;
-  strategyParams: Record<string, any>;
-  address: string;
 }
 
 /** The period string is parsed to derive the actual period. That's why
@@ -247,7 +216,7 @@ export const registerCampaign = async (uri: string, details: CampaignCreateDetai
   });
 };
 
-export const getCampaign = async (uri: string): Promise<CampaignDetails> => {
+export const getCampaign = async (uri: string): Promise<CampaignReadDetails> => {
   const response = await fetch(ORACLE_NODE_URL + `/campaign/${uri}`, {
     method: 'get',
     credentials: 'include',

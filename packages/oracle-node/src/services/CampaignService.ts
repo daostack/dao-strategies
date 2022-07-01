@@ -54,36 +54,18 @@ export class CampaignService {
     return this.campaignRepo.exist(uri);
   }
 
-  async getOrCreate(details: CampaignUriDetails, by: string): Promise<string> {
+  async getOrCreate(details: CampaignUriDetails): Promise<string> {
     const uri = await getCampaignUri(details);
     const exist = await this.exist(uri);
 
     if (!exist) {
       const createData: Prisma.CampaignCreateInput = {
         uri,
-        title: '',
-        description: '',
-        creator: {
-          connect: {
-            address: by.toLowerCase(),
-          },
-        },
         nonce: details.nonce,
-        asset: '',
-        chain: '',
-        guardian: '',
-        oracle: '',
         execDate: details.execDate,
-        cancelDate: 0,
         stratID: details.strategyID as Strategy_ID,
         stratParamsStr: JSON.stringify(details.strategyParams),
-        lastRunDate: undefined,
-        publishDate: undefined,
         registered: false,
-        running: false,
-        executed: false,
-        published: false,
-        address: '',
       };
 
       const campaign = await this.create(createData);

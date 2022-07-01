@@ -1,8 +1,4 @@
-import {
-  CampaignOnchainDetails,
-  ChainId,
-  ChainsDetails,
-} from '@dao-strategies/core';
+import { CampaignOnchainDetails, ChainsDetails } from '@dao-strategies/core';
 import { BigNumber, Contract, providers } from 'ethers';
 import { CampaignService } from './CampaignService';
 
@@ -29,22 +25,20 @@ export class CampaignOnChainService {
   }
 
   async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
-    const assets = ChainsDetails.chainAssets(
-      this.provider.network.chainId.toString() as ChainId
-    );
+    const campaign = await this.campaignService.getFromAddress(address);
+    const assets = ChainsDetails.chainAssets(campaign.chainId);
 
-    const assetsKeys = Object.keys(assets);
-
-    const balances = await Promise.all(
-      assetsKeys.map(
+    const tokens = await Promise.all(
+      assets.map(
         async (
-          key
+          asset
         ): Promise<{
-          key: string;
+          id: string;
           address: string;
           balance: string;
+          name: string;
+          icon: string;
         }> => {
-          const asset = assets[key];
           let getBalance;
 
           if (!ChainsDetails.isNative(asset)) {
@@ -57,22 +51,15 @@ export class CampaignOnChainService {
           const balance = (await getBalance) as BigNumber;
           /* eslint-enable */
           return {
-            key,
+            id: asset.id,
             address: asset.address,
             balance: balance.toString(),
+            name: asset.name,
+            icon: asset.icon,
           };
         }
       )
     );
-
-    /** convert arry to object with keys */
-    const tokens = {};
-    balances.forEach((balance) => {
-      tokens[balance.key] = {
-        address: balance.address,
-        balance: balance.balance,
-      };
-    });
 
     return { tokens };
   }
