@@ -37,7 +37,7 @@ const chainList: ChainAndAssets[] = [
       },
       {
         id: 'usdc',
-        address: ContractsJson.jsonOfChain().contracts.TestErc20.address,
+        address: ContractsJson.jsonOfChain().contracts.TestErc20_02.address,
         name: 'USDC',
         icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=022',
       },

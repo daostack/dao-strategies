@@ -29,6 +29,15 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     from: deployer.address,
     args: [hre.ethers.utils.parseEther('1000000'), deployer.address],
     log: true,
+    contract: 'TestErc20',
+  });
+
+  const erc20token2 = await deploy('TestErc20_02', {
+    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+    from: deployer.address,
+    args: [hre.ethers.utils.parseEther('1000000'), deployer.address],
+    log: true,
+    contract: 'TestErc20',
   });
 
   await deploy('CampaignFactory', {
@@ -39,11 +48,15 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   });
 
   /** transfer DAI to accounts */
-  const token = new hre.ethers.Contract(erc20token.address, erc20Abi, deployer) as TestErc20;
-  await (await token.transfer(signers[1].address, hre.ethers.utils.parseEther('100000'))).wait();
-  await (await token.transfer(signers[2].address, hre.ethers.utils.parseEther('200000'))).wait();
-  await (await token.transfer(signers[3].address, hre.ethers.utils.parseEther('300000'))).wait();
-  await (await token.transfer(signers[4].address, hre.ethers.utils.parseEther('400000'))).wait();
+  await Promise.all(
+    [erc20token.address, erc20token2.address].map(async (address: string) => {
+      const token = new hre.ethers.Contract(address, erc20Abi, deployer) as TestErc20;
+      await (await token.transfer(signers[1].address, hre.ethers.utils.parseEther('100000'))).wait();
+      await (await token.transfer(signers[2].address, hre.ethers.utils.parseEther('200000'))).wait();
+      await (await token.transfer(signers[3].address, hre.ethers.utils.parseEther('300000'))).wait();
+      await (await token.transfer(signers[4].address, hre.ethers.utils.parseEther('400000'))).wait();
+    })
+  );
 };
 
 export default deploy;

@@ -9,8 +9,8 @@ import { ColumnView, TwoColumns, ViewportContainer } from '../../components/styl
 import { useCampaign } from '../../hooks/useCampaign';
 import { AppHeader } from '../AppHeader';
 import { FundCampaign } from '../../components/FundCampaign';
-import { ethers } from 'ethers';
 import { formatEther } from '../../utils/ethers';
+import { useLoggedUser } from '../../hooks/useLoggedUser';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -20,6 +20,12 @@ type RouteParams = {
   campaignAddress: string;
 };
 
+enum UserClaimStatus {
+  loggedOff = 'loggedOff',
+  canClaim = 'canClaim',
+  notExecuted = 'notExecuted',
+}
+
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const params = useParams<RouteParams>();
   const [showFund, setShowFund] = useState<boolean>(false);
@@ -27,6 +33,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const { isLoading, campaign, getRewards, rewards, getOtherDetails, otherDetails } = useCampaign(
     params.campaignAddress
   );
+
+  const { user, connect } = useLoggedUser();
 
   useEffect(() => {
     getRewards();
@@ -51,6 +59,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         {Object.keys(otherDetails.tokens).map((key: any) => {
           const token = otherDetails.tokens[key];
 
+          if (token.balance === '0') return <></>;
+
           return (
             <Box
               direction="column"
@@ -72,6 +82,37 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     ) : (
       <></>
     );
+
+  let claimStatus = UserClaimStatus.loggedOff;
+
+  if (user === undefined) {
+    claimStatus = UserClaimStatus.loggedOff;
+  } else {
+    if (!campaign.executed) {
+      claimStatus = UserClaimStatus.notExecuted;
+    }
+  }
+
+  const claimButton = (claimStatus: UserClaimStatus) => {
+    switch (claimStatus) {
+      case UserClaimStatus.loggedOff:
+        return (
+          <>
+            <AppButton onClick={() => connect()}>Connect</AppButton>
+          </>
+        );
+
+      case UserClaimStatus.canClaim:
+        return (
+          <>
+            My Reward <AppButton>Claim rewards</AppButton>
+          </>
+        );
+
+      case UserClaimStatus.notExecuted:
+        return <>Not executed</>;
+    }
+  };
 
   return (
     <>
@@ -123,7 +164,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             </>
             <>
               <Box direction="row" align="center">
-                My Reward <AppButton>Claim rewards</AppButton>
+                {claimButton(claimStatus)}
               </Box>
             </>
           </TwoColumns>

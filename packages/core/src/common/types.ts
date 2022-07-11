@@ -26,6 +26,7 @@ export interface CampaignReadDetails
     CampaignUriDetails {
   uri: string;
   registered: boolean;
+  executed: boolean;
 }
 
 export interface TokenBalance {

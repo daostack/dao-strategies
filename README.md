@@ -26,7 +26,7 @@ yarn compile
 yarn chain
 ```
 
-Open another terminal and run
+If you want to run tests, open another terminal and run
 
 ```
 yarn test
@@ -50,7 +50,7 @@ sudo docker-compose up
 Once the docker processes are running we need to create and deploy the subgraph.
 
 ```
-cd pacakges/subgraph
+cd packages/subgraph
 ```
 
 And then, we once need to build the subgraph with:
@@ -77,4 +77,32 @@ Then we can run the app from the root folder with
 yarn start
 ```
 
-|
+## Runing the oracle node
+
+The oracle-node is a NodeJS express app in `packages/oracle-node`. It uses postgress as the DB and Prisma as the ORM.
+
+You need to codegen the prisma files that will then be stored on `node_modules/@prisma/client`
+
+```
+yarn prisma-generate
+```
+
+Then start postgres (and pgAdmin)
+
+```
+sudo docker-compose up
+```
+
+Then run the NodeJS app
+
+```
+yarn start
+```
+
+## Runing the frontend
+
+The frontend is a React app in `packages/frontend`.
+
+```
+yarn start
+```
