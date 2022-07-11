@@ -1,9 +1,8 @@
 import { useContract, useSigner } from 'wagmi';
 
-import hardhatContractsJson from '../generated/hardhat_contracts.json';
-import { CampaignFactory } from '../generated/typechain';
+import { ContractsJson, Typechain } from '@dao-strategies/core';
 
-export const useCampaignFactory = (): CampaignFactory | undefined => {
+export const useCampaignFactory = (): Typechain.CampaignFactory | undefined => {
   const { data: signer } = useSigner();
   //   const { activeChain } = useNetwork();
 
@@ -13,11 +12,9 @@ export const useCampaignFactory = (): CampaignFactory | undefined => {
   //       : (hardhatContractsJson as any)[activeChain.id][activeChain.name]['contracts']['CampaignFactory'];
   //   const abi = contractJson ? contractJson['abi'] : undefined;
 
-  const contractJson = (hardhatContractsJson as any)['31337']['localhost']['contracts']['CampaignFactory'];
-
-  return useContract<CampaignFactory>({
-    addressOrName: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512', // contractJson ? contractJson['address'] : undefined,
-    contractInterface: contractJson.abi,
+  return useContract<Typechain.CampaignFactory>({
+    addressOrName: ContractsJson.jsonOfChain().contracts.CampaignFactory.address,
+    contractInterface: ContractsJson.jsonOfChain().contracts.CampaignFactory.abi,
     signerOrProvider: signer,
   });
 };

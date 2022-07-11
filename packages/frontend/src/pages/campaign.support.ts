@@ -1,13 +1,11 @@
-import { BigNumber, ethers } from 'ethers';
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
-import { CampaignUriDetails } from '@dao-strategies/core';
+import { CampaignCreateDetails, CampaignReadDetails, CampaignUriDetails, Typechain } from '@dao-strategies/core';
 
-import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
-import { CampaignFactory } from '../generated/typechain';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/time';
+import { ethers } from 'ethers';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
@@ -17,35 +15,6 @@ export interface SimulationResult {
   uri?: string;
   details?: CampaignUriDetails;
   rewards?: RewardsMap;
-}
-
-/** the details of a campaign that are not used as part of the URI */
-export interface CampaignCreateDetails {
-  title: string;
-  description: string;
-  guardian: string;
-  oracle: string;
-  cancelDate: number;
-  address: string;
-}
-
-/** The details of a read campaign that are available on the frontend,
- * not all of them are part of the campaign URI and can be edited
- * by the campaign creator.
- */
-/** should be the same as CampaignExternal in oracle */
-export interface CampaignDetails {
-  uri: string;
-  title: string;
-  description: string;
-  creator: string;
-  guardian: string;
-  oracle: string;
-  execDate: number;
-  cancelDate: number;
-  strategyID: string;
-  strategyParams: Record<string, any>;
-  address: string;
 }
 
 /** The period string is parsed to derive the actual period. That's why
@@ -188,7 +157,7 @@ export const createCampaign = async (details: CampaignUriDetails): Promise<strin
 };
 
 export const deployCampaign = async (
-  campaignFactory: CampaignFactory,
+  campaignFactory: Typechain.CampaignFactory,
   uri: string | undefined,
   otherDetails: CampaignCreateDetails,
   details: CampaignUriDetails | undefined
@@ -205,23 +174,23 @@ export const deployCampaign = async (
 
   /** raw hash 32-bit wide is exctracted from URI CID  */
   const uriCid = CID.parse(uriDefined, base32);
-
   if (uriCid == null) throw new Error(`uri ${uri} is not a CID`);
 
+  const uriHex = ethers.utils.hexlify(uriCid.multihash.digest);
+  const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Date.now().toString())); // uriHex;
+
   const ex = await campaignFactory.createCampaign(
-    { sharesMerkleRoot: ZERO_BYTES32, totalShares: BigNumber.from(0) },
-    uriCid.multihash.digest,
+    ZERO_BYTES32,
+    ZERO_BYTES32,
+    uriHex,
     otherDetails.guardian,
     otherDetails.oracle,
-    false,
-    ethers.BigNumber.from(1000),
-    /** the campaign uri uniquely and deterministically determines the campaign contract address */
-    uriCid.multihash.digest
+    salt
   );
   const txReceipt = await ex.wait();
 
   if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
-  const event = txReceipt.events.find((e) => e.event === 'CampaignCreated') as CampaignCreatedEvent;
+  const event = txReceipt.events.find((e) => e.event === 'CampaignCreated');
 
   if (event === undefined) throw new Error('event undefined');
   if (event.args === undefined) throw new Error('event.args undefined');
@@ -247,7 +216,7 @@ export const registerCampaign = async (uri: string, details: CampaignCreateDetai
   });
 };
 
-export const getCampaign = async (uri: string): Promise<CampaignDetails> => {
+export const getCampaign = async (uri: string): Promise<CampaignReadDetails> => {
   const response = await fetch(ORACLE_NODE_URL + `/campaign/${uri}`, {
     method: 'get',
     credentials: 'include',

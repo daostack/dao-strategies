@@ -2,13 +2,12 @@ import {
   BalancesObject,
   balancesToObject,
   CampaignUriDetails,
+  CampaignCreateDetails,
+  CampaignOnchainDetails,
 } from '@dao-strategies/core';
-import { Campaign } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
-import { CampaignCreateDetails } from '../services/types';
 import { Services } from '../types';
-import { toNumber } from '../utils/utils';
 
 import { Controller } from './Controller';
 import { toCampaignExternal } from './toCampaignExternal';
@@ -55,8 +54,7 @@ export class CampaignController extends Controller {
     }
 
     const uri = await this.services.campaign.getOrCreate(
-      request.body.details as CampaignUriDetails,
-      loggedUser
+      request.body.details as CampaignUriDetails
     );
     return {
       uri,
@@ -77,8 +75,7 @@ export class CampaignController extends Controller {
     }
 
     const uri = await this.services.campaign.getOrCreate(
-      request.body.details as CampaignUriDetails,
-      loggedUser
+      request.body.details as CampaignUriDetails
     );
     return { uri };
   }
@@ -120,6 +117,19 @@ export class CampaignController extends Controller {
     ) as any);
 
     return toCampaignExternal(campaign);
+    /* eslint-enable */
+  }
+
+  async getOtherDetails(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<CampaignOnchainDetails> {
+    /* eslint-disable */
+    return this.services.campaignOnChain.getCampaignDetails(
+      request.params.address as string
+    );
     /* eslint-enable */
   }
 }

@@ -31,15 +31,15 @@ export class CampaignCreated__Params {
     return this._event.parameters[1].value.toAddress();
   }
 
-  get _sharesRoot(): Bytes {
+  get _sharesMerkleRoot(): Bytes {
     return this._event.parameters[2].value.toBytes();
   }
 
-  get _sharesTotal(): BigInt {
-    return this._event.parameters[3].value.toBigInt();
+  get _sharesUri(): Bytes {
+    return this._event.parameters[3].value.toBytes();
   }
 
-  get _uri(): Bytes {
+  get _strategyUri(): Bytes {
     return this._event.parameters[4].value.toBytes();
   }
 
@@ -51,16 +51,8 @@ export class CampaignCreated__Params {
     return this._event.parameters[6].value.toAddress();
   }
 
-  get _sharesPublished(): boolean {
-    return this._event.parameters[7].value.toBoolean();
-  }
-
-  get _claimPeriodStart(): BigInt {
-    return this._event.parameters[8].value.toBigInt();
-  }
-
   get salt(): Bytes {
-    return this._event.parameters[9].value.toBytes();
+    return this._event.parameters[7].value.toBytes();
   }
 }
 
@@ -140,34 +132,28 @@ export class CreateCampaignCall__Inputs {
     this._call = call;
   }
 
-  get _shares(): CreateCampaignCall_sharesStruct {
-    return changetype<CreateCampaignCall_sharesStruct>(
-      this._call.inputValues[0].value.toTuple()
-    );
+  get _sharesMerkleRoot(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
   }
 
-  get _uri(): Bytes {
+  get _sharesUri(): Bytes {
     return this._call.inputValues[1].value.toBytes();
   }
 
-  get _guardian(): Address {
-    return this._call.inputValues[2].value.toAddress();
+  get _strategyUri(): Bytes {
+    return this._call.inputValues[2].value.toBytes();
   }
 
-  get _oracle(): Address {
+  get _guardian(): Address {
     return this._call.inputValues[3].value.toAddress();
   }
 
-  get _sharesPublished(): boolean {
-    return this._call.inputValues[4].value.toBoolean();
-  }
-
-  get _claimPeriodStart(): BigInt {
-    return this._call.inputValues[5].value.toBigInt();
+  get _oracle(): Address {
+    return this._call.inputValues[4].value.toAddress();
   }
 
   get salt(): Bytes {
-    return this._call.inputValues[6].value.toBytes();
+    return this._call.inputValues[5].value.toBytes();
   }
 }
 
@@ -176,15 +162,5 @@ export class CreateCampaignCall__Outputs {
 
   constructor(call: CreateCampaignCall) {
     this._call = call;
-  }
-}
-
-export class CreateCampaignCall_sharesStruct extends ethereum.Tuple {
-  get totalShares(): BigInt {
-    return this[0].toBigInt();
-  }
-
-  get sharesMerkleRoot(): Bytes {
-    return this[1].toBytes();
   }
 }

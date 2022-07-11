@@ -33,7 +33,7 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
 
   const { disconnect } = useDisconnect();
 
-  const { data: account, isFetching } = useAccount();
+  const { address, isConnecting } = useAccount();
   const [user, setUser] = useState<UserDetails | undefined>(undefined);
 
   const checkAndLogin = async (signer: Signer) => {
@@ -83,21 +83,21 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
   };
 
   useEffect(() => {
-    if (!isFetching && account != null) {
+    if (!isConnecting && address) {
       /** automatically logout if the account changed */
-      if (user && user.address !== account.address) {
+      if (user && user.address !== address) {
         startLogout();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, isFetching]);
+  }, [address, isConnecting]);
 
   /** the connected account is the connected metamask user and the read user from the backend (obtained by
    * signing the siwe) */
   const accountAddress =
-    account !== undefined && user !== undefined
-      ? account.address?.toLowerCase() === user.address.toLowerCase()
-        ? account.address
+    address !== undefined && user !== undefined
+      ? address?.toLowerCase() === user.address.toLowerCase()
+        ? address
         : undefined
       : undefined;
 

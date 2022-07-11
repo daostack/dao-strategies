@@ -1,6 +1,5 @@
-// import { BigInt, Address } from "@graphprotocol/graph-ts";
-import { CampaignCreated } from "./generated/CampaignFactory/CampaignFactory";
-import { Campaign } from "./generated/schema";
+import { CampaignCreated } from './generated/CampaignFactory/CampaignFactory';
+import { Campaign } from './generated/schema';
 
 export function handleCampaignCreated(event: CampaignCreated): void {
   let campaign = new Campaign(

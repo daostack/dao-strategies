@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
-import { TestErc20, TestErc20__factory, Erc20Campaign, Erc20Campaign__factory, Erc20CampaignFactory__factory } from './../typechain';
+import { TestErc20, TestErc20__factory, CampaignFactory__factory, Campaign__factory, Campaign } from './../typechain';
 import { toBigNumber, fastForwardToTimestamp } from './support';
 // import { MockContract } from '@ethereum-waffle/mock-contract';
 
@@ -27,7 +27,7 @@ interface SetupData {
   tree: BalanceTree;
   merkleRoot: string;
   claimersBalances: Balances;
-  campaign: Erc20Campaign;
+  campaign: Campaign;
   rewardToken: TestErc20;
 }
 
@@ -49,8 +49,8 @@ describe('Erc20Campaign', () => {
     const merkleRoot = tree.getHexRoot();
 
     // get deployers
-    const campaignFactoryDeployer = await ethers.getContractFactory<Erc20CampaignFactory__factory>('Erc20CampaignFactory');
-    const campaignDeployer = await ethers.getContractFactory<Erc20Campaign__factory>('Erc20Campaign');
+    const campaignFactoryDeployer = await ethers.getContractFactory<CampaignFactory__factory>('CampaignFactory');
+    const campaignDeployer = await ethers.getContractFactory<Campaign__factory>('Campaign');
     const rewardTokenDeployer = await ethers.getContractFactory<TestErc20__factory>('TestErc20');
 
     // deploy contracts
@@ -65,8 +65,7 @@ describe('Erc20Campaign', () => {
       URI,
       guardian.address,
       oracle.address,
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('1')),
-      rewardToken.address
+      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('1'))
     );
     const campaignCreationReceipt = await campaignCreationTx.wait();
     const campaignAddress: string = (campaignCreationReceipt as any).events[1].args[1]; // get campaign proxy address from the CampaignCreated event
@@ -100,10 +99,10 @@ describe('Erc20Campaign', () => {
     // funder sends 1000 tokens to the campaign
     await rewardToken.connect(admin).transfer(funders[0].address, toBigNumber('1000', 18));
     await rewardToken.connect(funders[0]).increaseAllowance(campaign.address, toBigNumber('1000', 18));
-    await campaign.connect(funders[0]).transferValueIn(toBigNumber('1000', 18));
-    expect(await campaign.providers(funders[0].address)).to.equal(toBigNumber('1000', 18));
+    await campaign.connect(funders[0]).fund(rewardToken.address, toBigNumber('1000', 18));
+    expect(await campaign.providers(rewardToken.address, funders[0].address)).to.equal(toBigNumber('1000', 18));
     expect(await rewardToken.balanceOf(campaign.address)).to.equal(toBigNumber('1000', 18));
-    expect(await campaign.totalReward()).to.equal(toBigNumber('1000', 18));
+    expect(await campaign.totalReward(rewardToken.address)).to.equal(toBigNumber('1000', 18));
 
     // fast forward to claim period
     const _activationTime = await campaign.activationTime();
@@ -112,21 +111,21 @@ describe('Erc20Campaign', () => {
     // claimer1 claims, should receive 1/6 of the tokens
     const claimer1BalanceBefore = await rewardToken.balanceOf(claimers[0].address);
     const proofClaimer1 = tree.getProof(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber);
-    await campaign.claim(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber, proofClaimer1);
+    await campaign.claim(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber, proofClaimer1, rewardToken.address);
     const claimer1BalanceAfter = await rewardToken.balanceOf(claimers[0].address);
     expect(claimer1BalanceAfter.sub(claimer1BalanceBefore)).to.equal(toBigNumber('1000', 18).mul(sharesArray[0]).div(TOTAL_SHARES));
 
     // claimer2 claims, should receive 1/3 of the tokens
     const claimer2BalanceBefore = await rewardToken.balanceOf(claimers[1].address);
     const proofClaimer2 = tree.getProof(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber);
-    await campaign.claim(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber, proofClaimer2);
+    await campaign.claim(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber, proofClaimer2, rewardToken.address);
     const claimer2BalanceAfter = await rewardToken.balanceOf(claimers[1].address);
     expect(claimer2BalanceAfter.sub(claimer2BalanceBefore)).to.equal(toBigNumber('1000', 18).mul(sharesArray[1]).div(TOTAL_SHARES));
 
     // claimer3 claims, should receive 1/2 of the tokens
     const claimer3BalanceBefore = await rewardToken.balanceOf(claimers[2].address);
     const proofClaimer3 = tree.getProof(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber);
-    await campaign.claim(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber, proofClaimer3);
+    await campaign.claim(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber, proofClaimer3, rewardToken.address);
     const claimer3BalanceAfter = await rewardToken.balanceOf(claimers[2].address);
     expect(claimer3BalanceAfter.sub(claimer3BalanceBefore)).to.equal(toBigNumber('1000', 18).mul(sharesArray[2]).div(TOTAL_SHARES));
   });
@@ -145,10 +144,10 @@ describe('Erc20Campaign', () => {
     // funder sends 1000 tokens to the campaign
     await rewardToken.connect(admin).transfer(funders[0].address, toBigNumber('1000', 18));
     await rewardToken.connect(funders[0]).increaseAllowance(campaign.address, toBigNumber('1000', 18));
-    await campaign.connect(funders[0]).transferValueIn(toBigNumber('1000', 18));
-    expect(await campaign.providers(funders[0].address)).to.equal(toBigNumber('1000', 18));
+    await campaign.connect(funders[0]).fund(rewardToken.address, toBigNumber('1000', 18));
+    expect(await campaign.providers(rewardToken.address, funders[0].address)).to.equal(toBigNumber('1000', 18));
     expect(await rewardToken.balanceOf(campaign.address)).to.equal(toBigNumber('1000', 18));
-    expect(await campaign.totalReward()).to.equal(toBigNumber('1000', 18));
+    expect(await campaign.totalReward(rewardToken.address)).to.equal(toBigNumber('1000', 18));
 
     // oracle publishes shares
     await campaign.connect(oracle).proposeShares(merkleRoot, URI);
@@ -160,21 +159,21 @@ describe('Erc20Campaign', () => {
     // claimer1 claims, should receive 1/6 of the tokens
     const claimer1BalanceBefore = await rewardToken.balanceOf(claimers[0].address);
     const proofClaimer1 = tree.getProof(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber);
-    await campaign.claim(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber, proofClaimer1);
+    await campaign.claim(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber, proofClaimer1, rewardToken.address);
     const claimer1BalanceAfter = await rewardToken.balanceOf(claimers[0].address);
     expect(claimer1BalanceAfter.sub(claimer1BalanceBefore)).to.equal(toBigNumber('1000', 18).mul(sharesArray[0]).div(TOTAL_SHARES));
 
     // claimer2 claims, should receive 1/3 of the tokens
     const claimer2BalanceBefore = await rewardToken.balanceOf(claimers[1].address);
     const proofClaimer2 = tree.getProof(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber);
-    await campaign.claim(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber, proofClaimer2);
+    await campaign.claim(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber, proofClaimer2, rewardToken.address);
     const claimer2BalanceAfter = await rewardToken.balanceOf(claimers[1].address);
     expect(claimer2BalanceAfter.sub(claimer2BalanceBefore)).to.equal(toBigNumber('1000', 18).mul(sharesArray[1]).div(TOTAL_SHARES));
 
     // claimer3 claims, should receive 1/2 of the tokens
     const claimer3BalanceBefore = await rewardToken.balanceOf(claimers[2].address);
     const proofClaimer3 = tree.getProof(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber);
-    await campaign.claim(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber, proofClaimer3);
+    await campaign.claim(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber, proofClaimer3, rewardToken.address);
     const claimer3BalanceAfter = await rewardToken.balanceOf(claimers[2].address);
     expect(claimer3BalanceAfter.sub(claimer3BalanceBefore)).to.equal(toBigNumber('1000', 18).mul(sharesArray[2]).div(TOTAL_SHARES));
   });

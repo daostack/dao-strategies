@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
-import { EthCampaign, EthCampaign__factory, EthCampaignFactory__factory } from './../typechain';
+import { Campaign, Campaign__factory, CampaignFactory__factory } from './../typechain';
 import { toWei, toBigNumber, fastForwardToTimestamp } from './support';
 
 (BigNumber.prototype as any).toJSON = function () {
@@ -26,8 +26,10 @@ interface SetupData {
   tree: BalanceTree;
   merkleRoot: string;
   claimersBalances: Balances;
-  campaign: EthCampaign;
+  campaign: Campaign;
 }
+
+let counter = 0;
 
 describe('EthCampaign', () => {
   async function setUp(sharesDistribution: BigNumber[], publishShares: boolean): Promise<SetupData> {
@@ -47,8 +49,8 @@ describe('EthCampaign', () => {
     const merkleRoot = tree.getHexRoot();
 
     // get deployers
-    const campaignFactoryDeployer = await ethers.getContractFactory<EthCampaignFactory__factory>('EthCampaignFactory');
-    const campaignDeployer = await ethers.getContractFactory<EthCampaign__factory>('EthCampaign');
+    const campaignFactoryDeployer = await ethers.getContractFactory<CampaignFactory__factory>('CampaignFactory');
+    const campaignDeployer = await ethers.getContractFactory<Campaign__factory>('Campaign');
 
     // deploy contracts
     const campaignMaster = await campaignDeployer.deploy(); // deploy cmapign master implementation
@@ -61,11 +63,14 @@ describe('EthCampaign', () => {
       URI,
       guardian.address,
       oracle.address,
-      ethers.utils.keccak256(ethers.utils.toUtf8Bytes('1'))
+      ethers.utils.keccak256(ethers.utils.toUtf8Bytes(counter.toString()))
     );
+    counter++;
     const campaignCreationReceipt = await campaignCreationTx.wait();
     const campaignAddress: string = (campaignCreationReceipt as any).events[1].args[1]; // get campaign proxy address from the CampaignCreated event
-    const campaign = campaignDeployer.attach(campaignAddress);
+
+    console.log({ campaignAddress });
+    const campaign = campaignMaster.attach(campaignAddress);
 
     return {
       admin,
@@ -93,7 +98,7 @@ describe('EthCampaign', () => {
 
     // funder sends 1 ether to the campaign
     await funders[0].sendTransaction({ to: campaign.address, value: toWei('1') });
-    expect(await campaign.providers(funders[0].address)).to.equal(toWei('1'));
+    expect(await campaign.providers(ethers.constants.AddressZero, funders[0].address)).to.equal(toWei('1'));
     expect(await ethers.provider.getBalance(campaign.address)).to.equal(toWei('1'));
 
     // fast forward to claim period
@@ -103,21 +108,21 @@ describe('EthCampaign', () => {
     // claimer1 claims, should receive 1/6 ether
     const claimer1BalanceBefore = await ethers.provider.getBalance(claimers[0].address);
     const proofClaimer1 = tree.getProof(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber);
-    await campaign.claim(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber, proofClaimer1);
+    await campaign.claim(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber, proofClaimer1, ethers.constants.AddressZero);
     const claimer1BalanceAfter = await ethers.provider.getBalance(claimers[0].address);
     expect(claimer1BalanceAfter.sub(claimer1BalanceBefore)).to.equal(toWei('1').div(6));
 
     // claimer2 claims, should receive 1/3 ether
     const claimer2BalanceBefore = await ethers.provider.getBalance(claimers[1].address);
     const proofClaimer2 = tree.getProof(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber);
-    await campaign.claim(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber, proofClaimer2);
+    await campaign.claim(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber, proofClaimer2, ethers.constants.AddressZero);
     const claimer2BalanceAfter = await ethers.provider.getBalance(claimers[1].address);
     expect(claimer2BalanceAfter.sub(claimer2BalanceBefore)).to.equal(toWei('1').div(3));
 
     // claimer3 claims, should receive 1/2 ether
     const claimer3BalanceBefore = await ethers.provider.getBalance(claimers[2].address);
     const proofClaimer3 = tree.getProof(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber);
-    await campaign.claim(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber, proofClaimer3);
+    await campaign.claim(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber, proofClaimer3, ethers.constants.AddressZero);
     const claimer3BalanceAfter = await ethers.provider.getBalance(claimers[2].address);
     expect(claimer3BalanceAfter.sub(claimer3BalanceBefore)).to.equal(toWei('1').div(2));
   });
@@ -135,7 +140,7 @@ describe('EthCampaign', () => {
 
     // funder sends 1 ether to the campaign
     await funders[0].sendTransaction({ to: campaign.address, value: toWei('1') });
-    expect(await campaign.providers(funders[0].address)).to.equal(toWei('1'));
+    expect(await campaign.providers(ethers.constants.AddressZero, funders[0].address)).to.equal(toWei('1'));
     expect(await ethers.provider.getBalance(campaign.address)).to.equal(toWei('1'));
 
     // oracle publishes shares
@@ -148,21 +153,21 @@ describe('EthCampaign', () => {
     // claimer1 claims, should receive 1/6 ether
     const claimer1BalanceBefore = await ethers.provider.getBalance(claimers[0].address);
     const proofClaimer1 = tree.getProof(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber);
-    await campaign.claim(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber, proofClaimer1);
+    await campaign.claim(claimers[0].address, claimersBalances.get(claimers[0].address) as BigNumber, proofClaimer1, ethers.constants.AddressZero);
     const claimer1BalanceAfter = await ethers.provider.getBalance(claimers[0].address);
     expect(claimer1BalanceAfter.sub(claimer1BalanceBefore)).to.equal(toWei('1').div(6));
 
     // claimer2 claims, should receive 1/3 ether
     const claimer2BalanceBefore = await ethers.provider.getBalance(claimers[1].address);
     const proofClaimer2 = tree.getProof(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber);
-    await campaign.claim(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber, proofClaimer2);
+    await campaign.claim(claimers[1].address, claimersBalances.get(claimers[1].address) as BigNumber, proofClaimer2, ethers.constants.AddressZero);
     const claimer2BalanceAfter = await ethers.provider.getBalance(claimers[1].address);
     expect(claimer2BalanceAfter.sub(claimer2BalanceBefore)).to.equal(toWei('1').div(3));
 
     // claimer3 claims, should receive 1/2 ether
     const claimer3BalanceBefore = await ethers.provider.getBalance(claimers[2].address);
     const proofClaimer3 = tree.getProof(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber);
-    await campaign.claim(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber, proofClaimer3);
+    await campaign.claim(claimers[2].address, claimersBalances.get(claimers[2].address) as BigNumber, proofClaimer3, ethers.constants.AddressZero);
     const claimer3BalanceAfter = await ethers.provider.getBalance(claimers[2].address);
     expect(claimer3BalanceAfter.sub(claimer3BalanceBefore)).to.equal(toWei('1').div(2));
   });

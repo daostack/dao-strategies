@@ -1,6 +1,7 @@
 import {
   Balances,
   BalanceTree,
+  CampaignCreateDetails,
   CampaignUriDetails,
   getCampaignUri,
   StrategyComputation,
@@ -11,12 +12,11 @@ import { Campaign, Prisma } from '@prisma/client';
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
-import { hashReceivers, toNumber } from '../utils/utils';
+import { toNumber } from '../utils/utils';
 
 import { campaignToUriDetails } from './CampaignUri';
 import { OnChainService } from './OnChainService';
 import { TimeService } from './TimeService';
-import { CampaignCreateDetails } from './types';
 
 /**
  * On Retroactive Campaign
@@ -54,34 +54,18 @@ export class CampaignService {
     return this.campaignRepo.exist(uri);
   }
 
-  async getOrCreate(details: CampaignUriDetails, by: string): Promise<string> {
+  async getOrCreate(details: CampaignUriDetails): Promise<string> {
     const uri = await getCampaignUri(details);
     const exist = await this.exist(uri);
 
     if (!exist) {
       const createData: Prisma.CampaignCreateInput = {
         uri,
-        title: '',
-        description: '',
-        creator: {
-          connect: {
-            address: by.toLowerCase(),
-          },
-        },
         nonce: details.nonce,
-        guardian: '',
-        oracle: '',
         execDate: details.execDate,
-        cancelDate: 0,
         stratID: details.strategyID as Strategy_ID,
         stratParamsStr: JSON.stringify(details.strategyParams),
-        lastRunDate: undefined,
-        publishDate: undefined,
         registered: false,
-        running: false,
-        executed: false,
-        published: false,
-        address: '',
       };
 
       const campaign = await this.create(createData);
@@ -203,10 +187,8 @@ export class CampaignService {
       throw new Error(`campaign ${campaign.uri} alread published`);
     }
 
-    const rewards = await this.getRewards(campaign.uri);
-    const rewardsHashes = await hashReceivers(rewards);
-
-    const tree = new BalanceTree(rewardsHashes);
+    const rewards = await this.getRewardsToAddresses(campaign.uri);
+    const tree = new BalanceTree(rewards);
     const root = tree.getHexRoot();
 
     return root;

@@ -1,12 +1,16 @@
-import { Box, Header, Paragraph, Spinner, Tabs, Tab } from 'grommet';
-import { FC, useEffect } from 'react';
+import { Box, Header, Paragraph, Spinner, Tabs, Tab, Layer } from 'grommet';
+import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
 import { AppButton } from '../../components/styles/BasicElements';
-import { ColumnView, TwoColumns } from '../../components/styles/LayoutComponents.styled';
+import { ColumnView, TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaign } from '../../hooks/useCampaign';
 import { AppHeader } from '../AppHeader';
+import { FundCampaign } from '../../components/FundCampaign';
+import { formatEther } from '../../utils/ethers';
+import { useLoggedUser } from '../../hooks/useLoggedUser';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -16,19 +20,116 @@ type RouteParams = {
   campaignAddress: string;
 };
 
+enum UserClaimStatus {
+  loggedOff = 'loggedOff',
+  canClaim = 'canClaim',
+  notExecuted = 'notExecuted',
+}
+
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const params = useParams<RouteParams>();
-  const { isLoading, campaign, getRewards, rewards } = useCampaign(params.campaignAddress);
+  const [showFund, setShowFund] = useState<boolean>(false);
+
+  const { isLoading, campaign, getRewards, rewards, getOtherDetails, otherDetails } = useCampaign(
+    params.campaignAddress
+  );
+
+  const { user, connect } = useLoggedUser();
 
   useEffect(() => {
     getRewards();
+    getOtherDetails();
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
 
-  if (campaign === undefined || isLoading) return <Spinner />;
+  if (campaign === undefined || isLoading)
+    return (
+      <ViewportContainer>
+        please wait...
+        <br></br>
+        <Spinner />
+      </ViewportContainer>
+    );
+
+  const balances =
+    otherDetails !== undefined ? (
+      <Box direction="row">
+        {' '}
+        {Object.keys(otherDetails.tokens).map((key: any) => {
+          const token = otherDetails.tokens[key];
+
+          if (token.balance === '0') return <></>;
+
+          return (
+            <Box
+              direction="column"
+              style={{
+                width: '120px',
+                backgroundColor: '#ccc',
+                borderRadius: '10px',
+                marginLeft: '16px',
+              }}>
+              <Box style={{ textAlign: 'center', height: '40px', width: '40px' }}>
+                <img src={(token as any).icon} alt={(token as any).name} />
+              </Box>
+              <Box style={{ textAlign: 'center' }}>{(token as any).name}</Box>
+              <Box style={{ textAlign: 'center' }}>{formatEther(token.balance)}</Box>
+            </Box>
+          );
+        })}
+      </Box>
+    ) : (
+      <></>
+    );
+
+  let claimStatus = UserClaimStatus.loggedOff;
+
+  if (user === undefined) {
+    claimStatus = UserClaimStatus.loggedOff;
+  } else {
+    if (!campaign.executed) {
+      claimStatus = UserClaimStatus.notExecuted;
+    }
+  }
+
+  const claimButton = (claimStatus: UserClaimStatus) => {
+    switch (claimStatus) {
+      case UserClaimStatus.loggedOff:
+        return (
+          <>
+            <AppButton onClick={() => connect()}>Connect</AppButton>
+          </>
+        );
+
+      case UserClaimStatus.canClaim:
+        return (
+          <>
+            My Reward <AppButton>Claim rewards</AppButton>
+          </>
+        );
+
+      case UserClaimStatus.notExecuted:
+        return <>Not executed</>;
+    }
+  };
+
   return (
     <>
+      {showFund ? (
+        <Layer onEsc={() => setShowFund(false)} onClickOutside={() => setShowFund(false)}>
+          <FundCampaign
+            onSuccess={() => {
+              setShowFund(false);
+              getOtherDetails();
+            }}
+            asset={campaign.asset}
+            chainId={campaign.chainId}
+            address={campaign.address}></FundCampaign>
+        </Layer>
+      ) : (
+        <></>
+      )}
       <AppHeader></AppHeader>
       <ColumnView>
         <Countdown to-date={campaign?.execDate}></Countdown>
@@ -54,12 +155,16 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           <TwoColumns style={{ border: 'solid 2px #ccc', borderRadius: '20px', padding: '20px 30px' }}>
             <>
               <Box direction="row" align="center">
-                Campaign Funding <AppButton>Fund Campaign</AppButton>
+                Campaign Funding
+                <AppButton onClick={() => setShowFund(true)}>Fund Campaign</AppButton>
+              </Box>
+              <Box direction="row" align="center">
+                {balances}
               </Box>
             </>
             <>
               <Box direction="row" align="center">
-                My Reward <AppButton>Claim rewards</AppButton>
+                {claimButton(claimStatus)}
               </Box>
             </>
           </TwoColumns>

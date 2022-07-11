@@ -1,5 +1,7 @@
 import { BigNumber, utils } from 'ethers';
 
+import { Balances } from '../types';
+
 import { MerkleTree } from './merkleTree';
 
 /** a tree from hash (bytes32) to bignumbers */
@@ -7,7 +9,7 @@ export class BalanceTree {
   private readonly tree: MerkleTree;
   readonly totalSupply: BigNumber;
 
-  constructor(balances: Map<Uint8Array, BigNumber>) {
+  constructor(balances: Balances) {
     this.totalSupply = BigNumber.from(0);
     balances.forEach((balance) => this.totalSupply.add(balance));
     this.tree = new MerkleTree(
@@ -18,7 +20,7 @@ export class BalanceTree {
   }
 
   public static verifyProof(
-    account: Uint8Array,
+    account: string,
     allocation: BigNumber,
     proof: Buffer[],
     root: Buffer
@@ -33,10 +35,10 @@ export class BalanceTree {
 
   /** toNode hashes the concatenation of the address and the allocation and
    * keeps only the first byte */
-  public static toNode(account: Uint8Array, allocation: BigNumber): Buffer {
+  public static toNode(account: string, allocation: BigNumber): Buffer {
     const hash = Buffer.from(
       utils
-        .solidityKeccak256(['bytes32', 'uint256'], [account, allocation])
+        .solidityKeccak256(['address', 'uint256'], [account, allocation])
         .substr(2),
       'hex'
     );
@@ -48,7 +50,7 @@ export class BalanceTree {
   }
 
   // returns the hex bytes32 values of the proof
-  public getProof(account: Uint8Array, allocation: BigNumber): string[] {
+  public getProof(account: string, allocation: BigNumber): string[] {
     return this.tree.getHexProof(BalanceTree.toNode(account, allocation));
   }
 }

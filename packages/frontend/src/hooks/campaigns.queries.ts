@@ -24,7 +24,8 @@ export function useCampaigns() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query }),
     });
-    return response.json() as Record<string, any>;
+    const data = (await response.json()) as Record<string, any>;
+    return data;
   });
 
   return {

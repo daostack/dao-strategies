@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { useSigner } from 'wagmi';
 
 import { useCampaigns } from '../../hooks/campaigns.queries';
 
@@ -9,7 +8,6 @@ export interface ICampaignsExplorerProps {
 }
 
 export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaignsExplorerProps) => {
-  const { data: signer } = useSigner();
   const { campaigns } = useCampaigns();
 
   return (

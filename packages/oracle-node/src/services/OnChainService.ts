@@ -1,34 +1,24 @@
 import {
-  Wallet,
-  Signer,
-  Contract,
-  BigNumber,
-  ContractInterface,
-  providers,
-} from 'ethers';
+  CampaignCreateDetails,
+  ContractsJson,
+  Typechain,
+} from '@dao-strategies/core';
+import { Wallet, Signer, Contract, providers } from 'ethers';
 import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
 
-import hardhatContractsJson from '../generated/hardhat_contracts.json';
-import { Campaign, CampaignFactory } from '../generated/typechain';
-import { CampaignCreatedEvent } from '../generated/typechain/CampaignFactory';
-
-import { CampaignCreateDetails } from './types';
+const ZERO_BYTES32 =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 /* eslint-disable */
-const CampaignFactoryJson: any = (hardhatContractsJson as any)['31337'][
-  'localhost'
-]['contracts']['CampaignFactory'];
-
-const CampaignJson: any = (hardhatContractsJson as any)['31337']['localhost'][
-  'contracts'
-]['Campaign'];
+const CampaignFactoryJson =
+  ContractsJson.jsonOfChain().contracts.CampaignFactory;
 /* eslint-enable */
 
 export class OnChainService {
   readonly signer: Signer;
   readonly provider: providers.JsonRpcProvider;
-  readonly campaignFactory: CampaignFactory;
+  readonly campaignFactory: Typechain.CampaignFactory;
 
   constructor(_signer?: Signer, _provider?: providers.JsonRpcProvider) {
     const signer = _signer || new Wallet(process.env.ORACLE_PRIVATE_KEY);
@@ -43,7 +33,7 @@ export class OnChainService {
       CampaignFactoryJson.address,
       CampaignFactoryJson.abi,
       this.signer
-    ) as CampaignFactory;
+    ) as Typechain.CampaignFactory;
     /* eslint-enable */
   }
 
@@ -57,20 +47,23 @@ export class OnChainService {
 
   async deploy(
     uri: string,
-    shares: Campaign.SharesDataStruct,
+    root: string,
+    file: string,
     details: CampaignCreateDetails,
     _salt?: Uint8Array
   ): Promise<string> {
     const uriCid = CID.parse(uri, base32);
     const salt = _salt || uriCid.multihash.digest;
 
+    /** TODO: What happens if two campaigns are deployed on the same block?
+     * Anyway, this method is only for tests  */
+
     const tx = await this.campaignFactory.createCampaign(
-      shares,
+      root,
+      ZERO_BYTES32,
       uriCid.multihash.digest,
       details.guardian,
       details.oracle,
-      false,
-      0,
       salt
     );
 
@@ -78,28 +71,29 @@ export class OnChainService {
 
     if (txReceipt.events === undefined)
       throw new Error('txReceipt.events undefined');
+
+    /* eslint-disable */
     const event = txReceipt.events.find(
       (e) => e.event === 'CampaignCreated'
-    ) as CampaignCreatedEvent;
+    ) as any;
 
     if (event === undefined) throw new Error('event undefined');
     if (event.args === undefined) throw new Error('event.args undefined');
 
     return event.args.newCampaign;
+    /* eslint-enable */
   }
 
   async publishShares(address: string, root: string): Promise<void> {
     const campaign = new Contract(
       address,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      CampaignJson.abi as ContractInterface,
+      ['function proposeShares(bytes32,bytes32) external'],
       this.signer
-    ) as Campaign;
-    const tx = await campaign.publishShares({
-      sharesMerkleRoot: root,
-      totalShares: BigNumber.from('1000000000000000000'),
-    });
+    );
+
+    /* eslint-disable */
+    const tx = await campaign.proposeShares(root, ZERO_BYTES32);
     const rec = await tx.wait();
-    console.log({ rec });
+    /* eslint-enable */
   }
 }
