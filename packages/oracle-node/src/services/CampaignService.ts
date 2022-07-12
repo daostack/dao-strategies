@@ -6,6 +6,7 @@ import {
   getCampaignUri,
   StrategyComputation,
   Strategy_ID,
+  ClaimInfo,
 } from '@dao-strategies/core';
 import { Campaign, Prisma } from '@prisma/client';
 
@@ -207,6 +208,25 @@ export class CampaignService {
 
   async setRewards(uri: string, rewards: Balances): Promise<void> {
     return this.campaignRepo.setRewards(uri, rewards);
+  }
+
+  async getClaimInfo(
+    campaignAddress: string,
+    account: string
+  ): Promise<ClaimInfo | undefined> {
+    const campaign = await this.getFromAddress(campaignAddress);
+    const reward = await this.campaignRepo.getRewardsToAddress(
+      campaign.uri,
+      account
+    );
+
+    if (reward == null) return undefined;
+
+    return {
+      account: reward.account,
+      campaignAddress: campaign.address,
+      shares: reward.amount.toString(),
+    };
   }
 
   async register(uri: string, details: CampaignCreateDetails): Promise<void> {

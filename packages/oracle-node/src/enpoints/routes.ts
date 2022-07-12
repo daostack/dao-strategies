@@ -65,6 +65,13 @@ export const Routes: RouteConfig[] = [
   },
   {
     method: 'get',
+    route: '/campaign/claimInfo/:address/:account',
+    controller: CampaignController,
+    action: 'getClaimInfo',
+    protected: false, // TODO, change to true
+  },
+  {
+    method: 'get',
     route: '/user/me',
     controller: UserController,
     action: 'me',

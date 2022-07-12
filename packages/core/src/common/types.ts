@@ -40,3 +40,9 @@ export interface TokenBalance {
 export interface CampaignOnchainDetails {
   tokens: TokenBalance[];
 }
+
+export interface ClaimInfo {
+  account: string;
+  campaignAddress: string;
+  shares: string;
+}

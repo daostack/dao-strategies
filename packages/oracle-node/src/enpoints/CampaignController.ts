@@ -4,6 +4,7 @@ import {
   CampaignUriDetails,
   CampaignCreateDetails,
   CampaignOnchainDetails,
+  ClaimInfo,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
 
@@ -129,6 +130,20 @@ export class CampaignController extends Controller {
     /* eslint-disable */
     return this.services.campaignOnChain.getCampaignDetails(
       request.params.address as string
+    );
+    /* eslint-enable */
+  }
+
+  async getClaimInfo(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<ClaimInfo | undefined> {
+    /* eslint-disable */
+    return this.services.campaign.getClaimInfo(
+      request.params.address as string,
+      request.params.account as string
     );
     /* eslint-enable */
   }

@@ -1,5 +1,5 @@
 import { CampaignCreateDetails, Balances } from '@dao-strategies/core';
-import { PrismaClient, Prisma, Campaign } from '@prisma/client';
+import { PrismaClient, Prisma, Campaign, Reward } from '@prisma/client';
 import { BigNumber } from 'ethers';
 
 import { toNumber } from '../utils/utils';
@@ -101,6 +101,20 @@ export class CampaignRepository {
 
     console.log(result);
     return new Map();
+  }
+
+  async getRewardsToAddress(
+    uri: string,
+    address: string
+  ): Promise<Reward | undefined> {
+    const reward = await this.client.reward.findFirst({
+      where: {
+        campaignId: uri,
+        account: address,
+      },
+    });
+
+    return reward;
   }
 
   /** campaigns whose execution date is older and has not been executed */
