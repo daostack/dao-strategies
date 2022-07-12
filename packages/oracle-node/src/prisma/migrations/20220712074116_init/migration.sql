@@ -18,7 +18,7 @@ CREATE TABLE "Campaign" (
     "execDate" BIGINT,
     "publishDate" BIGINT,
     "cancelDate" BIGINT,
-    "registered" BOOLEAN NOT NULL,
+    "registered" BOOLEAN,
     "running" BOOLEAN,
     "executed" BOOLEAN,
     "published" BOOLEAN,

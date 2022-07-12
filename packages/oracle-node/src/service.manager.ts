@@ -12,6 +12,9 @@ import { TimeService } from './services/TimeService';
 import { UserService } from './services/UserService';
 import { Services } from './types';
 
+// const LOG = ['query', 'info', 'warn', 'error'];
+const LOG = ['warn', 'error'];
+
 export class ServiceManager {
   public client: PrismaClient;
   public campaignRepo: CampaignRepository;
@@ -29,7 +32,8 @@ export class ServiceManager {
   public execution: ExecuteService;
 
   constructor(config: ExecutionConfig) {
-    this.client = new PrismaClient();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    this.client = new PrismaClient({ log: LOG as any });
 
     this.campaignRepo = new CampaignRepository(this.client);
     this.userRepo = new UserRepository(this.client);

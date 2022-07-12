@@ -2,13 +2,25 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Create terminals",
-      "dependsOn": ["chain", "oracle-docker"],
+      "label": "start all",
+      "dependsOn": ["chain", "oracle", "frontend"],
       // Mark as the default build task so cmd/ctrl+shift+b will create them
       "group": {
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      // The name that shows up in terminal tab
+      "label": "oracle",
+      // The task will launch a shell
+      "dependsOrder": "sequence",
+      "dependsOn": ["oracle-docker"],
+      "type": "shell",
+      "command": "cd packages/oracle-node && yarn start",
+      // Mark as a background task to avoid the spinner animation on the terminal tab
+      "isBackground": false,
+      "problemMatcher": []
     },
     {
       // The name that shows up in terminal tab

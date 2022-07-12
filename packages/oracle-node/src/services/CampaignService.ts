@@ -66,6 +66,9 @@ export class CampaignService {
         stratID: details.strategyID as Strategy_ID,
         stratParamsStr: JSON.stringify(details.strategyParams),
         registered: false,
+        executed: false,
+        published: false,
+        running: false,
       };
 
       const campaign = await this.create(createData);

@@ -110,9 +110,7 @@ export class CampaignRepository {
         execDate: {
           lte: now,
         },
-        AND: {
-          executed: false,
-        },
+        OR: [{ executed: false }, { executed: null }],
       },
     });
   }
