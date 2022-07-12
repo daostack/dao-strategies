@@ -106,15 +106,22 @@ export class CampaignRepository {
   async getRewardsToAddress(
     uri: string,
     address: string
-  ): Promise<Reward | undefined> {
-    const reward = await this.client.reward.findFirst({
-      where: {
-        campaignId: uri,
-        account: address,
-      },
-    });
+  ): Promise<Reward | null> {
+    const result = await this.client.$queryRaw`
+      SELECT account, address, amount FROM 
+      (
+        SELECT * FROM public."Reward" 
+        WHERE "campaignId" = ${uri}
+      ) as rewards
+      LEFT JOIN 
+      public."User" 
+      ON rewards.account = "verifiedGithub"
+      WHERE address = ${address}
+    `;
 
-    return reward;
+    /* eslint-disable */
+    return result && (result as any).length > 0 ? result[0] : null;
+    /* eslint-enable */
   }
 
   /** campaigns whose execution date is older and has not been executed */

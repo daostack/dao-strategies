@@ -3,6 +3,7 @@ import { useCampaign } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { useClaimer } from '../hooks/useClaimer';
 import { AppButton } from './styles/BasicElements';
+import { ethers } from 'ethers';
 
 interface IParams {
   campaignAddress: string;
@@ -20,8 +21,6 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
 
   const { campaign } = useCampaign(props.campaignAddress);
   const { claimInfo } = useClaimer(props.campaignAddress, user?.address);
-
-  console.log({ claimInfo });
 
   if (user === undefined) {
     return (
@@ -48,10 +47,11 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
     );
   }
 
-  if (status.canClaim) {
+  if (status.canClaim && claimInfo !== undefined) {
     return (
       <>
         My Reward <AppButton>Claim rewards</AppButton>
+        <div>{ethers.utils.formatEther(claimInfo.shares)}</div>
       </>
     );
   }
