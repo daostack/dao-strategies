@@ -182,17 +182,23 @@ contract Campaign is Initializable {
     function rewardsAvailableToClaimer(
         address account,
         uint256 share,
-        bytes32[] calldata proof,
         address asset
     ) public view returns (uint256 total) {
+        /** Rewards by claimer are a portion of the total funds received. If new funds are received, new rewards will become available */
+        return (totalFundsReceived(asset) * share) / TOTAL_SHARES - claimed[asset][account];
+    }
+
+    function verifyShares(
+        address account,
+        uint256 share,
+        bytes32[] calldata proof
+    ) public view {
         bytes32 claimingMerkleRoot = getValidRoot();
 
         bytes32 leaf = keccak256(abi.encodePacked(account, share));
         if (MerkleProof.verify(proof, claimingMerkleRoot, leaf) == false) {
             revert InvalidProof();
         }
-        /** Rewards by claimer are a portion of the total funds received. If new funds are received, new rewards will become available */
-        return (totalFundsReceived(asset) * share) / TOTAL_SHARES - claimed[asset][account];
     }
 
     /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
@@ -202,7 +208,9 @@ contract Campaign is Initializable {
         bytes32[] calldata proof,
         address asset
     ) external {
-        uint256 reward = rewardsAvailableToClaimer(account, share, proof, asset);
+        verifyShares(account, share, proof);
+        uint256 reward = rewardsAvailableToClaimer(account, share, asset);
+
         if (reward == 0) {
             revert NoRewardAvailable();
         }

@@ -23,6 +23,7 @@ CREATE TABLE "Campaign" (
     "executed" BOOLEAN,
     "published" BOOLEAN,
     "address" TEXT,
+    "isComputing" BOOLEAN NOT NULL,
 
     CONSTRAINT "Campaign_pkey" PRIMARY KEY ("uri")
 );
@@ -45,8 +46,32 @@ CREATE TABLE "Reward" (
     CONSTRAINT "Reward_pkey" PRIMARY KEY ("campaignId","account")
 );
 
+-- CreateTable
+CREATE TABLE "CampaignRoot" (
+    "campaignId" TEXT NOT NULL,
+    "root" TEXT NOT NULL,
+    "date" BIGINT NOT NULL,
+
+    CONSTRAINT "CampaignRoot_pkey" PRIMARY KEY ("campaignId","root")
+);
+
+-- CreateTable
+CREATE TABLE "BalanceLeaf" (
+    "rootId" TEXT NOT NULL,
+    "account" TEXT NOT NULL,
+    "balance" TEXT NOT NULL,
+
+    CONSTRAINT "BalanceLeaf_pkey" PRIMARY KEY ("rootId","account")
+);
+
 -- AddForeignKey
 ALTER TABLE "Campaign" ADD CONSTRAINT "Campaign_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "User"("address") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Reward" ADD CONSTRAINT "Reward_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CampaignRoot" ADD CONSTRAINT "CampaignRoot_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BalanceLeaf" ADD CONSTRAINT "BalanceLeaf_rootId_account_fkey" FOREIGN KEY ("rootId", "account") REFERENCES "CampaignRoot"("campaignId", "root") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -504,11 +504,6 @@
                   "type": "uint256"
                 },
                 {
-                  "internalType": "bytes32[]",
-                  "name": "proof",
-                  "type": "bytes32[]"
-                },
-                {
                   "internalType": "address",
                   "name": "asset",
                   "type": "address"
@@ -605,6 +600,29 @@
                   "type": "uint256"
                 }
               ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "share",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "proof",
+                  "type": "bytes32[]"
+                }
+              ],
+              "name": "verifyShares",
+              "outputs": [],
               "stateMutability": "view",
               "type": "function"
             },

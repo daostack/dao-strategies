@@ -1,4 +1,5 @@
 import { Chain, chain } from '@wagmi/core';
+import { ethers } from 'ethers';
 
 import { ContractsJson } from './contracts.json';
 
@@ -25,7 +26,7 @@ const chainList: ChainAndAssets[] = [
     assets: [
       {
         id: 'ether',
-        address: '',
+        address: ethers.constants.AddressZero,
         name: 'Ether',
         icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
       },
@@ -85,6 +86,6 @@ export class ChainsDetails {
   };
 
   static isNative = (asset: Asset): boolean => {
-    return asset.address === '';
+    return asset.address === ethers.constants.AddressZero;
   };
 }

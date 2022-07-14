@@ -6,9 +6,14 @@ import {
   getCampaignUri,
   StrategyComputation,
   Strategy_ID,
-  ClaimInfo,
 } from '@dao-strategies/core';
-import { Campaign, Prisma } from '@prisma/client';
+import {
+  BalanceLeaf,
+  Campaign,
+  CampaignRoot,
+  Prisma,
+  Reward,
+} from '@prisma/client';
 
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
@@ -70,6 +75,7 @@ export class CampaignService {
         executed: false,
         published: false,
         running: false,
+        isComputing: false,
       };
 
       const campaign = await this.create(createData);
@@ -174,11 +180,11 @@ export class CampaignService {
   /**  */
   async publishCampaign(uri: string): Promise<void> {
     const campaign = await this.get(uri);
-    const root = await this.getRoot(campaign);
+    const root = await this.computeRoot(campaign);
     await this.onChainService.publishShares(campaign.address, root);
   }
 
-  async getRoot(campaign: Campaign): Promise<string> {
+  async computeRoot(campaign: Campaign): Promise<string> {
     if (!campaign.registered) {
       throw new Error(`campaign ${campaign.uri} not registered`);
     }
@@ -187,13 +193,40 @@ export class CampaignService {
       throw new Error(`campaign ${campaign.uri} not executed`);
     }
 
-    if (campaign.published) {
-      throw new Error(`campaign ${campaign.uri} alread published`);
+    /**
+     * reentrancy protection, if isComputing wait for the computation to finish
+     * and returns the latest root
+     */
+    const isComputing = await this.campaignRepo.getIsComputing(campaign.uri);
+
+    if (isComputing) {
+      const existingRoot = await new Promise<CampaignRoot>((resolve) => {
+        setInterval(() => {
+          void this.campaignRepo
+            .getIsComputing(campaign.uri)
+            .then((stillComputing) => {
+              if (!stillComputing) {
+                void this.campaignRepo
+                  .getLatestRoot(campaign.uri)
+                  .then((_root) => resolve(_root));
+              }
+            });
+        }, 250);
+      });
+
+      return existingRoot.root;
     }
 
+    /** else compute the root */
+    await this.campaignRepo.setIsComputing(campaign.uri, true);
+
+    const now = this.timeService.now();
     const rewards = await this.getRewardsToAddresses(campaign.uri);
     const tree = new BalanceTree(rewards);
     const root = tree.getHexRoot();
+
+    await this.campaignRepo.addRoot(campaign.uri, root, rewards, now);
+    await this.campaignRepo.setIsComputing(campaign.uri, false);
 
     return root;
   }
@@ -206,27 +239,20 @@ export class CampaignService {
     return this.campaignRepo.getRewardsToAddresses(uri);
   }
 
+  getRewardToAddress(uri: string, account: string): Promise<Reward | null> {
+    return this.campaignRepo.getRewardToAddress(uri, account);
+  }
+
   async setRewards(uri: string, rewards: Balances): Promise<void> {
     return this.campaignRepo.setRewards(uri, rewards);
   }
 
-  async getClaimInfo(
-    campaignAddress: string,
+  async getBalanceLeaf(
+    uri: string,
+    root: string,
     account: string
-  ): Promise<ClaimInfo | undefined> {
-    const campaign = await this.getFromAddress(campaignAddress);
-    const reward = await this.campaignRepo.getRewardsToAddress(
-      campaign.uri,
-      account
-    );
-
-    if (reward == null) return undefined;
-
-    return {
-      account: reward.account,
-      campaignAddress: campaign.address,
-      shares: reward.amount.toString(),
-    };
+  ): Promise<BalanceLeaf> {
+    return this.campaignRepo.getBalanceLeaf(uri, root, account);
   }
 
   async register(uri: string, details: CampaignCreateDetails): Promise<void> {

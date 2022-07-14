@@ -30,6 +30,8 @@ model Campaign {
   executed        Boolean?  // executed campaigns are those whose final rewards have been computed 
   published       Boolean?  // published campaigns are those whose shares has been published in their smart contract
   address         String?   // cannot be @unique since it is null for simulated campaigns - Smart contract address
+  isComputing     Boolean   // prevent reentrancy issues (two roots being computed at once)
+  roots           CampaignRoot[] 
 }
 
 enum CampaignState {
@@ -51,4 +53,22 @@ model Reward {
   amount          BigInt        
   campaign        Campaign  @relation(fields: [campaignId], references: [uri])
   campaignId      String
+}
+
+model CampaignRoot {
+  @@id([campaignId, root])
+  campaign        Campaign  @relation(fields: [campaignId], references: [uri])
+  campaignId      String
+  root            String
+  date            BigInt
+  balances        BalanceLeaf[]   // Leafs are stored on a table to be efficiently read
+}
+
+model BalanceLeaf {
+  @@id([rootId, account])
+  root            CampaignRoot  @relation(fields: [rootId, account], references: [campaignId, root])
+  rootId          String
+  account         String
+  balance         String
+  proof           String[]      // Store the proofs so that they don't have to be recomputed eveytime they are needed
 }

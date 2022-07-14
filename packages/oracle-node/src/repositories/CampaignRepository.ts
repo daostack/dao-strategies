@@ -1,8 +1,21 @@
 import { CampaignCreateDetails, Balances } from '@dao-strategies/core';
-import { PrismaClient, Prisma, Campaign, Reward } from '@prisma/client';
+import {
+  PrismaClient,
+  Prisma,
+  Campaign,
+  Reward,
+  CampaignRoot,
+  BalanceLeaf,
+} from '@prisma/client';
 import { BigNumber } from 'ethers';
 
 import { toNumber } from '../utils/utils';
+
+export interface Leaf {
+  account: string;
+  balance: string;
+  proof: string[];
+}
 
 export class CampaignRepository {
   constructor(protected client: PrismaClient) {}
@@ -103,7 +116,7 @@ export class CampaignRepository {
     return new Map();
   }
 
-  async getRewardsToAddress(
+  async getRewardToAddress(
     uri: string,
     address: string
   ): Promise<Reward | null> {
@@ -163,5 +176,79 @@ export class CampaignRepository {
 
   async deleteAll(): Promise<void> {
     await this.client.campaign.deleteMany();
+  }
+
+  async getIsComputing(uri: string): Promise<boolean> {
+    const res = await this.client.campaign.findUnique({
+      where: {
+        uri,
+      },
+      select: {
+        isComputing: true,
+      },
+    });
+
+    return res.isComputing;
+  }
+
+  async setIsComputing(uri: string, value: boolean): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { isComputing: value },
+    });
+  }
+
+  async getLatestRoot(uri: string): Promise<CampaignRoot | undefined> {
+    const res = await this.client.campaign.findUnique({
+      where: {
+        uri,
+      },
+      include: {
+        roots: {
+          orderBy: {
+            date: 'desc',
+          },
+          take: 1,
+        },
+      },
+    });
+
+    return res.roots.length > 0 ? res.roots[0] : undefined;
+  }
+
+  async addRoot(
+    uri: string,
+    root: string,
+    leafs: Leaf[],
+    date: number
+  ): Promise<void> {
+    await this.client.campaignRoot.create({
+      data: {
+        campaignId: uri,
+        date,
+        root,
+        balances: {
+          createMany: {
+            data: leafs,
+          },
+        },
+      },
+    });
+  }
+
+  async getBalanceLeaf(
+    uri: string,
+    root: string,
+    account: string
+  ): Promise<BalanceLeaf> {
+    const res = await this.client.balanceLeaf.findUnique({
+      where: {
+        rootId_account: {
+          account,
+          rootId: root,
+        },
+      },
+    });
+    return res;
   }
 }

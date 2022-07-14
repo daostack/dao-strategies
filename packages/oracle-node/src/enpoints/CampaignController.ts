@@ -121,7 +121,7 @@ export class CampaignController extends Controller {
     /* eslint-enable */
   }
 
-  async getOtherDetails(
+  getOtherDetails(
     request: Request,
     response: Response,
     next: NextFunction,
@@ -134,14 +134,14 @@ export class CampaignController extends Controller {
     /* eslint-enable */
   }
 
-  async getClaimInfo(
+  getClaimInfo(
     request: Request,
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
   ): Promise<ClaimInfo | undefined> {
     /* eslint-disable */
-    return this.services.campaign.getClaimInfo(
+    return this.services.campaignOnChain.getClaimInfo(
       request.params.address as string,
       request.params.account as string
     );

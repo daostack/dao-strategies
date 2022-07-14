@@ -8,7 +8,7 @@ function truncate(str: string, maxDecimalDigits: number) {
   return str;
 }
 
-export const formatEther = (wei: string | BigNumber) => {
+export const formatEther = (wei: string | BigNumber, decimals: number = 4) => {
   const str = ethers.utils.formatEther(wei).toString();
-  return truncate(str, 4);
+  return truncate(str, decimals);
 };

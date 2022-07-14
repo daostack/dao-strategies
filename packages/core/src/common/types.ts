@@ -29,12 +29,18 @@ export interface CampaignReadDetails
   executed: boolean;
 }
 
+/**
+ * used to list the balances of a campaign contract and reused also
+ * for sending the available claimable tokens for a given address on
+ * a given campaign
+ */
 export interface TokenBalance {
   id: string;
   address: string;
   balance: string;
   name: string;
   icon: string;
+  proof?: string[];
 }
 
 export interface CampaignOnchainDetails {
@@ -45,4 +51,5 @@ export interface ClaimInfo {
   account: string;
   campaignAddress: string;
   shares: string;
+  assets: TokenBalance[];
 }

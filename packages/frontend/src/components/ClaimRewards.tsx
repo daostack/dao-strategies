@@ -1,9 +1,13 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { useCampaign } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { useClaimer } from '../hooks/useClaimer';
 import { AppButton } from './styles/BasicElements';
 import { ethers } from 'ethers';
+import { useNavigate } from 'react-router-dom';
+import { RouteNames } from '../pages/MainPage';
+import { formatEther } from '../utils/ethers';
+import { Layer } from 'grommet';
 
 interface IParams {
   campaignAddress: string;
@@ -17,7 +21,9 @@ interface UserClaimStatus {
 }
 
 export const ClaimButton: FC<IParams> = (props: IParams) => {
+  const [showClaim, setShowClaim] = useState<boolean>(false);
   const { user, connect } = useLoggedUser();
+  const navigate = useNavigate();
 
   const { campaign } = useCampaign(props.campaignAddress);
   const { claimInfo } = useClaimer(props.campaignAddress, user?.address);
@@ -42,7 +48,7 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
   if (!status.isVerified) {
     return (
       <>
-        <AppButton>Verify Github</AppButton>
+        <AppButton onClick={() => navigate(RouteNames.Profile)}>Verify Github</AppButton>
       </>
     );
   }
@@ -50,8 +56,15 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
   if (status.canClaim && claimInfo !== undefined) {
     return (
       <>
-        My Reward <AppButton>Claim rewards</AppButton>
-        <div>{ethers.utils.formatEther(claimInfo.shares)}</div>
+        {showClaim ? (
+          <Layer onEsc={() => setShowClaim(false)} onClickOutside={() => setShowClaim(false)}>
+            test
+          </Layer>
+        ) : (
+          <></>
+        )}
+        <AppButton onClick={() => setShowClaim(true)}>Claim rewards</AppButton>
+        <div>{formatEther(ethers.BigNumber.from(claimInfo.shares).mul(100), 2)}%</div>
       </>
     );
   }
