@@ -39,12 +39,13 @@ export interface CampaignInterface extends utils.Interface {
     "pendingMerkleRoot()": FunctionFragment;
     "proposeShares(bytes32,bytes32)": FunctionFragment;
     "providers(address,address)": FunctionFragment;
-    "rewardsAvailableToClaimer(address,uint256,bytes32[],address)": FunctionFragment;
+    "rewardsAvailableToClaimer(address,uint256,address)": FunctionFragment;
     "setLock(bool)": FunctionFragment;
     "strategyUri()": FunctionFragment;
     "totalClaimed(address)": FunctionFragment;
     "totalFundsReceived(address)": FunctionFragment;
     "totalReward(address)": FunctionFragment;
+    "verifyShares(address,uint256,bytes32[])": FunctionFragment;
     "withdrawFunds(address,address)": FunctionFragment;
   };
 
@@ -113,7 +114,7 @@ export interface CampaignInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "rewardsAvailableToClaimer",
-    values: [string, BigNumberish, BytesLike[], string]
+    values: [string, BigNumberish, string]
   ): string;
   encodeFunctionData(functionFragment: "setLock", values: [boolean]): string;
   encodeFunctionData(
@@ -129,6 +130,10 @@ export interface CampaignInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(functionFragment: "totalReward", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "verifyShares",
+    values: [string, BigNumberish, BytesLike[]]
+  ): string;
   encodeFunctionData(
     functionFragment: "withdrawFunds",
     values: [string, string]
@@ -201,6 +206,10 @@ export interface CampaignInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "totalReward",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "verifyShares",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -368,7 +377,6 @@ export interface Campaign extends BaseContract {
     rewardsAvailableToClaimer(
       account: string,
       share: BigNumberish,
-      proof: BytesLike[],
       asset: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { total: BigNumber }>;
@@ -388,6 +396,13 @@ export interface Campaign extends BaseContract {
     ): Promise<[BigNumber] & { total: BigNumber }>;
 
     totalReward(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    verifyShares(
+      account: string,
+      share: BigNumberish,
+      proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<[void]>;
 
     withdrawFunds(
       account: string,
@@ -469,7 +484,6 @@ export interface Campaign extends BaseContract {
   rewardsAvailableToClaimer(
     account: string,
     share: BigNumberish,
-    proof: BytesLike[],
     asset: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
@@ -489,6 +503,13 @@ export interface Campaign extends BaseContract {
   ): Promise<BigNumber>;
 
   totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  verifyShares(
+    account: string,
+    share: BigNumberish,
+    proof: BytesLike[],
+    overrides?: CallOverrides
+  ): Promise<void>;
 
   withdrawFunds(
     account: string,
@@ -567,7 +588,6 @@ export interface Campaign extends BaseContract {
     rewardsAvailableToClaimer(
       account: string,
       share: BigNumberish,
-      proof: BytesLike[],
       asset: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -584,6 +604,13 @@ export interface Campaign extends BaseContract {
     ): Promise<BigNumber>;
 
     totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    verifyShares(
+      account: string,
+      share: BigNumberish,
+      proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     withdrawFunds(
       account: string,
@@ -715,7 +742,6 @@ export interface Campaign extends BaseContract {
     rewardsAvailableToClaimer(
       account: string,
       share: BigNumberish,
-      proof: BytesLike[],
       asset: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -735,6 +761,13 @@ export interface Campaign extends BaseContract {
     ): Promise<BigNumber>;
 
     totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    verifyShares(
+      account: string,
+      share: BigNumberish,
+      proof: BytesLike[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     withdrawFunds(
       account: string,
@@ -822,7 +855,6 @@ export interface Campaign extends BaseContract {
     rewardsAvailableToClaimer(
       account: string,
       share: BigNumberish,
-      proof: BytesLike[],
       asset: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -846,6 +878,13 @@ export interface Campaign extends BaseContract {
 
     totalReward(
       arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    verifyShares(
+      account: string,
+      share: BigNumberish,
+      proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

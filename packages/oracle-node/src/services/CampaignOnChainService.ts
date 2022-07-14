@@ -98,8 +98,7 @@ export class CampaignOnChainService {
       account
     );
 
-    // /** check the proof is valid */
-    // const tree = new BalanceTree(JSON.parse);
+    /** check the proof is valid */
 
     // const assets = ChainsDetails.chainAssets(campaign.chainId);
 
