@@ -7,7 +7,7 @@ import {
   TokenBalance,
   Typechain,
 } from '@dao-strategies/core';
-import { BigNumber, Contract, providers } from 'ethers';
+import { BigNumber, Contract, ethers, providers } from 'ethers';
 import { CampaignService } from './CampaignService';
 
 const ZERO_BYTES32 =
@@ -91,38 +91,61 @@ export class CampaignOnChainService {
 
     const currentRoot = await campaignContract.getValidRoot();
 
-    /** oad the proof of that root for this account and balance */
+    /** read the proof of that root for this account and balance */
     const leaf = await this.campaignService.getBalanceLeaf(
       campaign.uri,
       currentRoot,
       account
     );
 
+    /**
+     * The shares in the root should be the same rewards originally computed
+     * there is no reason for which the shares in the root would differ.
+     */
+
+    if (
+      !ethers.BigNumber.from(reward.amount).eq(
+        ethers.BigNumber.from(leaf.balance)
+      )
+    ) {
+      throw new Error(
+        `Unexpected shares for account ${account}. Reward was ${reward.amount} but leaf is ${leaf.balance}`
+      );
+    }
+
     /** check the proof is valid */
+    const res = await campaignContract.verifyShares(
+      account,
+      leaf.balance,
+      leaf.proof
+    );
 
-    // const assets = ChainsDetails.chainAssets(campaign.chainId);
+    console.log({ res });
 
-    // const tokens = await Promise.all(
-    //   assets.map(async (asset): Promise<TokenBalance> => {
-    //     const amount = await campaignContract.rewardsAvailableToClaimer(
-    //       account,
-    //       asset.address
-    //     );
-    //     return {
-    //       id: asset.id,
-    //       address: asset.address,
-    //       balance: balance.toString(),
-    //       name: asset.name,
-    //       icon: asset.icon,
-    //     };
-    //   })
-    // );
+    const assets = ChainsDetails.chainAssets(campaign.chainId);
+
+    const tokens = await Promise.all(
+      assets.map(async (asset): Promise<TokenBalance> => {
+        const amount = await campaignContract.rewardsAvailableToClaimer(
+          account,
+          leaf.balance,
+          asset.address
+        );
+        return {
+          id: asset.id,
+          address: asset.address,
+          balance: amount.toString(),
+          name: asset.name,
+          icon: asset.icon,
+        };
+      })
+    );
 
     return {
       account: reward.account,
       campaignAddress: campaign.address,
       shares: reward.amount.toString(),
-      assets: [],
+      assets: tokens,
     };
   }
 }
