@@ -149,6 +149,20 @@ export class CampaignRepository {
     });
   }
 
+  async isPending(uri: string, now: number): Promise<boolean> {
+    return this.client.campaign
+      .findFirst({
+        where: {
+          uri,
+          execDate: {
+            lte: now,
+          },
+          OR: [{ executed: false }, { executed: null }],
+        },
+      })
+      .then(Boolean);
+  }
+
   async setRewards(uri: string, rewards: Balances): Promise<void> {
     const rewardsArray = Array.from(rewards.entries()).map(
       ([account, amount]) => {

@@ -17,7 +17,7 @@ import {
 
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
-import { CampaignRepository } from '../repositories/CampaignRepository';
+import { CampaignRepository, Leaf } from '../repositories/CampaignRepository';
 import { toNumber } from '../utils/utils';
 
 import { campaignToUriDetails } from './CampaignUri';
@@ -225,7 +225,18 @@ export class CampaignService {
     const tree = new BalanceTree(rewards);
     const root = tree.getHexRoot();
 
-    await this.campaignRepo.addRoot(campaign.uri, root, rewards, now);
+    const leafs = Array.from(rewards.entries()).map(
+      ([account, balance]): Leaf => {
+        const proof = tree.getProof(account, balance);
+        return {
+          account,
+          balance: balance.toString(),
+          proof,
+        };
+      }
+    );
+
+    await this.campaignRepo.addRoot(campaign.uri, root, leafs, now);
     await this.campaignRepo.setIsComputing(campaign.uri, false);
 
     return root;

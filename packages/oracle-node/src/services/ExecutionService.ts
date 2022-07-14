@@ -34,6 +34,11 @@ export class ExecuteService {
     }
   }
 
+  /** check if a campaign is pending now */
+  async isPending(uri: string, now: number): Promise<boolean> {
+    return this.services.campaign.isPending(uri, now);
+  }
+
   /**
    * - check for campaigns whose execution date is in the next 30 seconds,
    * - store them in the running map and initialize the timeout
