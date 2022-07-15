@@ -6,6 +6,7 @@ import {
 import { Wallet, Signer, Contract, providers } from 'ethers';
 import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
+import { appLogger } from '../logger';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -85,15 +86,17 @@ export class OnChainService {
   }
 
   async publishShares(address: string, root: string): Promise<void> {
-    /* eslint-disable */
     const campaign = new Contract(
       address,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       ContractsJson.jsonOfChain().contracts.Campaign.abi,
       this.signer
-    );
+    ) as Typechain.Campaign;
 
     const tx = await campaign.proposeShares(root, ZERO_BYTES32);
     const rec = await tx.wait();
-    /* eslint-enable */
+    appLogger.info(
+      `OnChainService - publishedShares, address: ${address}, root: ${root}, block: ${rec.blockNumber}`
+    );
   }
 }

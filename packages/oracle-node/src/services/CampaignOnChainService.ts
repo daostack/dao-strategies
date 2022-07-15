@@ -89,6 +89,8 @@ export class CampaignOnChainService {
       this.provider
     ) as Typechain.Campaign;
 
+    <NEED TO CONSIDER THE CHALLENGE PERIOD NOW>
+
     const currentRoot = await campaignContract.getValidRoot();
 
     if (currentRoot === ZERO_BYTES32) {
