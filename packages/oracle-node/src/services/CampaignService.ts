@@ -189,11 +189,16 @@ export class CampaignService {
 
     if (root !== ZERO_BYTES32) {
       await this.onChainService.publishShares(campaign.address, root);
+      await this.campaignRepo.setPublished(uri, true, this.timeService.now());
     }
   }
 
-  async isPending(uri: string, now: number): Promise<boolean> {
-    return this.campaignRepo.isPending(uri, now);
+  isPendingExecution(uri: string, now: number): Promise<boolean> {
+    return this.campaignRepo.isPendingExecution(uri, now);
+  }
+
+  isPendingPublishing(uri: string): Promise<boolean> {
+    return this.campaignRepo.isPendingPublishing(uri);
   }
 
   async computeRoot(campaign: Campaign): Promise<string> {

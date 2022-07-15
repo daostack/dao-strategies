@@ -115,14 +115,11 @@ export class CampaignController extends Controller {
       request.body as CampaignCreateDetails
     );
     const now = this.manager.services.time.now();
-    if (
-      await this.manager.services.campaign.isPending(
-        request.params.uri as string,
-        now
-      )
-    ) {
-      await this.manager.execution.execute(request.params.uri as string, now);
-    }
+
+    await this.manager.execution.executeAndPublish(
+      request.params.uri as string,
+      now
+    );
   }
 
   async getFromAddress(

@@ -87,6 +87,13 @@ export class CampaignRepository {
     });
   }
 
+  async setPublished(uri: string, value: boolean, date: number): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { published: value, publishDate: date },
+    });
+  }
+
   async getRewards(uri: string): Promise<Balances> {
     const result = await this.client.campaign.findUnique({
       where: { uri: uri },
@@ -155,6 +162,7 @@ export class CampaignRepository {
   async findPending(now: number): Promise<string[]> {
     const uris = await this.client.campaign.findMany({
       where: {
+        registered: true,
         execDate: {
           lte: now,
         },
@@ -168,7 +176,7 @@ export class CampaignRepository {
     return uris.map((uri) => uri.uri);
   }
 
-  async isPending(uri: string, now: number): Promise<boolean> {
+  async isPendingExecution(uri: string, now: number): Promise<boolean> {
     return this.client.campaign
       .findFirst({
         where: {
@@ -177,6 +185,18 @@ export class CampaignRepository {
             lte: now,
           },
           OR: [{ executed: false }, { executed: null }],
+        },
+      })
+      .then(Boolean);
+  }
+
+  async isPendingPublishing(uri: string): Promise<boolean> {
+    return this.client.campaign
+      .findFirst({
+        where: {
+          uri,
+          executed: true,
+          OR: [{ published: false }, { published: null }],
         },
       })
       .then(Boolean);

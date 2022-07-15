@@ -30,6 +30,7 @@ export class ExecuteService {
   cicle: NodeJS.Timer;
   schedulled: Set<string> = new Set();
   executing: Map<string, Promise<void>> = new Map();
+  publishing: Map<string, Promise<void>> = new Map();
 
   constructor(protected services: Services, protected config: ExecutionConfig) {
     if (this.config.enabled) {
@@ -45,7 +46,7 @@ export class ExecuteService {
   }
 
   /**
-   * - check for campaigns whose execution date is in the next 30 seconds,
+   * Check for which are either pending execution and/or pending publishing
    */
   async checkIncoming(): Promise<void> {
     const now = this.services.time.now();
@@ -78,6 +79,7 @@ export class ExecuteService {
 
     const callback = async (): Promise<void> => {
       await this.execute(campaign.uri, now + delay);
+      await this.publish(campaign.uri);
       this.schedulled.delete(campaign.uri);
     };
 
@@ -91,8 +93,18 @@ export class ExecuteService {
     );
   }
 
+  /**
+   * will only execute and publish if the correct conditions are met. Safe to call
+   * just to ne sure it's exectued and published
+   */
+  async executeAndPublish(uri: string, now: number): Promise<void> {
+    await this.execute(uri, now);
+    await this.publish(uri);
+  }
+
   /** single point from which a campaign execution and publishing is done */
   async execute(uri: string, now: number): Promise<void> {
+    /** reentrancy protection */
     const executing = this.executing.get(uri);
     if (executing !== undefined) {
       return executing;
@@ -108,6 +120,8 @@ export class ExecuteService {
 
       /** rewards are computed only if they have not been yet computed (as part
        * of the campaign creation process in the UI for instance) */
+      appLogger.info(`Executing ${uri}`);
+
       if (
         campaign.lastRunDate == null ||
         campaign.lastRunDate < campaign.execDate
@@ -118,15 +132,34 @@ export class ExecuteService {
         await this.services.campaign.runCampaign(uri, now);
       }
 
-      appLogger.info(`Executing ${uri}`);
-
       await this.services.campaign.setExecuted(uri);
-      await this.services.campaign.publishCampaign(uri);
 
       appLogger.info(`Executed ${uri}`);
     })();
 
     this.executing.set(uri, _execute);
     await _execute;
+  }
+
+  async publish(uri: string): Promise<void> {
+    /** reentrancy protection */
+    const publishing = this.publishing.get(uri);
+    if (publishing !== undefined) {
+      return publishing;
+    }
+
+    const _publish = (async (): Promise<void> => {
+      const campaign = await this.services.campaign.get(uri);
+
+      if (!campaign.executed || campaign.published) {
+        /** campaign not ready to be published */
+        return;
+      }
+
+      await this.services.campaign.publishCampaign(uri);
+    })();
+
+    this.publishing.set(uri, publishing);
+    await _publish;
   }
 }
