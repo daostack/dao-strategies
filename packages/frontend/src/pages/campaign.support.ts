@@ -48,11 +48,13 @@ export enum PeriodType {
 
 export const strategyDetails = (
   values: CampaignFormValues,
-  today: DateManager,
+  now: DateManager | undefined,
   account: string | undefined
 ): CampaignUriDetails | undefined => {
+  if (now === undefined) return undefined;
+
   const repos = getRepos(values);
-  const [start, end] = getStartEnd(values, today);
+  const [start, end] = getStartEnd(values, now);
 
   return {
     creator: account !== undefined ? account : '',
@@ -98,17 +100,22 @@ export const getRepos = (values: CampaignFormValues): { owner: string; repo: str
   });
 };
 
-export const getPeriodType = (details: CampaignUriDetails | undefined, today: DateManager): PeriodType | undefined => {
+export const getPeriodType = (
+  details: CampaignUriDetails | undefined,
+  now: DateManager | undefined
+): PeriodType | undefined => {
+  if (now === undefined) return undefined;
+
   const params = details?.strategyParams;
   if (params === undefined || params.timeRange === undefined) return undefined;
 
   let type: PeriodType = PeriodType.future;
 
-  if (params.timeRange.start < today.getTime()) {
+  if (params.timeRange.start < now.getTime()) {
     type = PeriodType.retroactive;
   }
 
-  if (params.timeRange.end > today.getTime()) {
+  if (params.timeRange.end > now.getTime()) {
     type = PeriodType.ongoing;
   }
 

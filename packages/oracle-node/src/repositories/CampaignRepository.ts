@@ -7,14 +7,21 @@ import {
   CampaignRoot,
   BalanceLeaf,
 } from '@prisma/client';
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
+import { appLogger } from '../logger';
 
 import { toNumber } from '../utils/utils';
 
 export interface Leaf {
-  account: string;
+  address: string;
   balance: string;
   proof: string[];
+}
+
+export interface AddressReward {
+  account: string;
+  address: string;
+  amount: ethers.BigNumber;
 }
 
 export class CampaignRepository {
@@ -101,19 +108,26 @@ export class CampaignRepository {
   }
 
   async getRewardsToAddresses(uri: string): Promise<Balances> {
-    const result = await this.client.$queryRaw`
+    const result: AddressReward[] = await this.client.$queryRaw`
       SELECT account, address, amount FROM 
       (
         SELECT * FROM public."Reward" 
-        WHERE "campaignId" = '${uri}'
+        WHERE "campaignId" = ${uri}
       ) as rewards
       LEFT JOIN 
       public."User" 
       ON rewards.account = "verifiedGithub"
     `;
 
-    console.log(result);
-    return new Map();
+    const balances = new Map();
+    result.forEach((reward) => {
+      if (reward.address != null)
+        balances.set(
+          reward.address,
+          ethers.BigNumber.from(reward.amount.toString())
+        );
+    });
+    return balances;
   }
 
   async getRewardToAddress(
@@ -138,15 +152,20 @@ export class CampaignRepository {
   }
 
   /** campaigns whose execution date is older and has not been executed */
-  async findPending(now: number): Promise<Campaign[]> {
-    return this.client.campaign.findMany({
+  async findPending(now: number): Promise<string[]> {
+    const uris = await this.client.campaign.findMany({
       where: {
         execDate: {
           lte: now,
         },
         OR: [{ executed: false }, { executed: null }],
       },
+      select: {
+        uri: true,
+      },
     });
+
+    return uris.map((uri) => uri.uri);
   }
 
   async isPending(uri: string, now: number): Promise<boolean> {
@@ -205,6 +224,19 @@ export class CampaignRepository {
     return res.isComputing;
   }
 
+  async isExecuted(uri: string): Promise<boolean> {
+    const res = await this.client.campaign.findUnique({
+      where: {
+        uri,
+      },
+      select: {
+        executed: true,
+      },
+    });
+
+    return res.executed;
+  }
+
   async setIsComputing(uri: string, value: boolean): Promise<void> {
     await this.client.campaign.update({
       where: { uri: uri },
@@ -236,7 +268,12 @@ export class CampaignRepository {
     leafs: Leaf[],
     date: number
   ): Promise<void> {
-    await this.client.campaignRoot.create({
+    appLogger.info(
+      `CampaignRepository - addRoot() uri: ${uri}, root: ${root}, leafs: ${JSON.stringify(
+        leafs
+      )}, date: ${date}`
+    );
+    const _root = await this.client.campaignRoot.create({
       data: {
         campaignId: uri,
         date,
@@ -248,17 +285,30 @@ export class CampaignRepository {
         },
       },
     });
+
+    // await this.client.balanceLeaf.createMany({
+    //   data: leafs.map((leaf) => {
+    //     return {
+    //       address: leaf.address,
+    //       balance: leaf.balance,
+    //       proof: leaf.proof,
+    //       campaignId: uri,
+    //       rootId: _root.root,
+    //     };
+    //   }),
+    // });
   }
 
   async getBalanceLeaf(
     uri: string,
     root: string,
-    account: string
+    address: string
   ): Promise<BalanceLeaf> {
     const res = await this.client.balanceLeaf.findUnique({
       where: {
-        rootId_account: {
-          account,
+        campaignId_rootId_address: {
+          campaignId: uri,
+          address: address,
           rootId: root,
         },
       },

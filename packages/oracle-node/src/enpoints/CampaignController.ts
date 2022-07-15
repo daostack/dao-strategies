@@ -5,6 +5,7 @@ import {
   CampaignCreateDetails,
   CampaignOnchainDetails,
   ClaimInfo,
+  TimeDetails,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
 import { ServiceManager } from '../service.manager';
@@ -82,6 +83,14 @@ export class CampaignController extends Controller {
     return { uri };
   }
 
+  timeNow(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<TimeDetails> {
+    return Promise.resolve({ now: this.manager.services.time.now() });
+  }
+
   async simulateFromUri(
     request: Request,
     response: Response,
@@ -105,8 +114,14 @@ export class CampaignController extends Controller {
       request.params.uri as string,
       request.body as CampaignCreateDetails
     );
-    if (await this.manager.execution.isPending()) {
-      this.manager.execution.
+    const now = this.manager.services.time.now();
+    if (
+      await this.manager.services.campaign.isPending(
+        request.params.uri as string,
+        now
+      )
+    ) {
+      await this.manager.execution.execute(request.params.uri as string, now);
     }
   }
 

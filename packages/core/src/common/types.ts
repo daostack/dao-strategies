@@ -48,8 +48,14 @@ export interface CampaignOnchainDetails {
 }
 
 export interface ClaimInfo {
-  account: string;
-  campaignAddress: string;
-  shares: string;
-  assets: TokenBalance[];
+  executed: boolean;
+  present: boolean;
+  account?: string;
+  campaignAddress?: string;
+  shares?: string;
+  assets?: TokenBalance[];
+}
+
+export interface TimeDetails {
+  now: number;
 }

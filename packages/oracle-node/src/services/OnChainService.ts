@@ -7,7 +7,7 @@ import { Wallet, Signer, Contract, providers } from 'ethers';
 import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
 
-const ZERO_BYTES32 =
+export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 /* eslint-disable */
@@ -85,13 +85,13 @@ export class OnChainService {
   }
 
   async publishShares(address: string, root: string): Promise<void> {
+    /* eslint-disable */
     const campaign = new Contract(
       address,
-      ['function proposeShares(bytes32,bytes32) external'],
+      ContractsJson.jsonOfChain().contracts.Campaign.abi,
       this.signer
     );
 
-    /* eslint-disable */
     const tx = await campaign.proposeShares(root, ZERO_BYTES32);
     const rec = await tx.wait();
     /* eslint-enable */

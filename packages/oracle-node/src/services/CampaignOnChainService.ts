@@ -64,12 +64,12 @@ export class CampaignOnChainService {
 
   async getClaimInfo(
     campaignAddress: string,
-    account: string
+    address: string
   ): Promise<ClaimInfo | undefined> {
     const campaign = await this.campaignService.getFromAddress(campaignAddress);
     const reward = await this.campaignService.getRewardToAddress(
       campaign.uri,
-      account
+      address
     );
 
     if (reward == null) return undefined;
@@ -91,12 +91,26 @@ export class CampaignOnChainService {
 
     const currentRoot = await campaignContract.getValidRoot();
 
+    if (currentRoot === ZERO_BYTES32) {
+      return {
+        executed: false,
+        present: false,
+      };
+    }
+
     /** read the proof of that root for this account and balance */
     const leaf = await this.campaignService.getBalanceLeaf(
       campaign.uri,
       currentRoot,
-      account
+      address
     );
+
+    if (leaf == null) {
+      return {
+        executed: true,
+        present: false,
+      };
+    }
 
     /**
      * The shares in the root should be the same rewards originally computed
@@ -109,13 +123,13 @@ export class CampaignOnChainService {
       )
     ) {
       throw new Error(
-        `Unexpected shares for account ${account}. Reward was ${reward.amount} but leaf is ${leaf.balance}`
+        `Unexpected shares for account ${address}. Reward was ${reward.amount} but leaf is ${leaf.balance}`
       );
     }
 
     /** check the proof is valid */
     const res = await campaignContract.verifyShares(
-      account,
+      address,
       leaf.balance,
       leaf.proof
     );
@@ -127,7 +141,7 @@ export class CampaignOnChainService {
     const tokens = await Promise.all(
       assets.map(async (asset): Promise<TokenBalance> => {
         const amount = await campaignContract.rewardsAvailableToClaimer(
-          account,
+          address,
           leaf.balance,
           asset.address
         );
@@ -142,6 +156,8 @@ export class CampaignOnChainService {
     );
 
     return {
+      executed: true,
+      present: true,
       account: reward.account,
       campaignAddress: campaign.address,
       shares: reward.amount.toString(),

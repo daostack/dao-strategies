@@ -108,6 +108,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           </Box>
         </Box>
 
+        <Box>{JSON.stringify(campaign)}</Box>
+
         <Box direction="row" align="center" justify="center" style={{ marginBottom: '36px' }}>
           Created by: {(campaign as any).creatorId}
         </Box>

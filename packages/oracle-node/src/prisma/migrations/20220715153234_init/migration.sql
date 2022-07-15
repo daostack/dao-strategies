@@ -57,11 +57,13 @@ CREATE TABLE "CampaignRoot" (
 
 -- CreateTable
 CREATE TABLE "BalanceLeaf" (
+    "campaignId" TEXT NOT NULL,
     "rootId" TEXT NOT NULL,
-    "account" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
     "balance" TEXT NOT NULL,
+    "proof" TEXT[],
 
-    CONSTRAINT "BalanceLeaf_pkey" PRIMARY KEY ("rootId","account")
+    CONSTRAINT "BalanceLeaf_pkey" PRIMARY KEY ("campaignId","rootId","address")
 );
 
 -- AddForeignKey
@@ -74,4 +76,4 @@ ALTER TABLE "Reward" ADD CONSTRAINT "Reward_campaignId_fkey" FOREIGN KEY ("campa
 ALTER TABLE "CampaignRoot" ADD CONSTRAINT "CampaignRoot_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BalanceLeaf" ADD CONSTRAINT "BalanceLeaf_rootId_account_fkey" FOREIGN KEY ("rootId", "account") REFERENCES "CampaignRoot"("campaignId", "root") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BalanceLeaf" ADD CONSTRAINT "BalanceLeaf_campaignId_rootId_fkey" FOREIGN KEY ("campaignId", "rootId") REFERENCES "CampaignRoot"("campaignId", "root") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,6 +1,5 @@
 import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
-import { useAccount } from 'wagmi';
-import { FC, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ChainsDetails, getCampaignUri, CampaignCreateDetails } from '@dao-strategies/core';
@@ -76,7 +75,7 @@ const DEBUG = true;
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
 
-  const [today] = useState<DateManager>(new DateManager());
+  const [now, setNow] = useState<DateManager>();
   const [pageIx, setPageIx] = useState<number>(0);
 
   const { isValid, checking, checkExist, isValidName } = useGithubSearch();
@@ -84,6 +83,20 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const [validated, setValidated] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
+
+  /**
+   * Time management: frontend's time is syncronized with the oracle time.
+   *
+   * This means that the execDate, if campaign is retroactive, will be a time lower than the
+   * local time on the oracle when registering (and executing) the campaign.
+   */
+  useEffect(() => {
+    const _now = new DateManager();
+    _now.sync().then(() => {
+      if (DEBUG) console.log('CampaignCreate - now set', { now: now, bias: _now.getBias() });
+      setNow(_now);
+    });
+  }, []);
 
   /** Form data is kept in the formValues state. The strategy details is a computed
    * property that should change everytime the formValues change.
@@ -99,8 +112,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const navigate = useNavigate();
 
   /** details is a derived value */
-  const details = strategyDetails(formValues, today, account);
-  const periodType = getPeriodType(details, today);
+  const details = strategyDetails(formValues, now, account);
+  const periodType = getPeriodType(details, now);
   const isLogged = account !== undefined;
 
   const chainOptions = ChainsDetails.chains().map((chain) => chain.name);
@@ -155,11 +168,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const setFormValues = (nextFormValues: CampaignFormValues) => {
     if (formValues === undefined) return;
 
-    const oldDetails = strategyDetails(formValues, today, account);
+    const oldDetails = strategyDetails(formValues, now, account);
 
     /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
     if (oldDetails !== undefined && simulation !== undefined) {
-      const nextDetails = strategyDetails(nextFormValues, today, account);
+      const nextDetails = strategyDetails(nextFormValues, now, account);
       if (nextDetails !== undefined) {
         const currentUri = getCampaignUri(oldDetails);
         const nextUri = getCampaignUri(nextDetails);

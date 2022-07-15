@@ -11,6 +11,11 @@ export interface ExecutionConfig {
 }
 
 /**
+ * The only point in the app from which a campaign execution can be triggered.
+ *
+ * It includes a watcher service that looks for incoming campaigns and
+ * schedule their up-to-the-second on-time execution.
+ *
  * A service that periodically fetches data about the campaigns and prepares for
  * their on-time execution.
  *
@@ -23,25 +28,24 @@ export interface ExecutionConfig {
 
 export class ExecuteService {
   cicle: NodeJS.Timer;
-  running: Set<string> = new Set();
+  schedulled: Set<string> = new Set();
+  executing: Map<string, Promise<void>> = new Map();
 
   constructor(protected services: Services, protected config: ExecutionConfig) {
     if (this.config.enabled) {
-      void this.checkIncoming();
-      this.cicle = setInterval(() => {
-        void this.checkIncoming();
-      }, this.config.periodCheck * 1000);
+      this.startWatcher();
     }
   }
 
-  /** check if a campaign is pending now */
-  async isPending(uri: string, now: number): Promise<boolean> {
-    return this.services.campaign.isPending(uri, now);
+  startWatcher(): void {
+    void this.checkIncoming();
+    this.cicle = setInterval(() => {
+      void this.checkIncoming();
+    }, this.config.periodCheck * 1000);
   }
 
   /**
    * - check for campaigns whose execution date is in the next 30 seconds,
-   * - store them in the running map and initialize the timeout
    */
   async checkIncoming(): Promise<void> {
     const now = this.services.time.now();
@@ -54,43 +58,75 @@ export class ExecuteService {
     appLogger.info(`Check Incoming Tasks ${nowUTC.toUTCString()}`);
 
     await Promise.all(
-      incoming.map(async (campaign) => {
-        if (
-          !this.running.has(campaign.uri) &&
-          campaign.registered &&
-          !campaign.executed
-        ) {
-          this.running.add(campaign.uri);
-
-          if (campaign.execDate < now && campaign.lastRunDate !== undefined) {
-            /** retroactive campaigns that were already run are not re-run, but just
-             * marked as executed */
-            appLogger.info(`Already executed ${campaign.uri}`);
-            await this.services.campaign.setExecuted(campaign.uri);
-          } else {
-            const callback = async (): Promise<void> => {
-              appLogger.info(`Executing ${campaign.uri}`);
-
-              await this.services.campaign.runAndPublishCampaign(campaign.uri);
-
-              this.running.delete(campaign.uri);
-              appLogger.info(`Executed ${campaign.uri}`);
-            };
-
-            const delay =
-              toNumber(campaign.execDate) - this.services.time.now();
-
-            appLogger.info(
-              `Preparing execution of ${campaign.uri} in ${delay} seconds`
-            );
-            setTimeout(
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              callback,
-              delay * 1000
-            );
-          }
-        }
+      incoming.map(async (uri) => {
+        await this.scheduleExecute(uri, now);
       })
     );
+  }
+
+  async scheduleExecute(uri: string, now: number): Promise<void> {
+    /** don't schedule and schedulled task */
+    if (this.schedulled.has(uri)) {
+      return;
+    }
+
+    const campaign = await this.services.campaign.get(uri);
+
+    this.schedulled.add(campaign.uri);
+
+    const delay = toNumber(campaign.execDate) - now;
+
+    const callback = async (): Promise<void> => {
+      await this.execute(campaign.uri, now + delay);
+      this.schedulled.delete(campaign.uri);
+    };
+
+    appLogger.info(
+      `Preparing execution of ${campaign.uri} in ${delay} seconds`
+    );
+    setTimeout(
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      callback,
+      delay * 1000
+    );
+  }
+
+  /** single point from which a campaign execution and publishing is done */
+  async execute(uri: string, now: number): Promise<void> {
+    const executing = this.executing.get(uri);
+    if (executing !== undefined) {
+      return executing;
+    }
+
+    const _execute = (async (): Promise<void> => {
+      const campaign = await this.services.campaign.get(uri);
+
+      if (campaign.executed || campaign.execDate > now) {
+        /** campaign not ready to be executed */
+        return;
+      }
+
+      /** rewards are computed only if they have not been yet computed (as part
+       * of the campaign creation process in the UI for instance) */
+      if (
+        campaign.lastRunDate == null ||
+        campaign.lastRunDate < campaign.execDate
+      ) {
+        /** campaigns that were already run are not re-run, but just
+         * marked as executed */
+        appLogger.info(`Already executed ${campaign.uri}`);
+        await this.services.campaign.runCampaign(uri, now);
+      }
+
+      appLogger.info(`Executing ${uri}`);
+
+      await this.services.campaign.setExecuted(uri);
+      await this.services.campaign.publishCampaign(uri);
+
+      appLogger.info(`Executed ${uri}`);
+    })();
+
+    this.executing.set(uri, _execute);
+    await _execute;
   }
 }

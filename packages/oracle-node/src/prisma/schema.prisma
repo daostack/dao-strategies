@@ -65,10 +65,11 @@ model CampaignRoot {
 }
 
 model BalanceLeaf {
-  @@id([rootId, account])
-  root            CampaignRoot  @relation(fields: [rootId, account], references: [campaignId, root])
+  @@id([campaignId, rootId, address])
+  root            CampaignRoot  @relation(fields: [campaignId, rootId], references: [campaignId, root])
+  campaignId      String
   rootId          String
-  account         String
+  address         String
   balance         String
   proof           String[]      // Store the proofs so that they don't have to be recomputed eveytime they are needed
 }
