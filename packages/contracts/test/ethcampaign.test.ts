@@ -5,7 +5,7 @@ import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 
 import { Campaign, Campaign__factory, CampaignFactory__factory } from './../typechain';
-import { toWei, toBigNumber, fastForwardToTimestamp } from './support';
+import { toWei, toBigNumber, fastForwardToTimestamp, getTimestamp } from './support';
 
 (BigNumber.prototype as any).toJSON = function () {
   // eslint-disable-next-line
@@ -16,6 +16,7 @@ const RANDOM_BYTES32 = '0x5fd924625f6ab16a19cc9807c7c506ae1813490e4ba675f843d5a1
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000';
 const URI = RANDOM_BYTES32;
 const TOTAL_SHARES = toBigNumber('1', 18);
+const MONTH_IN_SECONDS = 2592000;
 
 interface SetupData {
   admin: SignerWithAddress;
@@ -32,7 +33,7 @@ interface SetupData {
 let counter = 0;
 
 describe('EthCampaign', () => {
-  async function setUp(sharesDistribution: BigNumber[], publishShares: boolean): Promise<SetupData> {
+  async function setUp(sharesDistribution: BigNumber[], publishShares: boolean, activationTime: BigNumber): Promise<SetupData> {
     const addresses = await ethers.getSigners();
     const admin = addresses[0];
     const guardian = addresses[1];
@@ -63,6 +64,7 @@ describe('EthCampaign', () => {
       URI,
       guardian.address,
       oracle.address,
+      activationTime,
       ethers.utils.keccak256(ethers.utils.toUtf8Bytes(counter.toString()))
     );
     counter++;
@@ -88,7 +90,7 @@ describe('EthCampaign', () => {
   it('predefined shares at creation', async () => {
     const sharesArray = [TOTAL_SHARES.div(6), TOTAL_SHARES.div(3), TOTAL_SHARES.div(2)];
 
-    const { guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign } = await setUp(sharesArray, true);
+    const { guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign } = await setUp(sharesArray, true, BigNumber.from(0));
 
     // sanity checks
     expect(await campaign.pendingMerkleRoot()).to.equal(merkleRoot);
@@ -130,7 +132,9 @@ describe('EthCampaign', () => {
   it('publish shares ones after creation', async () => {
     const sharesArray = [TOTAL_SHARES.div(6), TOTAL_SHARES.div(3), TOTAL_SHARES.div(2)];
 
-    const { guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign } = await setUp(sharesArray, false);
+    const firstExecutionTime = await getTimestamp();
+    firstExecutionTime.add(BigNumber.from(MONTH_IN_SECONDS));
+    const { guardian, oracle, claimers, funders, tree, merkleRoot, claimersBalances, campaign } = await setUp(sharesArray, false, firstExecutionTime);
 
     // sanity checks
     expect(await campaign.pendingMerkleRoot()).to.equal(ZERO_BYTES32);
@@ -144,6 +148,7 @@ describe('EthCampaign', () => {
     expect(await ethers.provider.getBalance(campaign.address)).to.equal(toWei('1'));
 
     // oracle publishes shares
+    await fastForwardToTimestamp(firstExecutionTime.add(10));
     await campaign.connect(oracle).proposeShares(merkleRoot, URI);
 
     // fast forward to claim period

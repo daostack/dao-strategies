@@ -22,6 +22,8 @@ export interface CampaignInterface extends utils.Interface {
   contractName: "Campaign";
   functions: {
     "CHALLENGE_PERIOD()": FunctionFragment;
+    "DAYS_IN_WEEK()": FunctionFragment;
+    "SECONDS_IN_DAY()": FunctionFragment;
     "TOTAL_SHARES()": FunctionFragment;
     "activationTime()": FunctionFragment;
     "approvedMerkleRoot()": FunctionFragment;
@@ -29,12 +31,13 @@ export interface CampaignInterface extends utils.Interface {
     "challenge(uint8)": FunctionFragment;
     "claim(address,uint256,bytes32[],address)": FunctionFragment;
     "claimed(address,address)": FunctionFragment;
-    "convertToReward(address)": FunctionFragment;
     "fund(address,uint256)": FunctionFragment;
     "getValidRoot()": FunctionFragment;
     "guardian()": FunctionFragment;
-    "initCampaign(bytes32,bytes32,address,address)": FunctionFragment;
+    "initCampaign(bytes32,bytes32,address,address,uint256)": FunctionFragment;
+    "isChallengePeriod()": FunctionFragment;
     "locked()": FunctionFragment;
+    "merkleRootUpdateAllowed()": FunctionFragment;
     "oracle()": FunctionFragment;
     "pendingMerkleRoot()": FunctionFragment;
     "proposeShares(bytes32,bytes32)": FunctionFragment;
@@ -43,14 +46,22 @@ export interface CampaignInterface extends utils.Interface {
     "setLock(bool)": FunctionFragment;
     "strategyUri()": FunctionFragment;
     "totalClaimed(address)": FunctionFragment;
-    "totalFundsReceived(address)": FunctionFragment;
-    "totalReward(address)": FunctionFragment;
+    "totalReceived(address)": FunctionFragment;
     "verifyShares(address,uint256,bytes32[])": FunctionFragment;
-    "withdrawFunds(address,address)": FunctionFragment;
+    "withdrawAllowed()": FunctionFragment;
+    "withdrawAssets(address,address)": FunctionFragment;
   };
 
   encodeFunctionData(
     functionFragment: "CHALLENGE_PERIOD",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "DAYS_IN_WEEK",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "SECONDS_IN_DAY",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -82,10 +93,6 @@ export interface CampaignInterface extends utils.Interface {
     values: [string, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "convertToReward",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "fund",
     values: [string, BigNumberish]
   ): string;
@@ -96,9 +103,17 @@ export interface CampaignInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "guardian", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initCampaign",
-    values: [BytesLike, BytesLike, string, string]
+    values: [BytesLike, BytesLike, string, string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isChallengePeriod",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "locked", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "merkleRootUpdateAllowed",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "oracle", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "pendingMerkleRoot",
@@ -126,21 +141,32 @@ export interface CampaignInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "totalFundsReceived",
+    functionFragment: "totalReceived",
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "totalReward", values: [string]): string;
   encodeFunctionData(
     functionFragment: "verifyShares",
     values: [string, BigNumberish, BytesLike[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "withdrawFunds",
+    functionFragment: "withdrawAllowed",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawAssets",
     values: [string, string]
   ): string;
 
   decodeFunctionResult(
     functionFragment: "CHALLENGE_PERIOD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "DAYS_IN_WEEK",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "SECONDS_IN_DAY",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -162,10 +188,6 @@ export interface CampaignInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "convertToReward",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "fund", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getValidRoot",
@@ -176,7 +198,15 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "initCampaign",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "isChallengePeriod",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "merkleRootUpdateAllowed",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "oracle", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pendingMerkleRoot",
@@ -201,11 +231,7 @@ export interface CampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "totalFundsReceived",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "totalReward",
+    functionFragment: "totalReceived",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -213,7 +239,11 @@ export interface CampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "withdrawFunds",
+    functionFragment: "withdrawAllowed",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawAssets",
     data: BytesLike
   ): Result;
 
@@ -222,7 +252,8 @@ export interface CampaignInterface extends utils.Interface {
     "Claim(address,uint256,uint256,address)": EventFragment;
     "Fund(address,uint256,address)": EventFragment;
     "Initialized(uint8)": EventFragment;
-    "SharesMerkleRoot(bytes32,bytes32,uint256)": EventFragment;
+    "Lock(bool)": EventFragment;
+    "SharesMerkleRootUpdate(bytes32,bytes32,uint256)": EventFragment;
     "Withdraw(address,uint256,address)": EventFragment;
   };
 
@@ -230,7 +261,8 @@ export interface CampaignInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Claim"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Fund"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SharesMerkleRoot"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Lock"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SharesMerkleRootUpdate"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
 
@@ -256,13 +288,17 @@ export type InitializedEvent = TypedEvent<[number], { version: number }>;
 
 export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
 
-export type SharesMerkleRootEvent = TypedEvent<
+export type LockEvent = TypedEvent<[boolean], { locked: boolean }>;
+
+export type LockEventFilter = TypedEventFilter<LockEvent>;
+
+export type SharesMerkleRootUpdateEvent = TypedEvent<
   [string, string, BigNumber],
   { sharesMerkleRoot: string; sharesUri: string; activationTime: BigNumber }
 >;
 
-export type SharesMerkleRootEventFilter =
-  TypedEventFilter<SharesMerkleRootEvent>;
+export type SharesMerkleRootUpdateEventFilter =
+  TypedEventFilter<SharesMerkleRootUpdateEvent>;
 
 export type WithdrawEvent = TypedEvent<
   [string, BigNumber, string],
@@ -301,6 +337,10 @@ export interface Campaign extends BaseContract {
   functions: {
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    DAYS_IN_WEEK(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    SECONDS_IN_DAY(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     TOTAL_SHARES(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     activationTime(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -331,11 +371,6 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    convertToReward(
-      asset: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     fund(
       asset: string,
       amount: BigNumberish,
@@ -353,10 +388,15 @@ export interface Campaign extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _activationTime: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    isChallengePeriod(overrides?: CallOverrides): Promise<[boolean]>;
+
     locked(overrides?: CallOverrides): Promise<[boolean]>;
+
+    merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<[boolean]>;
 
     oracle(overrides?: CallOverrides): Promise<[string]>;
 
@@ -390,12 +430,10 @@ export interface Campaign extends BaseContract {
 
     totalClaimed(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    totalFundsReceived(
+    totalReceived(
       asset: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { total: BigNumber }>;
-
-    totalReward(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     verifyShares(
       account: string,
@@ -404,7 +442,9 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[void]>;
 
-    withdrawFunds(
+    withdrawAllowed(overrides?: CallOverrides): Promise<[boolean]>;
+
+    withdrawAssets(
       account: string,
       asset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -412,6 +452,10 @@ export interface Campaign extends BaseContract {
   };
 
   CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
+
+  DAYS_IN_WEEK(overrides?: CallOverrides): Promise<BigNumber>;
+
+  SECONDS_IN_DAY(overrides?: CallOverrides): Promise<BigNumber>;
 
   TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -440,11 +484,6 @@ export interface Campaign extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  convertToReward(
-    asset: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   fund(
     asset: string,
     amount: BigNumberish,
@@ -460,10 +499,15 @@ export interface Campaign extends BaseContract {
     _strategyUri: BytesLike,
     _guardian: string,
     _oracle: string,
+    _activationTime: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  isChallengePeriod(overrides?: CallOverrides): Promise<boolean>;
+
   locked(overrides?: CallOverrides): Promise<boolean>;
+
+  merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<boolean>;
 
   oracle(overrides?: CallOverrides): Promise<string>;
 
@@ -497,12 +541,7 @@ export interface Campaign extends BaseContract {
 
   totalClaimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  totalFundsReceived(
-    asset: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+  totalReceived(asset: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   verifyShares(
     account: string,
@@ -511,7 +550,9 @@ export interface Campaign extends BaseContract {
     overrides?: CallOverrides
   ): Promise<void>;
 
-  withdrawFunds(
+  withdrawAllowed(overrides?: CallOverrides): Promise<boolean>;
+
+  withdrawAssets(
     account: string,
     asset: string,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -519,6 +560,10 @@ export interface Campaign extends BaseContract {
 
   callStatic: {
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
+
+    DAYS_IN_WEEK(overrides?: CallOverrides): Promise<BigNumber>;
+
+    SECONDS_IN_DAY(overrides?: CallOverrides): Promise<BigNumber>;
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -547,8 +592,6 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    convertToReward(asset: string, overrides?: CallOverrides): Promise<void>;
-
     fund(
       asset: string,
       amount: BigNumberish,
@@ -564,10 +607,15 @@ export interface Campaign extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _activationTime: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
+    isChallengePeriod(overrides?: CallOverrides): Promise<boolean>;
+
     locked(overrides?: CallOverrides): Promise<boolean>;
+
+    merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<boolean>;
 
     oracle(overrides?: CallOverrides): Promise<string>;
 
@@ -598,12 +646,7 @@ export interface Campaign extends BaseContract {
 
     totalClaimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    totalFundsReceived(
-      asset: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    totalReceived(asset: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     verifyShares(
       account: string,
@@ -612,7 +655,9 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    withdrawFunds(
+    withdrawAllowed(overrides?: CallOverrides): Promise<boolean>;
+
+    withdrawAssets(
       account: string,
       asset: string,
       overrides?: CallOverrides
@@ -624,49 +669,64 @@ export interface Campaign extends BaseContract {
     Challenge(action?: null): ChallengeEventFilter;
 
     "Claim(address,uint256,uint256,address)"(
-      account?: null,
+      account?: string | null,
       share?: null,
       reward?: null,
       assset?: null
     ): ClaimEventFilter;
     Claim(
-      account?: null,
+      account?: string | null,
       share?: null,
       reward?: null,
       assset?: null
     ): ClaimEventFilter;
 
     "Fund(address,uint256,address)"(
-      provider?: null,
+      provider?: string | null,
       amount?: null,
       asset?: null
     ): FundEventFilter;
-    Fund(provider?: null, amount?: null, asset?: null): FundEventFilter;
+    Fund(
+      provider?: string | null,
+      amount?: null,
+      asset?: null
+    ): FundEventFilter;
 
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
 
-    "SharesMerkleRoot(bytes32,bytes32,uint256)"(
+    "Lock(bool)"(locked?: null): LockEventFilter;
+    Lock(locked?: null): LockEventFilter;
+
+    "SharesMerkleRootUpdate(bytes32,bytes32,uint256)"(
       sharesMerkleRoot?: null,
       sharesUri?: null,
       activationTime?: null
-    ): SharesMerkleRootEventFilter;
-    SharesMerkleRoot(
+    ): SharesMerkleRootUpdateEventFilter;
+    SharesMerkleRootUpdate(
       sharesMerkleRoot?: null,
       sharesUri?: null,
       activationTime?: null
-    ): SharesMerkleRootEventFilter;
+    ): SharesMerkleRootUpdateEventFilter;
 
     "Withdraw(address,uint256,address)"(
-      account?: null,
+      account?: string | null,
       amount?: null,
       asset?: null
     ): WithdrawEventFilter;
-    Withdraw(account?: null, amount?: null, asset?: null): WithdrawEventFilter;
+    Withdraw(
+      account?: string | null,
+      amount?: null,
+      asset?: null
+    ): WithdrawEventFilter;
   };
 
   estimateGas: {
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
+
+    DAYS_IN_WEEK(overrides?: CallOverrides): Promise<BigNumber>;
+
+    SECONDS_IN_DAY(overrides?: CallOverrides): Promise<BigNumber>;
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -698,11 +758,6 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    convertToReward(
-      asset: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     fund(
       asset: string,
       amount: BigNumberish,
@@ -718,10 +773,15 @@ export interface Campaign extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _activationTime: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    isChallengePeriod(overrides?: CallOverrides): Promise<BigNumber>;
+
     locked(overrides?: CallOverrides): Promise<BigNumber>;
+
+    merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<BigNumber>;
 
     oracle(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -755,12 +815,7 @@ export interface Campaign extends BaseContract {
 
     totalClaimed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    totalFundsReceived(
-      asset: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    totalReceived(asset: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     verifyShares(
       account: string,
@@ -769,7 +824,9 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    withdrawFunds(
+    withdrawAllowed(overrides?: CallOverrides): Promise<BigNumber>;
+
+    withdrawAssets(
       account: string,
       asset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -778,6 +835,10 @@ export interface Campaign extends BaseContract {
 
   populateTransaction: {
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    DAYS_IN_WEEK(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    SECONDS_IN_DAY(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -811,11 +872,6 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    convertToReward(
-      asset: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     fund(
       asset: string,
       amount: BigNumberish,
@@ -831,10 +887,17 @@ export interface Campaign extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _activationTime: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    isChallengePeriod(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     locked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    merkleRootUpdateAllowed(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     oracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -871,13 +934,8 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    totalFundsReceived(
+    totalReceived(
       asset: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    totalReward(
-      arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -888,7 +946,9 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    withdrawFunds(
+    withdrawAllowed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    withdrawAssets(
       account: string,
       asset: string,
       overrides?: Overrides & { from?: string | Promise<string> }
