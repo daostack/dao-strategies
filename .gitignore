@@ -50,6 +50,7 @@ artifacts
 # misc
 .DS_Store
 .netlify
+.env
 
 # debug
 npm-debug.log*

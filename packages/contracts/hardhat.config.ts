@@ -24,18 +24,16 @@ import * as fs from 'fs';
 import { HardhatUserConfig, task } from 'hardhat/config';
 
 import { config as envConfig } from 'dotenv';
-envConfig({ path: '../frontend/.env' });
+envConfig({ path: './.env' });
 
 /**
  * Set your target network!!!
  */
-console.log('HARDHAT_TARGET_NETWORK: ', process.env.HARDHAT_TARGET_NETWORK);
+//console.log('HARDHAT_TARGET_NETWORK: ', process.env.HARDHAT_TARGET_NETWORK);
+console.log('Rinkeby API key: ', process.env.ALCHEMY_RINKEBY_KEY);
+console.log('Goerli API key: ', process.env.ALCHEMY_GOERLI_KEY);
 
-//
-// Select the network you want to deploy to here:
-//
-
-const mnemonicPath = './generated/mnemonic.secret';
+const mnemonicPath = './mnemonic.secret';
 const getMnemonic = (): string => {
   try {
     return fs.readFileSync(mnemonicPath).toString().trim();
@@ -48,67 +46,29 @@ const getMnemonic = (): string => {
 };
 
 const config: HardhatUserConfig = {
-  defaultNetwork: process.env.HARDHAT_TARGET_NETWORK,
+  //defaultNetwork: process.env.HARDHAT_TARGET_NETWORK,
   namedAccounts: {
     deployer: {
       default: 0, // here this will by default take the first account as deployer
     },
   },
-  // don't forget to set your provider like:
-  // REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
-  // (then your frontend will talk to your contracts on the live network!)
-  // (you will need to restart the `yarn run start` dev server after editing the .env)
-
   networks: {
     hardhat: {
-      /*
-        if there is no mnemonic, it will just use account 0 of the hardhat node to deploy
-        (you can put in a mnemonic here to set the deployer locally)
-      */
-      // accounts: {
-      //   mnemonic: mnemonic(),
-      // },
     },
     rinkeby: {
-      url: 'https://rinkeby.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
-      accounts: {
-        mnemonic: getMnemonic(),
-      },
-    },
-    kovan: {
-      url: 'https://kovan.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
+      url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_RINKEBY_KEY}`,
       accounts: {
         mnemonic: getMnemonic(),
       },
     },
     mainnet: {
-      url: 'https://mainnet.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
-      accounts: {
-        mnemonic: getMnemonic(),
-      },
-    },
-    ropsten: {
-      url: 'https://ropsten.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
+      url: 'https://eth-mainnet.g.alchemy.com/v2/dgWViC5GtyYZ8Ay_Sn17TeyxzqfqWdta',
       accounts: {
         mnemonic: getMnemonic(),
       },
     },
     goerli: {
-      url: 'https://goerli.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad', // <---- YOUR INFURA ID! (or it won't work)
-      accounts: {
-        mnemonic: getMnemonic(),
-      },
-    },
-    xdai: {
-      url: 'https://rpc.xdaichain.com/',
-      gasPrice: 1000000000,
-      accounts: {
-        mnemonic: getMnemonic(),
-      },
-    },
-    matic: {
-      url: 'https://rpc-mainnet.maticvigil.com/',
-      gasPrice: 1000000000,
+      url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_GOERLI_KEY}`,
       accounts: {
         mnemonic: getMnemonic(),
       },
@@ -118,24 +78,6 @@ const config: HardhatUserConfig = {
     compilers: [
       {
         version: '0.8.6',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-      {
-        version: '0.7.6',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-      {
-        version: '0.6.7',
         settings: {
           optimizer: {
             enabled: true,
