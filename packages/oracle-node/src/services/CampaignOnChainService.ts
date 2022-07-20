@@ -1,11 +1,9 @@
 import {
-  BalanceTree,
   CampaignOnchainDetails,
   ChainsDetails,
   ClaimInfo,
-  ContractsJson,
+  campaignInstance,
   TokenBalance,
-  Typechain,
 } from '@dao-strategies/core';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
 import { CampaignService } from './CampaignService';
@@ -82,14 +80,7 @@ export class CampaignOnChainService {
 
     /** read the root details (including the tree) of the current campaign root (use the root
      * from the contract since maybe there is a recent one in the DB that has not been published) */
-    const campaignContract = new Contract(
-      campaign.address,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      ContractsJson.jsonOfChain().contracts.Campaign.abi,
-      this.provider
-    ) as Typechain.Campaign;
-
-    <NEED TO CONSIDER THE CHALLENGE PERIOD NOW>
+    const campaignContract = campaignInstance(campaign.address, this.provider);
 
     const currentRoot = await campaignContract.getValidRoot();
 
