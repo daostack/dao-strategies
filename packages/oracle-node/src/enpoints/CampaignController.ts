@@ -4,7 +4,7 @@ import {
   CampaignUriDetails,
   CampaignCreateDetails,
   CampaignOnchainDetails,
-  ClaimInfo,
+  CampaignClaimInfo,
   TimeDetails,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
@@ -155,7 +155,7 @@ export class CampaignController extends Controller {
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
-  ): Promise<ClaimInfo | undefined> {
+  ): Promise<CampaignClaimInfo | undefined> {
     /* eslint-disable */
     return this.manager.services.campaignOnChain.getClaimInfo(
       request.params.address as string,

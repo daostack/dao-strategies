@@ -54,4 +54,18 @@ export class DateManager {
     this.date = new Date(newDate);
     return this;
   }
+
+  prettyDiff(to: number) {
+    // TODO
+    const diff = Math.abs(this.getTime() - to);
+    if (diff < 60) {
+      return diff + ' sec';
+    } else if (diff < 60 * 60) {
+      return Math.ceil(diff / 60) + ' min';
+    } else if (diff < 60 * 60 * 24) {
+      return Math.ceil(diff / (60 * 60)) + ' hr';
+    } else {
+      return Math.ceil(diff / (60 * 60 * 24)) + ' days';
+    }
+  }
 }

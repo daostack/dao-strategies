@@ -93,6 +93,12 @@ Then start postgres (and pgAdmin)
 sudo docker-compose up
 ```
 
+Then migrate (create the DB tables) using prisma
+
+```
+yarn prisma-migrate
+```
+
 Then run the NodeJS app
 
 ```

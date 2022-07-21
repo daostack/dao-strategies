@@ -34,6 +34,7 @@ export interface CampaignInterface extends utils.Interface {
     "getValidRoot()": FunctionFragment;
     "guardian()": FunctionFragment;
     "initCampaign(bytes32,bytes32,address,address)": FunctionFragment;
+    "isRootActive()": FunctionFragment;
     "locked()": FunctionFragment;
     "oracle()": FunctionFragment;
     "pendingMerkleRoot()": FunctionFragment;
@@ -97,6 +98,10 @@ export interface CampaignInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "initCampaign",
     values: [BytesLike, BytesLike, string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isRootActive",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "locked", values?: undefined): string;
   encodeFunctionData(functionFragment: "oracle", values?: undefined): string;
@@ -174,6 +179,10 @@ export interface CampaignInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "guardian", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "initCampaign",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isRootActive",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
@@ -356,6 +365,8 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    isRootActive(overrides?: CallOverrides): Promise<[boolean]>;
+
     locked(overrides?: CallOverrides): Promise<[boolean]>;
 
     oracle(overrides?: CallOverrides): Promise<[string]>;
@@ -463,6 +474,8 @@ export interface Campaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  isRootActive(overrides?: CallOverrides): Promise<boolean>;
+
   locked(overrides?: CallOverrides): Promise<boolean>;
 
   oracle(overrides?: CallOverrides): Promise<string>;
@@ -566,6 +579,8 @@ export interface Campaign extends BaseContract {
       _oracle: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    isRootActive(overrides?: CallOverrides): Promise<boolean>;
 
     locked(overrides?: CallOverrides): Promise<boolean>;
 
@@ -721,6 +736,8 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    isRootActive(overrides?: CallOverrides): Promise<BigNumber>;
+
     locked(overrides?: CallOverrides): Promise<BigNumber>;
 
     oracle(overrides?: CallOverrides): Promise<BigNumber>;
@@ -833,6 +850,8 @@ export interface Campaign extends BaseContract {
       _oracle: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    isRootActive(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     locked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

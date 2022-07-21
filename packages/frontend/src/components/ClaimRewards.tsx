@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { RouteNames } from '../pages/MainPage';
 import { formatEther } from '../utils/ethers';
 import { Layer } from 'grommet';
+import { TreeClaimInfo } from '@dao-strategies/core';
+import { useNow } from '../hooks/useNow';
 
 interface IParams {
   campaignAddress: string;
@@ -17,11 +19,14 @@ interface UserClaimStatus {
   isLogged: boolean;
   isVerified: boolean;
   canClaim: boolean;
+  willCanClaim: boolean;
+  claim: TreeClaimInfo | undefined;
   wasExecuted: boolean;
 }
 
 export const ClaimButton: FC<IParams> = (props: IParams) => {
   const [showClaim, setShowClaim] = useState<boolean>(false);
+  const { now } = useNow();
   const { user, connect } = useLoggedUser();
   const navigate = useNavigate();
 
@@ -38,10 +43,15 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
 
   if (campaign === undefined) return <></>;
 
+  const currentClaim = claimInfo !== undefined && claimInfo.current !== undefined ? claimInfo.current : undefined;
+  const pendingClaim = claimInfo !== undefined && claimInfo.pending !== undefined ? claimInfo.pending : undefined;
+
   const status: UserClaimStatus = {
     isLogged: user !== undefined,
     isVerified: user.verified.github != null,
-    canClaim: claimInfo !== undefined && claimInfo.shares !== undefined,
+    canClaim: currentClaim !== undefined && currentClaim.shares !== undefined,
+    willCanClaim: pendingClaim !== undefined && pendingClaim.shares !== undefined,
+    claim: currentClaim !== undefined ? currentClaim : pendingClaim !== undefined ? pendingClaim : undefined,
     wasExecuted: campaign.executed,
   };
 
@@ -53,18 +63,25 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
     );
   }
 
-  if (status.canClaim && claimInfo !== undefined) {
+  if ((status.canClaim || status.willCanClaim) && status.claim !== undefined) {
     return (
       <>
-        {showClaim ? (
+        {status.canClaim && showClaim ? (
           <Layer onEsc={() => setShowClaim(false)} onClickOutside={() => setShowClaim(false)}>
             test
           </Layer>
         ) : (
           <></>
         )}
-        <AppButton onClick={() => setShowClaim(true)}>Claim rewards</AppButton>
-        <div>{formatEther(ethers.BigNumber.from(claimInfo.shares).mul(100), 2)}%</div>
+        {!status.canClaim && status.willCanClaim && now && claimInfo && claimInfo.activationTime ? (
+          <>Pending {now.prettyDiff(claimInfo.activationTime)}</>
+        ) : (
+          <></>
+        )}
+        <AppButton disabled={!status.canClaim} onClick={() => setShowClaim(true)}>
+          Claim
+        </AppButton>
+        <div>{formatEther(ethers.BigNumber.from(status.claim.shares).mul(100), 2)}%</div>
       </>
     );
   }

@@ -1,3 +1,4 @@
+import { campaignInstance } from '@dao-strategies/core';
 import {
   CampaignCreateDetails,
   ContractsJson,
@@ -86,12 +87,7 @@ export class OnChainService {
   }
 
   async publishShares(address: string, root: string): Promise<void> {
-    const campaign = new Contract(
-      address,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      ContractsJson.jsonOfChain().contracts.Campaign.abi,
-      this.signer
-    ) as Typechain.Campaign;
+    const campaign = campaignInstance(address, this.signer);
 
     const tx = await campaign.proposeShares(root, ZERO_BYTES32);
     const rec = await tx.wait();

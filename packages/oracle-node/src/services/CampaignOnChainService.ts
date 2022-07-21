@@ -1,11 +1,15 @@
 import {
   CampaignOnchainDetails,
   ChainsDetails,
-  ClaimInfo,
-  campaignInstance,
+  CampaignClaimInfo,
+  TreeClaimInfo,
+  campaignProvider,
   TokenBalance,
+  Typechain,
 } from '@dao-strategies/core';
+import { Reward } from '@prisma/client';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
+
 import { CampaignService } from './CampaignService';
 
 const ZERO_BYTES32 =
@@ -60,58 +64,26 @@ export class CampaignOnChainService {
     return { tokens };
   }
 
-  async getClaimInfo(
-    campaignAddress: string,
-    address: string
-  ): Promise<ClaimInfo | undefined> {
-    const campaign = await this.campaignService.getFromAddress(campaignAddress);
-    const reward = await this.campaignService.getRewardToAddress(
-      campaign.uri,
-      address
-    );
+  /** get the shares (and fill the assets) for a given merkle root of a given campaign */
+  async getTreeClaimInfo(
+    uri: string,
+    root: string,
+    address: string,
+    reward: Reward,
+    campaignContract: Typechain.Campaign,
+    chainId: number,
+    verify: boolean = false
+  ): Promise<TreeClaimInfo | undefined> {
+    /** if there should be an entry in the root for this addres,
+     * read the proof for this address and balance */
+    const leaf = await this.campaignService.getBalanceLeaf(uri, root, address);
 
-    if (reward == null) return undefined;
+    /** is this an error? */
+    if (leaf == null) return undefined;
 
-    /**
-     * if there is a reward to this address is because it is already a verified
-     * address of a social account. Accordingly this address should be in the
-     * merkle root of that campaign
-     */
-
-    /** read the root details (including the tree) of the current campaign root (use the root
-     * from the contract since maybe there is a recent one in the DB that has not been published) */
-    const campaignContract = campaignInstance(campaign.address, this.provider);
-
-    const currentRoot = await campaignContract.getValidRoot();
-
-    if (currentRoot === ZERO_BYTES32) {
-      return {
-        executed: false,
-        present: false,
-      };
-    }
-
-    /** read the proof of that root for this account and balance */
-    const leaf = await this.campaignService.getBalanceLeaf(
-      campaign.uri,
-      currentRoot,
-      address
-    );
-
-    if (leaf == null) {
-      return {
-        executed: true,
-        present: false,
-      };
-    }
-
-    /**
-     * The shares in the root should be the same rewards originally computed
-     * there is no reason for which the shares in the root would differ.
-     */
-
+    /** protection: the shares in the root should not be other than the rewards computed for this address */
     if (
-      !ethers.BigNumber.from(reward.amount).eq(
+      !ethers.BigNumber.from(reward.amount.toString()).eq(
         ethers.BigNumber.from(leaf.balance)
       )
     ) {
@@ -120,16 +92,16 @@ export class CampaignOnChainService {
       );
     }
 
-    /** check the proof is valid */
-    const res = await campaignContract.verifyShares(
-      address,
-      leaf.balance,
-      leaf.proof
-    );
+    /** protection: check that the proof is valid */
+    if (verify) {
+      const res = await campaignContract.verifyShares(
+        address,
+        leaf.balance,
+        leaf.proof
+      );
+    }
 
-    console.log({ res });
-
-    const assets = ChainsDetails.chainAssets(campaign.chainId);
+    const assets = ChainsDetails.chainAssets(chainId);
 
     const tokens = await Promise.all(
       assets.map(async (asset): Promise<TokenBalance> => {
@@ -149,12 +121,73 @@ export class CampaignOnChainService {
     );
 
     return {
-      executed: true,
+      root,
+      address,
       present: true,
-      account: reward.account,
-      campaignAddress: campaign.address,
       shares: reward.amount.toString(),
       assets: tokens,
+    };
+  }
+
+  async getClaimInfo(
+    campaignAddress: string,
+    address: string
+  ): Promise<CampaignClaimInfo | undefined> {
+    const campaign = await this.campaignService.getFromAddress(campaignAddress);
+
+    /** get the reward to the address () */
+    const reward = await this.campaignService.getRewardToAddress(
+      campaign.uri,
+      address
+    );
+
+    /** if there is not reward, then there should not be any entry in the root */
+    if (reward == null) return undefined;
+
+    /**
+     * if there is a reward to this address is because it is already a verified
+     * address of a social account. Accordingly this address should be in the
+     * merkle root of that campaign
+     */
+
+    /** read the root details (including the tree) of the current campaign root (use the root
+     * from the contract since maybe there is a recent one in the DB that has not been published) */
+    const campaignContract = campaignProvider(campaign.address, this.provider);
+
+    const currentRoot = await campaignContract.getValidRoot();
+
+    const currentClaim = await this.getTreeClaimInfo(
+      campaign.uri,
+      currentRoot,
+      address,
+      reward,
+      campaignContract,
+      campaign.chainId,
+      true
+    );
+
+    const isRootActive = await campaignContract.isRootActive();
+    const activationTime = await campaignContract.activationTime();
+
+    let pendingClaim: TreeClaimInfo | undefined = undefined;
+    if (!isRootActive) {
+      const pendingRoot = await campaignContract.pendingMerkleRoot();
+      pendingClaim = await this.getTreeClaimInfo(
+        campaign.uri,
+        pendingRoot,
+        address,
+        reward,
+        campaignContract,
+        campaign.chainId
+      );
+    }
+
+    return {
+      executed: campaign.executed,
+      published: campaign.published,
+      current: currentClaim,
+      pending: pendingClaim,
+      activationTime: activationTime.toNumber(),
     };
   }
 }

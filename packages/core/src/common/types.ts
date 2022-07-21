@@ -47,13 +47,31 @@ export interface CampaignOnchainDetails {
   tokens: TokenBalance[];
 }
 
-export interface ClaimInfo {
-  executed: boolean;
+export interface TreeClaimInfo {
+  /** merkle root */
+  root: string;
+  /** address */
+  address?: string;
+  /** true if the address is present in the merkle root */
   present: boolean;
-  account?: string;
-  campaignAddress?: string;
+  /** amount of shares available to the address */
   shares?: string;
+  /** amount of assets available to the address (based on current campaign assets) */
   assets?: TokenBalance[];
+}
+
+export interface CampaignClaimInfo {
+  campaignAddress?: string;
+  /** true if the campaign was already executed  */
+  executed: boolean;
+  /** true if the campaign was already executed  */
+  published: boolean;
+  /** current claim info */
+  current?: TreeClaimInfo;
+  /** pending claim info */
+  pending?: TreeClaimInfo;
+  /** activation time for the pending claim */
+  activationTime?: number;
 }
 
 export interface TimeDetails {

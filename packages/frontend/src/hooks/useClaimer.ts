@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ClaimInfo } from '@dao-strategies/core';
+import { CampaignClaimInfo } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 
@@ -8,11 +8,11 @@ export const useClaimer = (
   userAddress: string | undefined
 ): {
   isLoading: boolean;
-  claimInfo: ClaimInfo | undefined;
+  claimInfo: CampaignClaimInfo | undefined;
   check: () => void;
 } => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [claimInfo, setClaimInfo] = useState<ClaimInfo>();
+  const [claimInfo, setClaimInfo] = useState<CampaignClaimInfo>();
 
   const check = async (): Promise<void> => {
     if (campaignAddress === undefined) return undefined;

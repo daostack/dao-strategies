@@ -33,6 +33,7 @@ import { FormTrash } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
+import { useNow } from '../../hooks/useNow';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -75,7 +76,7 @@ const DEBUG = true;
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
 
-  const [now, setNow] = useState<DateManager>();
+  const { now } = useNow();
   const [pageIx, setPageIx] = useState<number>(0);
 
   const { isValid, checking, checkExist, isValidName } = useGithubSearch();
@@ -83,20 +84,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const [validated, setValidated] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
-
-  /**
-   * Time management: frontend's time is syncronized with the oracle time.
-   *
-   * This means that the execDate, if campaign is retroactive, will be a time lower than the
-   * local time on the oracle when registering (and executing) the campaign.
-   */
-  useEffect(() => {
-    const _now = new DateManager();
-    _now.sync().then(() => {
-      if (DEBUG) console.log('CampaignCreate - now set', { now: now, bias: _now.getBias() });
-      setNow(_now);
-    });
-  }, []);
 
   /** Form data is kept in the formValues state. The strategy details is a computed
    * property that should change everytime the formValues change.

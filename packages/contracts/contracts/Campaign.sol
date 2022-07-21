@@ -168,9 +168,13 @@ contract Campaign is Initializable {
         emit SharesMerkleRoot(_sharesMerkleRoot, _sharesUri, activationTime);
     }
 
+    function isRootActive() public view returns (bool) {
+        return block.timestamp > activationTime;
+    }
+
     /** Valid root is either the approved or pending one depending on the activation time */
     function getValidRoot() public view returns (bytes32 root) {
-        return block.timestamp > activationTime ? pendingMerkleRoot : approvedMerkleRoot;
+        return isRootActive() ? pendingMerkleRoot : approvedMerkleRoot;
     }
 
     /** Total funds received by the contract */
