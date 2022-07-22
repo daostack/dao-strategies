@@ -9,6 +9,7 @@ export const toCampaignExternal = (campaign: Campaign): CampaignReadDetails => {
     creator: campaign.creatorId,
     execDate: toNumber(campaign.execDate),
     cancelDate: toNumber(campaign.cancelDate),
+    challengePeriod: toNumber(campaign.challengePeriod),
     strategyID: campaign.stratID as Strategy_ID,
     strategyParams: JSON.parse(campaign.stratParamsStr) as Record<string, any>,
   };

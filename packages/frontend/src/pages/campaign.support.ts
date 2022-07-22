@@ -1,11 +1,17 @@
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
-import { CampaignCreateDetails, CampaignReadDetails, CampaignUriDetails, Typechain } from '@dao-strategies/core';
+import {
+  CampaignCreateDetails,
+  CampaignReadDetails,
+  CampaignUriDetails,
+  ChainsDetails,
+  Typechain,
+} from '@dao-strategies/core';
+import { ethers } from 'ethers';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/time';
-import { ethers } from 'ethers';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
@@ -192,6 +198,7 @@ export const deployCampaign = async (
     uriHex,
     otherDetails.guardian,
     otherDetails.oracle,
+    otherDetails.challengePeriod,
     salt
   );
   const txReceipt = await ex.wait();
@@ -231,4 +238,26 @@ export const getCampaign = async (uri: string): Promise<CampaignReadDetails> => 
 
   const data = await response.json();
   return data;
+};
+
+export const claimRewards = async (
+  campaign: Typechain.Campaign,
+  account: string,
+  shares: string,
+  proof: string[],
+  chainId: number
+) => {
+  const assets = ChainsDetails.chainAssets(chainId);
+
+  const ex = await campaign.claim(
+    account,
+    shares,
+    proof,
+    assets.map((a) => a.address)
+  );
+
+  const txReceipt = await ex.wait();
+
+  console.log(txReceipt);
+  return;
 };

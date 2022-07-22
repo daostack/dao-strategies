@@ -1,3 +1,4 @@
+import { Chain } from '@wagmi/core';
 import { Strategy_ID } from '../strategies';
 
 /** Necessary and sufficient properties needed to derive the URI */
@@ -15,6 +16,7 @@ export interface CampaignCreateDetails {
   description: string;
   guardian: string;
   oracle: string;
+  challengePeriod: number;
   chainId: number;
   asset: string;
   address: string;
@@ -29,18 +31,28 @@ export interface CampaignReadDetails
   executed: boolean;
 }
 
+export interface Asset {
+  id: string;
+  address: string;
+  decimals: number;
+  name: string;
+  icon: string;
+}
+
+export interface ChainAndAssets {
+  chainIcon: string;
+  chain: Chain;
+  assets: Asset[];
+}
+
 /**
  * used to list the balances of a campaign contract and reused also
  * for sending the available claimable tokens for a given address on
  * a given campaign
  */
-export interface TokenBalance {
-  id: string;
-  address: string;
+export interface TokenBalance extends Asset {
   balance: string;
-  name: string;
-  icon: string;
-  proof?: string[];
+  price?: number;
 }
 
 export interface CampaignOnchainDetails {
@@ -54,6 +66,8 @@ export interface TreeClaimInfo {
   address?: string;
   /** true if the address is present in the merkle root */
   present: boolean;
+  /** proof for this address */
+  proof?: string[];
   /** amount of shares available to the address */
   shares?: string;
   /** amount of assets available to the address (based on current campaign assets) */

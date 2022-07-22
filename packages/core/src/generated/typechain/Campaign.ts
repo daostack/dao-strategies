@@ -21,19 +21,18 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 export interface CampaignInterface extends utils.Interface {
   contractName: "Campaign";
   functions: {
-    "CHALLENGE_PERIOD()": FunctionFragment;
     "TOTAL_SHARES()": FunctionFragment;
     "activationTime()": FunctionFragment;
     "approvedMerkleRoot()": FunctionFragment;
     "balanceOfAsset(address)": FunctionFragment;
     "challenge(uint8)": FunctionFragment;
-    "claim(address,uint256,bytes32[],address)": FunctionFragment;
+    "challengePeriod()": FunctionFragment;
+    "claim(address,uint256,bytes32[],address[])": FunctionFragment;
     "claimed(address,address)": FunctionFragment;
-    "convertToReward(address)": FunctionFragment;
     "fund(address,uint256)": FunctionFragment;
     "getValidRoot()": FunctionFragment;
     "guardian()": FunctionFragment;
-    "initCampaign(bytes32,bytes32,address,address)": FunctionFragment;
+    "initCampaign(bytes32,bytes32,address,address,uint256)": FunctionFragment;
     "isRootActive()": FunctionFragment;
     "locked()": FunctionFragment;
     "oracle()": FunctionFragment;
@@ -45,15 +44,10 @@ export interface CampaignInterface extends utils.Interface {
     "strategyUri()": FunctionFragment;
     "totalClaimed(address)": FunctionFragment;
     "totalFundsReceived(address)": FunctionFragment;
-    "totalReward(address)": FunctionFragment;
     "verifyShares(address,uint256,bytes32[])": FunctionFragment;
     "withdrawFunds(address,address)": FunctionFragment;
   };
 
-  encodeFunctionData(
-    functionFragment: "CHALLENGE_PERIOD",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "TOTAL_SHARES",
     values?: undefined
@@ -75,16 +69,16 @@ export interface CampaignInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "challengePeriod",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "claim",
-    values: [string, BigNumberish, BytesLike[], string]
+    values: [string, BigNumberish, BytesLike[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "claimed",
     values: [string, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "convertToReward",
-    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "fund",
@@ -97,7 +91,7 @@ export interface CampaignInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "guardian", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initCampaign",
-    values: [BytesLike, BytesLike, string, string]
+    values: [BytesLike, BytesLike, string, string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "isRootActive",
@@ -134,7 +128,6 @@ export interface CampaignInterface extends utils.Interface {
     functionFragment: "totalFundsReceived",
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "totalReward", values: [string]): string;
   encodeFunctionData(
     functionFragment: "verifyShares",
     values: [string, BigNumberish, BytesLike[]]
@@ -144,10 +137,6 @@ export interface CampaignInterface extends utils.Interface {
     values: [string, string]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "CHALLENGE_PERIOD",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "TOTAL_SHARES",
     data: BytesLike
@@ -165,12 +154,12 @@ export interface CampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "convertToReward",
+    functionFragment: "challengePeriod",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "fund", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getValidRoot",
@@ -211,10 +200,6 @@ export interface CampaignInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "totalFundsReceived",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "totalReward",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -308,8 +293,6 @@ export interface Campaign extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     TOTAL_SHARES(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     activationTime(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -326,11 +309,13 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    challengePeriod(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     claim(
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
-      asset: string,
+      assets: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -339,11 +324,6 @@ export interface Campaign extends BaseContract {
       arg1: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
-
-    convertToReward(
-      asset: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
 
     fund(
       asset: string,
@@ -362,6 +342,7 @@ export interface Campaign extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _challengePeriod: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -406,8 +387,6 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { total: BigNumber }>;
 
-    totalReward(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
-
     verifyShares(
       account: string,
       share: BigNumberish,
@@ -422,8 +401,6 @@ export interface Campaign extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
-
   TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
   activationTime(overrides?: CallOverrides): Promise<BigNumber>;
@@ -437,11 +414,13 @@ export interface Campaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  challengePeriod(overrides?: CallOverrides): Promise<BigNumber>;
+
   claim(
     account: string,
     share: BigNumberish,
     proof: BytesLike[],
-    asset: string,
+    assets: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -450,11 +429,6 @@ export interface Campaign extends BaseContract {
     arg1: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
-
-  convertToReward(
-    asset: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
 
   fund(
     asset: string,
@@ -471,6 +445,7 @@ export interface Campaign extends BaseContract {
     _strategyUri: BytesLike,
     _guardian: string,
     _oracle: string,
+    _challengePeriod: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -515,8 +490,6 @@ export interface Campaign extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
   verifyShares(
     account: string,
     share: BigNumberish,
@@ -531,8 +504,6 @@ export interface Campaign extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
-
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
     activationTime(overrides?: CallOverrides): Promise<BigNumber>;
@@ -546,11 +517,13 @@ export interface Campaign extends BaseContract {
 
     challenge(action: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
+    challengePeriod(overrides?: CallOverrides): Promise<BigNumber>;
+
     claim(
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
-      asset: string,
+      assets: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -559,8 +532,6 @@ export interface Campaign extends BaseContract {
       arg1: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    convertToReward(asset: string, overrides?: CallOverrides): Promise<void>;
 
     fund(
       asset: string,
@@ -577,6 +548,7 @@ export interface Campaign extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _challengePeriod: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -617,8 +589,6 @@ export interface Campaign extends BaseContract {
       asset: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     verifyShares(
       account: string,
@@ -681,8 +651,6 @@ export interface Campaign extends BaseContract {
   };
 
   estimateGas: {
-    CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
-
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
     activationTime(overrides?: CallOverrides): Promise<BigNumber>;
@@ -699,11 +667,13 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    challengePeriod(overrides?: CallOverrides): Promise<BigNumber>;
+
     claim(
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
-      asset: string,
+      assets: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -711,11 +681,6 @@ export interface Campaign extends BaseContract {
       arg0: string,
       arg1: string,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    convertToReward(
-      asset: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     fund(
@@ -733,6 +698,7 @@ export interface Campaign extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _challengePeriod: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -777,8 +743,6 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    totalReward(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
     verifyShares(
       account: string,
       share: BigNumberish,
@@ -794,8 +758,6 @@ export interface Campaign extends BaseContract {
   };
 
   populateTransaction: {
-    CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     TOTAL_SHARES(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     activationTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -814,11 +776,13 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    challengePeriod(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     claim(
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
-      asset: string,
+      assets: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -826,11 +790,6 @@ export interface Campaign extends BaseContract {
       arg0: string,
       arg1: string,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    convertToReward(
-      asset: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     fund(
@@ -848,6 +807,7 @@ export interface Campaign extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _challengePeriod: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -892,11 +852,6 @@ export interface Campaign extends BaseContract {
 
     totalFundsReceived(
       asset: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    totalReward(
-      arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

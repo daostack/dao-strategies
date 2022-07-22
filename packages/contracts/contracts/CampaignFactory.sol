@@ -35,10 +35,11 @@ contract CampaignFactory {
         bytes32 _strategyUri,
         address _guardian,
         address _oracle,
+        uint256 _challengePeriod,
         bytes32 salt
     ) external {
         address payable proxy = payable(Clones.cloneDeterministic(address(master), salt));
-        Campaign(proxy).initCampaign(_sharesMerkleRoot, _strategyUri, _guardian, _oracle);
+        Campaign(proxy).initCampaign(_sharesMerkleRoot, _strategyUri, _guardian, _oracle, _challengePeriod);
 
         emit CampaignCreated(msg.sender, proxy, _sharesMerkleRoot, _sharesUri, _strategyUri, _guardian, _oracle, salt);
     }

@@ -1,15 +1,18 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useCampaign } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { useClaimer } from '../hooks/useClaimer';
 import { AppButton } from './styles/BasicElements';
-import { ethers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
 import { RouteNames } from '../pages/MainPage';
-import { formatEther } from '../utils/ethers';
-import { Layer } from 'grommet';
-import { TreeClaimInfo } from '@dao-strategies/core';
+import { Box, Layer } from 'grommet';
+import { ChainsDetails, TreeClaimInfo } from '@dao-strategies/core';
 import { useNow } from '../hooks/useNow';
+import { AssetBalance } from './Assets';
+import { claimRewards } from '../pages/campaign.support';
+import { useCampaignInstance } from '../hooks/useContracts';
+import { truncate } from '../utils/ethers';
+import { Refresh } from 'grommet-icons';
 
 interface IParams {
   campaignAddress: string;
@@ -27,11 +30,35 @@ interface UserClaimStatus {
 export const ClaimButton: FC<IParams> = (props: IParams) => {
   const [showClaim, setShowClaim] = useState<boolean>(false);
   const { now } = useNow();
-  const { user, connect } = useLoggedUser();
+  const { user, connect, account } = useLoggedUser();
   const navigate = useNavigate();
 
   const { campaign } = useCampaign(props.campaignAddress);
-  const { claimInfo } = useClaimer(props.campaignAddress, user?.address);
+  const { claimInfo, check } = useClaimer(props.campaignAddress, user?.address);
+  const campaignInstance = useCampaignInstance(props.campaignAddress);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('checking claim info');
+      check();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const claim = async () => {
+    if (
+      account === undefined ||
+      campaignInstance === undefined ||
+      claimInfo === undefined ||
+      claimInfo.current === undefined ||
+      claimInfo.current.shares === undefined ||
+      claimInfo.current.proof === undefined ||
+      campaign === undefined
+    ) {
+      throw new Error('claim info undefined');
+    }
+    await claimRewards(campaignInstance, account, claimInfo.current.shares, claimInfo.current.proof, campaign.chainId);
+  };
 
   if (user === undefined) {
     return (
@@ -64,11 +91,26 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
   }
 
   if ((status.canClaim || status.willCanClaim) && status.claim !== undefined) {
+    const claimValue = status.claim.assets
+      ? truncate(ChainsDetails.valueOfAssets(status.claim.assets).toString(), 2)
+      : 0;
     return (
       <>
         {status.canClaim && showClaim ? (
           <Layer onEsc={() => setShowClaim(false)} onClickOutside={() => setShowClaim(false)}>
-            test
+            <Box pad="medium">
+              {status.claim.assets !== undefined ? (
+                status.claim.assets.map((asset) => {
+                  return <AssetBalance asset={asset}></AssetBalance>;
+                })
+              ) : (
+                <></>
+              )}
+              <div>~{claimValue} usd</div>
+              <AppButton primary onClick={() => claim()}>
+                Claim
+              </AppButton>
+            </Box>
           </Layer>
         ) : (
           <></>
@@ -81,7 +123,8 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
         <AppButton disabled={!status.canClaim} onClick={() => setShowClaim(true)}>
           Claim
         </AppButton>
-        <div>{formatEther(ethers.BigNumber.from(status.claim.shares).mul(100), 2)}%</div>
+        <div>~{claimValue} usd</div>
+        <Refresh onClick={() => check()}></Refresh>
       </>
     );
   }

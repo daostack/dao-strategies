@@ -1,6 +1,6 @@
 import { BigNumber, ethers } from 'ethers';
 
-function truncate(str: string, maxDecimalDigits: number) {
+export function truncate(str: string, maxDecimalDigits: number) {
   if (str.includes('.')) {
     const parts = str.split('.');
     return parts[0] + '.' + parts[1].slice(0, maxDecimalDigits);

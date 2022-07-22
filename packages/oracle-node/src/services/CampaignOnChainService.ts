@@ -11,6 +11,7 @@ import { Reward } from '@prisma/client';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
 
 import { CampaignService } from './CampaignService';
+import { PriceService } from './PriceService';
 
 const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -25,6 +26,7 @@ const erc20Abi = [
 
 export class CampaignOnChainService {
   readonly provider: providers.JsonRpcProvider;
+  protected price: PriceService;
 
   constructor(
     protected campaignService: CampaignService,
@@ -32,6 +34,7 @@ export class CampaignOnChainService {
   ) {
     this.provider =
       _provider || new providers.JsonRpcProvider(process.env.JSON_RPC_URL);
+    this.price = new PriceService();
   }
 
   async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
@@ -50,13 +53,12 @@ export class CampaignOnChainService {
         }
         /* eslint-disable */
         const balance = (await getBalance) as BigNumber;
+        const price = await this.priceOf(campaign.chainId, asset.address);
         /* eslint-enable */
         return {
-          id: asset.id,
-          address: asset.address,
+          ...asset,
           balance: balance.toString(),
-          name: asset.name,
-          icon: asset.icon,
+          price,
         };
       })
     );
@@ -110,12 +112,11 @@ export class CampaignOnChainService {
           leaf.balance,
           asset.address
         );
+        const price = await this.priceOf(chainId, asset.address);
         return {
-          id: asset.id,
-          address: asset.address,
+          ...asset,
           balance: amount.toString(),
-          name: asset.name,
-          icon: asset.icon,
+          price: price,
         };
       })
     );
@@ -124,8 +125,9 @@ export class CampaignOnChainService {
       root,
       address,
       present: true,
-      shares: reward.amount.toString(),
+      shares: leaf.balance.toString(),
       assets: tokens,
+      proof: leaf.proof,
     };
   }
 
@@ -172,14 +174,16 @@ export class CampaignOnChainService {
     let pendingClaim: TreeClaimInfo | undefined = undefined;
     if (!isRootActive) {
       const pendingRoot = await campaignContract.pendingMerkleRoot();
-      pendingClaim = await this.getTreeClaimInfo(
-        campaign.uri,
-        pendingRoot,
-        address,
-        reward,
-        campaignContract,
-        campaign.chainId
-      );
+      if (pendingRoot !== currentRoot) {
+        pendingClaim = await this.getTreeClaimInfo(
+          campaign.uri,
+          pendingRoot,
+          address,
+          reward,
+          campaignContract,
+          campaign.chainId
+        );
+      }
     }
 
     return {
@@ -187,7 +191,13 @@ export class CampaignOnChainService {
       published: campaign.published,
       current: currentClaim,
       pending: pendingClaim,
-      activationTime: activationTime.toNumber(),
+      activationTime: activationTime.gt(BigNumber.from(Number.MAX_SAFE_INTEGER))
+        ? NaN
+        : activationTime.toNumber(),
     };
+  }
+
+  async priceOf(chainId: number, address: string): Promise<number> {
+    return this.price.priceOf(chainId, address);
   }
 }

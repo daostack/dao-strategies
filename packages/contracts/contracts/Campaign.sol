@@ -15,7 +15,6 @@ contract Campaign is Initializable {
 
     /** Shares are considered a ratio [0-1] with 18 digits where 1E18 = 1 */
     uint256 public constant TOTAL_SHARES = 10**18;
-    uint256 public constant CHALLENGE_PERIOD = 604800;
 
     enum ChallengeAction {
         CancelPending,
@@ -34,10 +33,10 @@ contract Campaign is Initializable {
     bytes32 public strategyUri;
     address public guardian;
     address public oracle;
+    uint256 public challengePeriod;
 
     /** Counters of the total amount of funds provided by all providers
      * and claimed by all claimers */
-    mapping(address => uint256) public totalReward;
     mapping(address => uint256) public totalClaimed;
 
     /** Once locked, the merkleRoot cannot be updated anymore.
@@ -91,15 +90,17 @@ contract Campaign is Initializable {
         bytes32 _sharesMerkleRoot,
         bytes32 _strategyUri,
         address _guardian,
-        address _oracle
+        address _oracle,
+        uint256 _challengePeriod
     ) public initializer {
         strategyUri = _strategyUri;
         guardian = _guardian;
         oracle = _oracle;
+        challengePeriod = _challengePeriod;
 
         if (_sharesMerkleRoot != bytes32(0)) {
             pendingMerkleRoot = _sharesMerkleRoot;
-            activationTime = block.timestamp + CHALLENGE_PERIOD;
+            activationTime = block.timestamp + challengePeriod;
         } else {
             activationTime = type(uint256).max;
         }
@@ -112,7 +113,6 @@ contract Campaign is Initializable {
     ) internal {
         /** Not sure if this assigmations should be done after the funds where received. JIC */
         providers[asset][from] += amount;
-        totalReward[asset] += amount;
         if (asset != address(0)) {
             IERC20(asset).safeTransferFrom(from, address(this), amount);
         }
@@ -134,11 +134,6 @@ contract Campaign is Initializable {
 
     function balanceOfAsset(address asset) public view returns (uint256) {
         return asset == address(0) ? address(this).balance : IERC20(asset).balanceOf(address(this));
-    }
-
-    function convertToReward(address asset) external {
-        uint256 available = totalFundsReceived(asset) - balanceOfAsset(asset);
-        _fund(available, asset, address(this));
     }
 
     function transferValueOut(
@@ -163,13 +158,13 @@ contract Campaign is Initializable {
 
         approvedMerkleRoot = pendingMerkleRoot;
         pendingMerkleRoot = _sharesMerkleRoot;
-        activationTime = block.timestamp + CHALLENGE_PERIOD;
+        activationTime = block.timestamp + challengePeriod;
 
         emit SharesMerkleRoot(_sharesMerkleRoot, _sharesUri, activationTime);
     }
 
     function isRootActive() public view returns (bool) {
-        return block.timestamp > activationTime;
+        return block.timestamp >= activationTime;
     }
 
     /** Valid root is either the approved or pending one depending on the activation time */
@@ -179,7 +174,7 @@ contract Campaign is Initializable {
 
     /** Total funds received by the contract */
     function totalFundsReceived(address asset) public view returns (uint256 total) {
-        return totalReward[asset] + totalClaimed[asset];
+        return balanceOfAsset(asset) + totalClaimed[asset];
     }
 
     /** Validates the shares of an account and computes the available rewards it */
@@ -205,22 +200,30 @@ contract Campaign is Initializable {
         }
     }
 
-    /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
+    /** External function to start claiming one ore more assets. Proof verification is only done here */
     function claim(
         address account,
         uint256 share,
         bytes32[] calldata proof,
-        address asset
+        address[] calldata assets
     ) external {
         verifyShares(account, share, proof);
+
+        for (uint8 ix = 0; ix < assets.length; ix++) {
+            _claim(account, share, assets[ix]);
+        }
+    }
+
+    /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
+    function _claim(
+        address account,
+        uint256 share,
+        address asset
+    ) private {
         uint256 reward = rewardsAvailableToClaimer(account, share, asset);
 
-        if (reward == 0) {
-            revert NoRewardAvailable();
-        }
         claimed[asset][account] += reward;
         totalClaimed[asset] += reward;
-        totalReward[asset] -= reward;
 
         transferValueOut(account, reward, asset);
 
@@ -250,7 +253,7 @@ contract Campaign is Initializable {
 
     function withdrawFunds(address account, address asset) external {
         if (locked && approvedMerkleRoot == bytes32(0)) {
-            uint256 amount = providers[asset][account] / totalReward[asset];
+            uint256 amount = providers[asset][account];
             if (amount == 0) {
                 revert NoFunds();
             }

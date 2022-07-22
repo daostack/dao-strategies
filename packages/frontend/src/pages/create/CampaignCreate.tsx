@@ -130,6 +130,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       chainId,
       asset: ChainsDetails.assetOfName(chainId, formValues.assetName).id,
       cancelDate: finalDetails.execDate + CHALLENGE_PERIOD,
+      challengePeriod: 60, // 604800
     };
 
     /** if the campaign was not simulated it must be created first */

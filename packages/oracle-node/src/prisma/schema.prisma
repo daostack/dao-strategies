@@ -18,6 +18,7 @@ model Campaign {
   asset           String?   // store the Asset id as defined in @dao-strategies/core ChainsDetails
   guardian        String?
   oracle          String?
+  challengePeriod BigInt?   // challengePeriod
   stratID         String
   stratParamsStr  String    // For now, Params are stringified as they can have any structure
   rewards         Reward[] 

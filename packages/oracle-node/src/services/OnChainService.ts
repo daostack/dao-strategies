@@ -66,6 +66,7 @@ export class OnChainService {
       uriCid.multihash.digest,
       details.guardian,
       details.oracle,
+      details.challengePeriod,
       salt
     );
 

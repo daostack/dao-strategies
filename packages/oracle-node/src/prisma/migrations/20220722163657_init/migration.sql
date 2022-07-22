@@ -12,6 +12,7 @@ CREATE TABLE "Campaign" (
     "asset" TEXT,
     "guardian" TEXT,
     "oracle" TEXT,
+    "challengePeriod" BIGINT,
     "stratID" TEXT NOT NULL,
     "stratParamsStr" TEXT NOT NULL,
     "lastRunDate" BIGINT,

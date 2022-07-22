@@ -4,6 +4,7 @@
 import {
   BaseContract,
   BigNumber,
+  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -20,7 +21,7 @@ export interface CampaignFactoryInterface extends utils.Interface {
   contractName: "CampaignFactory";
   functions: {
     "campaignAddress(bytes32)": FunctionFragment;
-    "createCampaign(bytes32,bytes32,bytes32,address,address,bytes32)": FunctionFragment;
+    "createCampaign(bytes32,bytes32,bytes32,address,address,uint256,bytes32)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -29,7 +30,15 @@ export interface CampaignFactoryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createCampaign",
-    values: [BytesLike, BytesLike, BytesLike, string, string, BytesLike]
+    values: [
+      BytesLike,
+      BytesLike,
+      BytesLike,
+      string,
+      string,
+      BigNumberish,
+      BytesLike
+    ]
   ): string;
 
   decodeFunctionResult(
@@ -103,6 +112,7 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _challengePeriod: BigNumberish,
       salt: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -116,6 +126,7 @@ export interface CampaignFactory extends BaseContract {
     _strategyUri: BytesLike,
     _guardian: string,
     _oracle: string,
+    _challengePeriod: BigNumberish,
     salt: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -132,6 +143,7 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _challengePeriod: BigNumberish,
       salt: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -172,6 +184,7 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _challengePeriod: BigNumberish,
       salt: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -189,6 +202,7 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _challengePeriod: BigNumberish,
       salt: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;

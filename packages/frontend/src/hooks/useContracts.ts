@@ -18,3 +18,13 @@ export const useCampaignFactory = (): Typechain.CampaignFactory | undefined => {
     signerOrProvider: signer,
   });
 };
+
+export const useCampaignInstance = (address: string): Typechain.Campaign | undefined => {
+  const { data: signer } = useSigner();
+
+  return useContract<Typechain.Campaign>({
+    addressOrName: address,
+    contractInterface: ContractsJson.jsonOfChain().contracts.Campaign.abi,
+    signerOrProvider: signer,
+  });
+};
