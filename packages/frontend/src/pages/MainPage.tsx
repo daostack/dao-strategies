@@ -6,8 +6,6 @@ import { CampaignCreate } from './create/CampaignCreate';
 import { LandingPage } from './landing/LandingPage';
 import { MainPageFooter } from './MainPageFooter';
 
-import { UserProfile } from './user/UserProfile';
-
 const queryClient = new QueryClient();
 
 export const RouteNames = {
@@ -26,7 +24,6 @@ export const MainPage: FC = () => {
           <Route path={RouteNames.Base} element={<LandingPage />}></Route>
           <Route path={RouteNames.Create} element={<CampaignCreate />}></Route>
           <Route path={`${RouteNames.CampaignBase}/:campaignAddress`} element={<CampaignPage />}></Route>
-          <Route path={RouteNames.Profile} element={<UserProfile />}></Route>
         </Routes>
         <MainPageFooter></MainPageFooter>
       </BrowserRouter>
