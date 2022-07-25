@@ -1,10 +1,10 @@
 import { Button, TextInput } from 'grommet';
 import { FC, useState } from 'react';
 import { useSignMessage } from 'wagmi';
-import { AppButton } from '../../components/styles/BasicElements';
+import { AppButton } from './styles/BasicElements';
 
-import { ORACLE_NODE_URL } from '../../config/appConfig';
-import { useLoggedUser } from '../../hooks/useLoggedUser';
+import { ORACLE_NODE_URL } from '../config/appConfig';
+import { useLoggedUser } from '../hooks/useLoggedUser';
 
 export interface IUserProfileProps {
   dum?: string;
@@ -14,7 +14,7 @@ const getMessage = (github_username: string) => {
   return `Associate the github account "${github_username}" with this ethereum address`;
 };
 
-export const UserProfile: FC<IUserProfileProps> = () => {
+export const GithubVerification: FC<IUserProfileProps> = () => {
   const { user, refresh } = useLoggedUser();
   const [handle, setHandle] = useState<string>('pepoospina');
   const [handleWasSet, setHandleWasSet] = useState<boolean>(false);
