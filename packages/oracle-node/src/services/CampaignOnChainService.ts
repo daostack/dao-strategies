@@ -27,15 +27,14 @@ const erc20Abi = [
 
 export class CampaignOnChainService {
   readonly provider: providers.JsonRpcProvider;
-  protected price: PriceService;
 
   constructor(
     protected campaignService: CampaignService,
+    protected price: PriceService,
     _provider?: providers.JsonRpcProvider
   ) {
     this.provider =
       _provider || new providers.JsonRpcProvider(process.env.JSON_RPC_URL);
-    this.price = new PriceService();
   }
 
   async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {

@@ -17,3 +17,5 @@ export const resimulationPeriod: number = 30;
 
 export const GITHUB_API = 'https://api.github.com/';
 export const COINGECKO_URL = 'https://api.coingecko.com/api/v3/';
+
+export const PRICE_UPDATE_PERIOD = +process.env.PRICE_UPDATE_PERIOD;
