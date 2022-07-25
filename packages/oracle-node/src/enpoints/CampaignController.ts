@@ -137,6 +137,19 @@ export class CampaignController extends Controller {
     /* eslint-enable */
   }
 
+  async getCampaigns(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<any> {
+    /* eslint-disable */
+    const campaigns = await this.manager.services.campaign.list(loggedUser);
+
+    return campaigns.map((campaign) => toCampaignExternal(campaign));
+    /* eslint-enable */
+  }
+
   getOtherDetails(
     request: Request,
     response: Response,

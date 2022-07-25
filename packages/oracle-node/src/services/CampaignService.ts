@@ -303,4 +303,8 @@ export class CampaignService {
   deleteAll(): Promise<void> {
     return this.campaignRepo.deleteAll();
   }
+
+  list(user?: string): Promise<Campaign[]> {
+    return this.campaignRepo.list(user);
+  }
 }

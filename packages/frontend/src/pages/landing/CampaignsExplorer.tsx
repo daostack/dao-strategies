@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 
-import { useCampaigns } from '../../hooks/campaigns.queries';
+import { useCampaigns } from '../../hooks/useCampaigns';
 
 export interface ICampaignsExplorerProps {
   dum?: any;
