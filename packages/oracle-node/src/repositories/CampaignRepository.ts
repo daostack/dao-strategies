@@ -335,4 +335,9 @@ export class CampaignRepository {
     });
     return res;
   }
+
+  async list(user?: string): Promise<Campaign[]> {
+    const res = await this.client.campaign.findMany({ take: 10 });
+    return res;
+  }
 }
