@@ -11,6 +11,7 @@ export interface FormStatus {
   isSimulating: boolean;
   wasSimulated: boolean;
   canCreate: boolean;
+  isCreating: boolean;
 }
 
 export interface Actions {
@@ -30,6 +31,12 @@ export const getButtonActions = (
   let rightAction: () => void = () => actions.setPageIx(pageIx + 1);
   let rightText: string = 'Continue';
   let rightDisabled: boolean = false;
+
+  if (status.isCreating) {
+    rightText = 'Creating';
+    rightAction = () => {};
+    rightDisabled = true;
+  }
 
   /** Special values */
   if (status.page.isLastFormPage) {

@@ -77,3 +77,11 @@ model BalanceLeaf {
   balance         String
   proof           String[]      // Store the proofs so that they don't have to be recomputed eveytime they are needed
 }
+
+model AssetPrice {
+  @@id([chainId, address])
+  chainId         Int
+  address         String
+  price           Float
+  lastUpdated     BigInt
+}

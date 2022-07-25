@@ -70,6 +70,16 @@ CREATE TABLE "BalanceLeaf" (
     CONSTRAINT "BalanceLeaf_pkey" PRIMARY KEY ("campaignId","rootId","address")
 );
 
+-- CreateTable
+CREATE TABLE "AssetPrice" (
+    "chainId" INTEGER NOT NULL,
+    "address" TEXT NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "lastUpdated" BIGINT NOT NULL,
+
+    CONSTRAINT "AssetPrice_pkey" PRIMARY KEY ("chainId","address")
+);
+
 -- AddForeignKey
 ALTER TABLE "Campaign" ADD CONSTRAINT "Campaign_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "User"("address") ON DELETE SET NULL ON UPDATE CASCADE;
 

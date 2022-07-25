@@ -1,12 +1,14 @@
 import { StrategyComputation } from '@dao-strategies/core';
 import { PrismaClient } from '@prisma/client';
 
+import { PRICE_UPDATE_PERIOD } from './config';
 import { CampaignRepository } from './repositories/CampaignRepository';
 import { UserRepository } from './repositories/UserRepository';
 import { CampaignOnChainService } from './services/CampaignOnChainService';
 import { CampaignService } from './services/CampaignService';
 import { ExecuteService, ExecutionConfig } from './services/ExecutionService';
 import { OnChainService } from './services/OnChainService';
+import { PriceService } from './services/PriceService';
 import { SocialApiService } from './services/SocialApiService';
 import { TimeService } from './services/TimeService';
 import { UserService } from './services/UserService';
@@ -27,6 +29,7 @@ export class ServiceManager {
   private campaignOnChain: CampaignOnChainService;
   private socialApi: SocialApiService;
   private campaignService: CampaignService;
+  private priceService: PriceService;
 
   public services: Services;
   public execution: ExecuteService;
@@ -51,7 +54,15 @@ export class ServiceManager {
       this.onChainService
     );
 
-    this.campaignOnChain = new CampaignOnChainService(this.campaignService);
+    this.priceService = new PriceService(
+      this.client,
+      this.timeService,
+      PRICE_UPDATE_PERIOD
+    );
+    this.campaignOnChain = new CampaignOnChainService(
+      this.campaignService,
+      this.priceService
+    );
 
     this.services = {
       campaign: this.campaignService,
