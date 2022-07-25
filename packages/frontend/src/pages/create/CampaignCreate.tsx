@@ -71,7 +71,7 @@ const initialValues: CampaignFormValues = {
 
 const GITHUB_DOMAIN = 'https://www.github.com/';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
@@ -84,6 +84,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const [repo, setRepo] = useState<string>('');
 
   const [validated, setValidated] = useState<boolean>(false);
+  const [creating, setCreating] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
 
   /** Form data is kept in the formValues state. The strategy details is a computed
@@ -140,6 +141,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
     /** if the campaign was not simulated it must be created first */
     try {
+      setCreating(true);
       const campaignAddress = await deployCampaign(
         campaignFactory,
         (simulation as SimulationResult).uri,
@@ -147,6 +149,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         finalDetails
       );
 
+      setCreating(false);
       navigate(RouteNames.Campaign(campaignAddress));
     } catch (e) {
       showError('Error creating campaign');
@@ -246,6 +249,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     isSimulating: simulating,
     wasSimulated: simulation !== undefined,
     canCreate: isLogged,
+    isCreating: creating,
   };
 
   const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
