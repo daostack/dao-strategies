@@ -1,4 +1,4 @@
-import { Services } from '../types';
+import { ServiceManager } from '../service.manager';
 
 import { CampaignController } from './CampaignController';
 import { Controller } from './Controller';
@@ -8,7 +8,7 @@ import { UserController } from './UserController';
 export interface RouteConfig {
   method: 'post' | 'get' | 'delete';
   route: string;
-  controller: new (services: Services) => Controller;
+  controller: new (manager: ServiceManager) => Controller;
   action: string;
   protected: boolean;
 }
@@ -61,6 +61,20 @@ export const Routes: RouteConfig[] = [
     route: '/campaign/:address/otherDetails',
     controller: CampaignController,
     action: 'getOtherDetails',
+    protected: false,
+  },
+  {
+    method: 'get',
+    route: '/campaign/claimInfo/:address/:account',
+    controller: CampaignController,
+    action: 'getClaimInfo',
+    protected: false, // TODO, change to true
+  },
+  {
+    method: 'get',
+    route: '/time/now',
+    controller: CampaignController,
+    action: 'timeNow',
     protected: false,
   },
   {

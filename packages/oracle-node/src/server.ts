@@ -99,7 +99,7 @@ Routes.forEach((route) => {
           }
         }
 
-        const result = await new (route.controller as any)(manager.services)[
+        const result = await new (route.controller as any)(manager)[
           route.action
         ](req, res, next, loggedUser);
 

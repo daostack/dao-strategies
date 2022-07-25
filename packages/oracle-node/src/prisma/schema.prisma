@@ -18,6 +18,10 @@ model Campaign {
   asset           String?   // store the Asset id as defined in @dao-strategies/core ChainsDetails
   guardian        String?
   oracle          String?
+  activationTime    Int?
+  CHALLENGE_PERIOD  Int?
+  ACTIVATION_PERIOD Int?
+  ACTIVE_DURATION   Int?
   stratID         String
   stratParamsStr  String    // For now, Params are stringified as they can have any structure
   rewards         Reward[] 
@@ -30,6 +34,8 @@ model Campaign {
   executed        Boolean?  // executed campaigns are those whose final rewards have been computed 
   published       Boolean?  // published campaigns are those whose shares has been published in their smart contract
   address         String?   // cannot be @unique since it is null for simulated campaigns - Smart contract address
+  isComputing     Boolean   // prevent reentrancy issues (two roots being computed at once)
+  roots           CampaignRoot[] 
 }
 
 enum CampaignState {
@@ -51,4 +57,23 @@ model Reward {
   amount          BigInt        
   campaign        Campaign  @relation(fields: [campaignId], references: [uri])
   campaignId      String
+}
+
+model CampaignRoot {
+  @@id([campaignId, root])
+  campaign        Campaign  @relation(fields: [campaignId], references: [uri])
+  campaignId      String
+  root            String
+  date            BigInt
+  balances        BalanceLeaf[]   // Leafs are stored on a table to be efficiently read
+}
+
+model BalanceLeaf {
+  @@id([campaignId, rootId, address])
+  root            CampaignRoot  @relation(fields: [campaignId, rootId], references: [campaignId, root])
+  campaignId      String
+  rootId          String
+  address         String
+  balance         String
+  proof           String[]      // Store the proofs so that they don't have to be recomputed eveytime they are needed
 }

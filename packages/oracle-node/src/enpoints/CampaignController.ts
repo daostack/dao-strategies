@@ -4,8 +4,11 @@ import {
   CampaignUriDetails,
   CampaignCreateDetails,
   CampaignOnchainDetails,
+  CampaignClaimInfo,
+  TimeDetails,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
+import { ServiceManager } from '../service.manager';
 
 import { Services } from '../types';
 
@@ -38,8 +41,8 @@ import { toCampaignExternal } from './toCampaignExternal';
     unused-imports/no-unused-vars-ts */
 
 export class CampaignController extends Controller {
-  constructor(services: Services) {
-    super(services);
+  constructor(manager: ServiceManager) {
+    super(manager);
   }
 
   /** */
@@ -53,13 +56,13 @@ export class CampaignController extends Controller {
       throw new Error('logged user expected but not found');
     }
 
-    const uri = await this.services.campaign.getOrCreate(
+    const uri = await this.manager.services.campaign.getOrCreate(
       request.body.details as CampaignUriDetails
     );
     return {
       uri,
       rewards: balancesToObject(
-        await this.services.campaign.runCampaignThrottled(uri)
+        await this.manager.services.campaign.runCampaignThrottled(uri)
       ),
     };
   }
@@ -74,10 +77,18 @@ export class CampaignController extends Controller {
       throw new Error('logged user expected but not found');
     }
 
-    const uri = await this.services.campaign.getOrCreate(
+    const uri = await this.manager.services.campaign.getOrCreate(
       request.body.details as CampaignUriDetails
     );
     return { uri };
+  }
+
+  timeNow(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<TimeDetails> {
+    return Promise.resolve({ now: this.manager.services.time.now() });
   }
 
   async simulateFromUri(
@@ -88,7 +99,7 @@ export class CampaignController extends Controller {
   ): Promise<BalancesObject> {
     const uri: string = request.params.uri as string;
     return balancesToObject(
-      await this.services.campaign.runCampaignThrottled(uri)
+      await this.manager.services.campaign.runCampaignThrottled(uri)
     );
   }
 
@@ -99,9 +110,15 @@ export class CampaignController extends Controller {
     loggedUser: string | undefined
   ): Promise<void> {
     request.body.registered = true;
-    await this.services.campaign.register(
+    await this.manager.services.campaign.register(
       request.params.uri as string,
       request.body as CampaignCreateDetails
+    );
+    const now = this.manager.services.time.now();
+
+    await this.manager.execution.executeAndPublish(
+      request.params.uri as string,
+      now
     );
   }
 
@@ -112,7 +129,7 @@ export class CampaignController extends Controller {
     loggedUser: string | undefined
   ): Promise<any> {
     /* eslint-disable */
-    const campaign = await (this.services.campaign.getFromAddress(
+    const campaign = await (this.manager.services.campaign.getFromAddress(
       request.params.address as string
     ) as any);
 
@@ -120,15 +137,29 @@ export class CampaignController extends Controller {
     /* eslint-enable */
   }
 
-  async getOtherDetails(
+  getOtherDetails(
     request: Request,
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
   ): Promise<CampaignOnchainDetails> {
     /* eslint-disable */
-    return this.services.campaignOnChain.getCampaignDetails(
+    return this.manager.services.campaignOnChain.getCampaignDetails(
       request.params.address as string
+    );
+    /* eslint-enable */
+  }
+
+  getClaimInfo(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<CampaignClaimInfo | undefined> {
+    /* eslint-disable */
+    return this.manager.services.campaignOnChain.getClaimInfo(
+      request.params.address as string,
+      request.params.account as string
     );
     /* eslint-enable */
   }

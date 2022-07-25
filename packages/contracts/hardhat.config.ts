@@ -54,6 +54,10 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
+      mining: {
+        auto: false,
+        interval: 5000,
+      },
     },
     rinkeby: {
       url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_RINKEBY_KEY}`,

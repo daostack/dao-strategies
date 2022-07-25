@@ -6,9 +6,10 @@
   "scripts": {
     "prod": "ts-node src/server.ts",
     "prisma-migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
-    "prisma-reset": "rm -rf ./src/prisma/migrations && cd ./src &&  npx prisma migrate reset --preview-feature && cd ..",
+    "prisma-reset": "rm -rf ./src/prisma/migrations && cd ./src &&  npx prisma migrate reset --force --preview-feature && npx prisma migrate dev --name init && cd ..",
     "prisma-generate": "cd ./src && npx prisma generate && cd ..",
     "test": "jest test/main.test.ts",
+    "reboot": "yarn prisma-reset && yarn start",
     "start": "nodemon src/server.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
@@ -26,6 +27,7 @@
     "express-winston": "^4.2.0",
     "jest": "^28.1.0",
     "multiformats": "^9.6.5",
+    "node-fetch": "2.6.6",
     "octokit": "^1.7.1",
     "pg": "^8.4.0",
     "reflect-metadata": "^0.1.13",
@@ -35,6 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.10",
+    "@types/node-fetch": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
     "dotenv": "^16.0.0",

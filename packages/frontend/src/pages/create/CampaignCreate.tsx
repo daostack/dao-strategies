@@ -1,11 +1,9 @@
 import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
-import { useAccount } from 'wagmi';
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ChainsDetails, getCampaignUri, CampaignCreateDetails } from '@dao-strategies/core';
 
-import { DateManager } from '../../utils/time';
 import { useCampaignFactory } from '../../hooks/useContracts';
 import {
   deployCampaign,
@@ -17,7 +15,7 @@ import {
   SimulationResult,
   strategyDetails,
 } from '../campaign.support';
-import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
+import { ACTIVATION_PERIOD, ACTIVE_DURATION, CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
 import { RouteNames } from '../MainPage';
 import {
   AppButton,
@@ -34,6 +32,8 @@ import { FormTrash } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
+import { useNow } from '../../hooks/useNow';
+import { useUserError } from '../../hooks/useErrorContext';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -75,8 +75,9 @@ const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
+  const { showError } = useUserError();
 
-  const [today] = useState<DateManager>(new DateManager());
+  const { now } = useNow();
   const [pageIx, setPageIx] = useState<number>(0);
 
   const { isValid, checking, checkExist, isValidName } = useGithubSearch();
@@ -99,8 +100,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const navigate = useNavigate();
 
   /** details is a derived value */
-  const details = strategyDetails(formValues, today, account);
-  const periodType = getPeriodType(details, today);
+  const details = strategyDetails(formValues, now, account);
+  const periodType = getPeriodType(details, now);
   const isLogged = account !== undefined;
 
   const chainOptions = ChainsDetails.chains().map((chain) => chain.name);
@@ -120,27 +121,37 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (finalDetails === undefined) throw new Error();
 
     const chainId = ChainsDetails.chainOfName(formValues.chainName).chain.id;
+    const activationTime = 0;
+
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
       title: formValues.title,
       guardian: formValues.guardian,
       description: formValues.description,
       oracle: ORACLE_ADDRESS,
+      activationTime,
+      CHALLENGE_PERIOD: CHALLENGE_PERIOD,
+      ACTIVATION_PERIOD: ACTIVATION_PERIOD,
+      ACTIVE_DURATION: ACTIVE_DURATION,
       address: '',
       chainId,
       asset: ChainsDetails.assetOfName(chainId, formValues.assetName).id,
-      cancelDate: finalDetails.execDate + CHALLENGE_PERIOD,
     };
 
     /** if the campaign was not simulated it must be created first */
-    const campaignAddress = await deployCampaign(
-      campaignFactory,
-      (simulation as SimulationResult).uri,
-      otherDetails,
-      finalDetails
-    );
+    try {
+      const campaignAddress = await deployCampaign(
+        campaignFactory,
+        (simulation as SimulationResult).uri,
+        otherDetails,
+        finalDetails
+      );
 
-    navigate(RouteNames.Campaign(campaignAddress));
+      navigate(RouteNames.Campaign(campaignAddress));
+    } catch (e) {
+      showError('Error creating campaign');
+      console.log(e);
+    }
   };
 
   /** Processed values from the form that are cheap to compute and useful */
@@ -155,11 +166,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const setFormValues = (nextFormValues: CampaignFormValues) => {
     if (formValues === undefined) return;
 
-    const oldDetails = strategyDetails(formValues, today, account);
+    const oldDetails = strategyDetails(formValues, now, account);
 
     /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
     if (oldDetails !== undefined && simulation !== undefined) {
-      const nextDetails = strategyDetails(nextFormValues, today, account);
+      const nextDetails = strategyDetails(nextFormValues, now, account);
       if (nextDetails !== undefined) {
         const currentUri = getCampaignUri(oldDetails);
         const nextUri = getCampaignUri(nextDetails);

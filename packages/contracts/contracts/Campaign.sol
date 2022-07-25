@@ -17,9 +17,10 @@ contract Campaign is Initializable, ReentrancyGuard {
 
     /** Shares are considered a ratio [0-1] with 18 digits where 1E18 = 1 */
     uint256 public constant TOTAL_SHARES = 10**18;
-    uint256 public constant CHALLENGE_PERIOD = 604800; // 1 week
-    uint256 public constant SECONDS_IN_DAY = 86400;
-    uint256 public constant DAYS_IN_WEEK = 7;
+
+    uint256 public CHALLENGE_PERIOD;
+    uint256 public ACTIVATION_PERIOD;
+    uint256 public ACTIVE_DURATION;
 
     enum ChallengeAction {
         CancelPending,
@@ -95,26 +96,28 @@ contract Campaign is Initializable, ReentrancyGuard {
     EXTERNAL FUNCTIONS
     ***************/
 
-    /** Campaign initialization, called once at deploy (using the campaign factory).
-     * If shares distribution is known at creation, _sharesMerkleRoot will be non-zero, _activationTime is ignored
-     * Otherwise, _sharesMerkleRoot will be zero, _activationTime will be set according to the time in which the shares distribution will be calculated */
+    /**
+     * Campaign initialization, called once at deploy (using the campaign factory).
+     * CHALLENGE_PERIOD > ACTIVE_DURATION is recommended to limite one proposeal per
+     * active window
+     */
     function initCampaign(
-        bytes32 _sharesMerkleRoot,
         bytes32 _strategyUri,
         address _guardian,
         address _oracle,
-        uint256 _activationTime
+        uint256 _activationTime,
+        uint256 _CHALLENGE_PERIOD,
+        uint256 _ACTIVATION_PERIOD,
+        uint256 _ACTIVE_DURATION
     ) external initializer {
         strategyUri = _strategyUri;
         guardian = _guardian;
         oracle = _oracle;
+        activationTime = _activationTime;
 
-        if (_sharesMerkleRoot != bytes32(0)) {
-            pendingMerkleRoot = _sharesMerkleRoot;
-            activationTime = block.timestamp + CHALLENGE_PERIOD;
-        } else {
-            activationTime = _activationTime;
-        }
+        CHALLENGE_PERIOD = _CHALLENGE_PERIOD;
+        ACTIVATION_PERIOD = _ACTIVATION_PERIOD;
+        ACTIVE_DURATION = _ACTIVE_DURATION;
     }
 
     /** Fund campaign with native or any ERC20 token.
@@ -141,19 +144,28 @@ contract Campaign is Initializable, ReentrancyGuard {
         emit SharesMerkleRootUpdate(_sharesMerkleRoot, _sharesUri, activationTime);
     }
 
-    /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
+    /** External function to start claiming one ore more assets. Proof verification is only done here */
     function claim(
         address account,
         uint256 share,
         bytes32[] calldata proof,
-        address asset
+        address[] calldata assets
     ) external {
         verifyShares(account, share, proof);
+
+        for (uint8 ix = 0; ix < assets.length; ix++) {
+            _claim(account, share, assets[ix]);
+        }
+    }
+
+    /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
+    function _claim(
+        address account,
+        uint256 share,
+        address asset
+    ) private {
         uint256 reward = rewardsAvailableToClaimer(account, share, asset);
 
-        if (reward == 0) {
-            revert NoRewardAvailable();
-        }
         claimed[asset][account] += reward;
         totalClaimed[asset] += reward;
 
@@ -244,9 +256,14 @@ contract Campaign is Initializable, ReentrancyGuard {
         return (totalReceived(asset) * share) / TOTAL_SHARES - claimed[asset][account];
     }
 
+    /** isPendingActive returns true if the active root is the pending one */
+    function isPendingActive() public view returns (bool isActive) {
+        return block.timestamp > activationTime;
+    }
+
     /** Valid root is either the approved or pending one depending on the activation time */
     function getValidRoot() public view returns (bytes32 root) {
-        return block.timestamp > activationTime ? pendingMerkleRoot : approvedMerkleRoot;
+        return isPendingActive() ? pendingMerkleRoot : approvedMerkleRoot;
     }
 
     /** Total assets received by the contract.
@@ -264,14 +281,13 @@ contract Campaign is Initializable, ReentrancyGuard {
     }
 
     /** Indicates whether updating the merkle root is currently possible.
-     * updating the merkle root is allowed only at predefined time windows:
-     * [activationTime, activationTime + 1 day], [activationTime + 1 week, activationTime + 1 week + 1 day]... and so on for every consecutive week */
+     * updating the merkle root is allowed only at predefined time windows
+     * of duration ACTIVE_DURATION every ACTIVE_PERIOD */
     function merkleRootUpdateAllowed() public view returns (bool) {
         if (isChallengePeriod()) {
-            console.log("Challenge Period!");
             return false;
         }
-        if (((uint256(block.timestamp) - uint256(activationTime)) / uint256(SECONDS_IN_DAY)) % DAYS_IN_WEEK != 0) {
+        if ((uint256(block.timestamp) - uint256(activationTime)) % ACTIVATION_PERIOD < ACTIVE_DURATION) {
             return false;
         }
         return true;

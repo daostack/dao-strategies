@@ -16,3 +16,4 @@ export const port = process.env.PORT;
 export const resimulationPeriod: number = 30;
 
 export const GITHUB_API = 'https://api.github.com/';
+export const COINGECKO_URL = 'https://api.coingecko.com/api/v3/';

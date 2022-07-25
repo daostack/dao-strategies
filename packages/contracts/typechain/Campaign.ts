@@ -21,21 +21,22 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 export interface CampaignInterface extends utils.Interface {
   contractName: "Campaign";
   functions: {
+    "ACTIVATION_PERIOD()": FunctionFragment;
+    "ACTIVE_DURATION()": FunctionFragment;
     "CHALLENGE_PERIOD()": FunctionFragment;
-    "DAYS_IN_WEEK()": FunctionFragment;
-    "SECONDS_IN_DAY()": FunctionFragment;
     "TOTAL_SHARES()": FunctionFragment;
     "activationTime()": FunctionFragment;
     "approvedMerkleRoot()": FunctionFragment;
     "balanceOfAsset(address)": FunctionFragment;
     "challenge(uint8)": FunctionFragment;
-    "claim(address,uint256,bytes32[],address)": FunctionFragment;
+    "claim(address,uint256,bytes32[],address[])": FunctionFragment;
     "claimed(address,address)": FunctionFragment;
     "fund(address,uint256)": FunctionFragment;
     "getValidRoot()": FunctionFragment;
     "guardian()": FunctionFragment;
-    "initCampaign(bytes32,bytes32,address,address,uint256)": FunctionFragment;
+    "initCampaign(bytes32,address,address,uint256,uint256,uint256,uint256)": FunctionFragment;
     "isChallengePeriod()": FunctionFragment;
+    "isPendingActive()": FunctionFragment;
     "locked()": FunctionFragment;
     "merkleRootUpdateAllowed()": FunctionFragment;
     "oracle()": FunctionFragment;
@@ -53,15 +54,15 @@ export interface CampaignInterface extends utils.Interface {
   };
 
   encodeFunctionData(
+    functionFragment: "ACTIVATION_PERIOD",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ACTIVE_DURATION",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "CHALLENGE_PERIOD",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "DAYS_IN_WEEK",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "SECONDS_IN_DAY",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -86,7 +87,7 @@ export interface CampaignInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "claim",
-    values: [string, BigNumberish, BytesLike[], string]
+    values: [string, BigNumberish, BytesLike[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "claimed",
@@ -103,10 +104,22 @@ export interface CampaignInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "guardian", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initCampaign",
-    values: [BytesLike, BytesLike, string, string, BigNumberish]
+    values: [
+      BytesLike,
+      string,
+      string,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "isChallengePeriod",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isPendingActive",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "locked", values?: undefined): string;
@@ -158,15 +171,15 @@ export interface CampaignInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
+    functionFragment: "ACTIVATION_PERIOD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ACTIVE_DURATION",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "CHALLENGE_PERIOD",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "DAYS_IN_WEEK",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "SECONDS_IN_DAY",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -200,6 +213,10 @@ export interface CampaignInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isChallengePeriod",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isPendingActive",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
@@ -335,11 +352,11 @@ export interface Campaign extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    ACTIVATION_PERIOD(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    ACTIVE_DURATION(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    DAYS_IN_WEEK(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    SECONDS_IN_DAY(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -361,7 +378,7 @@ export interface Campaign extends BaseContract {
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
-      asset: string,
+      assets: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -384,15 +401,21 @@ export interface Campaign extends BaseContract {
     guardian(overrides?: CallOverrides): Promise<[string]>;
 
     initCampaign(
-      _sharesMerkleRoot: BytesLike,
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
       _activationTime: BigNumberish,
+      _CHALLENGE_PERIOD: BigNumberish,
+      _ACTIVATION_PERIOD: BigNumberish,
+      _ACTIVE_DURATION: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     isChallengePeriod(overrides?: CallOverrides): Promise<[boolean]>;
+
+    isPendingActive(
+      overrides?: CallOverrides
+    ): Promise<[boolean] & { isActive: boolean }>;
 
     locked(overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -451,11 +474,11 @@ export interface Campaign extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
+  ACTIVATION_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
+
+  ACTIVE_DURATION(overrides?: CallOverrides): Promise<BigNumber>;
+
   CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
-
-  DAYS_IN_WEEK(overrides?: CallOverrides): Promise<BigNumber>;
-
-  SECONDS_IN_DAY(overrides?: CallOverrides): Promise<BigNumber>;
 
   TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -474,7 +497,7 @@ export interface Campaign extends BaseContract {
     account: string,
     share: BigNumberish,
     proof: BytesLike[],
-    asset: string,
+    assets: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -495,15 +518,19 @@ export interface Campaign extends BaseContract {
   guardian(overrides?: CallOverrides): Promise<string>;
 
   initCampaign(
-    _sharesMerkleRoot: BytesLike,
     _strategyUri: BytesLike,
     _guardian: string,
     _oracle: string,
     _activationTime: BigNumberish,
+    _CHALLENGE_PERIOD: BigNumberish,
+    _ACTIVATION_PERIOD: BigNumberish,
+    _ACTIVE_DURATION: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   isChallengePeriod(overrides?: CallOverrides): Promise<boolean>;
+
+  isPendingActive(overrides?: CallOverrides): Promise<boolean>;
 
   locked(overrides?: CallOverrides): Promise<boolean>;
 
@@ -559,11 +586,11 @@ export interface Campaign extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    ACTIVATION_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
+
+    ACTIVE_DURATION(overrides?: CallOverrides): Promise<BigNumber>;
+
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
-
-    DAYS_IN_WEEK(overrides?: CallOverrides): Promise<BigNumber>;
-
-    SECONDS_IN_DAY(overrides?: CallOverrides): Promise<BigNumber>;
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -582,7 +609,7 @@ export interface Campaign extends BaseContract {
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
-      asset: string,
+      assets: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -603,15 +630,19 @@ export interface Campaign extends BaseContract {
     guardian(overrides?: CallOverrides): Promise<string>;
 
     initCampaign(
-      _sharesMerkleRoot: BytesLike,
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
       _activationTime: BigNumberish,
+      _CHALLENGE_PERIOD: BigNumberish,
+      _ACTIVATION_PERIOD: BigNumberish,
+      _ACTIVE_DURATION: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     isChallengePeriod(overrides?: CallOverrides): Promise<boolean>;
+
+    isPendingActive(overrides?: CallOverrides): Promise<boolean>;
 
     locked(overrides?: CallOverrides): Promise<boolean>;
 
@@ -722,11 +753,11 @@ export interface Campaign extends BaseContract {
   };
 
   estimateGas: {
+    ACTIVATION_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
+
+    ACTIVE_DURATION(overrides?: CallOverrides): Promise<BigNumber>;
+
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<BigNumber>;
-
-    DAYS_IN_WEEK(overrides?: CallOverrides): Promise<BigNumber>;
-
-    SECONDS_IN_DAY(overrides?: CallOverrides): Promise<BigNumber>;
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -748,7 +779,7 @@ export interface Campaign extends BaseContract {
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
-      asset: string,
+      assets: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -769,15 +800,19 @@ export interface Campaign extends BaseContract {
     guardian(overrides?: CallOverrides): Promise<BigNumber>;
 
     initCampaign(
-      _sharesMerkleRoot: BytesLike,
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
       _activationTime: BigNumberish,
+      _CHALLENGE_PERIOD: BigNumberish,
+      _ACTIVATION_PERIOD: BigNumberish,
+      _ACTIVE_DURATION: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     isChallengePeriod(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isPendingActive(overrides?: CallOverrides): Promise<BigNumber>;
 
     locked(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -834,11 +869,11 @@ export interface Campaign extends BaseContract {
   };
 
   populateTransaction: {
+    ACTIVATION_PERIOD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    ACTIVE_DURATION(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     CHALLENGE_PERIOD(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    DAYS_IN_WEEK(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    SECONDS_IN_DAY(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     TOTAL_SHARES(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -862,7 +897,7 @@ export interface Campaign extends BaseContract {
       account: string,
       share: BigNumberish,
       proof: BytesLike[],
-      asset: string,
+      assets: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -883,15 +918,19 @@ export interface Campaign extends BaseContract {
     guardian(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initCampaign(
-      _sharesMerkleRoot: BytesLike,
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
       _activationTime: BigNumberish,
+      _CHALLENGE_PERIOD: BigNumberish,
+      _ACTIVATION_PERIOD: BigNumberish,
+      _ACTIVE_DURATION: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     isChallengePeriod(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isPendingActive(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     locked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

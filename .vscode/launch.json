@@ -18,7 +18,8 @@
       "cwd": "${workspaceFolder}/packages/oracle-node",
       "runtimeExecutable": "${workspaceFolder}/packages/oracle-node/node_modules/.bin/ts-node",
       "args": ["src/server.ts"],
-      "outputCapture": "std"
+      "outputCapture": "std",
+      "console": "integratedTerminal"
     },
     {
       "name": "oracle-test",

@@ -9,8 +9,11 @@ import { ColumnView, TwoColumns, ViewportContainer } from '../../components/styl
 import { useCampaign } from '../../hooks/useCampaign';
 import { AppHeader } from '../AppHeader';
 import { FundCampaign } from '../../components/FundCampaign';
-import { formatEther } from '../../utils/ethers';
-import { useLoggedUser } from '../../hooks/useLoggedUser';
+import { ClaimButton } from '../../components/ClaimRewards';
+import { AssetBalance } from '../../components/Assets';
+import { Refresh } from 'grommet-icons';
+import { truncate } from '../../utils/ethers';
+import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -20,12 +23,6 @@ type RouteParams = {
   campaignAddress: string;
 };
 
-enum UserClaimStatus {
-  loggedOff = 'loggedOff',
-  canClaim = 'canClaim',
-  notExecuted = 'notExecuted',
-}
-
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const params = useParams<RouteParams>();
   const [showFund, setShowFund] = useState<boolean>(false);
@@ -33,8 +30,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const { isLoading, campaign, getRewards, rewards, getOtherDetails, otherDetails } = useCampaign(
     params.campaignAddress
   );
-
-  const { user, connect } = useLoggedUser();
 
   useEffect(() => {
     getRewards();
@@ -52,67 +47,21 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       </ViewportContainer>
     );
 
+  const claimValue =
+    otherDetails && otherDetails.tokens ? truncate(ChainsDetails.valueOfAssets(otherDetails.tokens).toString(), 2) : 0;
+
   const balances =
     otherDetails !== undefined ? (
       <Box direction="row">
-        {' '}
-        {Object.keys(otherDetails.tokens).map((key: any) => {
-          const token = otherDetails.tokens[key];
-
+        <Refresh onClick={() => getOtherDetails()}></Refresh>
+        {otherDetails.tokens.map((token: TokenBalance) => {
           if (token.balance === '0') return <></>;
-
-          return (
-            <Box
-              direction="column"
-              style={{
-                width: '120px',
-                backgroundColor: '#ccc',
-                borderRadius: '10px',
-                marginLeft: '16px',
-              }}>
-              <Box style={{ textAlign: 'center', height: '40px', width: '40px' }}>
-                <img src={(token as any).icon} alt={(token as any).name} />
-              </Box>
-              <Box style={{ textAlign: 'center' }}>{(token as any).name}</Box>
-              <Box style={{ textAlign: 'center' }}>{formatEther(token.balance)}</Box>
-            </Box>
-          );
+          return <AssetBalance asset={token}></AssetBalance>;
         })}
       </Box>
     ) : (
       <></>
     );
-
-  let claimStatus = UserClaimStatus.loggedOff;
-
-  if (user === undefined) {
-    claimStatus = UserClaimStatus.loggedOff;
-  } else {
-    if (!campaign.executed) {
-      claimStatus = UserClaimStatus.notExecuted;
-    }
-  }
-
-  const claimButton = (claimStatus: UserClaimStatus) => {
-    switch (claimStatus) {
-      case UserClaimStatus.loggedOff:
-        return (
-          <>
-            <AppButton onClick={() => connect()}>Connect</AppButton>
-          </>
-        );
-
-      case UserClaimStatus.canClaim:
-        return (
-          <>
-            My Reward <AppButton>Claim rewards</AppButton>
-          </>
-        );
-
-      case UserClaimStatus.notExecuted:
-        return <>Not executed</>;
-    }
-  };
 
   return (
     <>
@@ -147,6 +96,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           </Box>
         </Box>
 
+        <Box>{JSON.stringify(campaign)}</Box>
+
         <Box direction="row" align="center" justify="center" style={{ marginBottom: '36px' }}>
           Created by: {(campaign as any).creatorId}
         </Box>
@@ -155,7 +106,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           <TwoColumns style={{ border: 'solid 2px #ccc', borderRadius: '20px', padding: '20px 30px' }}>
             <>
               <Box direction="row" align="center">
-                Campaign Funding
+                Campaign Funding (~{claimValue} usd)
                 <AppButton onClick={() => setShowFund(true)}>Fund Campaign</AppButton>
               </Box>
               <Box direction="row" align="center">
@@ -164,7 +115,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             </>
             <>
               <Box direction="row" align="center">
-                {claimButton(claimStatus)}
+                <ClaimButton campaignAddress={campaign.address}></ClaimButton>
               </Box>
             </>
           </TwoColumns>

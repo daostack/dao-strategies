@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { generateNonce, SiweMessage } from 'siwe';
 
+import { ServiceManager } from '../service.manager';
 import { LoggedUserDetails } from '../services/UserService';
-import { Services } from '../types';
 
 import { Controller } from './Controller';
 
 export class UserController extends Controller {
-  constructor(services: Services) {
-    super(services);
+  constructor(manager: ServiceManager) {
+    super(manager);
   }
 
   /** */
@@ -22,7 +22,7 @@ export class UserController extends Controller {
       return undefined;
     }
     const address = request.session.siwe.address;
-    const user = await this.services.user.get(address);
+    const user = await this.manager.services.user.get(address);
     return { address: user.address, verified: { github: user.verifiedGithub } };
     /* eslint-enable */
   }
@@ -64,7 +64,7 @@ export class UserController extends Controller {
       }
 
       /** If signature is valid, add or create user */
-      const user = await this.services.user.getOrCreate({
+      const user = await this.manager.services.user.getOrCreate({
         address: fields.address,
       });
 
@@ -102,7 +102,7 @@ export class UserController extends Controller {
     _next: NextFunction
   ): Promise<{ address: string }> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return this.services.user.verifyGithubOfAddress(
+    return this.manager.services.user.verifyGithubOfAddress(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       request.body.signature as string,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -116,7 +116,7 @@ export class UserController extends Controller {
     _next: NextFunction
   ): Promise<{ address: string }> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return this.services.user.verifyAddressOfGithub(
+    return this.manager.services.user.verifyAddressOfGithub(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       request.body.handle as string
     );

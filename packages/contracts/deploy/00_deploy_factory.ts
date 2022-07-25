@@ -33,21 +33,21 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     log: true,
   });
 
-  if (chainId == '31337') { //hardhat or localhost
+  // hardhat or localhost
+  if (chainId == '31337') {
     const erc20token = await deploy('TestErc20', {
       from: deployer.address,
-      args: [hre.ethers.utils.parseEther('1000000'), deployer.address],
+      args: ['MakerDAO', 'DAI', hre.ethers.utils.parseEther('1000000'), deployer.address, 18],
       log: true,
       contract: 'TestErc20',
     });
 
     const erc20token2 = await deploy('TestErc20_02', {
       from: deployer.address,
-      args: [hre.ethers.utils.parseEther('1000000'), deployer.address],
+      args: ['USD-Coin', 'USDC', hre.ethers.utils.parseEther('1000000'), deployer.address, 6],
       log: true,
       contract: 'TestErc20',
     });
-
 
     /** transfer DAI to accounts */
     await Promise.all(

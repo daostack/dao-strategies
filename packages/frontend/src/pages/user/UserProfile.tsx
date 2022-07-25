@@ -1,6 +1,7 @@
 import { Button, TextInput } from 'grommet';
 import { FC, useState } from 'react';
 import { useSignMessage } from 'wagmi';
+import { AppButton } from '../../components/styles/BasicElements';
 
 import { ORACLE_NODE_URL } from '../../config/appConfig';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
@@ -120,9 +121,13 @@ export const UserProfile: FC<IUserProfileProps> = () => {
               </div>
               <div className="gutter-row">
                 {!handleWasSet ? (
-                  <Button onClick={handleSet}>Set</Button>
+                  <AppButton primary onClick={handleSet}>
+                    Set
+                  </AppButton>
                 ) : (
-                  <Button onClick={handleClear}>Clear</Button>
+                  <AppButton primary onClick={handleClear}>
+                    Clear
+                  </AppButton>
                 )}
               </div>
             </div>
@@ -133,7 +138,9 @@ export const UserProfile: FC<IUserProfileProps> = () => {
               </div>
               <div className="gutter-row">
                 {!verifiedSig ? (
-                  <Button onClick={sign}>{!verifyingSig ? <>Sign</> : <>Signing...</>}</Button>
+                  <AppButton primary onClick={sign}>
+                    {!verifyingSig ? <>Sign</> : <>Signing...</>}
+                  </AppButton>
                 ) : (
                   <>verified</>
                 )}
@@ -145,14 +152,18 @@ export const UserProfile: FC<IUserProfileProps> = () => {
                 Please create a <b>public</b> gist on github pasting your Ethereum address in it's body.
               </div>
               <div className="gutter-row">
-                <Button onClick={goToGithub}>Open Github</Button>
+                <AppButton primary onClick={goToGithub}>
+                  Open Github
+                </AppButton>
               </div>
             </div>
             <br></br>
             <div>
               <div className="gutter-row">Once you have created the gist, click below to verify it.</div>
               <div className="gutter-row">
-                <Button onClick={verifyAddressOfGithub}>{!verifying ? <>Verify</> : <>Verifying...</>}</Button>
+                <AppButton primary onClick={verifyAddressOfGithub}>
+                  {!verifying ? <>Verify</> : <>Verifying...</>}
+                </AppButton>
               </div>
             </div>
 

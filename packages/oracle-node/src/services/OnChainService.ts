@@ -1,3 +1,4 @@
+import { campaignInstance } from '@dao-strategies/core';
 import {
   CampaignCreateDetails,
   ContractsJson,
@@ -6,8 +7,9 @@ import {
 import { Wallet, Signer, Contract, providers } from 'ethers';
 import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
+import { appLogger } from '../logger';
 
-const ZERO_BYTES32 =
+export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 /* eslint-disable */
@@ -59,11 +61,13 @@ export class OnChainService {
      * Anyway, this method is only for tests  */
 
     const tx = await this.campaignFactory.createCampaign(
-      root,
-      ZERO_BYTES32,
       uriCid.multihash.digest,
       details.guardian,
       details.oracle,
+      details.activationTime,
+      details.CHALLENGE_PERIOD,
+      details.ACTIVATION_PERIOD,
+      details.ACTIVE_DURATION,
       salt
     );
 
@@ -85,15 +89,12 @@ export class OnChainService {
   }
 
   async publishShares(address: string, root: string): Promise<void> {
-    const campaign = new Contract(
-      address,
-      ['function proposeShares(bytes32,bytes32) external'],
-      this.signer
-    );
+    const campaign = campaignInstance(address, this.signer);
 
-    /* eslint-disable */
     const tx = await campaign.proposeShares(root, ZERO_BYTES32);
     const rec = await tx.wait();
-    /* eslint-enable */
+    appLogger.info(
+      `OnChainService - publishedShares, address: ${address}, root: ${root}, block: ${rec.blockNumber}`
+    );
   }
 }

@@ -1,11 +1,17 @@
 import { CID } from 'multiformats/cid';
 import { base32 } from 'multiformats/bases/base32';
-import { CampaignCreateDetails, CampaignReadDetails, CampaignUriDetails, Typechain } from '@dao-strategies/core';
+import {
+  CampaignCreateDetails,
+  CampaignReadDetails,
+  CampaignUriDetails,
+  ChainsDetails,
+  Typechain,
+} from '@dao-strategies/core';
+import { ethers } from 'ethers';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/time';
-import { ethers } from 'ethers';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
@@ -48,11 +54,13 @@ export enum PeriodType {
 
 export const strategyDetails = (
   values: CampaignFormValues,
-  today: DateManager,
+  now: DateManager | undefined,
   account: string | undefined
 ): CampaignUriDetails | undefined => {
+  if (now === undefined) return undefined;
+
   const repos = getRepos(values);
-  const [start, end] = getStartEnd(values, today);
+  const [start, end] = getStartEnd(values, now);
 
   return {
     creator: account !== undefined ? account : '',
@@ -98,17 +106,22 @@ export const getRepos = (values: CampaignFormValues): { owner: string; repo: str
   });
 };
 
-export const getPeriodType = (details: CampaignUriDetails | undefined, today: DateManager): PeriodType | undefined => {
+export const getPeriodType = (
+  details: CampaignUriDetails | undefined,
+  now: DateManager | undefined
+): PeriodType | undefined => {
+  if (now === undefined) return undefined;
+
   const params = details?.strategyParams;
   if (params === undefined || params.timeRange === undefined) return undefined;
 
   let type: PeriodType = PeriodType.future;
 
-  if (params.timeRange.start < today.getTime()) {
+  if (params.timeRange.start < now.getTime()) {
     type = PeriodType.retroactive;
   }
 
-  if (params.timeRange.end > today.getTime()) {
+  if (params.timeRange.end > now.getTime()) {
     type = PeriodType.ongoing;
   }
 
@@ -159,7 +172,7 @@ export const createCampaign = async (details: CampaignUriDetails): Promise<strin
 export const deployCampaign = async (
   campaignFactory: Typechain.CampaignFactory,
   uri: string | undefined,
-  otherDetails: CampaignCreateDetails,
+  createDetails: CampaignCreateDetails,
   details: CampaignUriDetails | undefined
 ) => {
   let uriDefined;
@@ -175,16 +188,19 @@ export const deployCampaign = async (
   /** raw hash 32-bit wide is exctracted from URI CID  */
   const uriCid = CID.parse(uriDefined, base32);
   if (uriCid == null) throw new Error(`uri ${uri} is not a CID`);
+  if (!details) throw new Error(`details undefined`);
 
   const uriHex = ethers.utils.hexlify(uriCid.multihash.digest);
   const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Date.now().toString())); // uriHex;
 
   const ex = await campaignFactory.createCampaign(
-    ZERO_BYTES32,
-    ZERO_BYTES32,
     uriHex,
-    otherDetails.guardian,
-    otherDetails.oracle,
+    createDetails.guardian,
+    createDetails.oracle,
+    createDetails.activationTime,
+    createDetails.CHALLENGE_PERIOD,
+    createDetails.ACTIVATION_PERIOD,
+    createDetails.ACTIVE_DURATION,
     salt
   );
   const txReceipt = await ex.wait();
@@ -199,9 +215,9 @@ export const deployCampaign = async (
 
   /** for now, the oracle is informed about the newly created campaign from this call, in the future, the
    * oracle might watch the blockchain */
-  otherDetails.address = address;
-  await registerCampaign(uriDefined, otherDetails);
+  createDetails.address = address;
 
+  await registerCampaign(uriDefined, createDetails);
   return address;
 };
 
@@ -224,4 +240,26 @@ export const getCampaign = async (uri: string): Promise<CampaignReadDetails> => 
 
   const data = await response.json();
   return data;
+};
+
+export const claimRewards = async (
+  campaign: Typechain.Campaign,
+  account: string,
+  shares: string,
+  proof: string[],
+  chainId: number
+) => {
+  const assets = ChainsDetails.chainAssets(chainId);
+
+  const ex = await campaign.claim(
+    account,
+    shares,
+    proof,
+    assets.map((a) => a.address)
+  );
+
+  const txReceipt = await ex.wait();
+
+  console.log(txReceipt);
+  return;
 };

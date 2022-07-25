@@ -1,5 +1,5 @@
-import { Services } from '../types';
+import { ServiceManager } from '../service.manager';
 
 export class Controller {
-  constructor(protected services: Services) {}
+  constructor(protected manager: ServiceManager) {}
 }

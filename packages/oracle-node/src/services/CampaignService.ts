@@ -7,15 +7,22 @@ import {
   StrategyComputation,
   Strategy_ID,
 } from '@dao-strategies/core';
-import { Campaign, Prisma } from '@prisma/client';
+import {
+  BalanceLeaf,
+  Campaign,
+  CampaignRoot,
+  Prisma,
+  Reward,
+} from '@prisma/client';
+import { ethers } from 'ethers';
 
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
-import { CampaignRepository } from '../repositories/CampaignRepository';
-import { toNumber } from '../utils/utils';
+import { CampaignRepository, Leaf } from '../repositories/CampaignRepository';
+import { bigIntToNumber } from '../utils/utils';
 
 import { campaignToUriDetails } from './CampaignUri';
-import { OnChainService } from './OnChainService';
+import { OnChainService, ZERO_BYTES32 } from './OnChainService';
 import { TimeService } from './TimeService';
 
 /**
@@ -69,6 +76,7 @@ export class CampaignService {
         executed: false,
         published: false,
         running: false,
+        isComputing: false,
       };
 
       const campaign = await this.create(createData);
@@ -84,17 +92,18 @@ export class CampaignService {
     return this.campaignRepo.create(details);
   }
 
-  async runAndPublishCampaign(uri: string): Promise<void> {
-    const campaign = await this.get(uri);
-
-    await this.runCampaign(campaign);
-    await this.setExecuted(uri);
-    await this.publishCampaign(uri);
-  }
-
-  /** runs the strategy, rewards are always stored on the DB overwriting the previous execution */
-  async runCampaign(campaign: Campaign, _now?: number): Promise<Balances> {
+  /**
+   * runs the strategy, rewards are always stored on the DB overwriting the previous execution, running a campaign
+   * can be done as part of a "simulation" or as part of the final execution. There is no distinction at this level
+   */
+  async runCampaign(
+    uri?: string,
+    _now?: number,
+    _campaign?: Campaign
+  ): Promise<Balances> {
     const now = _now || this.timeService.now();
+
+    const campaign = _campaign || (await this.get(uri));
 
     if (campaign.executed) {
       throw new Error(
@@ -124,8 +133,8 @@ export class CampaignService {
     const campaign = await this.get(uri);
 
     /** check if this campaign was recently simulated */
-    const runDate = toNumber(campaign.lastRunDate);
-    const execDate = toNumber(campaign.execDate);
+    const runDate = bigIntToNumber(campaign.lastRunDate);
+    const execDate = bigIntToNumber(campaign.execDate);
 
     let rewards: Balances;
     const now = this.timeService.now();
@@ -144,7 +153,7 @@ export class CampaignService {
         `rewards for strategy ${uri} read from DB. ${rewards.size} rewarded found`
       );
     } else {
-      rewards = await this.runCampaign(campaign);
+      rewards = await this.runCampaign(undefined, undefined, campaign);
       appLogger.info(
         `rewards for strategy ${uri} computed. ${rewards.size} rewarded found`
       );
@@ -172,12 +181,27 @@ export class CampaignService {
 
   /**  */
   async publishCampaign(uri: string): Promise<void> {
+    appLogger.info(`publishCampaign: ${uri}`);
     const campaign = await this.get(uri);
-    const root = await this.getRoot(campaign);
-    await this.onChainService.publishShares(campaign.address, root);
+    const root = await this.computeRoot(campaign);
+
+    appLogger.info(`publishCampaign - root: ${root}`);
+
+    if (root !== ZERO_BYTES32) {
+      await this.onChainService.publishShares(campaign.address, root);
+      await this.campaignRepo.setPublished(uri, true, this.timeService.now());
+    }
   }
 
-  async getRoot(campaign: Campaign): Promise<string> {
+  isPendingExecution(uri: string, now: number): Promise<boolean> {
+    return this.campaignRepo.isPendingExecution(uri, now);
+  }
+
+  isPendingPublishing(uri: string): Promise<boolean> {
+    return this.campaignRepo.isPendingPublishing(uri);
+  }
+
+  async computeRoot(campaign: Campaign): Promise<string> {
     if (!campaign.registered) {
       throw new Error(`campaign ${campaign.uri} not registered`);
     }
@@ -186,13 +210,56 @@ export class CampaignService {
       throw new Error(`campaign ${campaign.uri} not executed`);
     }
 
-    if (campaign.published) {
-      throw new Error(`campaign ${campaign.uri} alread published`);
+    /**
+     * reentrancy protection, if isComputing wait for the computation to finish
+     * and returns the latest root
+     */
+    const isComputing = await this.campaignRepo.getIsComputing(campaign.uri);
+
+    if (isComputing) {
+      const existingRoot = await new Promise<CampaignRoot>((resolve) => {
+        setInterval(() => {
+          void this.campaignRepo
+            .getIsComputing(campaign.uri)
+            .then((stillComputing) => {
+              if (!stillComputing) {
+                void this.campaignRepo
+                  .getLatestRoot(campaign.uri)
+                  .then((_root) => resolve(_root));
+              }
+            });
+        }, 250);
+      });
+
+      return existingRoot.root;
     }
 
+    /** else compute the root */
+    await this.campaignRepo.setIsComputing(campaign.uri, true);
+
+    const now = this.timeService.now();
     const rewards = await this.getRewardsToAddresses(campaign.uri);
+
+    if (rewards.size === 0) {
+      return ZERO_BYTES32;
+    }
+
     const tree = new BalanceTree(rewards);
     const root = tree.getHexRoot();
+
+    const leafs = Array.from(rewards.entries()).map(
+      ([address, balance]): Leaf => {
+        const proof = tree.getProof(address, balance);
+        return {
+          address,
+          balance: balance.toString(),
+          proof,
+        };
+      }
+    );
+
+    await this.campaignRepo.addRoot(campaign.uri, root, leafs, now);
+    await this.campaignRepo.setIsComputing(campaign.uri, false);
 
     return root;
   }
@@ -205,8 +272,20 @@ export class CampaignService {
     return this.campaignRepo.getRewardsToAddresses(uri);
   }
 
+  getRewardToAddress(uri: string, account: string): Promise<Reward | null> {
+    return this.campaignRepo.getRewardToAddress(uri, account);
+  }
+
   async setRewards(uri: string, rewards: Balances): Promise<void> {
     return this.campaignRepo.setRewards(uri, rewards);
+  }
+
+  async getBalanceLeaf(
+    uri: string,
+    root: string,
+    account: string
+  ): Promise<BalanceLeaf> {
+    return this.campaignRepo.getBalanceLeaf(uri, root, account);
   }
 
   async register(uri: string, details: CampaignCreateDetails): Promise<void> {
@@ -217,7 +296,7 @@ export class CampaignService {
     return this.campaignRepo.setExecuted(uri, true);
   }
 
-  findPending(time: number): Promise<Campaign[]> {
+  findPending(time: number): Promise<string[]> {
     return this.campaignRepo.findPending(time);
   }
 

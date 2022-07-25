@@ -18,7 +18,6 @@ const zerosStr = (n: number): string => {
   return '0'.repeat(n);
 };
 
-
 /* need to check a different conversion method because toPrecision can return exponential notation:
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toPrecision*/
 const floatToBN = (amount: number, nDecimals: number = 18): BigNumber => {
@@ -31,6 +30,21 @@ const floatToBN = (amount: number, nDecimals: number = 18): BigNumber => {
       : decimalsStr + zerosStr(nDecimals - decimalsStr.length)
   );
   return whole.add(decimals);
+};
+
+export const BNToFloat = (bn: BigNumber, decimals: number): number => {
+  // use string and insert dot in the decimal position
+  const str = bn.toString();
+
+  const decimalsStr =
+    str.length > decimals
+      ? str.slice(str.length - decimals, str.length)
+      : '0'.repeat(decimals - str.length).concat(str);
+
+  const wholeStr =
+    str.length > decimals ? str.slice(0, str.length - decimals) : '0';
+
+  return Number.parseFloat(`${wholeStr}.${decimalsStr}`);
 };
 
 /** float numbers are converted to big integers (where 1E+18 = 1.0)
@@ -65,15 +79,19 @@ export const normalizeRewards = (balancesFloat: BalancesFloat): Balances => {
     /** Round the balance to force exact sum of all balances is 1E18 */
     if (oneAccount !== undefined) {
       /** numerical error (should be small) */
-      //const res = sumBN.sub(BigNumber.from('1000000000000000000'));
       const oneAccountBal = balances.get(oneAccount);
       if (oneAccountBal === undefined)
         throw new Error('unexpected balance for account');
       if (sumBN.lt(BigNumber.from('1000000000000000000'))) {
-        balances.set(oneAccount, oneAccountBal.add(BigNumber.from('1000000000000000000').sub(sumBN)));
-      }
-      else {
-        balances.set(oneAccount, oneAccountBal.sub(sumBN.sub(BigNumber.from('1000000000000000000'))));
+        balances.set(
+          oneAccount,
+          oneAccountBal.add(BigNumber.from('1000000000000000000').sub(sumBN))
+        );
+      } else {
+        balances.set(
+          oneAccount,
+          oneAccountBal.sub(sumBN.sub(BigNumber.from('1000000000000000000')))
+        );
       }
     }
   }

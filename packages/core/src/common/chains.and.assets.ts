@@ -1,22 +1,12 @@
 import { Chain, chain } from '@wagmi/core';
+import { ethers } from 'ethers';
+import { BNToFloat } from '../support';
 
 import { ContractsJson } from './contracts.json';
+import { Asset, ChainAndAssets, TokenBalance } from './types';
 
 /** Single source of truth for the supported chains and assets. It is imported on the
  * frontend */
-
-export interface Asset {
-  id: string;
-  address: string;
-  name: string;
-  icon: string;
-}
-
-export interface ChainAndAssets {
-  chainIcon: string;
-  chain: Chain;
-  assets: Asset[];
-}
 
 const chainList: ChainAndAssets[] = [
   {
@@ -25,25 +15,60 @@ const chainList: ChainAndAssets[] = [
     assets: [
       {
         id: 'ether',
-        address: '',
+        address: ethers.constants.AddressZero,
         name: 'Ether',
         icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
+        decimals: 18,
       },
       {
         id: 'dai',
         address: ContractsJson.jsonOfChain().contracts.TestErc20.address,
         name: 'DAI',
         icon: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png',
+        decimals: 18,
       },
       {
         id: 'usdc',
         address: ContractsJson.jsonOfChain().contracts.TestErc20_02.address,
         name: 'USDC',
         icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=022',
+        decimals: 18,
+      },
+    ],
+  },
+  {
+    chain: chain.mainnet,
+    chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
+    assets: [
+      {
+        id: 'ether',
+        address: ethers.constants.AddressZero,
+        name: 'Ether',
+        icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
+        decimals: 18,
+      },
+      {
+        id: 'dai',
+        address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+        name: 'DAI',
+        icon: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png',
+        decimals: 18,
+      },
+      {
+        id: 'usdc',
+        address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        name: 'USDC',
+        icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=022',
+        decimals: 6,
       },
     ],
   },
 ];
+
+export enum SupportedChains {
+  ethereum = 'Ethereum',
+  localhost = 'Localhost',
+}
 
 export class ChainsDetails {
   static chains(): Chain[] {
@@ -59,7 +84,11 @@ export class ChainsDetails {
   static chainOfName = (name: string): ChainAndAssets => {
     const entry = chainList.find((chain) => chain.chain.name === name);
     if (entry === undefined)
-      throw new Error(`chain with name ${name} not found`);
+      throw new Error(
+        `chain with name ${name} not found. Available chains are ${JSON.stringify(
+          chainList.map((chain) => chain.chain.name)
+        )}`
+      );
     return entry;
   };
 
@@ -75,6 +104,14 @@ export class ChainsDetails {
     return entry;
   };
 
+  static assetOfAddress = (chainId: number, address: string): Asset => {
+    const assets = this.chainAssets(chainId);
+    const entry = assets.find((asset) => asset.address === address);
+    if (entry === undefined)
+      throw new Error(`asset with address ${address} not found`);
+    return entry;
+  };
+
   static asset = (chainId: number, assetId: string): Asset => {
     const asset = this.chainAssets(chainId).find(
       (asset) => assetId === asset.id
@@ -85,6 +122,20 @@ export class ChainsDetails {
   };
 
   static isNative = (asset: Asset): boolean => {
-    return asset.address === '';
+    return asset.address === ethers.constants.AddressZero;
   };
+
+  static valueOfAssets(balances: TokenBalance[]): number {
+    return balances
+      ? balances.reduce((sum, asset) => {
+          const value = BNToFloat(
+            ethers.BigNumber.from(asset.balance),
+            asset.decimals
+          );
+          // eslint-disable-next-line no-param-reassign
+          sum += asset.price ? value * asset.price : 0;
+          return sum;
+        }, 0)
+      : 0;
+  }
 }

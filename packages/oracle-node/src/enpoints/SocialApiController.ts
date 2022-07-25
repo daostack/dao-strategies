@@ -1,12 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-
-import { Services } from '../types';
+import { ServiceManager } from '../service.manager';
 
 import { Controller } from './Controller';
 
 export class SocialApiController extends Controller {
-  constructor(services: Services) {
-    super(services);
+  constructor(manager: ServiceManager) {
+    super(manager);
   }
 
   /** */
@@ -16,7 +15,7 @@ export class SocialApiController extends Controller {
     _next: NextFunction
   ): Promise<string[]> {
     /* eslint-disable */
-    return this.services.socialApi.searchGithub(
+    return this.manager.services.socialApi.searchGithub(
       request.body.what,
       request.body.query,
       request.body.page,
@@ -31,7 +30,7 @@ export class SocialApiController extends Controller {
     _next: NextFunction
   ): Promise<boolean> {
     /* eslint-disable */
-    return this.services.socialApi.repoIsValid(request.query.fullName);
+    return this.manager.services.socialApi.repoIsValid(request.query.fullName);
     /* eslint-enable */
   }
 }
