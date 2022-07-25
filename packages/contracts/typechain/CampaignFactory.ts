@@ -4,6 +4,7 @@
 import {
   BaseContract,
   BigNumber,
+  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -20,7 +21,7 @@ export interface CampaignFactoryInterface extends utils.Interface {
   contractName: "CampaignFactory";
   functions: {
     "campaignAddress(bytes32)": FunctionFragment;
-    "createCampaign(bytes32,bytes32,bytes32,address,address,bytes32)": FunctionFragment;
+    "createCampaign(bytes32,bytes32,bytes32,address,address,uint256,bytes32)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -29,7 +30,15 @@ export interface CampaignFactoryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createCampaign",
-    values: [BytesLike, BytesLike, BytesLike, string, string, BytesLike]
+    values: [
+      BytesLike,
+      BytesLike,
+      BytesLike,
+      string,
+      string,
+      BigNumberish,
+      BytesLike
+    ]
   ): string;
 
   decodeFunctionResult(
@@ -42,14 +51,14 @@ export interface CampaignFactoryInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,bytes32)": EventFragment;
+    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,uint256,bytes32)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "CampaignCreated"): EventFragment;
 }
 
 export type CampaignCreatedEvent = TypedEvent<
-  [string, string, string, string, string, string, string, string],
+  [string, string, string, string, string, string, string, BigNumber, string],
   {
     creator: string;
     newCampaign: string;
@@ -58,6 +67,7 @@ export type CampaignCreatedEvent = TypedEvent<
     _strategyUri: string;
     _guardian: string;
     _oracle: string;
+    activationTime: BigNumber;
     salt: string;
   }
 >;
@@ -103,6 +113,7 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _activationTime: BigNumberish,
       salt: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -116,6 +127,7 @@ export interface CampaignFactory extends BaseContract {
     _strategyUri: BytesLike,
     _guardian: string,
     _oracle: string,
+    _activationTime: BigNumberish,
     salt: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -132,13 +144,14 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _activationTime: BigNumberish,
       salt: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
   filters: {
-    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,bytes32)"(
+    "CampaignCreated(address,address,bytes32,bytes32,bytes32,address,address,uint256,bytes32)"(
       creator?: null,
       newCampaign?: null,
       _sharesMerkleRoot?: null,
@@ -146,6 +159,7 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri?: null,
       _guardian?: null,
       _oracle?: null,
+      activationTime?: null,
       salt?: null
     ): CampaignCreatedEventFilter;
     CampaignCreated(
@@ -156,6 +170,7 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri?: null,
       _guardian?: null,
       _oracle?: null,
+      activationTime?: null,
       salt?: null
     ): CampaignCreatedEventFilter;
   };
@@ -172,6 +187,7 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _activationTime: BigNumberish,
       salt: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -189,6 +205,7 @@ export interface CampaignFactory extends BaseContract {
       _strategyUri: BytesLike,
       _guardian: string,
       _oracle: string,
+      _activationTime: BigNumberish,
       salt: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
