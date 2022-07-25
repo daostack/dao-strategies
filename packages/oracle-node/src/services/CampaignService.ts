@@ -19,7 +19,7 @@ import { ethers } from 'ethers';
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository, Leaf } from '../repositories/CampaignRepository';
-import { toNumber } from '../utils/utils';
+import { bigIntToNumber } from '../utils/utils';
 
 import { campaignToUriDetails } from './CampaignUri';
 import { OnChainService, ZERO_BYTES32 } from './OnChainService';
@@ -133,8 +133,8 @@ export class CampaignService {
     const campaign = await this.get(uri);
 
     /** check if this campaign was recently simulated */
-    const runDate = toNumber(campaign.lastRunDate);
-    const execDate = toNumber(campaign.execDate);
+    const runDate = bigIntToNumber(campaign.lastRunDate);
+    const execDate = bigIntToNumber(campaign.execDate);
 
     let rewards: Balances;
     const now = this.timeService.now();

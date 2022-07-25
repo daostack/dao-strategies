@@ -1,10 +1,9 @@
 import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ChainsDetails, getCampaignUri, CampaignCreateDetails } from '@dao-strategies/core';
 
-import { DateManager } from '../../utils/time';
 import { useCampaignFactory } from '../../hooks/useContracts';
 import {
   deployCampaign,
@@ -16,7 +15,7 @@ import {
   SimulationResult,
   strategyDetails,
 } from '../campaign.support';
-import { CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
+import { ACTIVATION_PERIOD, ACTIVE_DURATION, CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
 import { RouteNames } from '../MainPage';
 import {
   AppButton,
@@ -34,6 +33,7 @@ import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
 import { useNow } from '../../hooks/useNow';
+import { useUserError } from '../../hooks/useErrorContext';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -75,6 +75,7 @@ const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
+  const { showError } = useUserError();
 
   const { now } = useNow();
   const [pageIx, setPageIx] = useState<number>(0);
@@ -120,28 +121,37 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (finalDetails === undefined) throw new Error();
 
     const chainId = ChainsDetails.chainOfName(formValues.chainName).chain.id;
+    const activationTime = 0;
+
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
       title: formValues.title,
       guardian: formValues.guardian,
       description: formValues.description,
       oracle: ORACLE_ADDRESS,
+      activationTime,
+      CHALLENGE_PERIOD: CHALLENGE_PERIOD,
+      ACTIVATION_PERIOD: ACTIVATION_PERIOD,
+      ACTIVE_DURATION: ACTIVE_DURATION,
       address: '',
       chainId,
       asset: ChainsDetails.assetOfName(chainId, formValues.assetName).id,
-      cancelDate: finalDetails.execDate + CHALLENGE_PERIOD,
-      challengePeriod: 60, // 604800
     };
 
     /** if the campaign was not simulated it must be created first */
-    const campaignAddress = await deployCampaign(
-      campaignFactory,
-      (simulation as SimulationResult).uri,
-      otherDetails,
-      finalDetails
-    );
+    try {
+      const campaignAddress = await deployCampaign(
+        campaignFactory,
+        (simulation as SimulationResult).uri,
+        otherDetails,
+        finalDetails
+      );
 
-    navigate(RouteNames.Campaign(campaignAddress));
+      navigate(RouteNames.Campaign(campaignAddress));
+    } catch (e) {
+      showError('Error creating campaign');
+      console.log(e);
+    }
   };
 
   /** Processed values from the form that are cheap to compute and useful */

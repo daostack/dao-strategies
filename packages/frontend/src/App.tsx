@@ -8,6 +8,7 @@ import { LoggedUserContext } from './hooks/useLoggedUser';
 import { MainPage } from './pages/MainPage';
 import { GlobalStyles } from './components/styles/GlobalStyles';
 import { theme } from './components/styles/themes';
+import { ErrorContext } from './hooks/useErrorContext';
 
 export const LOCALHOST_CHAIN_ID = 3177;
 
@@ -17,14 +18,16 @@ const client = createClient({ provider });
 function App() {
   return (
     <div className="App">
-      <WagmiConfig client={client}>
-        <LoggedUserContext>
-          <GlobalStyles />
-          <Grommet theme={theme}>
-            <MainPage></MainPage>
-          </Grommet>
-        </LoggedUserContext>
-      </WagmiConfig>
+      <ErrorContext>
+        <WagmiConfig client={client}>
+          <LoggedUserContext>
+            <GlobalStyles />
+            <Grommet theme={theme}>
+              <MainPage></MainPage>
+            </Grommet>
+          </LoggedUserContext>
+        </WagmiConfig>
+      </ErrorContext>
     </div>
   );
 }

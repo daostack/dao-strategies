@@ -16,19 +16,28 @@ export interface CampaignCreateDetails {
   description: string;
   guardian: string;
   oracle: string;
-  challengePeriod: number;
+  activationTime: number;
+  CHALLENGE_PERIOD: number;
+  ACTIVATION_PERIOD: number;
+  ACTIVE_DURATION: number;
   chainId: number;
   asset: string;
   address: string;
-  cancelDate: number;
 }
 
 export interface CampaignReadDetails
   extends CampaignCreateDetails,
     CampaignUriDetails {
   uri: string;
+  title: string;
+  description: string;
+  guardian: string;
+  oracle: string;
+  chainId: number;
+  address: string;
   registered: boolean;
   executed: boolean;
+  published: boolean;
 }
 
 export interface Asset {

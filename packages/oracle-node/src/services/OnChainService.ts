@@ -61,12 +61,13 @@ export class OnChainService {
      * Anyway, this method is only for tests  */
 
     const tx = await this.campaignFactory.createCampaign(
-      root,
-      ZERO_BYTES32,
       uriCid.multihash.digest,
       details.guardian,
       details.oracle,
-      details.challengePeriod,
+      details.activationTime,
+      details.CHALLENGE_PERIOD,
+      details.ACTIVATION_PERIOD,
+      details.ACTIVE_DURATION,
       salt
     );
 

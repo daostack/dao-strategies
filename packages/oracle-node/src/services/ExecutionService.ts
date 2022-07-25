@@ -2,7 +2,7 @@ import { WorldConfig } from '@dao-strategies/core';
 
 import { appLogger } from '../logger';
 import { Services } from '../types';
-import { toNumber } from '../utils/utils';
+import { bigIntToNumber } from '../utils/utils';
 
 export interface ExecutionConfig {
   world: WorldConfig;
@@ -75,7 +75,7 @@ export class ExecuteService {
 
     this.schedulled.add(campaign.uri);
 
-    const delay = toNumber(campaign.execDate) - now;
+    const delay = bigIntToNumber(campaign.execDate) - now;
 
     const callback = async (): Promise<void> => {
       await this.execute(campaign.uri, now + delay);

@@ -10,7 +10,7 @@ import {
 import { BigNumber, ethers } from 'ethers';
 import { appLogger } from '../logger';
 
-import { toNumber } from '../utils/utils';
+import { bigIntToNumber } from '../utils/utils';
 
 export interface Leaf {
   address: string;
@@ -63,7 +63,7 @@ export class CampaignRepository {
     /** "BigInt" in the DB to support timestamps beyond 2038, "number" in JS */
     return result.lastRunDate === null
       ? undefined
-      : toNumber(result.lastRunDate);
+      : bigIntToNumber(result.lastRunDate);
   }
 
   async setRunning(uri: string, value: boolean): Promise<void> {

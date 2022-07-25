@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { DateManager } from '../utils/time';
 
+/** now is asynchronously synchronizing with the oracle clock at creation. */
 export const useNow = (): {
   now: DateManager | undefined;
 } => {

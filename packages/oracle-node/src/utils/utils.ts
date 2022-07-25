@@ -4,12 +4,26 @@ import { Balances } from '@dao-strategies/core';
 import { BigNumber } from 'ethers';
 import { sha256 } from 'multiformats/hashes/sha2';
 
-export const toNumber = (bn: bigint | null | undefined): number | undefined => {
+export const bigIntToNumber = (
+  bn: bigint | null | undefined
+): number | undefined => {
   if (bn === undefined || bn == null) {
     return undefined;
   }
   if (bn > Number.MAX_SAFE_INTEGER) {
-    throw new Error('cannot convert bigint to number');
+    return NaN;
+  }
+  return Number(bn);
+};
+
+export const BigNumberToNumber = (
+  bn: BigNumber | undefined
+): number | undefined => {
+  if (bn === undefined || bn == null) {
+    return undefined;
+  }
+  if (bn.gt(BigNumber.from(Number.MAX_SAFE_INTEGER.toString()))) {
+    return NaN;
   }
   return Number(bn);
 };

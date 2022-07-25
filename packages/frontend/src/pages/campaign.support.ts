@@ -172,7 +172,7 @@ export const createCampaign = async (details: CampaignUriDetails): Promise<strin
 export const deployCampaign = async (
   campaignFactory: Typechain.CampaignFactory,
   uri: string | undefined,
-  otherDetails: CampaignCreateDetails,
+  createDetails: CampaignCreateDetails,
   details: CampaignUriDetails | undefined
 ) => {
   let uriDefined;
@@ -188,17 +188,19 @@ export const deployCampaign = async (
   /** raw hash 32-bit wide is exctracted from URI CID  */
   const uriCid = CID.parse(uriDefined, base32);
   if (uriCid == null) throw new Error(`uri ${uri} is not a CID`);
+  if (!details) throw new Error(`details undefined`);
 
   const uriHex = ethers.utils.hexlify(uriCid.multihash.digest);
   const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Date.now().toString())); // uriHex;
 
   const ex = await campaignFactory.createCampaign(
-    ZERO_BYTES32,
-    ZERO_BYTES32,
     uriHex,
-    otherDetails.guardian,
-    otherDetails.oracle,
-    otherDetails.challengePeriod,
+    createDetails.guardian,
+    createDetails.oracle,
+    createDetails.activationTime,
+    createDetails.CHALLENGE_PERIOD,
+    createDetails.ACTIVATION_PERIOD,
+    createDetails.ACTIVE_DURATION,
     salt
   );
   const txReceipt = await ex.wait();
@@ -213,9 +215,9 @@ export const deployCampaign = async (
 
   /** for now, the oracle is informed about the newly created campaign from this call, in the future, the
    * oracle might watch the blockchain */
-  otherDetails.address = address;
-  await registerCampaign(uriDefined, otherDetails);
+  createDetails.address = address;
 
+  await registerCampaign(uriDefined, createDetails);
   return address;
 };
 

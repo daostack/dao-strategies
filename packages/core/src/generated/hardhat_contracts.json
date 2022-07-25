@@ -9,16 +9,6 @@
           "abi": [
             {
               "inputs": [],
-              "name": "ActiveChallengePeriod",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "ClaimingNotAllowed",
-              "type": "error"
-            },
-            {
-              "inputs": [],
               "name": "InvalidProof",
               "type": "error"
             },
@@ -29,7 +19,12 @@
             },
             {
               "inputs": [],
-              "name": "NoFunds",
+              "name": "MerkleRootUpdateNotAllowed",
+              "type": "error"
+            },
+            {
+              "inputs": [],
+              "name": "NoAssetsToWithdraw",
               "type": "error"
             },
             {
@@ -74,7 +69,7 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
                   "name": "account",
                   "type": "address"
@@ -105,7 +100,7 @@
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
                   "name": "provider",
                   "type": "address"
@@ -144,6 +139,19 @@
               "inputs": [
                 {
                   "indexed": false,
+                  "internalType": "bool",
+                  "name": "locked",
+                  "type": "bool"
+                }
+              ],
+              "name": "Lock",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
                   "internalType": "bytes32",
                   "name": "sharesMerkleRoot",
                   "type": "bytes32"
@@ -161,14 +169,14 @@
                   "type": "uint256"
                 }
               ],
-              "name": "SharesMerkleRoot",
+              "name": "SharesMerkleRootUpdate",
               "type": "event"
             },
             {
               "anonymous": false,
               "inputs": [
                 {
-                  "indexed": false,
+                  "indexed": true,
                   "internalType": "address",
                   "name": "account",
                   "type": "address"
@@ -188,6 +196,45 @@
               ],
               "name": "Withdraw",
               "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "ACTIVATION_PERIOD",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "ACTIVE_DURATION",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "CHALLENGE_PERIOD",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
             },
             {
               "inputs": [],
@@ -258,19 +305,6 @@
               "name": "challenge",
               "outputs": [],
               "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "challengePeriod",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
               "type": "function"
             },
             {
@@ -373,11 +407,6 @@
               "inputs": [
                 {
                   "internalType": "bytes32",
-                  "name": "_sharesMerkleRoot",
-                  "type": "bytes32"
-                },
-                {
-                  "internalType": "bytes32",
                   "name": "_strategyUri",
                   "type": "bytes32"
                 },
@@ -393,7 +422,22 @@
                 },
                 {
                   "internalType": "uint256",
-                  "name": "_challengePeriod",
+                  "name": "_activationTime",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_CHALLENGE_PERIOD",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_ACTIVATION_PERIOD",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_ACTIVE_DURATION",
                   "type": "uint256"
                 }
               ],
@@ -404,7 +448,7 @@
             },
             {
               "inputs": [],
-              "name": "isRootActive",
+              "name": "isChallengePeriod",
               "outputs": [
                 {
                   "internalType": "bool",
@@ -417,7 +461,33 @@
             },
             {
               "inputs": [],
+              "name": "isPendingActive",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "isActive",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "locked",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "merkleRootUpdateAllowed",
               "outputs": [
                 {
                   "internalType": "bool",
@@ -578,7 +648,7 @@
                   "type": "address"
                 }
               ],
-              "name": "totalFundsReceived",
+              "name": "totalReceived",
               "outputs": [
                 {
                   "internalType": "uint256",
@@ -613,6 +683,19 @@
               "type": "function"
             },
             {
+              "inputs": [],
+              "name": "withdrawAllowed",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [
                 {
                   "internalType": "address",
@@ -625,7 +708,7 @@
                   "type": "address"
                 }
               ],
-              "name": "withdrawFunds",
+              "name": "withdrawAssets",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -636,20 +719,231 @@
             }
           ]
         },
-        "TestErc20": {
+        "CampaignFactory": {
           "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
           "abi": [
             {
               "inputs": [
                 {
+                  "internalType": "address payable",
+                  "name": "_master",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "creator",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "newCampaign",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bytes32",
+                  "name": "_strategyUri",
+                  "type": "bytes32"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "_guardian",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "_oracle",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
                   "internalType": "uint256",
-                  "name": "supply",
+                  "name": "activationTime",
+                  "type": "uint256"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "bytes32",
+                  "name": "salt",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "CampaignCreated",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "salt",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "campaignAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "_sharesMerkleRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "_sharesUri",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "_strategyUri",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_guardian",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_oracle",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_activationTime",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_CHALLENGE_PERIOD",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_ACTIVATION_PERIOD",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_ACTIVE_DURATION",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "salt",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "createAndPublishCampaign",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "_strategyUri",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_guardian",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_oracle",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_activationTime",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_CHALLENGE_PERIOD",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_ACTIVATION_PERIOD",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_ACTIVE_DURATION",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "salt",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "createCampaign",
+              "outputs": [
+                {
+                  "internalType": "address payable",
+                  "name": "proxy",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "TestErc20": {
+          "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "string",
+                  "name": "name_",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "symbol_",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_supply",
                   "type": "uint256"
                 },
                 {
                   "internalType": "address",
-                  "name": "owner",
+                  "name": "holder",
                   "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "decimals_",
+                  "type": "uint8"
                 }
               ],
               "stateMutability": "nonpayable",
@@ -928,19 +1222,34 @@
           ]
         },
         "TestErc20_02": {
-          "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
           "abi": [
             {
               "inputs": [
                 {
+                  "internalType": "string",
+                  "name": "name_",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "symbol_",
+                  "type": "string"
+                },
+                {
                   "internalType": "uint256",
-                  "name": "supply",
+                  "name": "_supply",
                   "type": "uint256"
                 },
                 {
                   "internalType": "address",
-                  "name": "owner",
+                  "name": "holder",
                   "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "decimals_",
+                  "type": "uint8"
                 }
               ],
               "stateMutability": "nonpayable",
@@ -1213,139 +1522,6 @@
                   "type": "bool"
                 }
               ],
-              "stateMutability": "nonpayable",
-              "type": "function"
-            }
-          ]
-        },
-        "CampaignFactory": {
-          "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "address payable",
-                  "name": "_master",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "creator",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "newCampaign",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "bytes32",
-                  "name": "_sharesMerkleRoot",
-                  "type": "bytes32"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "bytes32",
-                  "name": "_sharesUri",
-                  "type": "bytes32"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "bytes32",
-                  "name": "_strategyUri",
-                  "type": "bytes32"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "_guardian",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "_oracle",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "bytes32",
-                  "name": "salt",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "CampaignCreated",
-              "type": "event"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "salt",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "campaignAddress",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "_sharesMerkleRoot",
-                  "type": "bytes32"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "_sharesUri",
-                  "type": "bytes32"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "_strategyUri",
-                  "type": "bytes32"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_guardian",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_oracle",
-                  "type": "address"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "_challengePeriod",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "bytes32",
-                  "name": "salt",
-                  "type": "bytes32"
-                }
-              ],
-              "name": "createCampaign",
-              "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
             }

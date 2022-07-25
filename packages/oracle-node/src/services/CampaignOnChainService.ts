@@ -9,6 +9,7 @@ import {
 } from '@dao-strategies/core';
 import { Reward } from '@prisma/client';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
+import { BigNumberToNumber } from '../utils/utils';
 
 import { CampaignService } from './CampaignService';
 import { PriceService } from './PriceService';
@@ -168,7 +169,7 @@ export class CampaignOnChainService {
       true
     );
 
-    const isRootActive = await campaignContract.isRootActive();
+    const isRootActive = await campaignContract.isPendingActive();
     const activationTime = await campaignContract.activationTime();
 
     let pendingClaim: TreeClaimInfo | undefined = undefined;
@@ -191,9 +192,7 @@ export class CampaignOnChainService {
       published: campaign.published,
       current: currentClaim,
       pending: pendingClaim,
-      activationTime: activationTime.gt(BigNumber.from(Number.MAX_SAFE_INTEGER))
-        ? NaN
-        : activationTime.toNumber(),
+      activationTime: BigNumberToNumber(activationTime),
     };
   }
 

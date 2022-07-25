@@ -11,4 +11,7 @@ export const ORIGIN = window.location.origin;
 export const DAYS = 24 * 60 * 60;
 
 export const ORACLE_ADDRESS = '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc';
-export const CHALLENGE_PERIOD = 7 * DAYS;
+
+export const CHALLENGE_PERIOD = 1 * DAYS;
+export const ACTIVE_DURATION = 1 * DAYS;
+export const ACTIVATION_PERIOD = 7 * DAYS;
