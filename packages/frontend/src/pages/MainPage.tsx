@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AppHeader } from './AppHeader';
 import { CampaignPage } from './campaign/CampaignPage';
 import { CampaignCreate } from './create/CampaignCreate';
 import { LandingPage } from './landing/LandingPage';
@@ -20,6 +21,7 @@ export const MainPage: FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <AppHeader></AppHeader>
         <Routes>
           <Route path={RouteNames.Base} element={<LandingPage />}></Route>
           <Route path={RouteNames.Create} element={<CampaignCreate />}></Route>

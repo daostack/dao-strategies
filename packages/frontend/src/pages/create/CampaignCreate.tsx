@@ -1,5 +1,5 @@
 import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
-import { FC, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ChainsDetails, getCampaignUri, CampaignCreateDetails } from '@dao-strategies/core';
@@ -28,7 +28,7 @@ import {
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
 import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
-import { FormTrash } from 'grommet-icons';
+import { FormTrash, StatusCriticalSmall } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
@@ -237,20 +237,22 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setFormValues({ ...formValues });
   };
 
-  const status: FormStatus = {
-    page: {
-      isFirstPage: pageIx === 0,
-      isLastFormPage: pageIx === 1, // before the review page
-      isReview: pageIx === 2,
-    },
-    shouldSimulate: periodType !== PeriodType.future,
-    canSimulate: isLogged,
-    mustSimulate: periodType === PeriodType.retroactive,
-    isSimulating: simulating,
-    wasSimulated: simulation !== undefined,
-    canCreate: isLogged,
-    isCreating: creating,
-  };
+  const status = useMemo((): FormStatus => {
+    return {
+      page: {
+        isFirstPage: pageIx === 0,
+        isLastFormPage: pageIx === 1, // before the review page
+        isReview: pageIx === 2,
+      },
+      shouldSimulate: periodType !== PeriodType.future,
+      canSimulate: isLogged,
+      mustSimulate: periodType === PeriodType.retroactive,
+      isSimulating: simulating,
+      wasSimulated: simulation !== undefined,
+      canCreate: isLogged,
+      isCreating: creating,
+    };
+  }, [creating, isLogged, pageIx, periodType, simulating, simulation]);
 
   const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
     connect,
@@ -259,6 +261,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     simulate,
     validate,
   });
+
+  useEffect(() => {
+    if (status.page.isReview && status.canSimulate && !status.isSimulating && !status.wasSimulated) {
+      void simulate();
+    }
+  }, [status, account, simulate]);
 
   const leftClicked = () => {
     if (pageIx > 0) setPageIx(pageIx - 1);

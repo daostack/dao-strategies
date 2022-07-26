@@ -1,14 +1,13 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans&display=swap');
   * {
     box-sizing: border-box;
+    font-family: 'DM Sans', sans-serif;
   }
   body {
     background-color: white;
-    color: hsl(192, 100%, 9%);
-    font-family: 'DM Sans', sans-serif;
+    color: hsl(192, 100%, 9%);    
     font-size: 1.15em;
     margin: 0;
   }

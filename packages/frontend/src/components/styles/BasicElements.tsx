@@ -1,11 +1,10 @@
 import { Button, Form, Text, TextInput, TextArea, Box, ButtonExtendedProps, Select, FileInput } from 'grommet';
 import React, { FC } from 'react';
-import styled from 'styled-components';
 
 export interface IElement {
   onClick?: () => void;
   style?: React.CSSProperties;
-  children?: Array<React.ReactNode> | string;
+  children?: JSX.Element | React.ReactNode | Array<React.ReactNode> | Array<JSX.Element> | string;
 }
 
 export interface IValueElement extends IElement {

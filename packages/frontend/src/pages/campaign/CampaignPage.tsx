@@ -14,6 +14,7 @@ import { AssetBalance } from '../../components/Assets';
 import { Refresh } from 'grommet-icons';
 import { truncate } from '../../utils/ethers';
 import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
+import { CampaignGuardian } from '../../components/CampaignGuardian';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -79,7 +80,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       ) : (
         <></>
       )}
-      <AppHeader></AppHeader>
       <ColumnView>
         <Countdown to-date={campaign?.execDate}></Countdown>
         <Box direction="row" align="center" justify="center">
@@ -157,6 +157,9 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
                 </Box>
               </Box>
             </TwoColumns>
+          </Tab>
+          <Tab title="Admin">
+            <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>
           </Tab>
         </Tabs>
       </ColumnView>

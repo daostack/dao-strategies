@@ -12,12 +12,11 @@ export interface IWelcomeMessage {
 const WelcomeMessageCore: FC<IWelcomeMessage> = (props: IWelcomeMessage) => {
   return (
     <>
-      <Heading size="xlarge">
-        Where value is <br></br>been Rewarded
+      <Heading style={{ textAlign: 'center' }} size="xlarge">
+        Great work should<br></br>be rewarded
       </Heading>
-      <Paragraph size="xlarge">
-        The Decentralized Funding & Distribution Platform. Built for anyone and for everyone. <br></br>Create
-        interesting strategies to reward value.
+      <Paragraph style={{ textAlign: 'center' }} size="xlarge">
+        Create a campaign, raise funds, and get them automatically distributed to your Github contributors.
       </Paragraph>
 
       <Box direction="row" style={{ marginTop: '32px' }}>
