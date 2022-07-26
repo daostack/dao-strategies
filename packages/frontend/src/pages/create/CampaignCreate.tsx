@@ -1,4 +1,4 @@
-import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
+import { Box, DateInput, FormField, Layer, Paragraph, Spinner, Text, TextInput } from 'grommet';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,12 +28,13 @@ import {
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
 import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
-import { FormTrash, StatusCriticalSmall } from 'grommet-icons';
+import { FormTrash } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
 import { useNow } from '../../hooks/useNow';
 import { useUserError } from '../../hooks/useErrorContext';
+import { createPartiallyEmittedExpression } from 'typescript';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -96,6 +97,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const [formValues, setFormValuesState] = useState<CampaignFormValues>(initialValues);
   const [simulation, setSimulated] = useState<SimulationResult | undefined>();
   const [simulating, setSimulating] = useState<boolean>(false);
+  const [deploying, setDeploying] = useState<boolean>(false);
 
   const campaignFactory = useCampaignFactory();
   const navigate = useNavigate();
@@ -139,6 +141,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       asset: ChainsDetails.assetOfName(chainId, formValues.assetName).id,
     };
 
+    setDeploying(true);
     /** if the campaign was not simulated it must be created first */
     try {
       setCreating(true);
@@ -155,6 +158,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       showError('Error creating campaign');
       console.log(e);
     }
+
+    setDeploying(false);
   };
 
   /** Processed values from the form that are cheap to compute and useful */
@@ -206,16 +211,18 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return errors;
   };
 
-  const simulate = async (): Promise<void> => {
-    if (DEBUG) console.log('CampaignCreate - simulate()');
-    setSimulating(true);
+  const simulate = useMemo(() => {
+    return async (): Promise<void> => {
+      if (DEBUG) console.log('CampaignCreate - simulate()');
+      setSimulating(true);
 
-    if (details === undefined) throw new Error();
-    const sim = await simulateCampaign(details);
+      if (details === undefined) throw new Error();
+      const sim = await simulateCampaign(details);
 
-    setSimulated(sim);
-    setSimulating(false);
-  };
+      setSimulated(sim);
+      setSimulating(false);
+    };
+  }, [details]);
 
   /** Repo selection */
   const repoNameChanged = (name: string) => {
@@ -251,8 +258,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       wasSimulated: simulation !== undefined,
       canCreate: isLogged,
       isCreating: creating,
+      isDeploying: deploying,
     };
-  }, [creating, isLogged, pageIx, periodType, simulating, simulation]);
+  }, [creating, deploying, isLogged, pageIx, periodType, simulating, simulation]);
 
   const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
     connect,
@@ -452,6 +460,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               flexDirection: 'column',
               alignItems: 'center',
             }}>
+            {status.isDeploying ? (
+              <Layer>
+                <Box style={{ height: '50vh', width: '50vw' }} justify="center" align="center">
+                  Deploying
+                  <br></br>
+                  <Spinner></Spinner>
+                </Box>
+              </Layer>
+            ) : (
+              <></>
+            )}
             {pages.map((page, ix) => {
               return (
                 <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>

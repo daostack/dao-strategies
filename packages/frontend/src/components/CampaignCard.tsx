@@ -13,6 +13,7 @@ export const CampaignCard: FC<ICampaignCard> = (props: ICampaignCard) => {
       <Box>{props.campaign.guardian}</Box>
       <Box>{props.campaign.title}</Box>
       <Box>{props.campaign.description}</Box>
+      <Box>{props.campaign.address}</Box>
     </Box>
   );
 };

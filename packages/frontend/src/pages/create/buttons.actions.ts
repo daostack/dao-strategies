@@ -12,6 +12,7 @@ export interface FormStatus {
   wasSimulated: boolean;
   canCreate: boolean;
   isCreating: boolean;
+  isDeploying: boolean;
 }
 
 export interface Actions {

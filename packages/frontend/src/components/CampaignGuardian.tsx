@@ -1,6 +1,6 @@
 import { Box, Spinner, Text } from 'grommet';
 import { FC, useEffect } from 'react';
-import { useCampaign } from '../hooks/useCampaign';
+import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { AppButton } from './styles/BasicElements';
 
@@ -14,7 +14,7 @@ interface CampaignStatus {
 }
 
 export const CampaignGuardian: FC<ICampaignAdmin> = (props: ICampaignAdmin) => {
-  const { campaign, otherDetails, getOtherDetails } = useCampaign(props.campaignAddress);
+  const { campaign, otherDetails, getOtherDetails } = useCampaignContext();
   const { account } = useLoggedUser();
 
   useEffect(() => {

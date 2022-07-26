@@ -13,8 +13,8 @@ export function useCampaigns() {
       credentials: 'include',
     });
 
-    const campaigns = await response.json();
-    setCampaigns(campaigns);
+    const campaigns: CampaignReadDetails[] = await response.json();
+    setCampaigns(campaigns.filter((campaign) => campaign.address !== null));
   };
 
   useEffect(() => {

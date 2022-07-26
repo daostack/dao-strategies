@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { useCampaign } from '../hooks/useCampaign';
+import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { useClaimer } from '../hooks/useClaimer';
 import { AppButton } from './styles/BasicElements';
@@ -28,12 +28,13 @@ interface UserClaimStatus {
 }
 
 export const ClaimButton: FC<IParams> = (props: IParams) => {
+  const { campaign } = useCampaignContext();
+
   const [showClaim, setShowClaim] = useState<boolean>(false);
   const { now } = useNow();
   const { user, connect, account } = useLoggedUser();
   const navigate = useNavigate();
 
-  const { campaign } = useCampaign(props.campaignAddress);
   const { claimInfo, check } = useClaimer(props.campaignAddress, user?.address);
   const campaignInstance = useCampaignInstance(props.campaignAddress);
 

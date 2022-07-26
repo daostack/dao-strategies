@@ -1,13 +1,11 @@
 import { Box, Header, Paragraph, Spinner, Tabs, Tab, Layer } from 'grommet';
 import { FC, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
 import { AppButton } from '../../components/styles/BasicElements';
 import { ColumnView, TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
-import { useCampaign } from '../../hooks/useCampaign';
-import { AppHeader } from '../AppHeader';
+import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { ClaimButton } from '../../components/ClaimRewards';
 import { AssetBalance } from '../../components/Assets';
@@ -20,17 +18,10 @@ export interface ICampaignPageProps {
   dum?: any;
 }
 
-type RouteParams = {
-  campaignAddress: string;
-};
-
 export const CampaignPage: FC<ICampaignPageProps> = () => {
-  const params = useParams<RouteParams>();
   const [showFund, setShowFund] = useState<boolean>(false);
 
-  const { isLoading, campaign, getRewards, rewards, getOtherDetails, otherDetails } = useCampaign(
-    params.campaignAddress
-  );
+  const { isLoading, campaign, getRewards, rewards, getOtherDetails, otherDetails } = useCampaignContext();
 
   useEffect(() => {
     getRewards();
@@ -158,7 +149,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
               </Box>
             </TwoColumns>
           </Tab>
-          <Tab title="Admin">
+          <Tab title="Guardian">
             <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>
           </Tab>
         </Tabs>
