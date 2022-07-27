@@ -8,8 +8,8 @@ import {
   BalanceLeaf,
 } from '@prisma/client';
 import { BigNumber, ethers } from 'ethers';
-import { appLogger } from '../logger';
 
+import { appLogger } from '../logger';
 import { bigIntToNumber } from '../utils/utils';
 
 export interface Leaf {
@@ -40,6 +40,9 @@ export class CampaignRepository {
   async getFromAddress(address: string): Promise<Campaign> {
     const res = await this.client.campaign.findFirst({
       where: { address: address.toLowerCase() },
+      include: {
+        creator: true,
+      },
     });
     return res;
   }
@@ -222,9 +225,24 @@ export class CampaignRepository {
     await this.client.$transaction([deleteExisting, addNew]);
   }
 
-  async setDetails(uri: string, details: CampaignCreateDetails): Promise<void> {
+  async setDetails(
+    uri: string,
+    details: CampaignCreateDetails,
+    by: string
+  ): Promise<void> {
     details.address = details.address.toLowerCase();
-    await this.client.campaign.update({ where: { uri }, data: details });
+    const update: Prisma.CampaignUpdateArgs = {
+      where: { uri },
+      data: {
+        ...details,
+        creator: {
+          connect: {
+            address: by,
+          },
+        },
+      },
+    };
+    await this.client.campaign.update(update);
   }
 
   async deleteAll(): Promise<void> {
@@ -337,7 +355,10 @@ export class CampaignRepository {
   }
 
   async list(user?: string): Promise<Campaign[]> {
-    const res = await this.client.campaign.findMany({ take: 10 });
+    const res = await this.client.campaign.findMany({
+      where: { registered: true },
+      take: 10,
+    });
     return res;
   }
 }

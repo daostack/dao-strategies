@@ -46,9 +46,8 @@ export const LandingPage: FC<ILandingPageProps> = (props: ILandingPageProps) => 
             <></>
           )}
         </ViewportContainer>
-        <ViewportContainer style={{ backgroundColor: '#f0f0f0' }}>
-          <CampaignsExplorer />
-        </ViewportContainer>
+
+        <CampaignsExplorer />
       </Box>
     </>
   );

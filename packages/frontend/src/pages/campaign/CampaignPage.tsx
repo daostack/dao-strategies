@@ -1,4 +1,4 @@
-import { Box, Header, Paragraph, Spinner, Tabs, Tab, Layer } from 'grommet';
+import { Box, Header, Paragraph, Spinner, Tabs, Tab, Layer, Text } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 
 import { Countdown } from '../../components/Countdown';
@@ -13,6 +13,7 @@ import { Refresh } from 'grommet-icons';
 import { truncate } from '../../utils/ethers';
 import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
 import { CampaignGuardian } from '../../components/CampaignGuardian';
+import { DateManager } from '../../utils/date.manager';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -72,7 +73,16 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         <></>
       )}
       <ColumnView>
-        <Countdown to-date={campaign?.execDate}></Countdown>
+        <Box pad="medium">
+          {campaign.executed ? (
+            <Text>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Text>
+          ) : (
+            <>
+              Campaign to be executed on {new DateManager(campaign.execDate).toString()}
+              <Countdown to-date={campaign?.execDate}></Countdown>
+            </>
+          )}
+        </Box>
         <Box direction="row" align="center" justify="center">
           <Box
             style={{
@@ -87,8 +97,9 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           </Box>
         </Box>
 
-        <Box direction="row" align="center" justify="center" style={{ marginBottom: '36px' }}>
-          Created by: {(campaign as any).creatorId}
+        <Box align="center" justify="center" pad="medium">
+          <Box>Created by: {campaign.creatorId}</Box>
+          <Box>Guarded by: {campaign.guardian}</Box>
         </Box>
 
         <Box direction="row" align="center" justify="center" style={{ marginBottom: '36px' }}>

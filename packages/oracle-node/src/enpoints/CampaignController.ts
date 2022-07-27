@@ -112,7 +112,8 @@ export class CampaignController extends Controller {
     request.body.registered = true;
     await this.manager.services.campaign.register(
       request.params.uri as string,
-      request.body as CampaignCreateDetails
+      request.body as CampaignCreateDetails,
+      loggedUser
     );
     const now = this.manager.services.time.now();
 

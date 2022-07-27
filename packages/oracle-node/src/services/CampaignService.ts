@@ -288,8 +288,12 @@ export class CampaignService {
     return this.campaignRepo.getBalanceLeaf(uri, root, account);
   }
 
-  async register(uri: string, details: CampaignCreateDetails): Promise<void> {
-    await this.campaignRepo.setDetails(uri, details);
+  async register(
+    uri: string,
+    details: CampaignCreateDetails,
+    by: string
+  ): Promise<void> {
+    await this.campaignRepo.setDetails(uri, details, by);
   }
 
   setExecuted(uri: string): Promise<void> {

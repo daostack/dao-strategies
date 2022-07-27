@@ -89,7 +89,8 @@ Routes.forEach((route) => {
     route.route,
     async (req: Request, res: Response, next: Function) => {
       try {
-        const loggedUser: string | undefined = req.session?.siwe?.address;
+        const loggedUser: string | undefined =
+          req.session?.siwe?.address.toLowerCase();
 
         if (route.protected) {
           if (loggedUser === undefined) {

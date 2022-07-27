@@ -24,9 +24,10 @@ export const useClaimer = (
       credentials: 'include',
     });
 
-    const result = await response.json();
+    const claimInfo = await response.json();
+    console.log({ claimInfo });
     setIsLoading(false);
-    setClaimInfo(Object.keys(result).length > 0 ? result : undefined);
+    setClaimInfo(Object.keys(claimInfo).length > 0 ? claimInfo : undefined);
   };
 
   useEffect(() => {

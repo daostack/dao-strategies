@@ -38,6 +38,7 @@ export interface CampaignReadDetails
   registered: boolean;
   executed: boolean;
   published: boolean;
+  creatorId: string | null;
 }
 
 export interface Asset {

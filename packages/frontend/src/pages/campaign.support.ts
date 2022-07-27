@@ -11,7 +11,7 @@ import { ethers } from 'ethers';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
-import { DateManager } from '../utils/time';
+import { DateManager } from '../utils/date.manager';
 
 const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 

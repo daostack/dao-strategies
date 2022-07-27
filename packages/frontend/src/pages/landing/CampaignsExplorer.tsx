@@ -1,5 +1,4 @@
 import { Box, Text } from 'grommet';
-import { Search } from 'grommet-icons';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { CampaignCard } from '../../components/CampaignCard';
@@ -16,7 +15,7 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
   const { campaigns } = useCampaigns();
 
   return (
-    <Box style={{ height: '100vh', width: '100vw', padding: '16px 32px' }}>
+    <Box style={{ padding: '16px 32px' }}>
       <Box direction="row" style={{ maxWidth: '600px' }}>
         <Text size="xlarge">Explore Campaigns</Text>
         <AppInput placeholder="search"></AppInput>

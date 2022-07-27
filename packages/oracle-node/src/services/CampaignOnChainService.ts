@@ -9,6 +9,7 @@ import {
 } from '@dao-strategies/core';
 import { Reward } from '@prisma/client';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
+
 import { BigNumberToNumber } from '../utils/utils';
 
 import { CampaignService } from './CampaignService';
