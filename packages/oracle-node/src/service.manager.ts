@@ -64,6 +64,8 @@ export class ServiceManager {
       this.priceService
     );
 
+    this.campaignService.setOnChainRead(this.campaignOnChain);
+
     this.services = {
       campaign: this.campaignService,
       user: new UserService(this.userRepo, config.world.GITHUB_TOKEN),

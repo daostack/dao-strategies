@@ -21,10 +21,22 @@ import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository, Leaf } from '../repositories/CampaignRepository';
 import { bigIntToNumber } from '../utils/utils';
+import { CampaignOnChainService } from './CampaignOnChainService';
 
 import { campaignToUriDetails } from './CampaignUri';
 import { OnChainService, ZERO_BYTES32 } from './OnChainService';
 import { TimeService } from './TimeService';
+
+export interface RootComputation {
+  root: string;
+  totalRewarded: number;
+  totalInRoot: number;
+  totalPending: number;
+}
+
+export interface CampaigServiceConfig {
+  republishTimeMargin: number;
+}
 
 /**
  * On Retroactive Campaign
@@ -41,17 +53,24 @@ import { TimeService } from './TimeService';
  * - The oracle will compute the rewards (in terms of social ids) and return them.
  * - The frontend will show the rewards, and, if approved, deploy the smart contract.
  */
-
 export class CampaignService {
   /** keep track of campaigns for which the root is being computed */
-  computingRoot: Map<string, Promise<string>> = new Map();
+  computingRoot: Map<string, Promise<RootComputation>> = new Map();
+
+  /** Co-dependency between CampaignService and CampaignOnChainService :( */
+  protected campaignOnChain: CampaignOnChainService;
 
   constructor(
     protected campaignRepo: CampaignRepository,
     protected timeService: TimeService,
     protected strategyComputation: StrategyComputation,
-    protected onChainService: OnChainService
+    protected onChainService: OnChainService,
+    protected config: CampaigServiceConfig = { republishTimeMargin: 60 * 10 }
   ) {}
+
+  setOnChainRead(_campaignOnChain: CampaignOnChainService): void {
+    this.campaignOnChain = _campaignOnChain;
+  }
 
   async get(uri: string): Promise<Campaign | undefined> {
     return this.campaignRepo.get(uri);
@@ -186,12 +205,33 @@ export class CampaignService {
   async publishCampaign(uri: string): Promise<void> {
     appLogger.info(`publishCampaign: ${uri}`);
     const campaign = await this.get(uri);
-    const root = await this.computeRoot(campaign);
+    const rootDetails = await this.computeRoot(campaign);
 
-    appLogger.info(`publishCampaign - root: ${root}`);
+    appLogger.info(`publishCampaign - root: ${rootDetails.root}`);
 
-    if (root !== ZERO_BYTES32) {
-      await this.onChainService.publishShares(campaign.address, root);
+    if (rootDetails.root !== ZERO_BYTES32) {
+      await this.onChainService.publishShares(
+        campaign.address,
+        rootDetails.root
+      );
+
+      /** republishing is configured when publishing */
+      if (rootDetails.totalPending > 0) {
+        /** needs to scheule republishing */
+        const publishInfo = await this.campaignOnChain.getPublishInfo(
+          campaign.address
+        );
+
+        if (!publishInfo.isLocked) {
+          /**
+           * schedule to republish when oracle clock reaches the publish start. Add a margin to make sure
+           * that the onchain clock will also be marking that publishing is supported.
+           */
+          this.campaignRepo.setRepublishDate(
+            publishInfo.publishStart + this.config.republishTimeMargin
+          );
+        }
+      }
       await this.campaignRepo.setPublished(uri, true, this.timeService.now());
     }
   }
@@ -204,7 +244,7 @@ export class CampaignService {
     return this.campaignRepo.isPendingPublishing(uri);
   }
 
-  async computeRoot(campaign: Campaign): Promise<string> {
+  async computeRoot(campaign: Campaign): Promise<RootComputation> {
     if (!campaign.registered) {
       throw new Error(`campaign ${campaign.uri} not registered`);
     }
@@ -219,12 +259,18 @@ export class CampaignService {
       return this.computingRoot.get(campaign.uri);
     }
 
-    const compute = (async (): Promise<string> => {
+    const compute = (async (): Promise<RootComputation> => {
       const now = this.timeService.now();
+      const nRewarded = await this.countRewards(campaign.uri);
       const rewards = await this.getRewardsToAddresses(campaign.uri);
 
       if (rewards.size === 0) {
-        return ZERO_BYTES32;
+        return {
+          root: ZERO_BYTES32,
+          totalRewarded: nRewarded,
+          totalInRoot: 0,
+          totalPending: nRewarded,
+        };
       }
 
       const balances: Balances = new Map();
@@ -249,6 +295,13 @@ export class CampaignService {
       );
 
       await this.campaignRepo.addRoot(campaign.uri, root, leafs, now);
+
+      return {
+        root,
+        totalRewarded: nRewarded,
+        totalInRoot: rewards.size,
+        totalPending: nRewarded - rewards.size,
+      };
     })();
 
     this.computingRoot.set(campaign.uri, compute);
@@ -259,6 +312,10 @@ export class CampaignService {
 
   async getRewards(uri: string): Promise<Balances> {
     return this.campaignRepo.getRewards(uri);
+  }
+
+  async countRewards(uri: string): Promise<number> {
+    return this.campaignRepo.countRewards(uri);
   }
 
   /** considers only extensions to the previous root */
@@ -335,8 +392,12 @@ export class CampaignService {
     return this.campaignRepo.setExecuted(uri, true);
   }
 
-  findPending(time: number): Promise<string[]> {
-    return this.campaignRepo.findPending(time);
+  findPendingExecution(time: number): Promise<string[]> {
+    return this.campaignRepo.findPendingExecution(time);
+  }
+
+  findPendingRepublish(time: number): Promise<string[]> {
+    return this.campaignRepo.findPendingRepublish(time);
   }
 
   deleteAll(): Promise<void> {

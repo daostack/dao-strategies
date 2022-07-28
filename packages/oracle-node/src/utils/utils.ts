@@ -16,7 +16,7 @@ export const bigIntToNumber = (
   return Number(bn);
 };
 
-export const BigNumberToNumber = (
+export const bigNumberToNumber = (
   bn: BigNumber | undefined
 ): number | undefined => {
   if (bn === undefined || bn == null) {

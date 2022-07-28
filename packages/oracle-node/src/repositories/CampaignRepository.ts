@@ -1,5 +1,8 @@
-import { RewardsToAddresses } from '@dao-strategies/core';
-import { CampaignCreateDetails, Balances } from '@dao-strategies/core';
+import {
+  CampaignCreateDetails,
+  Balances,
+  RewardsToAddresses,
+} from '@dao-strategies/core';
 import {
   PrismaClient,
   Prisma,
@@ -99,24 +102,43 @@ export class CampaignRepository {
     });
   }
 
-  async getRewards(uri: string): Promise<Balances> {
-    const result = await this.client.campaign.findUnique({
+  async setRepublishDate(uri: string, date: number): Promise<void> {
+    await this.client.campaign.update({
       where: { uri: uri },
-      include: {
-        rewards: {
-          orderBy: {
-            amount: 'desc',
-          },
+      data: { republishDate: date },
+    });
+  }
+
+  async getRewards(uri: string): Promise<Balances> {
+    const result = await this.client.reward.findMany({
+      where: {
+        campaign: {
+          uri,
         },
+      },
+      orderBy: {
+        amount: 'desc',
       },
     });
 
     const balances: Balances = new Map();
-    result.rewards.forEach((reward) => {
+    result.forEach((reward) => {
       balances.set(reward.account, BigNumber.from(reward.amount));
     });
 
     return balances;
+  }
+
+  async countRewards(uri: string): Promise<number> {
+    const result = await this.client.reward.count({
+      where: {
+        campaign: {
+          uri,
+        },
+      },
+    });
+
+    return result;
   }
 
   async getLatestRoot(uri: string): Promise<CampaignRoot | null> {
@@ -193,14 +215,31 @@ export class CampaignRepository {
   }
 
   /** campaigns whose execution date is older and has not been executed */
-  async findPending(now: number): Promise<string[]> {
+  async findPendingExecution(now: number): Promise<string[]> {
     const uris = await this.client.campaign.findMany({
       where: {
         registered: true,
         execDate: {
           lte: now,
         },
+        // this actually exectDate < now & (executed = false || null)
         OR: [{ executed: false }, { executed: null }],
+      },
+      select: {
+        uri: true,
+      },
+    });
+
+    return uris.map((uri) => uri.uri);
+  }
+
+  async findPendingRepublish(now: number): Promise<string[]> {
+    const uris = await this.client.campaign.findMany({
+      where: {
+        registered: true,
+        republishDate: {
+          lte: now,
+        },
       },
       select: {
         uri: true,

@@ -101,3 +101,11 @@ export interface CampaignClaimInfo {
 export interface TimeDetails {
   now: number;
 }
+
+export interface PublishInfo {
+  activationPeriod: number;
+  activeDuration: number;
+  publishStarts: number;
+  publishEnds: number;
+  isLocked: boolean;
+}

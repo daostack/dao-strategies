@@ -28,6 +28,7 @@ model Campaign {
   lastRunDate     BigInt?
   execDate        BigInt?
   publishDate     BigInt?
+  republishDate   BigInt?   // set to schedule a republishing
   cancelDate      BigInt?
   registered      Boolean?  // Registered campaigns are those live (with a smart contract). 
   running         Boolean?  // running campaigns are currently being run (execution can take a few seconds or minutes)

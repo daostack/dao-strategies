@@ -10,6 +10,10 @@ export interface ExecutionConfig {
     enabled: boolean;
     period: number;
   };
+  republishWatcher: {
+    enabled: boolean;
+    period: number;
+  };
 }
 
 /**
@@ -29,40 +33,68 @@ export interface ExecutionConfig {
  *  */
 
 export class ExecuteService {
-  cicle: NodeJS.Timer;
+  executionCicle: NodeJS.Timer;
+  republishCicle: NodeJS.Timer;
   schedulled: Set<string> = new Set();
   executing: Map<string, Promise<void>> = new Map();
   publishing: Map<string, Promise<void>> = new Map();
 
   constructor(protected services: Services, protected config: ExecutionConfig) {
     if (this.config.executionWatcher.enabled) {
-      this.startWatcher();
+      this.startExecutionWatcher();
+    }
+    if (this.config.republishWatcher.enabled) {
+      this.startRepublishWatcher();
     }
   }
 
-  startWatcher(): void {
-    void this.checkIncoming();
-    this.cicle = setInterval(() => {
-      void this.checkIncoming();
+  startExecutionWatcher(): void {
+    void this.checkExecution();
+    this.executionCicle = setInterval(() => {
+      void this.checkExecution();
     }, this.config.executionWatcher.period * 1000);
   }
 
-  /**
-   * Check for campaigns which are either pending execution
-   */
-  async checkIncoming(): Promise<void> {
+  startRepublishWatcher(): void {
+    void this.checkRepublish();
+    this.republishCicle = setInterval(() => {
+      void this.checkRepublish();
+    }, this.config.republishWatcher.period * 1000);
+  }
+
+  async checkExecution(): Promise<void> {
     const now = this.services.time.now();
 
-    const incoming = await this.services.campaign.findPending(
+    const incoming = await this.services.campaign.findPendingExecution(
       now + this.config.executionWatcher.period
     );
 
     const nowUTC = new Date(now * 1000);
-    appLogger.info(`Check Incoming Tasks ${nowUTC.toUTCString()}`);
+    appLogger.info(`Check Incoming Executions ${nowUTC.toUTCString()}`);
 
     await Promise.all(
       incoming.map(async (uri) => {
         await this.scheduleExecute(uri, now);
+      })
+    );
+  }
+
+  /** Check for campaigns which are not locked and for which there
+   * are new users with identity mapped
+   */
+  async checkRepublish(): Promise<void> {
+    const now = this.services.time.now();
+
+    const incoming = await this.services.campaign.findPendingRepublish(
+      now + this.config.republishWatcher.period
+    );
+
+    const nowUTC = new Date(now * 1000);
+    appLogger.info(`Check Incoming Republishing ${nowUTC.toUTCString()}`);
+
+    await Promise.all(
+      incoming.map(async (uri) => {
+        await this.publish(uri);
       })
     );
   }
