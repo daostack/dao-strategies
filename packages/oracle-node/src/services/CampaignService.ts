@@ -1,5 +1,6 @@
 import {
   Balances,
+  RewardsToAddresses,
   BalanceTree,
   CampaignCreateDetails,
   CampaignUriDetails,
@@ -42,6 +43,9 @@ import { TimeService } from './TimeService';
  */
 
 export class CampaignService {
+  /** keep track of campaigns for which the root is being computed */
+  computingRoot: Map<string, Promise<string>> = new Map();
+
   constructor(
     protected campaignRepo: CampaignRepository,
     protected timeService: TimeService,
@@ -76,7 +80,6 @@ export class CampaignService {
         executed: false,
         published: false,
         running: false,
-        isComputing: false,
       };
 
       const campaign = await this.create(createData);
@@ -210,57 +213,47 @@ export class CampaignService {
       throw new Error(`campaign ${campaign.uri} not executed`);
     }
 
-    /**
-     * reentrancy protection, if isComputing wait for the computation to finish
-     * and returns the latest root
-     */
-    const isComputing = await this.campaignRepo.getIsComputing(campaign.uri);
+    /** reentrancy protection - don't recompute if already computing for this campaign (
+     * root computation may take minutes) */
+    if (this.computingRoot.has(campaign.uri)) {
+      return this.computingRoot.get(campaign.uri);
+    }
 
-    if (isComputing) {
-      const existingRoot = await new Promise<CampaignRoot>((resolve) => {
-        setInterval(() => {
-          void this.campaignRepo
-            .getIsComputing(campaign.uri)
-            .then((stillComputing) => {
-              if (!stillComputing) {
-                void this.campaignRepo
-                  .getLatestRoot(campaign.uri)
-                  .then((_root) => resolve(_root));
-              }
-            });
-        }, 250);
+    const compute = (async (): Promise<string> => {
+      const now = this.timeService.now();
+      const rewards = await this.getRewardsToAddresses(campaign.uri);
+
+      if (rewards.size === 0) {
+        return ZERO_BYTES32;
+      }
+
+      const balances: Balances = new Map();
+      rewards.forEach((reward, address) => {
+        balances.set(address, reward.amount);
       });
 
-      return existingRoot.root;
-    }
+      const tree = new BalanceTree(balances);
+      const root = tree.getHexRoot();
 
-    /** else compute the root */
-    await this.campaignRepo.setIsComputing(campaign.uri, true);
+      /** compute proofs */
+      const leafs = Array.from(rewards.entries()).map(
+        ([address, reward]): Prisma.BalanceLeafCreateManyRootInput => {
+          const proof = tree.getProof(address, reward.amount);
+          return {
+            account: reward.account,
+            address,
+            balance: reward.amount.toString(),
+            proof,
+          };
+        }
+      );
 
-    const now = this.timeService.now();
-    const rewards = await this.getRewardsToAddresses(campaign.uri);
+      await this.campaignRepo.addRoot(campaign.uri, root, leafs, now);
+    })();
 
-    if (rewards.size === 0) {
-      return ZERO_BYTES32;
-    }
+    this.computingRoot.set(campaign.uri, compute);
 
-    const tree = new BalanceTree(rewards);
-    const root = tree.getHexRoot();
-
-    const leafs = Array.from(rewards.entries()).map(
-      ([address, balance]): Leaf => {
-        const proof = tree.getProof(address, balance);
-        return {
-          address,
-          balance: balance.toString(),
-          proof,
-        };
-      }
-    );
-
-    await this.campaignRepo.addRoot(campaign.uri, root, leafs, now);
-    await this.campaignRepo.setIsComputing(campaign.uri, false);
-
+    const root = await compute;
     return root;
   }
 
@@ -268,8 +261,50 @@ export class CampaignService {
     return this.campaignRepo.getRewards(uri);
   }
 
-  getRewardsToAddresses(uri: string): Promise<Balances> {
-    return this.campaignRepo.getRewardsToAddresses(uri);
+  /** considers only extensions to the previous root */
+  async getRewardsToAddresses(uri: string): Promise<RewardsToAddresses> {
+    const latest = await this.campaignRepo.getLatestRootAndLeafs(uri);
+    const extension = await this.campaignRepo.getNewRewardsToAddresses(
+      uri,
+      latest?.order
+    );
+
+    const rewardsToAddresses: RewardsToAddresses = new Map();
+
+    /** filtering existing users here */
+    const usersInTree = new Map<string, string>();
+
+    if (latest !== null) {
+      /** the tree starts with its previous version */
+      latest.balances.forEach((leaf) => {
+        usersInTree.set(leaf.account, leaf.address);
+        rewardsToAddresses.set(leaf.address, {
+          account: leaf.account,
+          amount: ethers.BigNumber.from(leaf.balance),
+        });
+      });
+    }
+
+    /** the new values are then added as long as they are not yet present (in terms of account) */
+    extension.forEach((reward, address) => {
+      const addressInTree = usersInTree.get(reward.account);
+      if (usersInTree !== undefined) {
+        /** user should not be already in the tree (only new users can be appended) */
+        /** TODO: getNewRewardsToAddresses should do the filtering, but we currently do it here
+         * for simplicity */
+        // throw new Error();
+        appLogger.warn(`User ${reward.account} is already present in the tree with address ${addressInTree} 
+        and was about to be included again. Skipped.`);
+      } else {
+        /** new users are added in addition to the latests */
+        rewardsToAddresses.set(address, {
+          account: reward.account,
+          amount: reward.amount,
+        });
+      }
+    });
+
+    return rewardsToAddresses;
   }
 
   getRewardToAddress(uri: string, account: string): Promise<Reward | null> {

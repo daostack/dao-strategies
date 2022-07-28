@@ -77,8 +77,7 @@ app.use(bodyParser.json());
 /** Services instantiation */
 const manager = new ServiceManager({
   world: worldConfig,
-  enabled: true,
-  periodCheck: 30,
+  executionWatcher: { enabled: true, period: 30 },
 });
 
 /** --------------------- */

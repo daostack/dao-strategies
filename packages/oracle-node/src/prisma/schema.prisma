@@ -34,7 +34,6 @@ model Campaign {
   executed        Boolean?  // executed campaigns are those whose final rewards have been computed 
   published       Boolean?  // published campaigns are those whose shares has been published in their smart contract
   address         String?   // cannot be @unique since it is null for simulated campaigns - Smart contract address
-  isComputing     Boolean   // prevent reentrancy issues (two roots being computed at once)
   roots           CampaignRoot[] 
 }
 
@@ -60,19 +59,21 @@ model Reward {
 }
 
 model CampaignRoot {
-  @@id([campaignId, root])
+  @@id([campaignId, order])
+  order           Int             // campaign roots are ordered from 0 to N
   campaign        Campaign  @relation(fields: [campaignId], references: [uri])
   campaignId      String
-  root            String
+  root            String  
   date            BigInt
   balances        BalanceLeaf[]   // Leafs are stored on a table to be efficiently read
 }
 
 model BalanceLeaf {
-  @@id([campaignId, rootId, address])
-  root            CampaignRoot  @relation(fields: [campaignId, rootId], references: [campaignId, root])
+  @@id([campaignId, order, address])
+  root            CampaignRoot  @relation(fields: [campaignId, order], references: [campaignId, order])
   campaignId      String
-  rootId          String
+  order           Int           
+  account         String        // the social account of the leaf is used to prevent double payments
   address         String
   balance         String
   proof           String[]      // Store the proofs so that they don't have to be recomputed eveytime they are needed

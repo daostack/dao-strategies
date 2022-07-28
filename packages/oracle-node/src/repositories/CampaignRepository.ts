@@ -1,3 +1,4 @@
+import { RewardsToAddresses } from '@dao-strategies/core';
 import { CampaignCreateDetails, Balances } from '@dao-strategies/core';
 import {
   PrismaClient,
@@ -13,6 +14,7 @@ import { appLogger } from '../logger';
 import { bigIntToNumber } from '../utils/utils';
 
 export interface Leaf {
+  account: string;
   address: string;
   balance: string;
   proof: string[];
@@ -117,7 +119,36 @@ export class CampaignRepository {
     return balances;
   }
 
-  async getRewardsToAddresses(uri: string): Promise<Balances> {
+  async getLatestRoot(uri: string): Promise<CampaignRoot | null> {
+    const root = this.client.campaignRoot.findFirst({
+      where: { campaignId: uri },
+      orderBy: {
+        order: 'desc',
+      },
+    });
+    return root;
+  }
+
+  async getLatestRootAndLeafs(
+    uri: string
+  ): Promise<(CampaignRoot & { balances: BalanceLeaf[] }) | null> {
+    const root = await this.client.campaignRoot.findFirst({
+      where: { campaignId: uri },
+      include: {
+        balances: true,
+      },
+      orderBy: {
+        order: 'desc',
+      },
+    });
+    return root;
+  }
+
+  async getNewRewardsToAddresses(
+    uri: string,
+    prev_order: number | undefined
+  ): Promise<RewardsToAddresses> {
+    // TODO: filter existing accounts
     const result: AddressReward[] = await this.client.$queryRaw`
       SELECT account, address, amount FROM 
       (
@@ -127,17 +158,17 @@ export class CampaignRepository {
       LEFT JOIN 
       public."User" 
       ON rewards.account = "verifiedGithub"
-    `;
+      `;
 
-    const balances = new Map();
+    const rewards: RewardsToAddresses = new Map();
     result.forEach((reward) => {
       if (reward.address != null)
-        balances.set(
-          reward.address,
-          ethers.BigNumber.from(reward.amount.toString())
-        );
+        rewards.set(reward.address, {
+          amount: ethers.BigNumber.from(reward.amount.toString()),
+          account: reward.account,
+        });
     });
-    return balances;
+    return rewards;
   }
 
   async getRewardToAddress(
@@ -249,19 +280,6 @@ export class CampaignRepository {
     await this.client.campaign.deleteMany();
   }
 
-  async getIsComputing(uri: string): Promise<boolean> {
-    const res = await this.client.campaign.findUnique({
-      where: {
-        uri,
-      },
-      select: {
-        isComputing: true,
-      },
-    });
-
-    return res.isComputing;
-  }
-
   async isExecuted(uri: string): Promise<boolean> {
     const res = await this.client.campaign.findUnique({
       where: {
@@ -275,35 +293,10 @@ export class CampaignRepository {
     return res.executed;
   }
 
-  async setIsComputing(uri: string, value: boolean): Promise<void> {
-    await this.client.campaign.update({
-      where: { uri: uri },
-      data: { isComputing: value },
-    });
-  }
-
-  async getLatestRoot(uri: string): Promise<CampaignRoot | undefined> {
-    const res = await this.client.campaign.findUnique({
-      where: {
-        uri,
-      },
-      include: {
-        roots: {
-          orderBy: {
-            date: 'desc',
-          },
-          take: 1,
-        },
-      },
-    });
-
-    return res.roots.length > 0 ? res.roots[0] : undefined;
-  }
-
   async addRoot(
     uri: string,
     root: string,
-    leafs: Leaf[],
+    leafs: Prisma.BalanceLeafCreateManyRootInput[],
     date: number
   ): Promise<void> {
     appLogger.info(
@@ -311,9 +304,15 @@ export class CampaignRepository {
         leafs
       )}, date: ${date}`
     );
-    const _root = await this.client.campaignRoot.create({
+    const latest = await this.getLatestRoot(uri);
+    await this.client.campaignRoot.create({
       data: {
-        campaignId: uri,
+        order: latest !== null ? latest.order : 0,
+        campaign: {
+          connect: {
+            uri,
+          },
+        },
         date,
         root,
         balances: {
@@ -323,18 +322,6 @@ export class CampaignRepository {
         },
       },
     });
-
-    // await this.client.balanceLeaf.createMany({
-    //   data: leafs.map((leaf) => {
-    //     return {
-    //       address: leaf.address,
-    //       balance: leaf.balance,
-    //       proof: leaf.proof,
-    //       campaignId: uri,
-    //       rootId: _root.root,
-    //     };
-    //   }),
-    // });
   }
 
   async getBalanceLeaf(
@@ -342,13 +329,11 @@ export class CampaignRepository {
     root: string,
     address: string
   ): Promise<BalanceLeaf> {
-    const res = await this.client.balanceLeaf.findUnique({
+    const res = await this.client.balanceLeaf.findFirst({
       where: {
-        campaignId_rootId_address: {
-          campaignId: uri,
-          address: address,
-          rootId: root,
-        },
+        campaignId: uri,
+        root: { root },
+        address: address,
       },
     });
     return res;

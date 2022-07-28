@@ -4,6 +4,10 @@ import { World, WorldConfig } from './world/World';
 
 export type BalancesFloat = Map<string, number>;
 export type Balances = Map<string, BigNumber>;
+export type RewardsToAddresses = Map<
+  string,
+  { account: string; amount: BigNumber }
+>;
 
 export type StrategyFunc = (
   world: World,
