@@ -9,8 +9,6 @@
 // This adds support for typescript paths mappings
 import 'tsconfig-paths/register';
 
-import { BigNumber, Signer, utils } from 'ethers';
-
 import '@typechain/hardhat';
 import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';

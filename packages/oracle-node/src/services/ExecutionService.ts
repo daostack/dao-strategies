@@ -1,8 +1,7 @@
-import { WorldConfig } from '@dao-strategies/core';
+import { WorldConfig, bigIntToNumber } from '@dao-strategies/core';
 
 import { appLogger } from '../logger';
 import { Services } from '../types';
-import { bigIntToNumber } from '../utils/utils';
 
 export interface ExecutionConfig {
   world: WorldConfig;
@@ -69,8 +68,7 @@ export class ExecuteService {
       now + this.config.executionWatcher.period
     );
 
-    const nowUTC = new Date(now * 1000);
-    appLogger.info(`Check Incoming Executions ${nowUTC.toUTCString()}`);
+    appLogger.info(`Check Incoming Executions ${now}`);
 
     await Promise.all(
       incoming.map(async (uri) => {
@@ -79,18 +77,17 @@ export class ExecuteService {
     );
   }
 
-  /** Check for campaigns which are not locked and for which there
-   * are new users with identity mapped
+  /**
+   * Check for campaigns that have a republishDate less than now (note that
+   * republish is not setTimeout triggered to target an under-the-second
+   * accuracy (which is the case for execution))
    */
   async checkRepublish(): Promise<void> {
     const now = this.services.time.now();
 
-    const incoming = await this.services.campaign.findPendingRepublish(
-      now + this.config.republishWatcher.period
-    );
+    const incoming = await this.services.campaign.findPendingRepublish(now);
 
-    const nowUTC = new Date(now * 1000);
-    appLogger.info(`Check Incoming Republishing ${nowUTC.toUTCString()}`);
+    appLogger.info(`Check Incoming Republishing ${now}`);
 
     await Promise.all(
       incoming.map(async (uri) => {

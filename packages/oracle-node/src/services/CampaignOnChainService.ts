@@ -7,6 +7,7 @@ import {
   TokenBalance,
   Typechain,
   PublishInfo,
+  getCampaignPublishInfo,
 } from '@dao-strategies/core';
 import { Reward } from '@prisma/client';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
@@ -202,18 +203,6 @@ export class CampaignOnChainService {
   }
 
   async getPublishInfo(address: string): Promise<PublishInfo> {
-    const campaignContract = campaignProvider(address, this.provider);
-    const activationTime = await campaignContract.activationTime();
-    const activationPeriod = await campaignContract.ACTIVATION_PERIOD();
-    const activeDuration = await campaignContract.ACTIVE_DURATION();
-    const locked = await campaignContract.locked();
-
-    return {
-      activationPeriod: bigNumberToNumber(activationPeriod),
-      activeDuration: bigNumberToNumber(activeDuration),
-      isLocked: locked,
-      publishStart: bigNumberToNumber(activationTime),
-      publishEnds: bigNumberToNumber(activationTime.add(activeDuration)),
-    };
+    return getCampaignPublishInfo(this.provider, address);
   }
 }

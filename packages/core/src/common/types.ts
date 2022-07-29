@@ -103,9 +103,25 @@ export interface TimeDetails {
 }
 
 export interface PublishInfo {
-  activationPeriod: number;
-  activeDuration: number;
-  publishStarts: number;
-  publishEnds: number;
-  isLocked: boolean;
+  params: {
+    challengePeriod: number;
+    activationPeriod: number;
+    activeDuration: number;
+    deployTime: number;
+  };
+  status: {
+    blockNumber: number;
+    timestamp: number;
+    approvedRoot: string;
+    pendingRoot: string;
+    validRoot: string;
+    locked: boolean;
+    activationTime: number;
+    isProposeWindowActive: boolean;
+  };
+  derived?: {
+    periodIx: number;
+    nextWindowStarts: number;
+    nextWindowEnds: number;
+  };
 }

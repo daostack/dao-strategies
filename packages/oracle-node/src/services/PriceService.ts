@@ -1,10 +1,9 @@
-import { ChainsDetails } from '@dao-strategies/core';
+import { ChainsDetails, bigIntToNumber } from '@dao-strategies/core';
 import { AssetPrice, PrismaClient } from '@prisma/client';
 import fetch from 'node-fetch';
 
 import { COINGECKO_URL } from '../config';
 import { appLogger } from '../logger';
-import { bigIntToNumber } from '../utils/utils';
 
 import { TimeService } from './TimeService';
 

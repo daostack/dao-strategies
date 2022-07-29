@@ -35,6 +35,7 @@ contract Campaign is Initializable, ReentrancyGuard {
      * - Guardian cannot initiate an update */
     bytes32 public pendingMerkleRoot;
     uint256 public activationTime;
+    uint256 public deployTime;
 
     /** Uri pointing to the campaign's reward strategy */
     bytes32 public strategyUri;
@@ -113,7 +114,8 @@ contract Campaign is Initializable, ReentrancyGuard {
         strategyUri = _strategyUri;
         guardian = _guardian;
         oracle = _oracle;
-        activationTime = _activationTime;
+        activationTime = _activationTime > 0 ? _activationTime : block.timestamp;
+        deployTime = block.timestamp;
 
         CHALLENGE_PERIOD = _CHALLENGE_PERIOD;
         ACTIVATION_PERIOD = _ACTIVATION_PERIOD;
@@ -280,6 +282,10 @@ contract Campaign is Initializable, ReentrancyGuard {
         return false;
     }
 
+    function isProposeWindowActive() public view returns (bool) {
+        return (uint256(block.timestamp) - uint256(deployTime)) % ACTIVATION_PERIOD < ACTIVE_DURATION;
+    }
+
     /** Indicates whether updating the merkle root is currently possible.
      * updating the merkle root is allowed only at predefined time windows
      * of duration ACTIVE_DURATION every ACTIVE_PERIOD */
@@ -287,9 +293,11 @@ contract Campaign is Initializable, ReentrancyGuard {
         if (isChallengePeriod()) {
             return false;
         }
-        if ((uint256(block.timestamp) - uint256(activationTime)) % ACTIVATION_PERIOD < ACTIVE_DURATION) {
+
+        if (!isProposeWindowActive()) {
             return false;
         }
+
         return true;
     }
 
@@ -300,6 +308,8 @@ contract Campaign is Initializable, ReentrancyGuard {
         }
         return false;
     }
+
+    /** variable getters */
 
     /***************
     INTERNAL FUNCTIONS

@@ -11,6 +11,15 @@
       "cwd": "${workspaceFolder}/packages/contracts"
     },
     {
+      "name": "hardhat deploy",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "${workspaceFolder}/packages/contracts/node_modules/.bin/hardhat",
+      "args": ["deploy", "--export-all", "./generated/hardhat_contracts.json"],
+      "cwd": "${workspaceFolder}/packages/contracts"
+    },
+    {
       "name": "oracle",
       "type": "node",
       "request": "launch",

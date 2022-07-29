@@ -21,6 +21,7 @@
     "@types/jest": "^28.1.0",
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
+    "ethereum-multicall": "^2.14.0",
     "ethers": "^5.6.5",
     "express": "^4.17.2",
     "express-session": "^1.17.3",

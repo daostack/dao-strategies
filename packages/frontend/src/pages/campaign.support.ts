@@ -217,6 +217,8 @@ export const deployCampaign = async (
    * oracle might watch the blockchain */
   createDetails.address = address;
 
+  console.log('campaign contract deployed', { address });
+
   await registerCampaign(uriDefined, createDetails);
   return address;
 };

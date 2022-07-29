@@ -98,3 +98,27 @@ export const normalizeRewards = (balancesFloat: BalancesFloat): Balances => {
 
   return balances;
 };
+
+export const bigIntToNumber = (
+  bn: bigint | null | undefined
+): number | undefined => {
+  if (bn === undefined || bn == null) {
+    return undefined;
+  }
+  if (bn > Number.MAX_SAFE_INTEGER) {
+    return NaN;
+  }
+  return Number(bn);
+};
+
+export const bigNumberToNumber = (
+  bn: BigNumber | undefined
+): number | undefined => {
+  if (bn === undefined || bn == null) {
+    return undefined;
+  }
+  if (bn.gt(BigNumber.from(Number.MAX_SAFE_INTEGER.toString()))) {
+    return NaN;
+  }
+  return Number(bn);
+};

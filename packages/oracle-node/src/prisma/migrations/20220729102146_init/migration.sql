@@ -21,6 +21,7 @@ CREATE TABLE "Campaign" (
     "lastRunDate" BIGINT,
     "execDate" BIGINT,
     "publishDate" BIGINT,
+    "republishDate" BIGINT,
     "cancelDate" BIGINT,
     "registered" BOOLEAN,
     "running" BOOLEAN,

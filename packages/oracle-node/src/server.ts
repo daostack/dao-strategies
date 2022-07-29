@@ -78,6 +78,7 @@ app.use(bodyParser.json());
 const manager = new ServiceManager({
   world: worldConfig,
   executionWatcher: { enabled: true, period: 30 },
+  republishWatcher: { enabled: true, period: 60 },
 });
 
 /** --------------------- */

@@ -2,6 +2,7 @@ import {
   CampaignCreateDetails,
   Balances,
   RewardsToAddresses,
+  bigIntToNumber,
 } from '@dao-strategies/core';
 import {
   PrismaClient,
@@ -14,7 +15,6 @@ import {
 import { BigNumber, ethers } from 'ethers';
 
 import { appLogger } from '../logger';
-import { bigIntToNumber } from '../utils/utils';
 
 export interface Leaf {
   account: string;

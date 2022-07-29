@@ -7,6 +7,7 @@ import {
   getCampaignUri,
   StrategyComputation,
   Strategy_ID,
+  bigIntToNumber,
 } from '@dao-strategies/core';
 import {
   BalanceLeaf,
@@ -20,7 +21,6 @@ import { ethers } from 'ethers';
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository, Leaf } from '../repositories/CampaignRepository';
-import { bigIntToNumber } from '../utils/utils';
 import { CampaignOnChainService } from './CampaignOnChainService';
 
 import { campaignToUriDetails } from './CampaignUri';
@@ -206,33 +206,40 @@ export class CampaignService {
     appLogger.info(`publishCampaign: ${uri}`);
     const campaign = await this.get(uri);
     const rootDetails = await this.computeRoot(campaign);
+    const publishInfo = await this.campaignOnChain.getPublishInfo(
+      campaign.address
+    );
 
-    appLogger.info(`publishCampaign - root: ${rootDetails.root}`);
-
-    if (rootDetails.root !== ZERO_BYTES32) {
+    if (
+      rootDetails.root !== publishInfo.status.approvedRoot &&
+      rootDetails.root !== publishInfo.status.pendingRoot
+    ) {
+      appLogger.debug(`publishCampaign - root: ${rootDetails.root}`);
       await this.onChainService.publishShares(
         campaign.address,
         rootDetails.root
       );
 
-      /** republishing is configured when publishing */
-      if (rootDetails.totalPending > 0) {
-        /** needs to scheule republishing */
-        const publishInfo = await this.campaignOnChain.getPublishInfo(
-          campaign.address
-        );
-
-        if (!publishInfo.isLocked) {
-          /**
-           * schedule to republish when oracle clock reaches the publish start. Add a margin to make sure
-           * that the onchain clock will also be marking that publishing is supported.
-           */
-          this.campaignRepo.setRepublishDate(
-            publishInfo.publishStart + this.config.republishTimeMargin
-          );
-        }
-      }
       await this.campaignRepo.setPublished(uri, true, this.timeService.now());
+    } else {
+      appLogger.debug(
+        `publishCampaign skipped, merkle root not new: ${rootDetails.root}`
+      );
+    }
+
+    /** republishing is configured when publishing if there were pending rewarded users */
+    if (rootDetails.totalPending > 0) {
+      if (!publishInfo.status.locked) {
+        /**
+         * schedule to republish when oracle clock reaches the publish start. Add a margin to make sure
+         * that the onchain clock will also hold the time-based condition.
+         */
+        appLogger.debug(`publishCampaign - configuring republish ${uri} `);
+        await this.campaignRepo.setRepublishDate(
+          uri,
+          publishInfo.status.nextWindowStarts + this.config.republishTimeMargin
+        );
+      }
     }
   }
 
