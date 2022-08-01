@@ -234,10 +234,15 @@ export class CampaignService {
          * schedule to republish when oracle clock reaches the publish start. Add a margin to make sure
          * that the onchain clock will also hold the time-based condition.
          */
+        if (publishInfo.derived === undefined)
+          throw new Error(
+            'publish info does not include the derived parameters'
+          );
+
         appLogger.debug(`publishCampaign - configuring republish ${uri} `);
         await this.campaignRepo.setRepublishDate(
           uri,
-          publishInfo.status.nextWindowStarts + this.config.republishTimeMargin
+          publishInfo.derived.nextWindowStarts + this.config.republishTimeMargin
         );
       }
     }

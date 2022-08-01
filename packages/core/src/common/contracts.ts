@@ -119,8 +119,11 @@ export const getCampaignPublishInfo = async (
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const val = res.returnValues[0];
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return typeof val === 'object' ? bigNumberToNumber(val as BigNumber) : val;
+    /* eslint-disable */
+    return val.type !== undefined && val.type === 'BigNumber'
+      ? bigNumberToNumber(BigNumber.from(val))
+      : val;
+    /* eslint-enable */
   };
 
   const info: PublishInfo = {

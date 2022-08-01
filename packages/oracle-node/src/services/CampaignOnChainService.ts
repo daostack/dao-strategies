@@ -8,11 +8,10 @@ import {
   Typechain,
   PublishInfo,
   getCampaignPublishInfo,
+  bigNumberToNumber,
 } from '@dao-strategies/core';
 import { Reward } from '@prisma/client';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
-
-import { bigNumberToNumber } from '../utils/utils';
 
 import { CampaignService } from './CampaignService';
 import { PriceService } from './PriceService';
