@@ -8,6 +8,7 @@ import {
   StrategyComputation,
   Strategy_ID,
   bigIntToNumber,
+  RootDetails,
 } from '@dao-strategies/core';
 import {
   BalanceLeaf,
@@ -326,7 +327,7 @@ export class CampaignService {
          * only save new roots if caller intended to save when computing and
          * if the new root is different from the latest one
          */
-        const latest = await this.campaignRepo.getLatestRoot(campaign.uri);
+        const latest = await this.getLatestRoot(campaign.uri);
         if (latest === null || latest.root !== root) {
           await this.campaignRepo.addRoot(
             campaign.uri,
@@ -351,6 +352,14 @@ export class CampaignService {
     this.computingRoot.delete(campaign.uri);
 
     return root;
+  }
+
+  async getRoot(root: string): Promise<RootDetails> {
+    return this.campaignRepo.getRoot(root);
+  }
+
+  async getLatestRoot(uri: string): Promise<CampaignRoot> {
+    return this.campaignRepo.getLatestRoot(uri);
   }
 
   async getRewards(uri: string): Promise<Balances> {

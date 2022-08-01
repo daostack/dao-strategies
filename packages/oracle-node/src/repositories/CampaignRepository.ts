@@ -3,6 +3,7 @@ import {
   Balances,
   RewardsToAddresses,
   bigIntToNumber,
+  RootDetails,
 } from '@dao-strategies/core';
 import {
   PrismaClient,
@@ -149,6 +150,31 @@ export class CampaignRepository {
       },
     });
     return root;
+  }
+
+  async getRoot(_root: string): Promise<RootDetails> {
+    const root = await this.client.campaignRoot.findFirst({
+      where: { root: _root },
+      include: {
+        _count: {
+          select: {
+            balances: true,
+          },
+        },
+      },
+    });
+
+    if (root === null) {
+      throw new Error(`Root ${_root} not found`);
+    }
+
+    return {
+      root: root.root,
+      order: root.order,
+      uri: root.campaignId,
+      date: bigIntToNumber(root.date),
+      nLeafs: root._count.balances,
+    };
   }
 
   async getLatestRootAndLeafs(

@@ -9,8 +9,10 @@ import {
   PublishInfo,
   getCampaignPublishInfo,
   bigNumberToNumber,
+  RootDetails,
+  bigIntToNumber,
 } from '@dao-strategies/core';
-import { Reward } from '@prisma/client';
+import { Campaign, Reward } from '@prisma/client';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
 
 import { CampaignService } from './CampaignService';
@@ -41,17 +43,28 @@ export class CampaignOnChainService {
 
   async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
     const campaign = await this.campaignService.getFromAddress(address);
+
+    const tokens = await this.getCampaignTokens(campaign);
+    const publishInfo = await this.getPublishInfo(campaign.address);
+    const root = await this.campaignService.getRoot(
+      publishInfo.status.validRoot
+    );
+
+    return { tokens, publishInfo, root };
+  }
+
+  async getCampaignTokens(campaign: Campaign): Promise<TokenBalance[]> {
     const assets = ChainsDetails.chainAssets(campaign.chainId);
 
-    const tokens = await Promise.all(
+    return await Promise.all(
       assets.map(async (asset): Promise<TokenBalance> => {
         let getBalance;
 
         if (!ChainsDetails.isNative(asset)) {
           const token = new Contract(asset.address, erc20Abi, this.provider);
-          getBalance = token.balanceOf(address);
+          getBalance = token.balanceOf(campaign.address);
         } else {
-          getBalance = this.provider.getBalance(address);
+          getBalance = this.provider.getBalance(campaign.address);
         }
         /* eslint-disable */
         const balance = (await getBalance) as BigNumber;
@@ -64,8 +77,6 @@ export class CampaignOnChainService {
         };
       })
     );
-
-    return { tokens };
   }
 
   /** get the shares (and fill the assets) for a given merkle root of a given campaign */

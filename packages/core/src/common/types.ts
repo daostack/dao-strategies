@@ -65,8 +65,18 @@ export interface TokenBalance extends Asset {
   price?: number;
 }
 
+export interface RootDetails {
+  order: number;
+  uri: string;
+  root: string;
+  date: number;
+  nLeafs: number;
+}
+
 export interface CampaignOnchainDetails {
-  tokens: TokenBalance[];
+  publishInfo?: PublishInfo;
+  tokens?: TokenBalance[];
+  root?: RootDetails;
 }
 
 export interface TreeClaimInfo {
