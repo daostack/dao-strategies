@@ -51,7 +51,8 @@ export class ServiceManager {
       this.campaignRepo,
       this.timeService,
       this.strategyComputation,
-      this.onChainService
+      this.onChainService,
+      { republishTimeMargin: config.republishTimeMargin }
     );
 
     this.priceService = new PriceService(

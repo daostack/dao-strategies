@@ -336,17 +336,18 @@ export class CampaignRepository {
     uri: string,
     root: string,
     leafs: Prisma.BalanceLeafCreateManyRootInput[],
-    date: number
+    date: number,
+    order: number
   ): Promise<void> {
     appLogger.info(
       `CampaignRepository - addRoot() uri: ${uri}, root: ${root}, leafs: ${JSON.stringify(
         leafs
       )}, date: ${date}`
     );
-    const latest = await this.getLatestRoot(uri);
+
     await this.client.campaignRoot.create({
       data: {
-        order: latest !== null ? latest.order : 0,
+        order,
         campaign: {
           connect: {
             uri,

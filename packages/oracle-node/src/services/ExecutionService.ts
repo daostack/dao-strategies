@@ -13,6 +13,7 @@ export interface ExecutionConfig {
     enabled: boolean;
     period: number;
   };
+  republishTimeMargin: number;
 }
 
 /**

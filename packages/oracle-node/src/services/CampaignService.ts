@@ -65,7 +65,7 @@ export class CampaignService {
     protected timeService: TimeService,
     protected strategyComputation: StrategyComputation,
     protected onChainService: OnChainService,
-    protected config: CampaigServiceConfig = { republishTimeMargin: 60 * 10 }
+    protected config: CampaigServiceConfig
   ) {}
 
   setOnChainRead(_campaignOnChain: CampaignOnChainService): void {
@@ -205,14 +205,26 @@ export class CampaignService {
   async publishCampaign(uri: string): Promise<void> {
     appLogger.info(`publishCampaign: ${uri}`);
     const campaign = await this.get(uri);
+    /**
+     * computeRoot will also save the root as a new campaign root if different from
+     * the previous one
+     */
     const rootDetails = await this.computeRoot(campaign);
+
     const publishInfo = await this.campaignOnChain.getPublishInfo(
       campaign.address
     );
 
+    appLogger.debug(
+      `publishCampaign: rootDetails: ${JSON.stringify(
+        rootDetails
+      )} - publishInfo: ${JSON.stringify(publishInfo)}`
+    );
+
     if (
       rootDetails.root !== publishInfo.status.approvedRoot &&
-      rootDetails.root !== publishInfo.status.pendingRoot
+      rootDetails.root !== publishInfo.status.pendingRoot &&
+      publishInfo.status.isProposeWindowActive
     ) {
       appLogger.debug(`publishCampaign - root: ${rootDetails.root}`);
       await this.onChainService.publishShares(
@@ -256,7 +268,10 @@ export class CampaignService {
     return this.campaignRepo.isPendingPublishing(uri);
   }
 
-  async computeRoot(campaign: Campaign): Promise<RootComputation> {
+  async computeRoot(
+    campaign: Campaign,
+    save: boolean = true
+  ): Promise<RootComputation> {
     if (!campaign.registered) {
       throw new Error(`campaign ${campaign.uri} not registered`);
     }
@@ -306,7 +321,22 @@ export class CampaignService {
         }
       );
 
-      await this.campaignRepo.addRoot(campaign.uri, root, leafs, now);
+      if (save) {
+        /**
+         * only save new roots if caller intended to save when computing and
+         * if the new root is different from the latest one
+         */
+        const latest = await this.campaignRepo.getLatestRoot(campaign.uri);
+        if (latest === null || latest.root !== root) {
+          await this.campaignRepo.addRoot(
+            campaign.uri,
+            root,
+            leafs,
+            now,
+            latest === null ? 0 : latest.order + 1
+          );
+        }
+      }
 
       return {
         root,
@@ -317,8 +347,9 @@ export class CampaignService {
     })();
 
     this.computingRoot.set(campaign.uri, compute);
-
     const root = await compute;
+    this.computingRoot.delete(campaign.uri);
+
     return root;
   }
 
@@ -357,13 +388,11 @@ export class CampaignService {
     /** the new values are then added as long as they are not yet present (in terms of account) */
     extension.forEach((reward, address) => {
       const addressInTree = usersInTree.get(reward.account);
-      if (usersInTree !== undefined) {
+      if (addressInTree !== undefined) {
         /** user should not be already in the tree (only new users can be appended) */
         /** TODO: getNewRewardsToAddresses should do the filtering, but we currently do it here
          * for simplicity */
         // throw new Error();
-        appLogger.warn(`User ${reward.account} is already present in the tree with address ${addressInTree} 
-        and was about to be included again. Skipped.`);
       } else {
         /** new users are added in addition to the latests */
         rewardsToAddresses.set(address, {

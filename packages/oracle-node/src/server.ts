@@ -5,9 +5,7 @@ import Session from 'express-session';
 import expressWinston from 'express-winston';
 import winston from 'winston';
 
-import { worldConfig } from './config';
-
-import { port } from './config';
+import { config, port } from './config';
 import { Routes } from './enpoints/routes';
 import { appLogger } from './logger';
 import { ServiceManager } from './service.manager';
@@ -75,11 +73,7 @@ app.use(
 app.use(bodyParser.json());
 
 /** Services instantiation */
-const manager = new ServiceManager({
-  world: worldConfig,
-  executionWatcher: { enabled: true, period: 30 },
-  republishWatcher: { enabled: true, period: 60 },
-});
+const manager = new ServiceManager(config);
 
 /** --------------------- */
 
