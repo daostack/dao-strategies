@@ -1,46 +1,30 @@
 import { Box } from 'grommet';
 import React, { FC } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { LoggedUser } from '../components/LoggedUser';
-import { AppButton } from '../components/styles/BasicElements';
+import { Logo } from '../components/Logo';
 
-import { useLoggedUser } from '../hooks/useLoggedUser';
-import { RouteNames } from './MainPage';
+export const HEADER_HEIGHT = 80;
 
 export interface IMainPageHeaderProps {
   children?: React.ReactNode;
 }
 
 export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const seeProfile = () => {
-    if (isProfile()) {
-      navigate(RouteNames.Base);
-    } else {
-      navigate(RouteNames.Profile);
-    }
-  };
-
-  const isProfile = () => {
-    return location.pathname === RouteNames.Profile;
-  };
-
   const left = (
     <Link to="/">
-      <Box pad="small">Storks</Box>
+      <Logo></Logo>
     </Link>
   );
 
-  const right = (
-    <div style={{ position: 'fixed', textAlign: 'right', right: 0, top: 0, padding: 10, zIndex: 1 }}>
-      <LoggedUser></LoggedUser>
-    </div>
-  );
+  const right = <LoggedUser></LoggedUser>;
 
   return (
-    <Box direction="row" justify="between" pad="small">
+    <Box
+      style={{ position: 'absolute', width: '100vw', height: `${HEADER_HEIGHT}px`, padding: '0px 32px' }}
+      direction="row"
+      justify="between"
+      align="center">
       {left}
       {right}
     </Box>

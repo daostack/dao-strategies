@@ -1,18 +1,21 @@
+import { useNavigate } from 'react-router-dom';
+import { Refresh } from 'grommet-icons';
+import { Box, Layer, Text } from 'grommet';
+import { ChainsDetails, TreeClaimInfo } from '@dao-strategies/core';
 import { FC, useEffect, useState } from 'react';
-import { useCampaign } from '../hooks/useCampaign';
+
+import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { useClaimer } from '../hooks/useClaimer';
-import { AppButton } from './styles/BasicElements';
-import { useNavigate } from 'react-router-dom';
 import { RouteNames } from '../pages/MainPage';
-import { Box, Layer } from 'grommet';
-import { ChainsDetails, TreeClaimInfo } from '@dao-strategies/core';
-import { useNow } from '../hooks/useNow';
-import { AssetBalance } from './Assets';
 import { claimRewards } from '../pages/campaign.support';
+
+import { useNow } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { truncate } from '../utils/ethers';
-import { Refresh } from 'grommet-icons';
+
+import { AppButton } from './styles/BasicElements';
+import { AssetBalance } from './Assets';
 
 interface IParams {
   campaignAddress: string;
@@ -25,15 +28,17 @@ interface UserClaimStatus {
   willCanClaim: boolean;
   claim: TreeClaimInfo | undefined;
   wasExecuted: boolean;
+  wasPublished: boolean;
 }
 
 export const ClaimButton: FC<IParams> = (props: IParams) => {
+  const { campaign } = useCampaignContext();
+
   const [showClaim, setShowClaim] = useState<boolean>(false);
   const { now } = useNow();
   const { user, connect, account } = useLoggedUser();
   const navigate = useNavigate();
 
-  const { campaign } = useCampaign(props.campaignAddress);
   const { claimInfo, check } = useClaimer(props.campaignAddress, user?.address);
   const campaignInstance = useCampaignInstance(props.campaignAddress);
 
@@ -80,7 +85,12 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
     willCanClaim: pendingClaim !== undefined && pendingClaim.shares !== undefined,
     claim: currentClaim !== undefined ? currentClaim : pendingClaim !== undefined ? pendingClaim : undefined,
     wasExecuted: campaign.executed,
+    wasPublished: campaign.published,
   };
+
+  if (status.wasExecuted && !status.wasPublished) {
+    return <Text>No rewards published yet</Text>;
+  }
 
   if (!status.isVerified) {
     return (

@@ -1,10 +1,6 @@
 import { BigNumber } from 'ethers';
 
-import { Balances, BalancesFloat } from '../types';
-
-export interface BalancesObject {
-  [account: string]: string;
-}
+import { Balances, BalancesFloat, BalancesObject } from '../types';
 
 export const balancesToObject = (balances: Balances): BalancesObject => {
   const balancesObject: BalancesObject = {};
@@ -50,7 +46,7 @@ export const BNToFloat = (bn: BigNumber, decimals: number): number => {
 /** float numbers are converted to big integers (where 1E+18 = 1.0)
  * and the set is scaled so that the sum of all the balances = 1E+18,
  * there **most likely will be** rounding errors in the conversion */
-export const normalizeRewards = (balancesFloat: BalancesFloat): Balances => {
+export const normalizeShares = (balancesFloat: BalancesFloat): Balances => {
   const balances: Balances = new Map();
 
   if (balancesFloat.size > 0) {
@@ -97,4 +93,28 @@ export const normalizeRewards = (balancesFloat: BalancesFloat): Balances => {
   }
 
   return balances;
+};
+
+export const bigIntToNumber = (
+  bn: bigint | null | undefined
+): number | undefined => {
+  if (bn === undefined || bn == null) {
+    return undefined;
+  }
+  if (bn > Number.MAX_SAFE_INTEGER) {
+    return NaN;
+  }
+  return Number(bn);
+};
+
+export const bigNumberToNumber = (
+  bn: BigNumber | undefined
+): number | undefined => {
+  if (bn === undefined || bn == null) {
+    return undefined;
+  }
+  if (bn.gt(BigNumber.from(Number.MAX_SAFE_INTEGER.toString()))) {
+    return NaN;
+  }
+  return Number(bn);
 };

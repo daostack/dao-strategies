@@ -14,7 +14,7 @@ import { toNumber } from '../src/utils/utils';
 
 import {
   StrategyComputationMockFunctions,
-  TEST_REWARDS,
+  TEST_SHARES,
 } from './mocks/strategy.computation';
 import { months } from './utils';
 
@@ -149,15 +149,13 @@ describe('start', () => {
       expect(toNumber(campaign.lastRunDate)).toBe(manager.services.time.now());
       expect(campaign.uri).toHaveLength(61);
 
-      const rewards = await manager.services.campaign.getRewards(uri);
+      const shares = await manager.services.campaign.getSharesPaginated(uri);
 
-      const test_receivers = Object.getOwnPropertyNames(TEST_REWARDS);
-      expect(rewards.size).toBe(test_receivers.length);
+      const test_receivers = Object.getOwnPropertyNames(TEST_SHARES);
+      expect(shares.size).toBe(test_receivers.length);
 
       test_receivers.forEach((user: string) => {
-        expect(rewards.get(user).eq(TEST_REWARDS[user] as BigNumber)).toBe(
-          true
-        );
+        expect(shares.get(user).eq(TEST_SHARES[user] as BigNumber)).toBe(true);
       });
     });
 
@@ -267,9 +265,9 @@ describe('start', () => {
       expect(campaign.registered).toBe(false);
       expect(campaign.lastRunDate).toBeNull();
 
-      const rewards = await manager.services.campaign.getRewards(uri);
+      const shares = await manager.services.campaign.getSharesPaginated(uri);
 
-      expect(rewards.size).toBe(0);
+      expect(shares.size).toBe(0);
     });
 
     describe('register future', () => {

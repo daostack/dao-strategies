@@ -6,22 +6,13 @@ import {
   CampaignUriDetails,
   ChainsDetails,
   Typechain,
+  SharesRead,
 } from '@dao-strategies/core';
 import { ethers } from 'ethers';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
-import { DateManager } from '../utils/time';
-
-const ZERO_BYTES32 = '0x' + '0'.repeat(64);
-
-export type RewardsMap = Record<string, string>;
-
-export interface SimulationResult {
-  uri?: string;
-  details?: CampaignUriDetails;
-  rewards?: RewardsMap;
-}
+import { DateManager } from '../utils/date.manager';
 
 /** The period string is parsed to derive the actual period. That's why
  * we need to use enums and maps to avoid using manual strings as keys
@@ -128,21 +119,8 @@ export const getPeriodType = (
   return type;
 };
 
-export const simulateCampaign = async (details: CampaignUriDetails): Promise<SimulationResult> => {
-  // const uri = await getCampaignUri(details);
-  // const rewards = await new Promise<Balances>((resolve) => {
-  //   setTimeout(() => {
-  //     StrategyComputationMockFunctions.runStrategy(details.strategyID, details.strategyParams).then((r) => resolve(r));
-  //   }, 2000);
-  // });
-
-  // return {
-  //   uri,
-  //   rewards: balancesToObject(rewards),
-  //   details,
-  // };
-
-  const response = await fetch(ORACLE_NODE_URL + '/campaign/simulateFromDetails', {
+export const simulateCampaign = async (details: CampaignUriDetails): Promise<SharesRead> => {
+  const response = await fetch(ORACLE_NODE_URL + '/campaign/sharesFromDetails', {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ details }),
@@ -150,11 +128,7 @@ export const simulateCampaign = async (details: CampaignUriDetails): Promise<Sim
   });
 
   const result = await response.json();
-  return {
-    uri: result.uri,
-    rewards: result.rewards,
-    details,
-  };
+  return result;
 };
 
 export const createCampaign = async (details: CampaignUriDetails): Promise<string> => {
@@ -216,6 +190,8 @@ export const deployCampaign = async (
   /** for now, the oracle is informed about the newly created campaign from this call, in the future, the
    * oracle might watch the blockchain */
   createDetails.address = address;
+
+  console.log('campaign contract deployed', { address });
 
   await registerCampaign(uriDefined, createDetails);
   return address;

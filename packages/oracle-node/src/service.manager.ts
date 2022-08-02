@@ -51,7 +51,8 @@ export class ServiceManager {
       this.campaignRepo,
       this.timeService,
       this.strategyComputation,
-      this.onChainService
+      this.onChainService,
+      { republishTimeMargin: config.republishTimeMargin }
     );
 
     this.priceService = new PriceService(
@@ -63,6 +64,8 @@ export class ServiceManager {
       this.campaignService,
       this.priceService
     );
+
+    this.campaignService.setOnChainRead(this.campaignOnChain);
 
     this.services = {
       campaign: this.campaignService,
@@ -79,7 +82,13 @@ export class ServiceManager {
   /** for testing only */
   async resetDB(): Promise<void> {
     await this.client.$executeRaw`
-      TRUNCATE public."Campaign", public."User", public."Reward";
+      TRUNCATE 
+        public."Campaign", 
+        public."User", 
+        public."Share", 
+        public."CampaignRoot", 
+        public."BalanceLeaf", 
+        public."AssetPrice";
     `;
   }
 }

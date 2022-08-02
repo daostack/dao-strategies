@@ -1,4 +1,4 @@
-import { Box, Grid } from 'grommet';
+import { Box, Grid, GridExtendedProps, ResponsiveContext } from 'grommet';
 import { FC } from 'react';
 import { IElement } from './BasicElements';
 
@@ -50,3 +50,43 @@ export const TwoColumns = (props: IElement) => {
     </Grid>
   );
 };
+
+export interface IResponsiveGrid extends GridExtendedProps {}
+
+enum Breakpoints {
+  small = 'small',
+  medium = 'medium',
+  large = 'large',
+  xlarge = 'xlarge',
+}
+
+export const ResponsiveGrid: FC<IResponsiveGrid> = (props: IResponsiveGrid) => (
+  <ResponsiveContext.Consumer>
+    {(_size) => {
+      const size = _size as Breakpoints;
+      const columns = {
+        small: ['auto'],
+        medium: ['auto', 'auto'],
+        large: ['auto', 'auto', 'auto'],
+        xlarge: ['auto', 'auto', 'auto'],
+      };
+
+      const rows = {
+        small: ['auto'],
+        medium: ['auto'],
+        large: ['auto'],
+        xlarge: ['auto'],
+      };
+
+      // take into consideration if not array is sent but a simple string
+      const columnsVal = columns[size];
+      const rowsVal = rows[size];
+
+      return (
+        <Grid {...props} rows={!rowsVal ? size : rowsVal} columns={!columnsVal ? size : columnsVal}>
+          {props.children}
+        </Grid>
+      );
+    }}
+  </ResponsiveContext.Consumer>
+);

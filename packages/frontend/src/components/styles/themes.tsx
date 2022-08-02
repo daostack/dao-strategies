@@ -28,6 +28,15 @@ const extension: ThemeType = {
     },
     border: false,
   },
+  select: {
+    control: {
+      extend: css`
+        & {
+          border-style: none;
+        }
+      `,
+    },
+  },
   textArea: {
     extend: (props) => {
       return css`

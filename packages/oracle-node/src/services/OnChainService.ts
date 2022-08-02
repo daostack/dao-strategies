@@ -90,7 +90,6 @@ export class OnChainService {
 
   async publishShares(address: string, root: string): Promise<void> {
     const campaign = campaignInstance(address, this.signer);
-
     const tx = await campaign.proposeShares(root, ZERO_BYTES32);
     const rec = await tx.wait();
     appLogger.info(

@@ -5,9 +5,7 @@ import Session from 'express-session';
 import expressWinston from 'express-winston';
 import winston from 'winston';
 
-import { worldConfig } from './config';
-
-import { port } from './config';
+import { config, port } from './config';
 import { Routes } from './enpoints/routes';
 import { appLogger } from './logger';
 import { ServiceManager } from './service.manager';
@@ -75,11 +73,7 @@ app.use(
 app.use(bodyParser.json());
 
 /** Services instantiation */
-const manager = new ServiceManager({
-  world: worldConfig,
-  enabled: true,
-  periodCheck: 30,
-});
+const manager = new ServiceManager(config);
 
 /** --------------------- */
 
@@ -89,7 +83,8 @@ Routes.forEach((route) => {
     route.route,
     async (req: Request, res: Response, next: Function) => {
       try {
-        const loggedUser: string | undefined = req.session?.siwe?.address;
+        const loggedUser: string | undefined =
+          req.session?.siwe?.address.toLowerCase();
 
         if (route.protected) {
           if (loggedUser === undefined) {

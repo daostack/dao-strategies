@@ -35,6 +35,12 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   // hardhat or localhost
   if (chainId == '31337') {
+    await deploy('Multicall', {
+      from: deployer.address,
+      args: [],
+      log: true,
+    });
+
     const erc20token = await deploy('TestErc20', {
       from: deployer.address,
       args: ['MakerDAO', 'DAI', hre.ethers.utils.parseEther('1000000'), deployer.address, 18],

@@ -31,12 +31,14 @@ export interface CampaignInterface extends utils.Interface {
     "challenge(uint8)": FunctionFragment;
     "claim(address,uint256,bytes32[],address[])": FunctionFragment;
     "claimed(address,address)": FunctionFragment;
+    "deployTime()": FunctionFragment;
     "fund(address,uint256)": FunctionFragment;
     "getValidRoot()": FunctionFragment;
     "guardian()": FunctionFragment;
     "initCampaign(bytes32,address,address,uint256,uint256,uint256,uint256)": FunctionFragment;
     "isChallengePeriod()": FunctionFragment;
     "isPendingActive()": FunctionFragment;
+    "isProposeWindowActive()": FunctionFragment;
     "locked()": FunctionFragment;
     "merkleRootUpdateAllowed()": FunctionFragment;
     "oracle()": FunctionFragment;
@@ -94,6 +96,10 @@ export interface CampaignInterface extends utils.Interface {
     values: [string, string]
   ): string;
   encodeFunctionData(
+    functionFragment: "deployTime",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "fund",
     values: [string, BigNumberish]
   ): string;
@@ -120,6 +126,10 @@ export interface CampaignInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "isPendingActive",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isProposeWindowActive",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "locked", values?: undefined): string;
@@ -201,6 +211,7 @@ export interface CampaignInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "deployTime", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "fund", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getValidRoot",
@@ -217,6 +228,10 @@ export interface CampaignInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isPendingActive",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isProposeWindowActive",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
@@ -388,6 +403,8 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    deployTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     fund(
       asset: string,
       amount: BigNumberish,
@@ -416,6 +433,8 @@ export interface Campaign extends BaseContract {
     isPendingActive(
       overrides?: CallOverrides
     ): Promise<[boolean] & { isActive: boolean }>;
+
+    isProposeWindowActive(overrides?: CallOverrides): Promise<[boolean]>;
 
     locked(overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -507,6 +526,8 @@ export interface Campaign extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  deployTime(overrides?: CallOverrides): Promise<BigNumber>;
+
   fund(
     asset: string,
     amount: BigNumberish,
@@ -531,6 +552,8 @@ export interface Campaign extends BaseContract {
   isChallengePeriod(overrides?: CallOverrides): Promise<boolean>;
 
   isPendingActive(overrides?: CallOverrides): Promise<boolean>;
+
+  isProposeWindowActive(overrides?: CallOverrides): Promise<boolean>;
 
   locked(overrides?: CallOverrides): Promise<boolean>;
 
@@ -619,6 +642,8 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    deployTime(overrides?: CallOverrides): Promise<BigNumber>;
+
     fund(
       asset: string,
       amount: BigNumberish,
@@ -643,6 +668,8 @@ export interface Campaign extends BaseContract {
     isChallengePeriod(overrides?: CallOverrides): Promise<boolean>;
 
     isPendingActive(overrides?: CallOverrides): Promise<boolean>;
+
+    isProposeWindowActive(overrides?: CallOverrides): Promise<boolean>;
 
     locked(overrides?: CallOverrides): Promise<boolean>;
 
@@ -789,6 +816,8 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    deployTime(overrides?: CallOverrides): Promise<BigNumber>;
+
     fund(
       asset: string,
       amount: BigNumberish,
@@ -813,6 +842,8 @@ export interface Campaign extends BaseContract {
     isChallengePeriod(overrides?: CallOverrides): Promise<BigNumber>;
 
     isPendingActive(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isProposeWindowActive(overrides?: CallOverrides): Promise<BigNumber>;
 
     locked(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -907,6 +938,8 @@ export interface Campaign extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    deployTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     fund(
       asset: string,
       amount: BigNumberish,
@@ -931,6 +964,10 @@ export interface Campaign extends BaseContract {
     isChallengePeriod(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isPendingActive(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isProposeWindowActive(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     locked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

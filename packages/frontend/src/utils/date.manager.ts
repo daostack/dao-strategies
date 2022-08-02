@@ -9,8 +9,9 @@ export class DateManager {
   /** difference between frontend and backend time */
   private bias: number = 0;
 
-  constructor(date?: Date) {
-    this.date = date ? date : new Date();
+  /** input date is in seconds if provided */
+  constructor(date?: Date | number) {
+    this.date = date ? (typeof date === 'number' ? new Date(date * 1000) : date) : new Date();
   }
 
   async sync() {
@@ -36,6 +37,11 @@ export class DateManager {
 
   getTime(): number {
     return Math.floor(this.date.getTime() / 1000) + this.bias;
+  }
+
+  /** updates to the latest device date (keeping the bias) */
+  refresh(): void {
+    this.date = new Date();
   }
 
   addMonths(n: number): DateManager {
@@ -67,5 +73,9 @@ export class DateManager {
     } else {
       return Math.ceil(diff / (60 * 60 * 24)) + ' days';
     }
+  }
+
+  toString(): string {
+    return this.date.toUTCString();
   }
 }

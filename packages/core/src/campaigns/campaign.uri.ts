@@ -2,7 +2,7 @@ import { CID } from 'multiformats/cid';
 import * as json from 'multiformats/codecs/json';
 import { sha256 } from 'multiformats/hashes/sha2';
 
-import { CampaignUriDetails } from '../common/types';
+import { CampaignUriDetails } from '../types';
 
 export const getCampaignUriCid = async (
   details: CampaignUriDetails

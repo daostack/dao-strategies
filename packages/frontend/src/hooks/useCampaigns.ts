@@ -1,10 +1,10 @@
-import { Typechain } from '@dao-strategies/core';
+import { CampaignReadDetails } from '@dao-strategies/core';
 import { useEffect, useState } from 'react';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useCampaigns() {
-  const [campaigns, setCampaigns] = useState<Typechain.Campaign[]>([]);
+  const [campaigns, setCampaigns] = useState<CampaignReadDetails[]>([]);
 
   const get = async () => {
     const response = await fetch(ORACLE_NODE_URL + `/campaigns`, {
@@ -13,8 +13,8 @@ export function useCampaigns() {
       credentials: 'include',
     });
 
-    const campaigns = await response.json();
-    setCampaigns(campaigns);
+    const campaigns: CampaignReadDetails[] = await response.json();
+    setCampaigns(campaigns.filter((campaign) => campaign.address !== null));
   };
 
   useEffect(() => {

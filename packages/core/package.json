@@ -13,6 +13,7 @@
   "dependencies": {
     "@octokit/plugin-rest-endpoint-methods": "^5.13.0",
     "@wagmi/core": "^0.4.4",
+    "ethereum-multicall": "^2.14.0",
     "ethereumjs-util": "^7.1.4",
     "ethers": "^5.5.4",
     "multiformats": "^9.6.5",

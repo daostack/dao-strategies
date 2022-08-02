@@ -1,8 +1,8 @@
-import { Box, DateInput, FormField, Paragraph, Text, TextInput } from 'grommet';
-import { FC, useState } from 'react';
+import { Box, DateInput, FormField, Layer, Paragraph, Spinner, Text, TextInput } from 'grommet';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { ChainsDetails, getCampaignUri, CampaignCreateDetails } from '@dao-strategies/core';
+import { ChainsDetails, getCampaignUri, CampaignCreateDetails, SharesRead } from '@dao-strategies/core';
 
 import { useCampaignFactory } from '../../hooks/useContracts';
 import {
@@ -12,7 +12,6 @@ import {
   getPeriodType,
   PeriodType,
   simulateCampaign,
-  SimulationResult,
   strategyDetails,
 } from '../campaign.support';
 import { ACTIVATION_PERIOD, ACTIVE_DURATION, CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
@@ -94,8 +93,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
    * on wheather the start date of the strategy is older than today.
    */
   const [formValues, setFormValuesState] = useState<CampaignFormValues>(initialValues);
-  const [simulation, setSimulated] = useState<SimulationResult | undefined>();
+  const [simulation, setSimulated] = useState<SharesRead | undefined>();
   const [simulating, setSimulating] = useState<boolean>(false);
+  const [deploying, setDeploying] = useState<boolean>(false);
 
   const campaignFactory = useCampaignFactory();
   const navigate = useNavigate();
@@ -139,12 +139,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       asset: ChainsDetails.assetOfName(chainId, formValues.assetName).id,
     };
 
+    setDeploying(true);
     /** if the campaign was not simulated it must be created first */
     try {
       setCreating(true);
       const campaignAddress = await deployCampaign(
         campaignFactory,
-        (simulation as SimulationResult).uri,
+        (simulation as SharesRead).uri,
         otherDetails,
         finalDetails
       );
@@ -155,6 +156,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       showError('Error creating campaign');
       console.log(e);
     }
+
+    setDeploying(false);
   };
 
   /** Processed values from the form that are cheap to compute and useful */
@@ -206,16 +209,18 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return errors;
   };
 
-  const simulate = async (): Promise<void> => {
-    if (DEBUG) console.log('CampaignCreate - simulate()');
-    setSimulating(true);
+  const simulate = useMemo(() => {
+    return async (): Promise<void> => {
+      if (DEBUG) console.log('CampaignCreate - simulate()');
+      setSimulating(true);
 
-    if (details === undefined) throw new Error();
-    const sim = await simulateCampaign(details);
+      if (details === undefined) throw new Error();
+      const sim = await simulateCampaign(details);
 
-    setSimulated(sim);
-    setSimulating(false);
-  };
+      setSimulated(sim);
+      setSimulating(false);
+    };
+  }, [details]);
 
   /** Repo selection */
   const repoNameChanged = (name: string) => {
@@ -237,20 +242,23 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setFormValues({ ...formValues });
   };
 
-  const status: FormStatus = {
-    page: {
-      isFirstPage: pageIx === 0,
-      isLastFormPage: pageIx === 1, // before the review page
-      isReview: pageIx === 2,
-    },
-    shouldSimulate: periodType !== PeriodType.future,
-    canSimulate: isLogged,
-    mustSimulate: periodType === PeriodType.retroactive,
-    isSimulating: simulating,
-    wasSimulated: simulation !== undefined,
-    canCreate: isLogged,
-    isCreating: creating,
-  };
+  const status = useMemo((): FormStatus => {
+    return {
+      page: {
+        isFirstPage: pageIx === 0,
+        isLastFormPage: pageIx === 1, // before the review page
+        isReview: pageIx === 2,
+      },
+      shouldSimulate: periodType !== PeriodType.future,
+      canSimulate: isLogged,
+      mustSimulate: periodType === PeriodType.retroactive,
+      isSimulating: simulating,
+      wasSimulated: simulation !== undefined,
+      canCreate: isLogged,
+      isCreating: creating,
+      isDeploying: deploying,
+    };
+  }, [creating, deploying, isLogged, pageIx, periodType, simulating, simulation]);
 
   const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
     connect,
@@ -259,6 +267,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     simulate,
     validate,
   });
+
+  useEffect(() => {
+    if (status.page.isReview && status.canSimulate && !status.isSimulating && !status.wasSimulated) {
+      void simulate();
+    }
+  }, [status, account, simulate]);
 
   const leftClicked = () => {
     if (pageIx > 0) setPageIx(pageIx - 1);
@@ -399,11 +413,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         ) : (
           <Box>
             <Box>{simulation !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
-            {status.wasSimulated ? (
-              <RewardsTable rewards={(simulation as SimulationResult).rewards}></RewardsTable>
-            ) : (
-              ''
-            )}
+            {status.wasSimulated ? <RewardsTable rewards={simulation as SharesRead}></RewardsTable> : ''}
           </Box>
         )}
       </Box>
@@ -444,6 +454,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               flexDirection: 'column',
               alignItems: 'center',
             }}>
+            {status.isDeploying ? (
+              <Layer>
+                <Box style={{ height: '50vh', width: '50vw' }} justify="center" align="center">
+                  Deploying
+                  <br></br>
+                  <Spinner></Spinner>
+                </Box>
+              </Layer>
+            ) : (
+              <></>
+            )}
             {pages.map((page, ix) => {
               return (
                 <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>

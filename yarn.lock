@@ -1816,6 +1816,7 @@ __metadata:
     eslint-plugin-import: ^2.25.4
     eslint-plugin-prettier: ^4.0.0
     eslint-plugin-unused-imports: ^2.0.0
+    ethereum-multicall: ^2.14.0
     ethereumjs-util: ^7.1.4
     ethers: ^5.5.4
     jest: ^28.1.0
@@ -1851,6 +1852,7 @@ __metadata:
     eslint-plugin-import: ^2.25.4
     eslint-plugin-prettier: ^4.0.0
     eslint-plugin-unused-imports: ^2.0.0
+    ethereum-multicall: ^2.14.0
     ethers: ^5.6.5
     express: ^4.17.2
     express-session: ^1.17.3
@@ -2357,7 +2359,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ethersproject/providers@npm:5.6.8, @ethersproject/providers@npm:^5.4.4, @ethersproject/providers@npm:^5.5.3":
+"@ethersproject/providers@npm:5.6.8, @ethersproject/providers@npm:^5.0.10, @ethersproject/providers@npm:^5.4.4, @ethersproject/providers@npm:^5.5.3":
   version: 5.6.8
   resolution: "@ethersproject/providers@npm:5.6.8"
   dependencies:
@@ -12186,6 +12188,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ethereum-multicall@npm:^2.14.0":
+  version: 2.14.0
+  resolution: "ethereum-multicall@npm:2.14.0"
+  dependencies:
+    "@ethersproject/providers": ^5.0.10
+    ethers: ^5.0.15
+  checksum: 02d24c9cb8d0655f413df52950369df860e2fc4ed922e8338c1a16b2714c365117d6d609d56c0fe8cc0524b2087ba41fac597d3fe6357c12755fe483fe12d668
+  languageName: node
+  linkType: hard
+
 "ethereum-waffle@npm:^3.4.0":
   version: 3.4.4
   resolution: "ethereum-waffle@npm:3.4.4"
@@ -12463,7 +12475,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^5.0.1, ethers@npm:^5.0.2, ethers@npm:^5.5.2, ethers@npm:^5.5.3, ethers@npm:^5.5.4, ethers@npm:^5.6.5, ethers@npm:^5.6.6, ethers@npm:^5.6.8":
+"ethers@npm:^5.0.1, ethers@npm:^5.0.15, ethers@npm:^5.0.2, ethers@npm:^5.5.2, ethers@npm:^5.5.3, ethers@npm:^5.5.4, ethers@npm:^5.6.5, ethers@npm:^5.6.6, ethers@npm:^5.6.8":
   version: 5.6.9
   resolution: "ethers@npm:5.6.9"
   dependencies:

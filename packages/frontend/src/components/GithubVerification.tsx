@@ -1,4 +1,4 @@
-import { Button, TextInput } from 'grommet';
+import { TextInput } from 'grommet';
 import { FC, useState } from 'react';
 import { useSignMessage } from 'wagmi';
 import { AppButton } from './styles/BasicElements';

@@ -1,13 +1,16 @@
 import { Box, Layer, Select } from 'grommet';
-import { FC, useState } from 'react';
+import { Logout } from 'grommet-icons';
+import { FC, ReactNode, useState } from 'react';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { GithubVerification } from './GithubVerification';
 import { AppButton } from './styles/BasicElements';
 
-const imageAndText = (url: string, text: string) => {
+const imageAndText = (url: string | ReactNode, text: string) => {
   return (
     <Box direction="row" align="center">
-      <img style={{ height: '30px', width: '30px' }} src={url}></img>
+      <Box style={{ width: '40px' }} align="center">
+        {typeof url === 'string' ? <img style={{ height: '30px', width: '30px' }} alt="logout" src={url}></img> : url}
+      </Box>
       <Box style={{ padding: '0px 15px' }}>{text}</Box>
     </Box>
   );
@@ -20,7 +23,7 @@ export const LoggedUser: FC = () => {
   if (account === undefined) {
     return (
       <AppButton primary onClick={connect}>
-        Connect
+        Connect Wallet
       </AppButton>
     );
   }
@@ -29,7 +32,7 @@ export const LoggedUser: FC = () => {
     switch (key) {
       case 0:
         return user && user.verified.github != null ? (
-          <Box pad="small">{imageAndText('/images/Github.png', 'Verified')}</Box>
+          <Box pad="small">{imageAndText('/images/Github.png', `@${user.verified.github}`)}</Box>
         ) : (
           <Box onClick={() => setShowLinkGithub(true)} pad="small">
             {imageAndText('/images/Github.png', 'Link Github Account')}
@@ -38,7 +41,7 @@ export const LoggedUser: FC = () => {
       case 1:
         return (
           <Box onClick={() => startLogout()} pad="small">
-            disconnect
+            {imageAndText(<Logout></Logout>, 'disconnect')}
           </Box>
         );
     }
@@ -55,9 +58,8 @@ export const LoggedUser: FC = () => {
       )}
       <Select
         name="asset"
-        style={{ border: '0px none' }}
         options={[0, 1]}
-        value={<Box pad="small">{imageAndText('/images/MetaMask_Fox.png', account)}</Box>}>
+        value={<Box pad="small">{imageAndText('/images/MetaMask_Fox.png', `${account.slice(0, 10)}...`)}</Box>}>
         {option}
       </Select>
     </>

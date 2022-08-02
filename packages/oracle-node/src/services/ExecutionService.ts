@@ -1,13 +1,19 @@
-import { WorldConfig } from '@dao-strategies/core';
+import { WorldConfig, bigIntToNumber } from '@dao-strategies/core';
 
 import { appLogger } from '../logger';
 import { Services } from '../types';
-import { bigIntToNumber } from '../utils/utils';
 
 export interface ExecutionConfig {
   world: WorldConfig;
-  enabled: boolean;
-  periodCheck: number;
+  executionWatcher: {
+    enabled: boolean;
+    period: number;
+  };
+  republishWatcher: {
+    enabled: boolean;
+    period: number;
+  };
+  republishTimeMargin: number;
 }
 
 /**
@@ -19,44 +25,51 @@ export interface ExecutionConfig {
  * A service that periodically fetches data about the campaigns and prepares for
  * their on-time execution.
  *
- * The DB is reviewed every PERIOD_CHECK seconds, and campaigns that should be executed in the next
- * PERIOD_CHECK seconds are scheduled to run using setTimeout.
+ * The DB is reviewed every executionWatcher.period seconds, and campaigns that should be executed in the next
+ * executionWatcher.period seconds are scheduled to run using setTimeout.
  *
  * Retroactive campaigns are campaigns that were "simulated" during their creation.
  * In this case the simulation is considered "the" exection, and are marked as executed.
  *  */
 
 export class ExecuteService {
-  cicle: NodeJS.Timer;
+  executionCicle: NodeJS.Timer;
+  republishCicle: NodeJS.Timer;
   schedulled: Set<string> = new Set();
   executing: Map<string, Promise<void>> = new Map();
   publishing: Map<string, Promise<void>> = new Map();
 
   constructor(protected services: Services, protected config: ExecutionConfig) {
-    if (this.config.enabled) {
-      this.startWatcher();
+    if (this.config.executionWatcher.enabled) {
+      this.startExecutionWatcher();
+    }
+    if (this.config.republishWatcher.enabled) {
+      this.startRepublishWatcher();
     }
   }
 
-  startWatcher(): void {
-    void this.checkIncoming();
-    this.cicle = setInterval(() => {
-      void this.checkIncoming();
-    }, this.config.periodCheck * 1000);
+  startExecutionWatcher(): void {
+    void this.checkExecution();
+    this.executionCicle = setInterval(() => {
+      void this.checkExecution();
+    }, this.config.executionWatcher.period * 1000);
   }
 
-  /**
-   * Check for which are either pending execution and/or pending publishing
-   */
-  async checkIncoming(): Promise<void> {
+  startRepublishWatcher(): void {
+    void this.checkRepublish();
+    this.republishCicle = setInterval(() => {
+      void this.checkRepublish();
+    }, this.config.republishWatcher.period * 1000);
+  }
+
+  async checkExecution(): Promise<void> {
     const now = this.services.time.now();
 
-    const incoming = await this.services.campaign.findPending(
-      now + this.config.periodCheck
+    const incoming = await this.services.campaign.findPendingExecution(
+      now + this.config.executionWatcher.period
     );
 
-    const nowUTC = new Date(now * 1000);
-    appLogger.info(`Check Incoming Tasks ${nowUTC.toUTCString()}`);
+    appLogger.info(`Check Incoming Executions ${now}`);
 
     await Promise.all(
       incoming.map(async (uri) => {
@@ -65,8 +78,27 @@ export class ExecuteService {
     );
   }
 
+  /**
+   * Check for campaigns that have a republishDate less than now (note that
+   * republish is not setTimeout triggered to target an under-the-second
+   * accuracy (which is the case for execution))
+   */
+  async checkRepublish(): Promise<void> {
+    const now = this.services.time.now();
+
+    const incoming = await this.services.campaign.findPendingRepublish(now);
+
+    appLogger.info(`Check Incoming Republishing ${now}`);
+
+    await Promise.all(
+      incoming.map(async (uri) => {
+        await this.publish(uri);
+      })
+    );
+  }
+
   async scheduleExecute(uri: string, now: number): Promise<void> {
-    /** don't schedule and schedulled task */
+    /** don't schedule an already schedulled task */
     if (this.schedulled.has(uri)) {
       return;
     }
@@ -118,8 +150,9 @@ export class ExecuteService {
         return;
       }
 
-      /** rewards are computed only if they have not been yet computed (as part
-       * of the campaign creation process in the UI for instance) */
+      /** shares are computed only if they have not been yet computed (as part
+       * of the campaign creation process in the UI for instance) and
+       * the comnputation was after the campaign execDate */
       appLogger.info(`Executing ${uri}`);
 
       if (
@@ -128,7 +161,9 @@ export class ExecuteService {
       ) {
         /** campaigns that were already run are not re-run, but just
          * marked as executed */
-        appLogger.info(`Already executed ${campaign.uri}`);
+        appLogger.info(
+          `Not already executed ${campaign.uri}. About to run then.`
+        );
         await this.services.campaign.runCampaign(uri, now);
       }
 
@@ -151,7 +186,7 @@ export class ExecuteService {
     const _publish = (async (): Promise<void> => {
       const campaign = await this.services.campaign.get(uri);
 
-      if (!campaign.executed || campaign.published) {
+      if (!campaign.executed) {
         /** campaign not ready to be published */
         return;
       }

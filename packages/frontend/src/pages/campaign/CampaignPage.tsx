@@ -1,38 +1,31 @@
-import { Box, Header, Paragraph, Spinner, Tabs, Tab, Layer } from 'grommet';
+import { Box, Header, Paragraph, Spinner, Tabs, Tab, Layer, Text } from 'grommet';
 import { FC, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
 import { AppButton } from '../../components/styles/BasicElements';
 import { ColumnView, TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
-import { useCampaign } from '../../hooks/useCampaign';
-import { AppHeader } from '../AppHeader';
+import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { ClaimButton } from '../../components/ClaimRewards';
 import { AssetBalance } from '../../components/Assets';
 import { Refresh } from 'grommet-icons';
 import { truncate } from '../../utils/ethers';
 import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
+import { CampaignGuardian } from '../../components/CampaignGuardian';
+import { DateManager } from '../../utils/date.manager';
 
 export interface ICampaignPageProps {
   dum?: any;
 }
 
-type RouteParams = {
-  campaignAddress: string;
-};
-
 export const CampaignPage: FC<ICampaignPageProps> = () => {
-  const params = useParams<RouteParams>();
   const [showFund, setShowFund] = useState<boolean>(false);
 
-  const { isLoading, campaign, getRewards, rewards, getOtherDetails, otherDetails } = useCampaign(
-    params.campaignAddress
-  );
+  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails } = useCampaignContext();
 
   useEffect(() => {
-    getRewards();
+    getShares();
     getOtherDetails();
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,10 +47,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     otherDetails !== undefined ? (
       <Box direction="row">
         <Refresh onClick={() => getOtherDetails()}></Refresh>
-        {otherDetails.tokens.map((token: TokenBalance) => {
-          if (token.balance === '0') return <></>;
-          return <AssetBalance asset={token}></AssetBalance>;
-        })}
+        {otherDetails.tokens ? (
+          otherDetails.tokens.map((token: TokenBalance) => {
+            if (token.balance === '0') return <></>;
+            return <AssetBalance asset={token}></AssetBalance>;
+          })
+        ) : (
+          <></>
+        )}
       </Box>
     ) : (
       <></>
@@ -79,9 +76,17 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       ) : (
         <></>
       )}
-      <AppHeader></AppHeader>
       <ColumnView>
-        <Countdown to-date={campaign?.execDate}></Countdown>
+        <Box pad="medium">
+          {campaign.executed ? (
+            <Text>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Text>
+          ) : (
+            <>
+              Campaign to be executed on {new DateManager(campaign.execDate).toString()}
+              <Countdown to-date={campaign?.execDate}></Countdown>
+            </>
+          )}
+        </Box>
         <Box direction="row" align="center" justify="center">
           <Box
             style={{
@@ -96,8 +101,9 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           </Box>
         </Box>
 
-        <Box direction="row" align="center" justify="center" style={{ marginBottom: '36px' }}>
-          Created by: {(campaign as any).creatorId}
+        <Box align="center" justify="center" pad="medium">
+          <Box>Created by: {campaign.creatorId}</Box>
+          <Box>Guarded by: {campaign.guardian}</Box>
         </Box>
 
         <Box direction="row" align="center" justify="center" style={{ marginBottom: '36px' }}>
@@ -124,8 +130,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         </Box>
 
         <Tabs style={{ height: '500px', overflow: 'auto' }}>
-          <Tab title="Leader Board">
-            <RewardsTable rewards={rewards} style={{ marginBottom: '36px' }}></RewardsTable>
+          <Tab title={campaign.executed ? 'Final Rewards' : 'Leader Board'}>
+            <RewardsTable rewards={shares} style={{ marginBottom: '36px' }}></RewardsTable>
           </Tab>
           <Tab title="More Info">
             <TwoColumns>
@@ -157,6 +163,9 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
                 </Box>
               </Box>
             </TwoColumns>
+          </Tab>
+          <Tab title="Guardian">
+            <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>
           </Tab>
         </Tabs>
       </ColumnView>

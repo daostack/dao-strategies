@@ -6,10 +6,14 @@ import {
   campaignProvider,
   TokenBalance,
   Typechain,
+  PublishInfo,
+  getCampaignPublishInfo,
+  bigNumberToNumber,
+  RootDetails,
+  bigIntToNumber,
 } from '@dao-strategies/core';
-import { Reward } from '@prisma/client';
+import { Campaign, Share } from '@prisma/client';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
-import { BigNumberToNumber } from '../utils/utils';
 
 import { CampaignService } from './CampaignService';
 import { PriceService } from './PriceService';
@@ -39,17 +43,29 @@ export class CampaignOnChainService {
 
   async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
     const campaign = await this.campaignService.getFromAddress(address);
+
+    const tokens = await this.getCampaignTokens(campaign);
+    const publishInfo = await this.getPublishInfo(campaign.address);
+    const root =
+      publishInfo.status.validRoot !== ZERO_BYTES32
+        ? await this.campaignService.getRoot(publishInfo.status.validRoot)
+        : undefined;
+
+    return { tokens, publishInfo, root };
+  }
+
+  async getCampaignTokens(campaign: Campaign): Promise<TokenBalance[]> {
     const assets = ChainsDetails.chainAssets(campaign.chainId);
 
-    const tokens = await Promise.all(
+    return await Promise.all(
       assets.map(async (asset): Promise<TokenBalance> => {
         let getBalance;
 
         if (!ChainsDetails.isNative(asset)) {
           const token = new Contract(asset.address, erc20Abi, this.provider);
-          getBalance = token.balanceOf(address);
+          getBalance = token.balanceOf(campaign.address);
         } else {
-          getBalance = this.provider.getBalance(address);
+          getBalance = this.provider.getBalance(campaign.address);
         }
         /* eslint-disable */
         const balance = (await getBalance) as BigNumber;
@@ -62,8 +78,6 @@ export class CampaignOnChainService {
         };
       })
     );
-
-    return { tokens };
   }
 
   /** get the shares (and fill the assets) for a given merkle root of a given campaign */
@@ -71,7 +85,7 @@ export class CampaignOnChainService {
     uri: string,
     root: string,
     address: string,
-    reward: Reward,
+    share: Share,
     campaignContract: Typechain.Campaign,
     chainId: number,
     verify: boolean = false
@@ -83,14 +97,14 @@ export class CampaignOnChainService {
     /** is this an error? */
     if (leaf == null) return undefined;
 
-    /** protection: the shares in the root should not be other than the rewards computed for this address */
+    /** protection: the shares in the root should not be other than the shares computed for this address */
     if (
-      !ethers.BigNumber.from(reward.amount.toString()).eq(
+      !ethers.BigNumber.from(share.amount.toString()).eq(
         ethers.BigNumber.from(leaf.balance)
       )
     ) {
       throw new Error(
-        `Unexpected shares for account ${address}. Reward was ${reward.amount} but leaf is ${leaf.balance}`
+        `Unexpected shares for account ${address}. Share was ${share.amount} but leaf is ${leaf.balance}`
       );
     }
 
@@ -137,17 +151,17 @@ export class CampaignOnChainService {
   ): Promise<CampaignClaimInfo | undefined> {
     const campaign = await this.campaignService.getFromAddress(campaignAddress);
 
-    /** get the reward to the address () */
-    const reward = await this.campaignService.getRewardToAddress(
+    /** get the shares of the address () */
+    const shares = await this.campaignService.getSharesOfAddress(
       campaign.uri,
       address
     );
 
-    /** if there is not reward, then there should not be any entry in the root */
-    if (reward == null) return undefined;
+    /** if there is not shares, then there should not be any entry in the root */
+    if (shares == null) return undefined;
 
     /**
-     * if there is a reward to this address is because it is already a verified
+     * if there are shares to this address is because it is already a verified
      * address of a social account. Accordingly this address should be in the
      * merkle root of that campaign
      */
@@ -162,7 +176,7 @@ export class CampaignOnChainService {
       campaign.uri,
       currentRoot,
       address,
-      reward,
+      shares,
       campaignContract,
       campaign.chainId,
       true
@@ -179,7 +193,7 @@ export class CampaignOnChainService {
           campaign.uri,
           pendingRoot,
           address,
-          reward,
+          shares,
           campaignContract,
           campaign.chainId
         );
@@ -191,11 +205,15 @@ export class CampaignOnChainService {
       published: campaign.published,
       current: currentClaim,
       pending: pendingClaim,
-      activationTime: BigNumberToNumber(activationTime),
+      activationTime: bigNumberToNumber(activationTime),
     };
   }
 
   async priceOf(chainId: number, address: string): Promise<number> {
     return this.price.priceOf(chainId, address);
+  }
+
+  async getPublishInfo(address: string): Promise<PublishInfo> {
+    return getCampaignPublishInfo(this.provider, address);
   }
 }
