@@ -1,12 +1,11 @@
-import { Strategy_ID } from '@dao-strategies/core';
-import { RewardsMap } from '../pages/campaign.support';
+import { Strategy_ID, SharesRead } from '@dao-strategies/core';
 
-export const TEST_REWARDS: RewardsMap = {
+export const TEST_SHARES: SharesRead = {
   user1: '10000',
 };
 
 export const StrategyComputationMockFunctions = {
-  runStrategy: async (strategyId: Strategy_ID, params: any): Promise<RewardsMap> => {
-    return TEST_REWARDS;
+  runStrategy: async (strategyId: Strategy_ID, params: any): Promise<SharesRead> => {
+    return TEST_SHARES;
   },
 };

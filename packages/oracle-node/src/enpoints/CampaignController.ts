@@ -1,16 +1,16 @@
 import {
   BalancesObject,
-  balancesToObject,
   CampaignUriDetails,
   CampaignCreateDetails,
   CampaignOnchainDetails,
   CampaignClaimInfo,
   TimeDetails,
+  SharesRead,
+  Page,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
-import { ServiceManager } from '../service.manager';
 
-import { Services } from '../types';
+import { ServiceManager } from '../service.manager';
 
 import { Controller } from './Controller';
 import { toCampaignExternal } from './toCampaignExternal';
@@ -19,7 +19,7 @@ import { toCampaignExternal } from './toCampaignExternal';
  * On Retroactive Campaign
  * =======================
  *
- * The rewards must be computed before the campaign
+ * The shares must be computed before the campaign
  * contract has been deployed (to inform the user).
  *
  * (Issue: a hacker can spam the oracle by creating thousands of different
@@ -28,11 +28,11 @@ import { toCampaignExternal } from './toCampaignExternal';
  * In any case, this is the flow during campaign creation:
  *
  * - The frontend will gather the campaign configuration
- * - The frontend will call the `simulate` endpoint.
- * - The oracle will compute the rewards (in terms of social ids) and return them.
- * - The frontend will show the rewards, and, if approved, deploy the smart contract and "register"
+ * - The frontend will call the `sharesFromDetails` endpoint.
+ * - The oracle will compute the shares (in terms of social ids) and return them.
+ * - The frontend will show the shares, and, if approved, deploy the smart contract and "register"
  *   the campaign in the oracle
- * - The oracle will wait for the grace period, execute the strategy, and set the merkle root.
+ * - The oracle will set the merkle root.
  */
 
 /* eslint-disable 
@@ -46,12 +46,12 @@ export class CampaignController extends Controller {
   }
 
   /** */
-  async simulateFromDetails(
+  async sharesFromDetails(
     request: Request,
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
-  ): Promise<{ uri: string; rewards: BalancesObject }> {
+  ): Promise<SharesRead> {
     if (loggedUser === undefined) {
       throw new Error('logged user expected but not found');
     }
@@ -59,12 +59,23 @@ export class CampaignController extends Controller {
     const uri = await this.manager.services.campaign.getOrCreate(
       request.body.details as CampaignUriDetails
     );
-    return {
+    return this.manager.services.campaign.getSharesThrottled(
       uri,
-      rewards: balancesToObject(
-        await this.manager.services.campaign.runCampaignThrottled(uri)
-      ),
-    };
+      request.body.page as Page
+    );
+  }
+
+  async sharesFromUri(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<SharesRead> {
+    const uri: string = request.params.uri as string;
+    return this.manager.services.campaign.getSharesThrottled(
+      uri,
+      request.body.page as Page
+    );
   }
 
   async create(
@@ -89,18 +100,6 @@ export class CampaignController extends Controller {
     next: NextFunction
   ): Promise<TimeDetails> {
     return Promise.resolve({ now: this.manager.services.time.now() });
-  }
-
-  async simulateFromUri(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-    loggedUser: string | undefined
-  ): Promise<BalancesObject> {
-    const uri: string = request.params.uri as string;
-    return balancesToObject(
-      await this.manager.services.campaign.runCampaignThrottled(uri)
-    );
   }
 
   async register(

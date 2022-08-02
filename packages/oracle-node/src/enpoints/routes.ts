@@ -23,16 +23,16 @@ export const Routes: RouteConfig[] = [
   },
   {
     method: 'post',
-    route: '/campaign/simulateFromDetails',
+    route: '/campaign/sharesFromDetails',
     controller: CampaignController,
-    action: 'simulateFromDetails',
+    action: 'sharesFromDetails',
     protected: true,
   },
   {
     method: 'post',
-    route: '/campaign/simulateFromUri/:uri',
+    route: '/campaign/sharesFromUri/:uri',
     controller: CampaignController,
-    action: 'simulateFromUri',
+    action: 'sharesFromUri',
     protected: false,
   },
   {

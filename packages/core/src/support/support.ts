@@ -1,10 +1,7 @@
 import { BigNumber } from 'ethers';
 
+import { BalancesObject } from '../common';
 import { Balances, BalancesFloat } from '../types';
-
-export interface BalancesObject {
-  [account: string]: string;
-}
 
 export const balancesToObject = (balances: Balances): BalancesObject => {
   const balancesObject: BalancesObject = {};
@@ -50,7 +47,7 @@ export const BNToFloat = (bn: BigNumber, decimals: number): number => {
 /** float numbers are converted to big integers (where 1E+18 = 1.0)
  * and the set is scaled so that the sum of all the balances = 1E+18,
  * there **most likely will be** rounding errors in the conversion */
-export const normalizeRewards = (balancesFloat: BalancesFloat): Balances => {
+export const normalizeShares = (balancesFloat: BalancesFloat): Balances => {
   const balances: Balances = new Map();
 
   if (balancesFloat.size > 0) {

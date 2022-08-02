@@ -24,7 +24,6 @@ model Campaign {
   ACTIVE_DURATION   Int?
   stratID         String
   stratParamsStr  String    // For now, Params are stringified as they can have any structure
-  rewards         Reward[] 
   lastRunDate     BigInt?
   execDate        BigInt?
   publishDate     BigInt?
@@ -35,6 +34,7 @@ model Campaign {
   executed        Boolean?  // executed campaigns are those whose final rewards have been computed 
   published       Boolean?  // published campaigns are those whose shares has been published in their smart contract
   address         String?   // cannot be @unique since it is null for simulated campaigns - Smart contract address
+  shares          Share[] 
   roots           CampaignRoot[] 
 }
 
@@ -51,7 +51,7 @@ model User {
   created         Campaign[]
 } 
 
-model Reward {  
+model Share {  
   @@id([campaignId, account])
   account         String
   amount          BigInt        
@@ -66,7 +66,7 @@ model CampaignRoot {
   campaignId      String
   root            String  
   date            BigInt
-  balances        BalanceLeaf[]   // Leafs are stored on a table to be efficiently read
+  leafs           BalanceLeaf[]   // Leafs are stored on a table to be efficiently read
 }
 
 model BalanceLeaf {

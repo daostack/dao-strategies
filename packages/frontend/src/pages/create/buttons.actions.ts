@@ -74,7 +74,7 @@ export const getButtonActions = (
           /** can simulate */
           if (status.mustSimulate) {
             /** should simulate, was not simulated, can simualte and must simulate */
-            rightText = 'Calculate rewards';
+            rightText = 'Calculate shares';
             rightAction = () => actions.simulate();
           } else {
             /** should simulate, was not simulated, can simualte but does not must simulate */
@@ -116,7 +116,7 @@ export const getButtonActions = (
 
   /** overwrite */
   if (status.isSimulating) {
-    rightText = `Computing rewards`;
+    rightText = `Computing shares`;
     rightAction = () => {};
   }
 

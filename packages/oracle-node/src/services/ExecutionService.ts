@@ -150,8 +150,9 @@ export class ExecuteService {
         return;
       }
 
-      /** rewards are computed only if they have not been yet computed (as part
-       * of the campaign creation process in the UI for instance) */
+      /** shares are computed only if they have not been yet computed (as part
+       * of the campaign creation process in the UI for instance) and
+       * the comnputation was after the campaign execDate */
       appLogger.info(`Executing ${uri}`);
 
       if (

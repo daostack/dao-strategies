@@ -13,7 +13,7 @@ export const worldConfig: WorldConfig = {
 
 export const port = process.env.PORT;
 
-/** Resimulate rewards if older than X seconds */
+/** Resimulate shares if older than X seconds */
 export const resimulationPeriod: number = 30;
 
 export const GITHUB_API = 'https://api.github.com/';

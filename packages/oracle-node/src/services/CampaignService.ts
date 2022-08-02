@@ -1,6 +1,6 @@
 import {
   Balances,
-  RewardsToAddresses,
+  SharesToAddresses,
   BalanceTree,
   CampaignCreateDetails,
   CampaignUriDetails,
@@ -9,28 +9,30 @@ import {
   Strategy_ID,
   bigIntToNumber,
   RootDetails,
+  SharesRead,
+  Page,
 } from '@dao-strategies/core';
 import {
   BalanceLeaf,
   Campaign,
   CampaignRoot,
   Prisma,
-  Reward,
+  Share,
 } from '@prisma/client';
 import { ethers } from 'ethers';
 
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
-import { CampaignRepository, Leaf } from '../repositories/CampaignRepository';
-import { CampaignOnChainService } from './CampaignOnChainService';
+import { CampaignRepository } from '../repositories/CampaignRepository';
 
+import { CampaignOnChainService } from './CampaignOnChainService';
 import { campaignToUriDetails } from './CampaignUri';
 import { OnChainService, ZERO_BYTES32 } from './OnChainService';
 import { TimeService } from './TimeService';
 
 export interface RootComputation {
   root: string;
-  totalRewarded: number;
+  totalShareholders: number;
   totalInRoot: number;
   totalPending: number;
 }
@@ -43,7 +45,7 @@ export interface CampaigServiceConfig {
  * On Retroactive Campaign
  * =======================
  *
- * The rewards must be computed before the campaign
+ * The shares must be computed before the campaign
  * contract has been deployed (to include the merkleRoot).
  *
  * (Issue: a hacker can spam the oracle by creating thousands of different
@@ -51,12 +53,15 @@ export interface CampaigServiceConfig {
  *
  * - The frontend will gather the campaign configuration
  * - The frontend will call the `execute` endpoint.
- * - The oracle will compute the rewards (in terms of social ids) and return them.
- * - The frontend will show the rewards, and, if approved, deploy the smart contract.
+ * - The oracle will compute the shares (in terms of social ids) and return them.
+ * - The frontend will show the shares, and, if approved, deploy the smart contract.
  */
 export class CampaignService {
   /** keep track of campaigns for which the root is being computed */
   computingRoot: Map<string, Promise<RootComputation>> = new Map();
+
+  /** keep track of campaigns which are being run */
+  running: Map<string, Promise<SharesRead>> = new Map();
 
   /** Co-dependency between CampaignService and CampaignOnChainService :( */
   protected campaignOnChain: CampaignOnChainService;
@@ -116,14 +121,14 @@ export class CampaignService {
   }
 
   /**
-   * runs the strategy, rewards are always stored on the DB overwriting the previous execution, running a campaign
+   * runs the strategy, shares are always stored on the DB overwriting the previous execution, running a campaign
    * can be done as part of a "simulation" or as part of the final execution. There is no distinction at this level
    */
   async runCampaign(
     uri?: string,
     _now?: number,
     _campaign?: Campaign
-  ): Promise<Balances> {
+  ): Promise<void> {
     const now = _now || this.timeService.now();
 
     const campaign = _campaign || (await this.get(uri));
@@ -139,51 +144,67 @@ export class CampaignService {
 
     await this.campaignRepo.setRunning(campaign.uri, true);
 
-    const rewards = await this.runStrategy(
+    const shares = await this.runStrategy(
       details.strategyID as Strategy_ID,
       details.strategyParams
     );
 
     await this.campaignRepo.setLastRunDate(campaign.uri, now);
-    await this.setRewards(campaign.uri, rewards);
+    await this.setShares(campaign.uri, shares);
 
     await this.campaignRepo.setRunning(campaign.uri, false);
 
-    return rewards;
+    appLogger.info(`shares for campaign ${uri} computed.`);
   }
 
-  async runCampaignThrottled(uri: string): Promise<Balances> {
-    const campaign = await this.get(uri);
-
-    /** check if this campaign was recently simulated */
-    const runDate = bigIntToNumber(campaign.lastRunDate);
-    const execDate = bigIntToNumber(campaign.execDate);
-
-    let rewards: Balances;
-    const now = this.timeService.now();
-
-    if (
-      campaign.executed ||
-      (runDate !== undefined &&
-        (runDate >= execDate || now - runDate < resimulationPeriod))
-    ) {
-      /** Dont run if:
-       * it has already been run and either
-       *   the runDate was the execDate or later, or
-       *   it was run very recently
-       * */
-      rewards = await this.getRewards(uri);
-      appLogger.info(
-        `rewards for strategy ${uri} read from DB. ${rewards.size} rewarded found`
-      );
-    } else {
-      rewards = await this.runCampaign(undefined, undefined, campaign);
-      appLogger.info(
-        `rewards for strategy ${uri} computed. ${rewards.size} rewarded found`
-      );
+  /**
+   * get the shares of a campaign. If no shares were ever computed
+   * they are computed here.
+   */
+  async getSharesThrottled(
+    uri: string,
+    page: Page = { skip: 0, take: 10 }
+  ): Promise<SharesRead> {
+    if (this.running.has(uri)) {
+      return this.running.get(uri);
     }
 
-    return rewards;
+    const gettingShares = (async (): Promise<SharesRead> => {
+      const campaign = await this.get(uri);
+
+      /** check if this campaign was recently simulated */
+      const runDate = bigIntToNumber(campaign.lastRunDate);
+      const execDate = bigIntToNumber(campaign.execDate);
+
+      const now = this.timeService.now();
+
+      /**
+       * A campaign may not be executed, but had been run (as a simulation). If executed
+       * a campaign should not be re-run (ever). If not executed, then it can be run but this is throttled
+       * so that consecutive calls to getSharesThrottled do not force expensive shares recomputation
+       */
+      const alreadyRun =
+        campaign.executed ||
+        (runDate !== undefined &&
+          (runDate >= execDate || now - runDate < resimulationPeriod));
+
+      if (!alreadyRun) {
+        /**
+         * Shares are computed if they have not been computed and are requested.
+         * This is useful during campaign creation.
+         */
+        await this.runCampaign(undefined, undefined, campaign);
+      }
+
+      /** usually shares were already computed */
+      return this.getSharesPaginated(uri, page);
+    })();
+
+    this.running.set(uri, gettingShares);
+    const shares = await gettingShares;
+    this.running.delete(uri);
+
+    return shares;
   }
 
   async runStrategy(
@@ -191,16 +212,16 @@ export class CampaignService {
     strategyParams: any
   ): Promise<Balances> {
     appLogger.info(`calling strategy ${strategyId}`);
-    const rewards = await this.strategyComputation.runStrategy(
+    const shares = await this.strategyComputation.runStrategy(
       strategyId,
       strategyParams
     );
 
     appLogger.info(
-      `calling strategy ${strategyId} - done, ${rewards.size} receivers found`
+      `calling strategy ${strategyId} - done, ${shares.size} receivers found`
     );
 
-    return rewards;
+    return shares;
   }
 
   /**  */
@@ -241,7 +262,7 @@ export class CampaignService {
       );
     }
 
-    /** republishing is configured when publishing if there were pending rewarded users */
+    /** republishing is configured when publishing if there were pending shareholders */
     if (rootDetails.totalPending > 0) {
       if (!publishInfo.status.locked) {
         /**
@@ -290,34 +311,34 @@ export class CampaignService {
 
     const compute = (async (): Promise<RootComputation> => {
       const now = this.timeService.now();
-      const nRewarded = await this.countRewards(campaign.uri);
-      const rewards = await this.getRewardsToAddresses(campaign.uri);
+      const nShareholders = await this.countShareholders(campaign.uri);
+      const shares = await this.getSharesToAddresses(campaign.uri);
 
-      if (rewards.size === 0) {
+      if (shares.size === 0) {
         return {
           root: ZERO_BYTES32,
-          totalRewarded: nRewarded,
+          totalShareholders: nShareholders,
           totalInRoot: 0,
-          totalPending: nRewarded,
+          totalPending: nShareholders,
         };
       }
 
       const balances: Balances = new Map();
-      rewards.forEach((reward, address) => {
-        balances.set(address, reward.amount);
+      shares.forEach((share, address) => {
+        balances.set(address, share.amount);
       });
 
       const tree = new BalanceTree(balances);
       const root = tree.getHexRoot();
 
       /** compute proofs */
-      const leafs = Array.from(rewards.entries()).map(
-        ([address, reward]): Prisma.BalanceLeafCreateManyRootInput => {
-          const proof = tree.getProof(address, reward.amount);
+      const leafs = Array.from(shares.entries()).map(
+        ([address, share]): Prisma.BalanceLeafCreateManyRootInput => {
+          const proof = tree.getProof(address, share.amount);
           return {
-            account: reward.account,
+            account: share.account,
             address,
-            balance: reward.amount.toString(),
+            balance: share.amount.toString(),
             proof,
           };
         }
@@ -342,9 +363,9 @@ export class CampaignService {
 
       return {
         root,
-        totalRewarded: nRewarded,
-        totalInRoot: rewards.size,
-        totalPending: nRewarded - rewards.size,
+        totalShareholders: nShareholders,
+        totalInRoot: shares.size,
+        totalPending: nShareholders - shares.size,
       };
     })();
 
@@ -363,23 +384,30 @@ export class CampaignService {
     return this.campaignRepo.getLatestRoot(uri);
   }
 
-  async getRewards(uri: string): Promise<Balances> {
-    return this.campaignRepo.getRewards(uri);
+  async getSharesPaginated(
+    uri: string,
+    page: Page = { skip: 0, take: 10 }
+  ): Promise<SharesRead> {
+    return this.campaignRepo.getSharesPaginated(uri, page);
   }
 
-  async countRewards(uri: string): Promise<number> {
-    return this.campaignRepo.countRewards(uri);
+  async getSharesAll(uri: string): Promise<Balances> {
+    return this.campaignRepo.getSharesAll(uri);
+  }
+
+  async countShareholders(uri: string): Promise<number> {
+    return this.campaignRepo.countShareholders(uri);
   }
 
   /** considers only extensions to the previous root */
-  async getRewardsToAddresses(uri: string): Promise<RewardsToAddresses> {
+  async getSharesToAddresses(uri: string): Promise<SharesToAddresses> {
     const latest = await this.campaignRepo.getLatestRootAndLeafs(uri);
-    const extension = await this.campaignRepo.getNewRewardsToAddresses(
+    const extension = await this.campaignRepo.getNewSharesToAddresses(
       uri,
       latest?.order
     );
 
-    const rewardsToAddresses: RewardsToAddresses = new Map();
+    const sharesToAddresses: SharesToAddresses = new Map();
 
     /** filtering existing users here */
     const usersInTree = new Map<string, string>();
@@ -388,7 +416,7 @@ export class CampaignService {
       /** the tree starts with its previous version */
       latest.balances.forEach((leaf) => {
         usersInTree.set(leaf.account, leaf.address);
-        rewardsToAddresses.set(leaf.address, {
+        sharesToAddresses.set(leaf.address, {
           account: leaf.account,
           amount: ethers.BigNumber.from(leaf.balance),
         });
@@ -396,31 +424,31 @@ export class CampaignService {
     }
 
     /** the new values are then added as long as they are not yet present (in terms of account) */
-    extension.forEach((reward, address) => {
-      const addressInTree = usersInTree.get(reward.account);
+    extension.forEach((share, address) => {
+      const addressInTree = usersInTree.get(share.account);
       if (addressInTree !== undefined) {
         /** user should not be already in the tree (only new users can be appended) */
-        /** TODO: getNewRewardsToAddresses should do the filtering, but we currently do it here
+        /** TODO: getNewSharesToAddresses should do the filtering, but we currently do it here
          * for simplicity */
         // throw new Error();
       } else {
         /** new users are added in addition to the latests */
-        rewardsToAddresses.set(address, {
-          account: reward.account,
-          amount: reward.amount,
+        sharesToAddresses.set(address, {
+          account: share.account,
+          amount: share.amount,
         });
       }
     });
 
-    return rewardsToAddresses;
+    return sharesToAddresses;
   }
 
-  getRewardToAddress(uri: string, account: string): Promise<Reward | null> {
-    return this.campaignRepo.getRewardToAddress(uri, account);
+  getSharesOfAddress(uri: string, account: string): Promise<Share | null> {
+    return this.campaignRepo.getSharesOfAddress(uri, account);
   }
 
-  async setRewards(uri: string, rewards: Balances): Promise<void> {
-    return this.campaignRepo.setRewards(uri, rewards);
+  async setShares(uri: string, shares: Balances): Promise<void> {
+    return this.campaignRepo.setShares(uri, shares);
   }
 
   async getBalanceLeaf(

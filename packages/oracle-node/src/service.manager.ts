@@ -82,7 +82,13 @@ export class ServiceManager {
   /** for testing only */
   async resetDB(): Promise<void> {
     await this.client.$executeRaw`
-      TRUNCATE public."Campaign", public."User", public."Reward";
+      TRUNCATE 
+        public."Campaign", 
+        public."User", 
+        public."Share", 
+        public."CampaignRoot", 
+        public."BalanceLeaf", 
+        public."AssetPrice";
     `;
   }
 }

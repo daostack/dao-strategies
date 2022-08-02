@@ -12,7 +12,7 @@ import {
   RootDetails,
   bigIntToNumber,
 } from '@dao-strategies/core';
-import { Campaign, Reward } from '@prisma/client';
+import { Campaign, Share } from '@prisma/client';
 import { BigNumber, Contract, ethers, providers } from 'ethers';
 
 import { CampaignService } from './CampaignService';
@@ -85,7 +85,7 @@ export class CampaignOnChainService {
     uri: string,
     root: string,
     address: string,
-    reward: Reward,
+    share: Share,
     campaignContract: Typechain.Campaign,
     chainId: number,
     verify: boolean = false
@@ -97,14 +97,14 @@ export class CampaignOnChainService {
     /** is this an error? */
     if (leaf == null) return undefined;
 
-    /** protection: the shares in the root should not be other than the rewards computed for this address */
+    /** protection: the shares in the root should not be other than the shares computed for this address */
     if (
-      !ethers.BigNumber.from(reward.amount.toString()).eq(
+      !ethers.BigNumber.from(share.amount.toString()).eq(
         ethers.BigNumber.from(leaf.balance)
       )
     ) {
       throw new Error(
-        `Unexpected shares for account ${address}. Reward was ${reward.amount} but leaf is ${leaf.balance}`
+        `Unexpected shares for account ${address}. Share was ${share.amount} but leaf is ${leaf.balance}`
       );
     }
 
@@ -151,17 +151,17 @@ export class CampaignOnChainService {
   ): Promise<CampaignClaimInfo | undefined> {
     const campaign = await this.campaignService.getFromAddress(campaignAddress);
 
-    /** get the reward to the address () */
-    const reward = await this.campaignService.getRewardToAddress(
+    /** get the shares of the address () */
+    const shares = await this.campaignService.getSharesOfAddress(
       campaign.uri,
       address
     );
 
-    /** if there is not reward, then there should not be any entry in the root */
-    if (reward == null) return undefined;
+    /** if there is not shares, then there should not be any entry in the root */
+    if (shares == null) return undefined;
 
     /**
-     * if there is a reward to this address is because it is already a verified
+     * if there are shares to this address is because it is already a verified
      * address of a social account. Accordingly this address should be in the
      * merkle root of that campaign
      */
@@ -176,7 +176,7 @@ export class CampaignOnChainService {
       campaign.uri,
       currentRoot,
       address,
-      reward,
+      shares,
       campaignContract,
       campaign.chainId,
       true
@@ -193,7 +193,7 @@ export class CampaignOnChainService {
           campaign.uri,
           pendingRoot,
           address,
-          reward,
+          shares,
           campaignContract,
           campaign.chainId
         );

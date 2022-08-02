@@ -1,15 +1,18 @@
 import {
   CampaignCreateDetails,
   Balances,
-  RewardsToAddresses,
+  SharesToAddresses,
   bigIntToNumber,
   RootDetails,
+  SharesRead,
+  BalancesObject,
+  Page,
 } from '@dao-strategies/core';
 import {
   PrismaClient,
   Prisma,
   Campaign,
-  Reward,
+  Share,
   CampaignRoot,
   BalanceLeaf,
 } from '@prisma/client';
@@ -24,7 +27,7 @@ export interface Leaf {
   proof: string[];
 }
 
-export interface AddressReward {
+export interface AddressShares {
   account: string;
   address: string;
   amount: ethers.BigNumber;
@@ -110,28 +113,61 @@ export class CampaignRepository {
     });
   }
 
-  async getRewards(uri: string): Promise<Balances> {
-    const result = await this.client.reward.findMany({
+  async getSharesPaginated(uri: string, page: Page): Promise<SharesRead> {
+    const [sharesRead, total] = await this.client.$transaction([
+      this.client.share.findMany({
+        where: {
+          campaign: {
+            uri,
+          },
+        },
+        orderBy: {
+          amount: 'desc',
+        },
+        skip: page.skip,
+        take: page.take,
+      }),
+      this.client.share.count({
+        where: {
+          campaign: {
+            uri,
+          },
+        },
+      }),
+    ]);
+
+    const balances: BalancesObject = {};
+    sharesRead.forEach((share) => {
+      balances[share.account] = share.amount.toString();
+    });
+
+    return {
+      uri,
+      balances,
+      page,
+      total,
+    };
+  }
+
+  async getSharesAll(uri: string): Promise<Balances> {
+    const sharesRead = await this.client.shares.findMany({
       where: {
         campaign: {
           uri,
         },
       },
-      orderBy: {
-        amount: 'desc',
-      },
     });
 
-    const balances: Balances = new Map();
-    result.forEach((reward) => {
-      balances.set(reward.account, BigNumber.from(reward.amount));
+    const shares: Balances = new Map();
+    sharesRead.forEach((share) => {
+      balances.set(share.account, BigNumber.from(share.amount));
     });
 
     return balances;
   }
 
-  async countRewards(uri: string): Promise<number> {
-    const result = await this.client.reward.count({
+  async countShareholders(uri: string): Promise<number> {
+    const result = await this.client.share.count({
       where: {
         campaign: {
           uri,
@@ -192,46 +228,46 @@ export class CampaignRepository {
     return root;
   }
 
-  async getNewRewardsToAddresses(
+  async getNewSharesToAddresses(
     uri: string,
     prev_order: number | undefined
-  ): Promise<RewardsToAddresses> {
+  ): Promise<SharesToAddresses> {
     // TODO: filter existing accounts
-    const result: AddressReward[] = await this.client.$queryRaw`
+    const result: AddressShares[] = await this.client.$queryRaw`
       SELECT account, address, amount FROM 
       (
-        SELECT * FROM public."Reward" 
+        SELECT * FROM public."Share" 
         WHERE "campaignId" = ${uri}
-      ) as rewards
+      ) as shares
       LEFT JOIN 
       public."User" 
-      ON rewards.account = "verifiedGithub"
+      ON shares.account = "verifiedGithub"
       `;
 
-    const rewards: RewardsToAddresses = new Map();
-    result.forEach((reward) => {
-      if (reward.address != null)
-        rewards.set(reward.address, {
-          amount: ethers.BigNumber.from(reward.amount.toString()),
-          account: reward.account,
+    const shares: SharesToAddresses = new Map();
+    result.forEach((share) => {
+      if (share.address != null)
+        shares.set(share.address, {
+          amount: ethers.BigNumber.from(share.amount.toString()),
+          account: share.account,
         });
     });
-    return rewards;
+    return shares;
   }
 
-  async getRewardToAddress(
+  async getSharesOfAddress(
     uri: string,
     address: string
-  ): Promise<Reward | null> {
+  ): Promise<Share | null> {
     const result = await this.client.$queryRaw`
       SELECT account, address, amount FROM 
       (
-        SELECT * FROM public."Reward" 
+        SELECT * FROM public."Share" 
         WHERE "campaignId" = ${uri}
-      ) as rewards
+      ) as shares
       LEFT JOIN 
       public."User" 
-      ON rewards.account = "verifiedGithub"
+      ON shares.account = "verifiedGithub"
       WHERE address = ${address}
     `;
 
@@ -301,14 +337,14 @@ export class CampaignRepository {
       .then(Boolean);
   }
 
-  async setRewards(uri: string, rewards: Balances): Promise<void> {
-    const rewardsArray = Array.from(rewards.entries()).map(
+  async setShares(uri: string, shares: Balances): Promise<void> {
+    const sharesArray = Array.from(shares.entries()).map(
       ([account, amount]) => {
         return { account, amount: amount.toBigInt(), campaignId: uri };
       }
     );
 
-    const deleteExisting = this.client.reward.deleteMany({
+    const deleteExisting = this.client.share.deleteMany({
       where: {
         campaign: {
           uri,
@@ -316,7 +352,7 @@ export class CampaignRepository {
       },
     });
 
-    const addNew = this.client.reward.createMany({ data: rewardsArray });
+    const addNew = this.client.share.createMany({ data: sharesArray });
 
     await this.client.$transaction([deleteExisting, addNew]);
   }
