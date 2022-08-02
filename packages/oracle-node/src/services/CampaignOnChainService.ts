@@ -46,9 +46,10 @@ export class CampaignOnChainService {
 
     const tokens = await this.getCampaignTokens(campaign);
     const publishInfo = await this.getPublishInfo(campaign.address);
-    const root = await this.campaignService.getRoot(
-      publishInfo.status.validRoot
-    );
+    const root =
+      publishInfo.status.validRoot !== ZERO_BYTES32
+        ? await this.campaignService.getRoot(publishInfo.status.validRoot)
+        : undefined;
 
     return { tokens, publishInfo, root };
   }

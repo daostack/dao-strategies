@@ -14,12 +14,8 @@ interface CampaignStatus {
 }
 
 export const CampaignGuardian: FC<ICampaignAdmin> = (props: ICampaignAdmin) => {
-  const { campaign, otherDetails, getOtherDetails } = useCampaignContext();
+  const { campaign, otherDetails, rewards } = useCampaignContext();
   const { account } = useLoggedUser();
-
-  useEffect(() => {
-    getOtherDetails();
-  }, []);
 
   if (!campaign) {
     return (

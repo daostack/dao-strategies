@@ -47,10 +47,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     otherDetails !== undefined ? (
       <Box direction="row">
         <Refresh onClick={() => getOtherDetails()}></Refresh>
-        {otherDetails.tokens.map((token: TokenBalance) => {
-          if (token.balance === '0') return <></>;
-          return <AssetBalance asset={token}></AssetBalance>;
-        })}
+        {otherDetails.tokens ? (
+          otherDetails.tokens.map((token: TokenBalance) => {
+            if (token.balance === '0') return <></>;
+            return <AssetBalance asset={token}></AssetBalance>;
+          })
+        ) : (
+          <></>
+        )}
       </Box>
     ) : (
       <></>

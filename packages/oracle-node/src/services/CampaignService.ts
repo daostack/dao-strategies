@@ -163,8 +163,9 @@ export class CampaignService {
     const now = this.timeService.now();
 
     if (
-      runDate !== undefined &&
-      (runDate >= execDate || now - runDate < resimulationPeriod)
+      campaign.executed ||
+      (runDate !== undefined &&
+        (runDate >= execDate || now - runDate < resimulationPeriod))
     ) {
       /** Dont run if:
        * it has already been run and either
