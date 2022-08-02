@@ -42,12 +42,12 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
-CREATE TABLE "Reward" (
+CREATE TABLE "Share" (
     "account" TEXT NOT NULL,
     "amount" BIGINT NOT NULL,
     "campaignId" TEXT NOT NULL,
 
-    CONSTRAINT "Reward_pkey" PRIMARY KEY ("campaignId","account")
+    CONSTRAINT "Share_pkey" PRIMARY KEY ("campaignId","account")
 );
 
 -- CreateTable
@@ -86,7 +86,7 @@ CREATE TABLE "AssetPrice" (
 ALTER TABLE "Campaign" ADD CONSTRAINT "Campaign_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "User"("address") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Reward" ADD CONSTRAINT "Reward_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Share" ADD CONSTRAINT "Share_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CampaignRoot" ADD CONSTRAINT "CampaignRoot_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;

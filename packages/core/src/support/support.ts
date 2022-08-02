@@ -1,7 +1,6 @@
 import { BigNumber } from 'ethers';
 
-import { BalancesObject } from '../common';
-import { Balances, BalancesFloat } from '../types';
+import { Balances, BalancesFloat, BalancesObject } from '../types';
 
 export const balancesToObject = (balances: Balances): BalancesObject => {
   const balancesObject: BalancesObject = {};

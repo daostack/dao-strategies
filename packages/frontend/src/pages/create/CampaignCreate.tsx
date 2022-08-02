@@ -2,7 +2,7 @@ import { Box, DateInput, FormField, Layer, Paragraph, Spinner, Text, TextInput }
 import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { ChainsDetails, getCampaignUri, CampaignCreateDetails } from '@dao-strategies/core';
+import { ChainsDetails, getCampaignUri, CampaignCreateDetails, SharesRead } from '@dao-strategies/core';
 
 import { useCampaignFactory } from '../../hooks/useContracts';
 import {
@@ -12,7 +12,6 @@ import {
   getPeriodType,
   PeriodType,
   simulateCampaign,
-  SimulationResult,
   strategyDetails,
 } from '../campaign.support';
 import { ACTIVATION_PERIOD, ACTIVE_DURATION, CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
@@ -94,7 +93,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
    * on wheather the start date of the strategy is older than today.
    */
   const [formValues, setFormValuesState] = useState<CampaignFormValues>(initialValues);
-  const [simulation, setSimulated] = useState<SimulationResult | undefined>();
+  const [simulation, setSimulated] = useState<SharesRead | undefined>();
   const [simulating, setSimulating] = useState<boolean>(false);
   const [deploying, setDeploying] = useState<boolean>(false);
 
@@ -146,7 +145,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       setCreating(true);
       const campaignAddress = await deployCampaign(
         campaignFactory,
-        (simulation as SimulationResult).uri,
+        (simulation as SharesRead).uri,
         otherDetails,
         finalDetails
       );
@@ -414,11 +413,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         ) : (
           <Box>
             <Box>{simulation !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
-            {status.wasSimulated ? (
-              <RewardsTable rewards={(simulation as SimulationResult).rewards}></RewardsTable>
-            ) : (
-              ''
-            )}
+            {status.wasSimulated ? <RewardsTable rewards={simulation as SharesRead}></RewardsTable> : ''}
           </Box>
         )}
       </Box>

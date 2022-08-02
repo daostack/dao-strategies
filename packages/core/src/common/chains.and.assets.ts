@@ -1,9 +1,10 @@
 import { Chain, chain } from '@wagmi/core';
 import { ethers } from 'ethers';
+
 import { BNToFloat } from '../support';
+import { Asset, ChainAndAssets, TokenBalance } from '../types';
 
 import { ContractsJson } from './contracts.json';
-import { Asset, ChainAndAssets, TokenBalance } from './types';
 
 /** Single source of truth for the supported chains and assets. It is imported on the
  * frontend */

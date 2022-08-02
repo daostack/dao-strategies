@@ -1,7 +1,10 @@
 import { Strategy_ID, SharesRead } from '@dao-strategies/core';
 
 export const TEST_SHARES: SharesRead = {
-  user1: '10000',
+  shares: { user1: '10000' },
+  page: { skip: 0, take: 10 },
+  total: 1,
+  uri: 'abc',
 };
 
 export const StrategyComputationMockFunctions = {

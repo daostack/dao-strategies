@@ -22,10 +22,10 @@ export interface ICampaignPageProps {
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
 
-  const { isLoading, campaign, getRewards, rewards, getOtherDetails, otherDetails } = useCampaignContext();
+  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails } = useCampaignContext();
 
   useEffect(() => {
-    getRewards();
+    getShares();
     getOtherDetails();
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,8 +130,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         </Box>
 
         <Tabs style={{ height: '500px', overflow: 'auto' }}>
-          <Tab title="Leader Board">
-            <RewardsTable rewards={rewards} style={{ marginBottom: '36px' }}></RewardsTable>
+          <Tab title={campaign.executed ? 'Final Rewards' : 'Leader Board'}>
+            <RewardsTable rewards={shares} style={{ marginBottom: '36px' }}></RewardsTable>
           </Tab>
           <Tab title="More Info">
             <TwoColumns>

@@ -136,21 +136,21 @@ export class CampaignRepository {
       }),
     ]);
 
-    const balances: BalancesObject = {};
+    const shares: BalancesObject = {};
     sharesRead.forEach((share) => {
-      balances[share.account] = share.amount.toString();
+      shares[share.account] = share.amount.toString();
     });
 
     return {
       uri,
-      balances,
+      shares,
       page,
       total,
     };
   }
 
   async getSharesAll(uri: string): Promise<Balances> {
-    const sharesRead = await this.client.shares.findMany({
+    const sharesRead = await this.client.share.findMany({
       where: {
         campaign: {
           uri,
@@ -160,10 +160,10 @@ export class CampaignRepository {
 
     const shares: Balances = new Map();
     sharesRead.forEach((share) => {
-      balances.set(share.account, BigNumber.from(share.amount));
+      shares.set(share.account, BigNumber.from(share.amount));
     });
 
-    return balances;
+    return shares;
   }
 
   async countShareholders(uri: string): Promise<number> {
@@ -194,7 +194,7 @@ export class CampaignRepository {
       include: {
         _count: {
           select: {
-            balances: true,
+            leafs: true,
           },
         },
       },
@@ -209,17 +209,17 @@ export class CampaignRepository {
       order: root.order,
       uri: root.campaignId,
       date: bigIntToNumber(root.date),
-      nLeafs: root._count.balances,
+      nLeafs: root._count.leafs,
     };
   }
 
   async getLatestRootAndLeafs(
     uri: string
-  ): Promise<(CampaignRoot & { balances: BalanceLeaf[] }) | null> {
+  ): Promise<(CampaignRoot & { leafs: BalanceLeaf[] }) | null> {
     const root = await this.client.campaignRoot.findFirst({
       where: { campaignId: uri },
       include: {
-        balances: true,
+        leafs: true,
       },
       orderBy: {
         order: 'desc',
@@ -417,7 +417,7 @@ export class CampaignRepository {
         },
         date,
         root,
-        balances: {
+        leafs: {
           createMany: {
             data: leafs,
           },

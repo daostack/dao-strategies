@@ -414,7 +414,7 @@ export class CampaignService {
 
     if (latest !== null) {
       /** the tree starts with its previous version */
-      latest.balances.forEach((leaf) => {
+      latest.leafs.forEach((leaf) => {
         usersInTree.set(leaf.account, leaf.address);
         sharesToAddresses.set(leaf.address, {
           account: leaf.account,

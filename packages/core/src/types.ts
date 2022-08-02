@@ -65,6 +65,7 @@ export interface SharesRead {
   shares: BalancesObject;
   page: Page;
   total: number;
+  details?: CampaignUriDetails;
 }
 
 export interface Asset {

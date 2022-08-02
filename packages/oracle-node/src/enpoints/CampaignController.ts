@@ -56,13 +56,15 @@ export class CampaignController extends Controller {
       throw new Error('logged user expected but not found');
     }
 
-    const uri = await this.manager.services.campaign.getOrCreate(
-      request.body.details as CampaignUriDetails
-    );
-    return this.manager.services.campaign.getSharesThrottled(
+    const details = request.body.details as CampaignUriDetails;
+    const uri = await this.manager.services.campaign.getOrCreate(details);
+    const shares = await this.manager.services.campaign.getSharesThrottled(
       uri,
       request.body.page as Page
     );
+
+    shares.details = details;
+    return shares;
   }
 
   async sharesFromUri(

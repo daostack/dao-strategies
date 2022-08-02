@@ -4,9 +4,9 @@ import { BigNumber, Contract, Signer } from 'ethers';
 
 import { Campaign } from '../generated/typechain';
 import { bigNumberToNumber } from '../support';
+import { PublishInfo } from '../types';
 
 import { ContractsJson } from './contracts.json';
-import { PublishInfo } from './types';
 
 export const campaignInstance = (address: string, signer: Signer): Campaign => {
   const contract = new Contract(

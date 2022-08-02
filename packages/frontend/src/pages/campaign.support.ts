@@ -128,11 +128,7 @@ export const simulateCampaign = async (details: CampaignUriDetails): Promise<Sha
   });
 
   const result = await response.json();
-  return {
-    uri: result.uri,
-    shares: result.shares,
-    details,
-  };
+  return result;
 };
 
 export const createCampaign = async (details: CampaignUriDetails): Promise<string> => {

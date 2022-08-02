@@ -1,14 +1,13 @@
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react';
-import { CampaignOnchainDetails, CampaignReadDetails } from '@dao-strategies/core';
+import { CampaignOnchainDetails, CampaignReadDetails, SharesRead } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
-import { RewardsMap } from '../pages/campaign.support';
 
 export type CampaignContextType = {
   isLoading: boolean;
   campaign: CampaignReadDetails | undefined;
-  getRewards: () => void;
-  rewards: RewardsMap | undefined;
+  getShares: () => void;
+  shares: SharesRead | undefined;
   getOtherDetails: () => void;
   otherDetails: CampaignOnchainDetails | undefined;
 };
@@ -23,20 +22,20 @@ export interface CampaignContextProps {
 export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContextProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [campaign, setCampaign] = useState<CampaignReadDetails>();
-  const [rewards, setRewards] = useState<RewardsMap>();
+  const [shares, setShares] = useState<SharesRead>();
   const [otherDetails, setOtherDetails] = useState<CampaignOnchainDetails>();
 
-  const getRewards = async (): Promise<void> => {
+  const getShares = async (): Promise<void> => {
     if (campaign === undefined) return undefined;
 
-    const response = await fetch(ORACLE_NODE_URL + `/campaign/simulateFromUri/${campaign.uri}`, {
+    const response = await fetch(ORACLE_NODE_URL + `/campaign/sharesFromUri/${campaign.uri}`, {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
     });
 
     const rewards = await response.json();
-    setRewards(rewards);
+    setShares(rewards);
   };
 
   const getOtherDetails = async (): Promise<void> => {
@@ -63,8 +62,8 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
       value={{
         isLoading,
         campaign,
-        getRewards,
-        rewards,
+        getShares,
+        shares,
         getOtherDetails,
         otherDetails,
       }}>
