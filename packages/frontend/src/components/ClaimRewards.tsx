@@ -46,24 +46,9 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
     const interval = setInterval(() => {
       console.log('checking claim info');
       check();
-    }, 5000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
-
-  const claim = async () => {
-    if (
-      account === undefined ||
-      campaignInstance === undefined ||
-      claimInfo === undefined ||
-      claimInfo.current === undefined ||
-      claimInfo.current.shares === undefined ||
-      claimInfo.current.proof === undefined ||
-      campaign === undefined
-    ) {
-      throw new Error('claim info undefined');
-    }
-    await claimRewards(campaignInstance, account, claimInfo.current.shares, claimInfo.current.proof, campaign.chainId);
-  };
 
   if (user === undefined) {
     return (
@@ -86,6 +71,28 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
     claim: currentClaim !== undefined ? currentClaim : pendingClaim !== undefined ? pendingClaim : undefined,
     wasExecuted: campaign.executed,
     wasPublished: campaign.published,
+  };
+
+  const claim = async () => {
+    if (
+      account === undefined ||
+      campaignInstance === undefined ||
+      status.claim === undefined ||
+      status.claim.shares === undefined ||
+      status.claim.assets === undefined ||
+      status.claim.proof === undefined ||
+      campaign === undefined
+    ) {
+      throw new Error('claim info undefined');
+    }
+
+    await claimRewards(
+      campaignInstance,
+      account,
+      status.claim.shares,
+      status.claim.proof,
+      status.claim.assets.map((asset) => asset.address)
+    );
   };
 
   if (status.wasExecuted && !status.wasPublished) {

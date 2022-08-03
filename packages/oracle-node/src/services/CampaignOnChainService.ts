@@ -9,25 +9,17 @@ import {
   PublishInfo,
   getCampaignPublishInfo,
   bigNumberToNumber,
-  RootDetails,
-  bigIntToNumber,
+  erc20Provider,
+  Asset,
 } from '@dao-strategies/core';
 import { Campaign, Share } from '@prisma/client';
-import { BigNumber, Contract, ethers, providers } from 'ethers';
+import { BigNumber, ethers, providers } from 'ethers';
 
 import { CampaignService } from './CampaignService';
 import { PriceService } from './PriceService';
 
 const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
-
-const erc20Abi = [
-  'function balanceOf(address owner) view returns (uint256)',
-  'function decimals() view returns (uint8)',
-  'function symbol() view returns (string)',
-  'function transfer(address to, uint amount) returns (bool)',
-  'event Transfer(address indexed from, address indexed to, uint amount)',
-];
 
 export class CampaignOnChainService {
   readonly provider: providers.JsonRpcProvider;
@@ -57,12 +49,12 @@ export class CampaignOnChainService {
   async getCampaignTokens(campaign: Campaign): Promise<TokenBalance[]> {
     const assets = ChainsDetails.chainAssets(campaign.chainId);
 
-    return await Promise.all(
+    const tokens = await Promise.all(
       assets.map(async (asset): Promise<TokenBalance> => {
         let getBalance;
 
         if (!ChainsDetails.isNative(asset)) {
-          const token = new Contract(asset.address, erc20Abi, this.provider);
+          const token = erc20Provider(asset.address, this.provider);
           getBalance = token.balanceOf(campaign.address);
         } else {
           getBalance = this.provider.getBalance(campaign.address);
@@ -78,6 +70,75 @@ export class CampaignOnChainService {
         };
       })
     );
+
+    const custom = await this.getCustomBalances(
+      campaign.customAssets,
+      campaign.address
+    );
+
+    return tokens.concat(custom);
+  }
+
+  async getCustomAssets(customAssets: string[]): Promise<Asset[]> {
+    return await Promise.all(
+      customAssets.map(async (assetAddress): Promise<Asset> => {
+        const token = erc20Provider(assetAddress, this.provider);
+
+        //
+        const decimals = await token.decimals();
+        const symbol = await token.symbol();
+
+        return {
+          address: assetAddress,
+          decimals: decimals,
+          id: assetAddress,
+          name: symbol,
+          // balance: balance.toString(),
+        };
+      })
+    );
+  }
+
+  /** append the balance of the custom assets of a given address */
+  async getCustomBalances(
+    customAssets: string[],
+    address: string
+  ): Promise<TokenBalance[]> {
+    const assets = await this.getCustomAssets(customAssets);
+
+    return Promise.all(
+      assets.map(async (asset) => {
+        const token = erc20Provider(asset.address, this.provider);
+        const balance = await token.balanceOf(address);
+        return {
+          ...asset,
+          balance: balance.toString(),
+        };
+      })
+    );
+  }
+
+  async getCustomRewardsAvailable(
+    customAssets: string[],
+    address: string,
+    shares: string,
+    campaignContract: Typechain.Campaign
+  ): Promise<TokenBalance[]> {
+    const assets = await this.getCustomAssets(customAssets);
+
+    return Promise.all(
+      assets.map(async (asset) => {
+        const amount = await campaignContract.rewardsAvailableToClaimer(
+          address,
+          shares,
+          asset.address
+        );
+        return {
+          ...asset,
+          balance: amount.toString(),
+        };
+      })
+    );
   }
 
   /** get the shares (and fill the assets) for a given merkle root of a given campaign */
@@ -88,6 +149,7 @@ export class CampaignOnChainService {
     share: Share,
     campaignContract: Typechain.Campaign,
     chainId: number,
+    customAssets: string[],
     verify: boolean = false
   ): Promise<TreeClaimInfo | undefined> {
     /** if there should be an entry in the root for this addres,
@@ -110,11 +172,7 @@ export class CampaignOnChainService {
 
     /** protection: check that the proof is valid */
     if (verify) {
-      const res = await campaignContract.verifyShares(
-        address,
-        leaf.balance,
-        leaf.proof
-      );
+      await campaignContract.verifyShares(address, leaf.balance, leaf.proof);
     }
 
     const assets = ChainsDetails.chainAssets(chainId);
@@ -135,12 +193,19 @@ export class CampaignOnChainService {
       })
     );
 
+    const custom = await this.getCustomRewardsAvailable(
+      customAssets,
+      address,
+      leaf.balance,
+      campaignContract
+    );
+
     return {
       root,
       address,
       present: true,
       shares: leaf.balance.toString(),
-      assets: tokens,
+      assets: tokens.concat(custom),
       proof: leaf.proof,
     };
   }
@@ -179,6 +244,7 @@ export class CampaignOnChainService {
       shares,
       campaignContract,
       campaign.chainId,
+      campaign.customAssets,
       true
     );
 
@@ -195,7 +261,8 @@ export class CampaignOnChainService {
           address,
           shares,
           campaignContract,
-          campaign.chainId
+          campaign.chainId,
+          campaign.customAssets
         );
       }
     }

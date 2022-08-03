@@ -15,7 +15,7 @@ model Campaign {
   creatorId       String?    
   nonce           Int
   chainId         Int?      // store the ChainId as defined in wagmi defaultChains
-  asset           String?   // store the Asset id as defined in @dao-strategies/core ChainsDetails
+  customAssets    String[]  // store the Asset id as defined in @dao-strategies/core ChainsDetails
   guardian        String?
   oracle          String?
   activationTime    Int?

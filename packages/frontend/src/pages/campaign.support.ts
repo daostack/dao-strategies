@@ -223,16 +223,9 @@ export const claimRewards = async (
   account: string,
   shares: string,
   proof: string[],
-  chainId: number
+  assets: string[]
 ) => {
-  const assets = ChainsDetails.chainAssets(chainId);
-
-  const ex = await campaign.claim(
-    account,
-    shares,
-    proof,
-    assets.map((a) => a.address)
-  );
+  const ex = await campaign.claim(account, shares, proof, assets);
 
   const txReceipt = await ex.wait();
 

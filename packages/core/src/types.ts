@@ -36,7 +36,7 @@ export interface CampaignCreateDetails {
   ACTIVATION_PERIOD: number;
   ACTIVE_DURATION: number;
   chainId: number;
-  asset: string;
+  customAssets: string[];
   address: string;
 }
 
@@ -73,7 +73,7 @@ export interface Asset {
   address: string;
   decimals: number;
   name: string;
-  icon: string;
+  icon?: string;
 }
 
 export interface ChainAndAssets {

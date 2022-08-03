@@ -1,3 +1,5 @@
+import { CampaignFormValues } from './CampaignCreate';
+
 /**  */
 export interface FormStatus {
   page: {

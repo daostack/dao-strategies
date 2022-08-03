@@ -2,7 +2,7 @@ import { Provider } from '@wagmi/core';
 import { Multicall, ContractCallContext } from 'ethereum-multicall';
 import { BigNumber, Contract, Signer } from 'ethers';
 
-import { Campaign } from '../generated/typechain';
+import { Campaign, TestErc20 } from '../generated/typechain';
 import { bigNumberToNumber } from '../support';
 import { PublishInfo } from '../types';
 
@@ -31,6 +31,20 @@ export const campaignProvider = (
     provider
   );
   return contract as Campaign;
+};
+
+export const erc20Provider = (
+  address: string,
+  provider: Provider
+): TestErc20 => {
+  const contract = new Contract(
+    address,
+    /* eslint-disable */
+    ContractsJson.jsonOfChain().contracts.TestErc20.abi,
+    /* eslint-enable */
+    provider
+  );
+  return contract as TestErc20;
 };
 
 export const getCampaignPublishInfo = async (

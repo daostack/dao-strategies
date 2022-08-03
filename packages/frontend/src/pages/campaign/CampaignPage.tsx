@@ -1,5 +1,7 @@
 import { Box, Header, Paragraph, Spinner, Tabs, Tab, Layer, Text } from 'grommet';
+import { Refresh } from 'grommet-icons';
 import { FC, useEffect, useState } from 'react';
+import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
@@ -9,9 +11,7 @@ import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { ClaimButton } from '../../components/ClaimRewards';
 import { AssetBalance } from '../../components/Assets';
-import { Refresh } from 'grommet-icons';
 import { truncate } from '../../utils/ethers';
-import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
 import { CampaignGuardian } from '../../components/CampaignGuardian';
 import { DateManager } from '../../utils/date.manager';
 
@@ -43,13 +43,15 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const claimValue =
     otherDetails && otherDetails.tokens ? truncate(ChainsDetails.valueOfAssets(otherDetails.tokens).toString(), 2) : 0;
 
+  const assets = otherDetails && otherDetails.tokens ? otherDetails.tokens : [];
+
   const balances =
     otherDetails !== undefined ? (
       <Box direction="row">
         <Refresh onClick={() => getOtherDetails()}></Refresh>
         {otherDetails.tokens ? (
           otherDetails.tokens.map((token: TokenBalance) => {
-            if (token.balance === '0') return <></>;
+            if (token.balance === '0' || campaign.customAssets.includes(token.address)) return <></>;
             return <AssetBalance asset={token}></AssetBalance>;
           })
         ) : (
@@ -60,6 +62,12 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       <></>
     );
 
+  console.log({ otherDetails });
+  const customAsset =
+    otherDetails && otherDetails.tokens
+      ? otherDetails.tokens.find((token) => token.address === campaign.customAssets[0])
+      : undefined;
+
   return (
     <>
       {showFund ? (
@@ -69,7 +77,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
               setShowFund(false);
               getOtherDetails();
             }}
-            asset={campaign.asset}
+            assets={assets}
             chainId={campaign.chainId}
             address={campaign.address}></FundCampaign>
         </Layer>
@@ -107,8 +115,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         </Box>
 
         <Box direction="row" align="center" justify="center" style={{ marginBottom: '36px' }}>
-          <TwoColumns style={{ border: 'solid 2px #ccc', borderRadius: '20px', padding: '20px 30px' }}>
-            <>
+          <Box style={{ border: 'solid 2px #ccc', borderRadius: '20px', padding: '20px 30px' }} direction="row">
+            <Box>
               <Box direction="row" align="center">
                 Campaign Funding (~{claimValue} usd)
                 <AppButton onClick={() => setShowFund(true)}>Fund Campaign</AppButton>
@@ -116,13 +124,20 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
               <Box direction="row" align="center">
                 {balances}
               </Box>
-            </>
-            <>
+            </Box>
+            {customAsset ? (
+              <Box>
+                Custom token: {campaign.customAssets[0]} <AssetBalance asset={customAsset}></AssetBalance>
+              </Box>
+            ) : (
+              <></>
+            )}
+            <Box>
               <Box direction="row" align="center">
                 <ClaimButton campaignAddress={campaign.address}></ClaimButton>
               </Box>
-            </>
-          </TwoColumns>
+            </Box>
+          </Box>
         </Box>
 
         <Box style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '36px' }}>
