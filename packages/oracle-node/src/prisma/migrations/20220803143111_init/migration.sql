@@ -9,7 +9,7 @@ CREATE TABLE "Campaign" (
     "creatorId" TEXT,
     "nonce" INTEGER NOT NULL,
     "chainId" INTEGER,
-    "asset" TEXT,
+    "customAssets" TEXT[],
     "guardian" TEXT,
     "oracle" TEXT,
     "activationTime" INTEGER,

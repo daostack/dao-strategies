@@ -1,4 +1,4 @@
-import { ChainsDetails, ContractsJson } from '@dao-strategies/core';
+import { Asset, ChainsDetails, ContractsJson } from '@dao-strategies/core';
 import { Contract, ethers } from 'ethers';
 import { Select, Box, Header, FormField, TextInput } from 'grommet';
 import { FC, useEffect, useState } from 'react';
@@ -13,12 +13,13 @@ interface FundFormValues {
 }
 
 const initialValues: FundFormValues = {
-  asset: '',
+  asset: '0',
   amount: '',
 };
 
 interface IFundCampaign extends IElement {
-  asset: string;
+  asset?: string;
+  assets: Asset[];
   chainId: number;
   address: string;
   onSuccess?: () => void;
@@ -28,25 +29,24 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const [formValues, setFormValues] = useState<FundFormValues>(initialValues);
   const { account, connect } = useLoggedUser();
   const isLogged = account !== undefined;
+  const assets = props.assets;
 
   const { data: signer } = useSigner();
 
-  useEffect(() => {
-    setFormValues({
-      ...formValues,
-      asset: props.asset,
-    });
-  }, [props]);
-
   const onValuesUpdated = (values: FundFormValues) => {
-    /** asset is index when selected */
-    const asset = Number.isInteger(parseFloat(values.asset)) ? assets[+values.asset as number].id : values.asset;
-
-    setFormValues({ ...values, asset });
+    setFormValues({ ...values });
   };
 
-  const assets = ChainsDetails.chainAssets(props.chainId);
-  const selectedAsset = assets.find((asset) => asset.id === formValues.asset);
+  useEffect(() => {
+    if (props.assets.length > 0) {
+      setFormValues({
+        ...formValues,
+        asset: props.assets[0].id,
+      });
+    }
+  }, [props]);
+
+  const selectedAsset = props.assets.find((asset) => asset.id === formValues.asset);
 
   const fund = async () => {
     if (!isLogged) {
@@ -82,14 +82,14 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
               <Select
                 name="asset"
                 style={{ border: '0px none' }}
-                options={Object.keys(assets)}
+                options={assets.map((asset) => asset.id)}
                 value={
                   <Box pad="small">
                     <AssetIcon asset={selectedAsset !== undefined ? selectedAsset : undefined}></AssetIcon>
                   </Box>
                 }>
                 {(key) => {
-                  return <AssetIcon asset={assets[key]}></AssetIcon>;
+                  return <AssetIcon asset={assets.find((asset) => asset.id === key)}></AssetIcon>;
                 }}
               </Select>
             </FormField>

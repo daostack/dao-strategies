@@ -1,4 +1,4 @@
-import { Box, DateInput, FormField, Layer, Paragraph, Spinner, Text, TextInput } from 'grommet';
+import { Box, CheckBox, DateInput, FormField, Layer, Paragraph, Spinner, Text, TextInput } from 'grommet';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,6 +33,7 @@ import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
 import { useNow } from '../../hooks/useNow';
 import { useUserError } from '../../hooks/useErrorContext';
+import { ethers } from 'ethers';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -41,7 +42,8 @@ export interface ICampaignCreateProps {
 export interface CampaignFormValues {
   title: string;
   description: string;
-  assetName: string;
+  customAssetAddress: string;
+  hasCustomAsset: boolean;
   chainName: string;
   repositoryFullnames: string[];
   guardian: string;
@@ -60,7 +62,8 @@ const initialValues: CampaignFormValues = {
   title: 'My Campaign',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
   chainName: initChain.name,
-  assetName: ChainsDetails.chainAssets(initChain.id)[0].name,
+  customAssetAddress: '',
+  hasCustomAsset: false,
   description: '',
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
@@ -107,9 +110,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const chainOptions = ChainsDetails.chains().map((chain) => chain.name);
 
-  const chain = ChainsDetails.chainOfName(formValues.chainName);
-  const assetsOptions = ChainsDetails.chainAssets(chain.chain.id).map((asset) => asset.name);
-
   if (DEBUG) console.log('CampaignCreate - render');
 
   /** Prepare all the parameters to deply the campaign and call the deployCampaign function */
@@ -136,7 +136,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       ACTIVE_DURATION: ACTIVE_DURATION,
       address: '',
       chainId,
-      asset: ChainsDetails.assetOfName(chainId, formValues.assetName).id,
+      customAssets: formValues.hasCustomAsset ? [formValues.customAssetAddress] : [],
     };
 
     setDeploying(true);
@@ -194,16 +194,18 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (DEBUG) console.log('CampaignCreate - onValuesUpdated()');
     if (validated) {
       // validate every change after the first time
-      validate();
+      validate(values);
     }
     setFormValues(values);
   };
 
-  const validate = (): string[] => {
+  const validate = (values: CampaignFormValues = formValues): string[] => {
     if (DEBUG) console.log('CampaignCreate - validate()');
     const errors: string[] = [];
-    if (formValues.title === '') errors.push('title cannot be empty');
-    if (formValues.repositoryFullnames.length === 0) errors.push('no repositories specified');
+    if (values.title === '') errors.push('title cannot be empty');
+    if (values.repositoryFullnames.length === 0) errors.push('no repositories specified');
+    if (values.hasCustomAsset && !ethers.utils.isAddress(values.customAssetAddress))
+      errors.push('custom asset address not correct');
     setValidated(true);
     setErrors(errors);
     return errors;
@@ -303,9 +305,16 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <FormField name="chainName" label="Chain" style={{ border: '0px none' }}>
           <AppSelect name="chainName" style={{ border: '0px none' }} options={chainOptions}></AppSelect>
         </FormField>
-        <FormField name="assetName" label="Asset" style={{ border: '0px none' }}>
-          <AppSelect name="assetName" style={{ border: '0px none' }} options={assetsOptions}></AppSelect>
+        <FormField name="hasCustomAsset" style={{ border: '0px none' }}>
+          <CheckBox name="hasCustomAsset" label="Use custom asset" />
         </FormField>
+        {formValues.hasCustomAsset ? (
+          <FormField name="customAssetAddress" label="ERC-20 token address" style={{ borderStyle: 'none' }}>
+            <AppInput name="customAssetAddress" placeholder="0x0..."></AppInput>
+          </FormField>
+        ) : (
+          <></>
+        )}
       </>
       <>
         <FormField label="File" name="file" component={AppFileInput} />
@@ -401,8 +410,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Paragraph>Description</Paragraph>
           </Box>
           <Box>
-            <Paragraph>Asset</Paragraph>
-            <Paragraph>{formValues.assetName}</Paragraph>
+            <Paragraph>Custom Asset</Paragraph>
+            <Paragraph>{formValues.hasCustomAsset ? formValues.customAssetAddress : 'none'}</Paragraph>
           </Box>
         </Box>
       </TwoColumns>

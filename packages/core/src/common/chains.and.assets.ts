@@ -21,13 +21,13 @@ const chainList: ChainAndAssets[] = [
         icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
         decimals: 18,
       },
-      {
-        id: 'dai',
-        address: ContractsJson.jsonOfChain().contracts.TestErc20.address,
-        name: 'DAI',
-        icon: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png',
-        decimals: 18,
-      },
+      // {
+      //   id: 'dai',
+      //   address: ContractsJson.jsonOfChain().contracts.TestErc20.address,
+      //   name: 'DAI',
+      //   icon: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png',
+      //   decimals: 18,
+      // },
       {
         id: 'usdc',
         address: ContractsJson.jsonOfChain().contracts.TestErc20_02.address,
