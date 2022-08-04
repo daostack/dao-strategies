@@ -1,4 +1,4 @@
-import { grommet, ThemeType } from 'grommet/themes';
+import { dark, grommet, ThemeType } from 'grommet/themes';
 import { deepMerge } from 'grommet/utils';
 import { css } from 'styled-components';
 
@@ -6,12 +6,21 @@ export const styleConstants = {
   fontSize: '18px',
 };
 
-const primary = '#4BA664';
+export const theme = {
+  primary: '#4BA664',
+  primaryLight: 'rgba(75, 166, 99, 0.05)',
+};
 
 const extension: ThemeType = {
+  global: {
+    colors: {
+      brand: theme.primary,
+      'light-1': theme.primaryLight,
+    },
+  },
   button: {
     border: { radius: '24px' },
-    primary: { color: primary },
+    primary: { color: theme.primary },
     extend: (props) => {
       return props.primary
         ? css`
@@ -65,6 +74,10 @@ const extension: ThemeType = {
       },
     },
   },
+  checkBox: {
+    color: theme.primary,
+  },
 };
 
-export const theme = deepMerge(grommet, extension);
+export const lightTheme = deepMerge(grommet, extension);
+export const darkTheme = deepMerge(dark, extension);

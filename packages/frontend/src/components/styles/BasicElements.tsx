@@ -1,5 +1,7 @@
 import { Button, Form, Text, TextInput, TextArea, Box, ButtonExtendedProps, Select, FileInput } from 'grommet';
 import React, { FC } from 'react';
+import styled from 'styled-components';
+import { theme } from './themes';
 
 export interface IElement {
   onClick?: () => void;
@@ -48,3 +50,13 @@ export const AppFileInput: FC = (props: IElement) => (
     />
   </Box>
 );
+
+export const AppCallout = styled(Box)`
+  text-align: center;
+  background-color: ${(props) => props.theme.global.colors['light-1']};
+  border-style: solid;
+  border-width: 3px;
+  border-color: ${(props) => props.theme.global.colors.brand};
+  border-radius: 16px;
+  padding: 16px 48px;
+`;
