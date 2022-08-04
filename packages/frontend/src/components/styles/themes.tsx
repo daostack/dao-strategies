@@ -9,13 +9,14 @@ export const styleConstants = {
 export const theme = {
   primary: '#4BA664',
   primaryLight: 'rgba(75, 166, 99, 0.05)',
+  links: '#5762D5',
 };
 
 const extension: ThemeType = {
   global: {
     colors: {
       brand: theme.primary,
-      'light-1': theme.primaryLight,
+      brandLight: theme.primaryLight,
     },
   },
   button: {

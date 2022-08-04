@@ -6,12 +6,15 @@ import { Asset, ChainAndAssets, TokenBalance } from '../types';
 
 import { ContractsJson } from './contracts.json';
 
+const ETHERSCAN_URL = 'https://etherscan.io';
+
 /** Single source of truth for the supported chains and assets. It is imported on the
  * frontend */
 
 const chainList: ChainAndAssets[] = [
   {
     chain: chain.localhost,
+    exploreAddress: (address: string) => `${ETHERSCAN_URL}/address/${address}`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {

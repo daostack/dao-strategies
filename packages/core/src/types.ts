@@ -80,6 +80,8 @@ export interface ChainAndAssets {
   chainIcon: string;
   chain: Chain;
   assets: Asset[];
+  explorer?: string;
+  exploreAddress?: (address: string) => string;
 }
 
 /**

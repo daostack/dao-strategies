@@ -53,7 +53,7 @@ export const AppFileInput: FC = (props: IElement) => (
 
 export const AppCallout = styled(Box)`
   text-align: center;
-  background-color: ${(props) => props.theme.global.colors['light-1']};
+  background-color: ${(props) => props.theme.global.colors.brandLight};
   border-style: solid;
   border-width: 3px;
   border-color: ${(props) => props.theme.global.colors.brand};
