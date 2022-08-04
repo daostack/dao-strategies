@@ -1,5 +1,19 @@
-import { Button, Form, Text, TextInput, TextArea, Box, ButtonExtendedProps, Select, FileInput } from 'grommet';
-import React, { FC } from 'react';
+import {
+  Button,
+  Form,
+  Text,
+  TextInput,
+  TextArea,
+  Box,
+  ButtonExtendedProps,
+  Select,
+  FileInput,
+  BoxExtendedProps,
+  Paragraph,
+  ParagraphProps,
+} from 'grommet';
+import { FormDown, FormUp } from 'grommet-icons';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { theme } from './themes';
 
@@ -60,3 +74,64 @@ export const AppCallout = styled(Box)`
   border-radius: 16px;
   padding: 16px 48px;
 `;
+
+interface IExpansibleParagraph extends IElement {
+  maxHeight: number;
+}
+
+export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleParagraph) => {
+  const [parHeight, setParHeight] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+
+  const ref = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (ref !== null && ref.current !== null) {
+      setParHeight(ref.current.clientHeight);
+    }
+  }, []);
+
+  const showExpand = parHeight > props.maxHeight;
+
+  return (
+    <Box
+      style={{
+        height: expanded ? 'auto' : `${props.maxHeight}px`,
+        overflow: 'hidden',
+        position: 'relative',
+        width: '100%',
+      }}>
+      <p ref={ref} style={{ width: '100%', lineHeight: '200%', paddingBottom: '24px' }}>
+        {props.children}
+      </p>
+      {showExpand ? (
+        <div
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'start',
+            alignItems: 'end',
+            fontWeight: '700',
+            padding: '0px 0px 10px 0px',
+            position: 'absolute',
+            width: '100%',
+            left: '0',
+            bottom: '0',
+            height: '80px',
+            cursor: 'pointer',
+            backgroundColor: 'red',
+            background: `${
+              expanded
+                ? 'none'
+                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
+            }`,
+          }}>
+          See more {expanded ? <FormUp></FormUp> : <FormDown></FormDown>}
+        </div>
+      ) : (
+        <></>
+      )}
+    </Box>
+  );
+};

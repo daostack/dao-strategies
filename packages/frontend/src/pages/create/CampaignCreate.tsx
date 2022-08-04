@@ -62,9 +62,10 @@ const initialValues: CampaignFormValues = {
   title: 'My Campaign',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
   chainName: initChain.name,
-  customAssetAddress: '',
-  hasCustomAsset: false,
-  description: '',
+  customAssetAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
+  hasCustomAsset: true,
+  description:
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam at imperdiet elit, ut vulputate ex. Quisque tincidunt varius magna nec convallis. Fusce eget pulvinar tellus. Pellentesque condimentum dui ut quam lobortis gravida. Sed suscipit iaculis ipsum, vel malesuada est commodo vitae. Cras faucibus massa quis est porta cursus. \n Integer quis bibendum neque. Integer eu sapien augue. Quisque congue vestibulum nibh, quis hendrerit erat gravida quis. Vivamus vulputate eleifend dignissim. Cras eu sapien bibendum est placerat fermentum. Vestibulum vitae ipsum quam. Aenean ornare odio id euismod elementum. Morbi in posuere neque, in euismod arcu. Vestibulum sed justo sapien. Etiam et ipsum dui. Pellentesque tempor posuere turpis, non elementum nisi mattis vel. Nulla eu arcu id dui dapibus porttitor id sit amet elit. Donec tempor quam diam, eu efficitur eros mattis vitae.',
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',

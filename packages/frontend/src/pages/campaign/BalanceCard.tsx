@@ -21,14 +21,17 @@ export const BalanceCard: FC<BalanceCardProps> = (props: BalanceCardProps) => {
         border: 'solid 1px  #F0EDED',
         padding: '16px 24px',
         borderRadius: '8px',
-        minWidth: '280px',
         minHeight: '122px',
       }}>
-      <Box style={{ textTransform: 'uppercase' }}>{props.title}</Box>
+      <Box style={{ textTransform: 'uppercase', fontWeight: '700' }}>{props.title}</Box>
       <Box>
-        {props.symbol}
-        {props.value}
-        {props.coin}
+        {props.value !== '0' ? (
+          <>
+            {props.symbol} {props.value} {props.coin}
+          </>
+        ) : (
+          '--'
+        )}
       </Box>
       {props.assets !== undefined ? props.assets.map((asset) => <img src={asset.icon} alt={asset.name} />) : <></>}
       {props.action !== undefined ? props.action : <></>}

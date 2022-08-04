@@ -1,12 +1,12 @@
-import { Box, Paragraph, Spinner, Tabs, Tab, Layer, Text, Heading } from 'grommet';
+import { Box, Paragraph, Spinner, Tabs, Tab, Layer, Text, Heading, GridSizeType } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { FC, useEffect, useState } from 'react';
 import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
-import { AppButton, AppCallout } from '../../components/styles/BasicElements';
-import { TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
+import { AppCallout, ExpansiveParagraph } from '../../components/styles/BasicElements';
+import { Breakpoint, ResponsiveGrid, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { ClaimButton } from '../../components/ClaimRewards';
@@ -117,31 +117,43 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       <></>
     );
 
+  const fundsColumns = ['1fr', '1fr', '1fr'];
+  const fundsRows = ['auto'];
+
+  const fundColumnsAt: Record<Breakpoint, GridSizeType[]> = {
+    small: fundsColumns,
+    medium: fundsColumns,
+    large: fundsColumns,
+    xlarge: fundsColumns,
+  };
+
+  const fundRowsAt: Record<Breakpoint, GridSizeType[]> = {
+    small: fundsRows,
+    medium: fundsRows,
+    large: fundsRows,
+    xlarge: fundsRows,
+  };
+
   const funds = (
-    <Box direction="row" align="center" justify="start" style={{ marginBottom: '18px' }}>
-      <BalanceCard title="Total raised" value={valueLocked} symbol="$"></BalanceCard>
-      <BalanceCard
-        style={{ marginLeft: '24px' }}
-        title="Available to Claim"
-        value={valueLocked}
-        symbol="$"
-        action={<ClaimButton campaignAddress={campaign.address}></ClaimButton>}></BalanceCard>
+    <ResponsiveGrid style={{ width: '100%' }} gap="1vw" columnsAt={fundColumnsAt} rowsAt={fundRowsAt}>
+      <BalanceCard title="Total Rewards" value={valueLocked} symbol="$"></BalanceCard>
       {customAsset ? (
         <>
-          <BalanceCard title="Custom token balance" value={customAsset.balance} coin={customAsset.name}></BalanceCard>
+          <BalanceCard title="Custom Assets" value={customAsset.balance} coin={customAsset.name}></BalanceCard>
         </>
       ) : (
         <></>
       )}
+      <BalanceCard title="Available to Claim" value={valueLocked} symbol="$"></BalanceCard>
       <Box>
         <Box direction="row" align="center"></Box>
       </Box>
-    </Box>
+    </ResponsiveGrid>
   );
 
   const description = (
-    <Box style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '36px' }}>
-      <Paragraph>{campaign.description}</Paragraph>
+    <Box style={{ marginBottom: '36px' }}>
+      <ExpansiveParagraph maxHeight={160}>{campaign.description}</ExpansiveParagraph>
     </Box>
   );
 
