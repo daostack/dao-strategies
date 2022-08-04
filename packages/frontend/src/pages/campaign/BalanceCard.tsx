@@ -1,6 +1,7 @@
 import { TokenBalance } from '@dao-strategies/core';
 import { Box, BoxExtendedProps } from 'grommet';
 import { FC, ReactElement } from 'react';
+import { AppCard } from '../../components/styles/BasicElements';
 
 interface BalanceCardProps extends BoxExtendedProps {
   title: string;
@@ -13,16 +14,7 @@ interface BalanceCardProps extends BoxExtendedProps {
 
 export const BalanceCard: FC<BalanceCardProps> = (props: BalanceCardProps) => {
   return (
-    <Box
-      {...props}
-      style={{
-        ...props.style,
-        backgroundColor: '#FBFDFC',
-        border: 'solid 1px  #F0EDED',
-        padding: '16px 24px',
-        borderRadius: '8px',
-        minHeight: '122px',
-      }}>
+    <AppCard>
       <Box style={{ textTransform: 'uppercase', fontWeight: '700' }}>{props.title}</Box>
       <Box>
         {props.value !== '0' ? (
@@ -35,6 +27,6 @@ export const BalanceCard: FC<BalanceCardProps> = (props: BalanceCardProps) => {
       </Box>
       {props.assets !== undefined ? props.assets.map((asset) => <img src={asset.icon} alt={asset.name} />) : <></>}
       {props.action !== undefined ? props.action : <></>}
-    </Box>
+    </AppCard>
   );
 };

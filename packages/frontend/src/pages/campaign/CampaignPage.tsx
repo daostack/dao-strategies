@@ -5,11 +5,10 @@ import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
-import { AppCallout, ExpansiveParagraph } from '../../components/styles/BasicElements';
+import { AppCallout, AppCard, ExpansiveParagraph } from '../../components/styles/BasicElements';
 import { Breakpoint, ResponsiveGrid, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
-import { ClaimButton } from '../../components/ClaimRewards';
 import { AssetBalance } from '../../components/Assets';
 import { truncate } from '../../utils/ethers';
 import { CampaignGuardian } from '../../components/CampaignGuardian';
@@ -22,6 +21,8 @@ import { BalanceCard } from './BalanceCard';
 export interface ICampaignPageProps {
   dum?: any;
 }
+
+const HEADING_SIZE = '24px';
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
@@ -153,11 +154,18 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const description = (
     <Box style={{ marginBottom: '36px' }}>
-      <ExpansiveParagraph maxHeight={160}>{campaign.description}</ExpansiveParagraph>
+      <ExpansiveParagraph maxHeight={200}>{campaign.description}</ExpansiveParagraph>
     </Box>
   );
 
-  const table = <RewardsTable rewards={shares} style={{ marginBottom: '36px' }}></RewardsTable>;
+  const table = (
+    <>
+      <Heading style={{ fontSize: HEADING_SIZE }}>Contributors Board</Heading>
+      <AppCard>
+        <RewardsTable style={{ marginBottom: '36px' }}></RewardsTable>
+      </AppCard>
+    </>
+  );
 
   const fund = <Box>fund</Box>;
 

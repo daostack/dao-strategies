@@ -1,72 +1,98 @@
 import { SharesRead } from '@dao-strategies/core';
 import { BigNumber } from 'ethers';
-import { Box, Table, TableBody, TableCell, TableHeader, TableRow, Text } from 'grommet';
+import { Box, Spinner, Table, TableBody, TableCell, TableHeader, TableRow, Text } from 'grommet';
+import { StatusGood } from 'grommet-icons';
 import { FC } from 'react';
+import { useCampaignContext } from '../hooks/useCampaign';
 import { IElement } from './styles/BasicElements';
-
-interface Column {
-  property: string;
-  label: string;
-}
 
 interface Data {
   id: string;
   user: string;
-  reward: string;
   badge: boolean;
   info: string;
+  reward: string;
+  percentage: string;
 }
 
-const columns: Column[] = [
-  { property: 'user', label: 'user' },
-  { property: 'reward', label: 'reward' },
-  { property: 'badge', label: 'verified' },
-  { property: 'info', label: '' },
-];
-
 export interface RewardsTableI extends IElement {
-  rewards?: SharesRead;
+  shares?: SharesRead;
 }
 
 export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
-  const data: Data[] =
-    props === undefined || props.rewards === undefined
-      ? []
-      : Object.entries(props.rewards.shares).map(([address, reward]) => {
-          const percentage = BigNumber.from(reward).mul(100).div(BigNumber.from('1000000000000000000')).toString();
-          return {
-            id: address,
-            user: address,
-            reward: `${percentage}%`,
-            badge: true,
-            info: '',
-          };
-        });
+  const { shares: _shares } = useCampaignContext();
+
+  const shares = props.shares ? props.shares : _shares;
+
+  if (shares === undefined) {
+    return (
+      <Box fill justify="center" align="center">
+        <Spinner></Spinner>
+      </Box>
+    );
+  }
+
+  const data: Data[] = Object.entries(shares.shares).map(([address, share]) => {
+    const percentage = BigNumber.from(share).mul(100).div(BigNumber.from('1000000000000000000')).toString();
+    return {
+      id: address,
+      user: address,
+      percentage,
+      reward: '200 USD',
+      badge: true,
+      info: '',
+    };
+  });
 
   return (
-    <Box style={props.style}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((c) => (
-              <TableCell key={c.property}>
-                <Text>{c.label}</Text>
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((datum) => (
-            <TableRow key={datum.id}>
-              {columns.map((c) => (
-                <TableCell key={c.property}>
-                  <Text>{datum[c.property as keyof Data]}</Text>
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <Box style={{ width: '100%', ...props.style }}>
+      <Box
+        direction="row"
+        style={{
+          width: '100%',
+          textTransform: 'uppercase',
+          fontSize: '12px',
+          fontWeight: '700',
+          marginBottom: '26px',
+          padding: '10px 36px',
+        }}>
+        <Box style={{ width: '50%' }}>user handle</Box>
+        <Box direction="row" justify="center" style={{ width: '25%' }}>
+          score
+        </Box>
+        <Box direction="row" justify="center" style={{ width: '25%' }}>
+          reward
+        </Box>
+      </Box>
+      <Box direction="column" style={{ width: '100%' }}>
+        {data.map((datum) => (
+          <Box
+            fill
+            direction="row"
+            align="center"
+            key={datum.id}
+            style={{
+              border: '1px solid',
+              borderColor: '#F0EDED',
+              borderRadius: '20px',
+              height: '40px',
+              marginBottom: '16px',
+              padding: '10px 36px',
+              backgroundImage: 'white',
+            }}>
+            <Box direction="row" align="center" style={{ width: '50%' }}>
+              @{datum.user}
+              {datum.badge ? <StatusGood style={{ marginLeft: '6px' }} color="#5762D5"></StatusGood> : <></>}
+            </Box>
+            <Box direction="row" justify="center" style={{ width: '25%' }}>
+              {datum.percentage}
+            </Box>
+            <Box direction="row" justify="center" style={{ width: '25%' }}>
+              {datum.reward}
+            </Box>
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };

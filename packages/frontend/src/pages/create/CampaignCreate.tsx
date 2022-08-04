@@ -423,7 +423,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         ) : (
           <Box>
             <Box>{simulation !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
-            {status.wasSimulated ? <RewardsTable rewards={simulation as SharesRead}></RewardsTable> : ''}
+            {status.wasSimulated ? <RewardsTable shares={simulation as SharesRead}></RewardsTable> : ''}
           </Box>
         )}
       </Box>

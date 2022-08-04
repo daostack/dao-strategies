@@ -78,6 +78,13 @@ const extension: ThemeType = {
   checkBox: {
     color: theme.primary,
   },
+  table: {
+    header: {
+      extend: css`
+        border: none;
+      `,
+    },
+  },
 };
 
 export const lightTheme = deepMerge(grommet, extension);

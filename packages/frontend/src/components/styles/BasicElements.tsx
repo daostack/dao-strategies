@@ -75,6 +75,24 @@ export const AppCallout = styled(Box)`
   padding: 16px 48px;
 `;
 
+interface AppCardProps extends BoxExtendedProps {}
+export const AppCard: FC<AppCardProps> = (props: AppCardProps) => {
+  return (
+    <Box
+      {...props}
+      style={{
+        ...props.style,
+        backgroundColor: '#FBFDFC',
+        border: 'solid 1px  #F0EDED',
+        padding: '16px 24px',
+        borderRadius: '8px',
+        minHeight: '122px',
+      }}>
+      {props.children}
+    </Box>
+  );
+};
+
 interface IExpansibleParagraph extends IElement {
   maxHeight: number;
 }
@@ -118,13 +136,13 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
             width: '100%',
             left: '0',
             bottom: '0',
-            height: '80px',
+            height: '120px',
             cursor: 'pointer',
             backgroundColor: 'red',
             background: `${
               expanded
                 ? 'none'
-                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
+                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
             }`,
           }}>
           See more {expanded ? <FormUp></FormUp> : <FormDown></FormDown>}
