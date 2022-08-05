@@ -2,8 +2,7 @@ import { Strategy_ID, SharesRead } from '@dao-strategies/core';
 
 export const TEST_SHARES: SharesRead = {
   shares: { user1: '10000' },
-  page: { skip: 0, take: 10 },
-  total: 1,
+  page: { number: 0, perPage: 10, total: 1 },
   uri: 'abc',
 };
 

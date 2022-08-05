@@ -2,7 +2,7 @@ import { Box, CheckBox, DateInput, FormField, Layer, Paragraph, Spinner, Text, T
 import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { ChainsDetails, getCampaignUri, CampaignCreateDetails, SharesRead } from '@dao-strategies/core';
+import { ChainsDetails, getCampaignUri, CampaignCreateDetails, SharesRead, Page } from '@dao-strategies/core';
 
 import { useCampaignFactory } from '../../hooks/useContracts';
 import {
@@ -11,8 +11,8 @@ import {
   periodOptions,
   getPeriodType,
   PeriodType,
-  simulateCampaign,
   strategyDetails,
+  sharesFromDetails,
 } from '../campaign.support';
 import { ACTIVATION_PERIOD, ACTIVE_DURATION, CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
 import { RouteNames } from '../MainPage';
@@ -62,9 +62,10 @@ const initialValues: CampaignFormValues = {
   title: 'My Campaign',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
   chainName: initChain.name,
-  customAssetAddress: '',
-  hasCustomAsset: false,
-  description: '',
+  customAssetAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
+  hasCustomAsset: true,
+  description:
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam at imperdiet elit, ut vulputate ex. Quisque tincidunt varius magna nec convallis. Fusce eget pulvinar tellus. Pellentesque condimentum dui ut quam lobortis gravida. Sed suscipit iaculis ipsum, vel malesuada est commodo vitae. Cras faucibus massa quis est porta cursus. \n Integer quis bibendum neque. Integer eu sapien augue. Quisque congue vestibulum nibh, quis hendrerit erat gravida quis. Vivamus vulputate eleifend dignissim. Cras eu sapien bibendum est placerat fermentum. Vestibulum vitae ipsum quam. Aenean ornare odio id euismod elementum. Morbi in posuere neque, in euismod arcu. Vestibulum sed justo sapien. Etiam et ipsum dui. Pellentesque tempor posuere turpis, non elementum nisi mattis vel. Nulla eu arcu id dui dapibus porttitor id sit amet elit. Donec tempor quam diam, eu efficitur eros mattis vitae.',
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
@@ -96,7 +97,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
    * on wheather the start date of the strategy is older than today.
    */
   const [formValues, setFormValuesState] = useState<CampaignFormValues>(initialValues);
-  const [simulation, setSimulated] = useState<SharesRead | undefined>();
+  const [shares, setShares] = useState<SharesRead | undefined>();
   const [simulating, setSimulating] = useState<boolean>(false);
   const [deploying, setDeploying] = useState<boolean>(false);
 
@@ -118,10 +119,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (campaignFactory === undefined) throw new Error('campaignFactoryContract undefined');
 
     /** the strategy details are the same used for simulation, unless no simulation was done */
-    const finalDetails = simulation !== undefined ? simulation.details : details;
+    const finalDetails = shares !== undefined ? shares.details : details;
     if (finalDetails === undefined) throw new Error();
 
-    const chainId = ChainsDetails.chainOfName(formValues.chainName).chain.id;
+    const chainId = ChainsDetails.chainOfName(formValues.chainName)?.chain.id;
+    if (chainId === undefined) {
+      throw new Error(`chain ${formValues.chainName} not found`);
+    }
     const activationTime = 0;
 
     /** the address is not yet known */
@@ -139,16 +143,15 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       customAssets: formValues.hasCustomAsset ? [formValues.customAssetAddress] : [],
     };
 
+    if (shares === undefined) {
+      throw new Error(`shares undefined`);
+    }
+
     setDeploying(true);
     /** if the campaign was not simulated it must be created first */
     try {
       setCreating(true);
-      const campaignAddress = await deployCampaign(
-        campaignFactory,
-        (simulation as SharesRead).uri,
-        otherDetails,
-        finalDetails
-      );
+      const campaignAddress = await deployCampaign(campaignFactory, shares.uri, otherDetails, finalDetails);
 
       setCreating(false);
       navigate(RouteNames.Campaign(campaignAddress));
@@ -175,13 +178,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     const oldDetails = strategyDetails(formValues, now, account);
 
     /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
-    if (oldDetails !== undefined && simulation !== undefined) {
+    if (oldDetails !== undefined && shares !== undefined) {
       const nextDetails = strategyDetails(nextFormValues, now, account);
       if (nextDetails !== undefined) {
         const currentUri = getCampaignUri(oldDetails);
         const nextUri = getCampaignUri(nextDetails);
         if (nextUri !== currentUri) {
-          setSimulated(undefined);
+          setShares(undefined);
         }
       }
     }
@@ -211,18 +214,30 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     return errors;
   };
 
-  const simulate = useMemo(() => {
+  const firstSimulate = useMemo(() => {
     return async (): Promise<void> => {
       if (DEBUG) console.log('CampaignCreate - simulate()');
       setSimulating(true);
 
-      if (details === undefined) throw new Error();
-      const sim = await simulateCampaign(details);
+      await simulate({ number: 0, perPage: 10 });
 
-      setSimulated(sim);
       setSimulating(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details]);
+
+  const simulate = useMemo(() => {
+    return async (_page: Page): Promise<void> => {
+      if (details === undefined) throw new Error();
+      const shares = await sharesFromDetails(details, _page);
+      setShares(shares);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [details]);
+
+  const updatePage = (page: Page) => {
+    void simulate(page);
+  };
 
   /** Repo selection */
   const repoNameChanged = (name: string) => {
@@ -255,24 +270,24 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       canSimulate: isLogged,
       mustSimulate: periodType === PeriodType.retroactive,
       isSimulating: simulating,
-      wasSimulated: simulation !== undefined,
+      wasSimulated: shares !== undefined,
       canCreate: isLogged,
       isCreating: creating,
       isDeploying: deploying,
     };
-  }, [creating, deploying, isLogged, pageIx, periodType, simulating, simulation]);
+  }, [creating, deploying, isLogged, pageIx, periodType, simulating, shares]);
 
   const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
     connect,
     create,
     setPageIx,
-    simulate,
+    simulate: firstSimulate,
     validate,
   });
 
   useEffect(() => {
     if (status.page.isReview && status.canSimulate && !status.isSimulating && !status.wasSimulated) {
-      void simulate();
+      void simulate({ number: 0, perPage: 10 });
     }
   }, [status, account, simulate]);
 
@@ -375,7 +390,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       </>
     </TwoColumns>,
     <Box>
-      <TwoColumns>
+      <TwoColumns style={{ overflowX: 'hidden' }}>
         <Box>
           <Box>
             <Paragraph>Campaign Name</Paragraph>
@@ -419,11 +434,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       <Box>
         {status.isSimulating ? (
           'simulating'
-        ) : (
-          <Box>
-            <Box>{simulation !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
-            {status.wasSimulated ? <RewardsTable rewards={simulation as SharesRead}></RewardsTable> : ''}
+        ) : shares !== undefined ? (
+          <Box style={{ paddingRight: '16px' }}>
+            <Box style={{ marginBottom: '24px' }}>{shares !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
+            {status.wasSimulated ? <RewardsTable shares={shares} updatePage={updatePage}></RewardsTable> : ''}
           </Box>
+        ) : (
+          <></>
         )}
       </Box>
     </Box>,

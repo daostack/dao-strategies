@@ -2,6 +2,7 @@ import { FC } from 'react';
 import styled from 'styled-components';
 
 import { IElement } from '../../components/styles/BasicElements';
+import { theme } from '../../components/styles/themes';
 
 export interface IFormProgress extends IElement {
   position: number;
@@ -53,9 +54,9 @@ const FormProgressCore: FC<IFormProgress> = (props: IFormProgress) => {
 
     return (
       <g key={ix}>
-        <circle cx={center} cy={circleVert} r={radius} stroke="green" strokeWidth="2" fill="transparent" />
-        <circle cx={center} cy={circleVert} r={radius - 3} fill="green" />
-        <text x={center} y={textVert} fill="green" textAnchor="middle" style={{ fontSize: '12px' }}>
+        <circle cx={center} cy={circleVert} r={radius} stroke={theme.primary} strokeWidth="2" fill="transparent" />
+        <circle cx={center} cy={circleVert} r={radius - 3} fill={theme.primary} />
+        <text x={center} y={textVert} fill={theme.primary} textAnchor="middle" style={{ fontSize: '12px' }}>
           {station.description}
         </text>
       </g>

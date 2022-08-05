@@ -15,7 +15,7 @@ export class PriceService {
     protected updatePeriod: number = 300
   ) {}
 
-  async priceOf(chainId: number, address: string): Promise<number> {
+  async priceOf(chainId: number, address: string): Promise<number | undefined> {
     const unique = chainId.toString().concat(address);
 
     /** Cached version of get price. Local map will return ongoing promises
@@ -25,7 +25,9 @@ export class PriceService {
       return new Promise<number>((resolve) => {
         void this.getting
           .get(unique)
-          .then((assetPrice) => resolve(assetPrice.price));
+          .then((assetPrice) =>
+            resolve(assetPrice !== null ? assetPrice.price : undefined)
+          );
       });
     }
 
@@ -61,6 +63,11 @@ export class PriceService {
     }
 
     const asset = ChainsDetails.assetOfAddress(chainId, address);
+
+    /** if the asset is not in the list of suppoerted assets for the chain return undefined */
+    if (!asset) {
+      return undefined;
+    }
 
     const assetId = ((): string => {
       switch (asset.id) {
@@ -117,6 +124,8 @@ export class PriceService {
         price: assetPrice.price,
       },
     });
+
+    this.getting.delete(unique);
 
     return assetPrice.price;
   }

@@ -6,12 +6,15 @@ import { Asset, ChainAndAssets, TokenBalance } from '../types';
 
 import { ContractsJson } from './contracts.json';
 
+const ETHERSCAN_URL = 'https://etherscan.io';
+
 /** Single source of truth for the supported chains and assets. It is imported on the
  * frontend */
 
 const chainList: ChainAndAssets[] = [
   {
     chain: chain.localhost,
+    exploreAddress: (address: string) => `${ETHERSCAN_URL}/address/${address}`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {
@@ -76,49 +79,44 @@ export class ChainsDetails {
     return chainList.map((chainAndAsset) => chainAndAsset.chain);
   }
 
-  static chainOfId(id: number): ChainAndAssets {
+  static chainOfId(id: number): ChainAndAssets | undefined {
     const entry = chainList.find((chain) => chain.chain.id === id);
     if (entry === undefined) throw new Error(`chain with id ${id} not found`);
     return entry;
   }
 
-  static chainOfName = (name: string): ChainAndAssets => {
+  static chainOfName = (name: string): ChainAndAssets | undefined => {
     const entry = chainList.find((chain) => chain.chain.name === name);
-    if (entry === undefined)
-      throw new Error(
-        `chain with name ${name} not found. Available chains are ${JSON.stringify(
-          chainList.map((chain) => chain.chain.name)
-        )}`
-      );
     return entry;
   };
 
   static chainAssets = (chainId: number): Asset[] => {
-    return this.chainOfId(chainId).assets;
+    const chain = this.chainOfId(chainId);
+    return chain ? chain.assets : [];
   };
 
-  static assetOfName = (chainId: number, assetName: string): Asset => {
+  static assetOfName = (
+    chainId: number,
+    assetName: string
+  ): Asset | undefined => {
     const assets = this.chainAssets(chainId);
     const entry = assets.find((asset) => asset.name === assetName);
-    if (entry === undefined)
-      throw new Error(`asset with name ${assetName} not found`);
     return entry;
   };
 
-  static assetOfAddress = (chainId: number, address: string): Asset => {
+  static assetOfAddress = (
+    chainId: number,
+    address: string
+  ): Asset | undefined => {
     const assets = this.chainAssets(chainId);
     const entry = assets.find((asset) => asset.address === address);
-    if (entry === undefined)
-      throw new Error(`asset with address ${address} not found`);
     return entry;
   };
 
-  static asset = (chainId: number, assetId: string): Asset => {
+  static asset = (chainId: number, assetId: string): Asset | undefined => {
     const asset = this.chainAssets(chainId).find(
       (asset) => assetId === asset.id
     );
-    if (asset === undefined)
-      throw new Error(`asset with name ${assetId} not found`);
     return asset;
   };
 

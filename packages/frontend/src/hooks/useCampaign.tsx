@@ -2,11 +2,12 @@ import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'r
 import { CampaignOnchainDetails, CampaignReadDetails, SharesRead } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
+import { Page } from '@dao-strategies/core';
 
 export type CampaignContextType = {
   isLoading: boolean;
   campaign: CampaignReadDetails | undefined;
-  getShares: () => void;
+  getShares: (page: Page) => void;
   shares: SharesRead | undefined;
   getOtherDetails: () => void;
   otherDetails: CampaignOnchainDetails | undefined;
@@ -25,12 +26,13 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
   const [shares, setShares] = useState<SharesRead>();
   const [otherDetails, setOtherDetails] = useState<CampaignOnchainDetails>();
 
-  const getShares = async (): Promise<void> => {
+  const getShares = async (page: Page): Promise<void> => {
     if (campaign === undefined) return undefined;
 
     const response = await fetch(ORACLE_NODE_URL + `/campaign/sharesFromUri/${campaign.uri}`, {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ page }),
       credentials: 'include',
     });
 

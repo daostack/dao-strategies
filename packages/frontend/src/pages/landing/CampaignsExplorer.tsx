@@ -14,6 +14,20 @@ export interface ICampaignsExplorerProps {
 export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaignsExplorerProps) => {
   const { campaigns } = useCampaigns();
 
+  const columns = {
+    small: ['auto'],
+    medium: ['auto', 'auto'],
+    large: ['auto', 'auto', 'auto'],
+    xlarge: ['auto', 'auto', 'auto'],
+  };
+
+  const rows = {
+    small: ['auto'],
+    medium: ['auto'],
+    large: ['auto'],
+    xlarge: ['auto'],
+  };
+
   return (
     <Box style={{ padding: '16px 32px' }}>
       <Box direction="row" style={{ maxWidth: '600px' }}>
@@ -21,7 +35,7 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
         <AppInput placeholder="search"></AppInput>
       </Box>
 
-      <ResponsiveGrid gap="small" pad={{ vertical: '30px' }}>
+      <ResponsiveGrid columnsAt={columns} rowsAt={rows} gap="small" pad={{ vertical: '30px' }}>
         {campaigns ? (
           campaigns.map((campaign) => {
             return (

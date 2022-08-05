@@ -1,31 +1,40 @@
-import { Box, Header, Paragraph, Spinner, Tabs, Tab, Layer, Text } from 'grommet';
+import { Box, Spinner, Layer, Text, Heading, GridSizeType } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { FC, useEffect, useState } from 'react';
-import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
+import { ChainsDetails, TokenBalance, Page } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
-import { AppButton } from '../../components/styles/BasicElements';
-import { ColumnView, TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
+import { AppCallout, AppCard, ExpansiveParagraph } from '../../components/styles/BasicElements';
+import { Breakpoint, ResponsiveGrid, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
-import { ClaimButton } from '../../components/ClaimRewards';
 import { AssetBalance } from '../../components/Assets';
 import { truncate } from '../../utils/ethers';
 import { CampaignGuardian } from '../../components/CampaignGuardian';
 import { DateManager } from '../../utils/date.manager';
+import { HEADER_HEIGHT } from '../AppHeader';
+import { CampaignAreas, CampaignGrid } from './CampaignGrid';
+import { Address } from '../../components/Address';
+import { BalanceCard } from './BalanceCard';
 
 export interface ICampaignPageProps {
   dum?: any;
 }
+
+const HEADING_SIZE = '24px';
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
 
   const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails } = useCampaignContext();
 
+  const updatePage = (page: Page) => {
+    getShares(page);
+  };
+
   useEffect(() => {
-    getShares();
+    getShares({ number: 0, perPage: 10 });
     getOtherDetails();
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -40,17 +49,68 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       </ViewportContainer>
     );
 
-  const claimValue =
-    otherDetails && otherDetails.tokens ? truncate(ChainsDetails.valueOfAssets(otherDetails.tokens).toString(), 2) : 0;
+  const valueLocked =
+    otherDetails && otherDetails.balances
+      ? truncate(ChainsDetails.valueOfAssets(otherDetails.balances).toString(), 2)
+      : '0';
 
-  const assets = otherDetails && otherDetails.tokens ? otherDetails.tokens : [];
+  const assets = otherDetails && otherDetails.balances ? otherDetails.balances : [];
+
+  const customAsset =
+    otherDetails && otherDetails.balances
+      ? otherDetails.balances.find((token) => token.address === campaign.customAssets[0])
+      : undefined;
+
+  const state = (
+    <Box style={{ paddingBottom: '60px' }}>
+      <AppCallout>
+        {campaign.executed ? (
+          <Text>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Text>
+        ) : (
+          <>
+            Campaign to be executed on {new DateManager(campaign.execDate).toString()}
+            <Countdown to-date={campaign?.execDate}></Countdown>
+          </>
+        )}
+      </AppCallout>
+    </Box>
+  );
+
+  const details = (
+    <Box style={{ paddingBottom: '18px' }}>
+      <Box direction="row" align="center" justify="start">
+        <Box
+          style={{
+            backgroundColor: '#ccc',
+            height: '80px',
+            width: '80px',
+            borderRadius: '40px',
+            marginRight: '20px',
+          }}></Box>
+        <Box>
+          <Heading size="small">{campaign.title}</Heading>
+        </Box>
+      </Box>
+
+      <Box direction="row" align="center" justify="start" style={{ marginTop: '16px', fontWeight: 400 }}>
+        <Box direction="row">
+          Created by:{' '}
+          <Address style={{ marginLeft: '8px' }} address={campaign.creatorId} chainId={campaign.chainId}></Address>
+        </Box>
+        <Box style={{ marginLeft: '16px' }} direction="row">
+          Guarded by:{' '}
+          <Address style={{ marginLeft: '8px' }} address={campaign.guardian} chainId={campaign.chainId}></Address>
+        </Box>
+      </Box>
+    </Box>
+  );
 
   const balances =
     otherDetails !== undefined ? (
       <Box direction="row">
         <Refresh onClick={() => getOtherDetails()}></Refresh>
-        {otherDetails.tokens ? (
-          otherDetails.tokens.map((token: TokenBalance) => {
+        {otherDetails.balances ? (
+          otherDetails.balances.map((token: TokenBalance) => {
             if (token.balance === '0' || campaign.customAssets.includes(token.address)) return <></>;
             return <AssetBalance asset={token}></AssetBalance>;
           })
@@ -62,14 +122,80 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       <></>
     );
 
-  console.log({ otherDetails });
-  const customAsset =
-    otherDetails && otherDetails.tokens
-      ? otherDetails.tokens.find((token) => token.address === campaign.customAssets[0])
-      : undefined;
+  const fundsColumns = ['1fr', '1fr', '1fr'];
+  const fundsRows = ['auto'];
+
+  const fundColumnsAt: Record<Breakpoint, GridSizeType[]> = {
+    small: fundsColumns,
+    medium: fundsColumns,
+    large: fundsColumns,
+    xlarge: fundsColumns,
+  };
+
+  const fundRowsAt: Record<Breakpoint, GridSizeType[]> = {
+    small: fundsRows,
+    medium: fundsRows,
+    large: fundsRows,
+    xlarge: fundsRows,
+  };
+
+  const funds = (
+    <ResponsiveGrid style={{ width: '100%' }} gap="1vw" columnsAt={fundColumnsAt} rowsAt={fundRowsAt}>
+      <BalanceCard title="Total Rewards" value={valueLocked} symbol="$"></BalanceCard>
+      {customAsset ? (
+        <>
+          <BalanceCard title="Custom Assets" value={customAsset.balance} coin={customAsset.name}></BalanceCard>
+        </>
+      ) : (
+        <></>
+      )}
+      <BalanceCard title="Available to Claim" value={valueLocked} symbol="$"></BalanceCard>
+      <Box>
+        <Box direction="row" align="center"></Box>
+      </Box>
+    </ResponsiveGrid>
+  );
+
+  const description = (
+    <Box style={{ marginBottom: '36px' }}>
+      <ExpansiveParagraph maxHeight={200}>{campaign.description}</ExpansiveParagraph>
+    </Box>
+  );
+
+  const table = (
+    <>
+      {shares !== undefined ? (
+        <>
+          <Heading style={{ fontSize: HEADING_SIZE }}>Contributors Board</Heading>
+          <AppCard>
+            <RewardsTable
+              shares={shares}
+              showReward
+              raised={otherDetails?.raised}
+              style={{ marginBottom: '36px' }}
+              updatePage={updatePage}></RewardsTable>
+          </AppCard>
+        </>
+      ) : (
+        <Spinner></Spinner>
+      )}
+    </>
+  );
+
+  const fund = <Box>fund</Box>;
+
+  const info = <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>;
 
   return (
-    <>
+    <Box
+      style={{
+        paddingTop: HEADER_HEIGHT,
+        paddingBottom: '40px',
+        paddingLeft: '5vw',
+        paddingRight: '5vw',
+        maxWidth: '1400px',
+        margin: '0 auto',
+      }}>
       {showFund ? (
         <Layer onEsc={() => setShowFund(false)} onClickOutside={() => setShowFund(false)}>
           <FundCampaign
@@ -84,106 +210,16 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       ) : (
         <></>
       )}
-      <ColumnView>
-        <Box pad="medium">
-          {campaign.executed ? (
-            <Text>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Text>
-          ) : (
-            <>
-              Campaign to be executed on {new DateManager(campaign.execDate).toString()}
-              <Countdown to-date={campaign?.execDate}></Countdown>
-            </>
-          )}
-        </Box>
-        <Box direction="row" align="center" justify="center">
-          <Box
-            style={{
-              backgroundColor: '#ccc',
-              height: '80px',
-              width: '80px',
-              borderRadius: '40px',
-              marginRight: '20px',
-            }}></Box>
-          <Box>
-            <Header>{campaign.title}</Header>
-          </Box>
-        </Box>
 
-        <Box align="center" justify="center" pad="medium">
-          <Box>Created by: {campaign.creatorId}</Box>
-          <Box>Guarded by: {campaign.guardian}</Box>
-        </Box>
-
-        <Box direction="row" align="center" justify="center" style={{ marginBottom: '36px' }}>
-          <Box style={{ border: 'solid 2px #ccc', borderRadius: '20px', padding: '20px 30px' }} direction="row">
-            <Box>
-              <Box direction="row" align="center">
-                Campaign Funding (~{claimValue} usd)
-                <AppButton onClick={() => setShowFund(true)}>Fund Campaign</AppButton>
-              </Box>
-              <Box direction="row" align="center">
-                {balances}
-              </Box>
-            </Box>
-            {customAsset ? (
-              <Box>
-                Custom token: {campaign.customAssets[0]} <AssetBalance asset={customAsset}></AssetBalance>
-              </Box>
-            ) : (
-              <></>
-            )}
-            <Box>
-              <Box direction="row" align="center">
-                <ClaimButton campaignAddress={campaign.address}></ClaimButton>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-
-        <Box style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '36px' }}>
-          <Paragraph>{campaign.description}</Paragraph>
-        </Box>
-
-        <Tabs style={{ height: '500px', overflow: 'auto' }}>
-          <Tab title={campaign.executed ? 'Final Rewards' : 'Leader Board'}>
-            <RewardsTable rewards={shares} style={{ marginBottom: '36px' }}></RewardsTable>
-          </Tab>
-          <Tab title="More Info">
-            <TwoColumns>
-              <Box>
-                <Box>
-                  <Paragraph>Guardian</Paragraph>
-                  <Paragraph>{campaign.guardian}</Paragraph>
-                </Box>
-                <Box>
-                  <Paragraph>Address</Paragraph>
-                  <Paragraph>{campaign.address}</Paragraph>
-                </Box>
-                <Box>
-                  <Paragraph>Asset</Paragraph>
-                  <Paragraph>TBD</Paragraph>
-                </Box>
-              </Box>
-
-              <Box>
-                <Box>
-                  <Paragraph>Repositories</Paragraph>
-                  {campaign.strategyParams.repositories.map((repo: { owner: string; repo: string }) => {
-                    return (
-                      <Paragraph>
-                        {repo.owner}/{repo.repo}
-                      </Paragraph>
-                    );
-                  })}
-                </Box>
-              </Box>
-            </TwoColumns>
-          </Tab>
-          <Tab title="Guardian">
-            <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>
-          </Tab>
-        </Tabs>
-      </ColumnView>
-    </>
+      <CampaignGrid>
+        <Box gridArea={CampaignAreas.state}>{state}</Box>
+        <Box gridArea={CampaignAreas.details}>{details}</Box>
+        <Box gridArea={CampaignAreas.funds}>{funds}</Box>
+        <Box gridArea={CampaignAreas.description}>{description}</Box>
+        <Box gridArea={CampaignAreas.table}>{table}</Box>
+        <Box gridArea={CampaignAreas.fund}>{fund}</Box>
+        <Box gridArea={CampaignAreas.info}>{info}</Box>
+      </CampaignGrid>
+    </Box>
   );
 };

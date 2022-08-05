@@ -1,72 +1,201 @@
-import { SharesRead } from '@dao-strategies/core';
-import { BigNumber } from 'ethers';
-import { Box, Table, TableBody, TableCell, TableHeader, TableRow, Text } from 'grommet';
+import { Page } from '@dao-strategies/core';
+import { SharesRead, TokenBalance } from '@dao-strategies/core';
+import { ethers } from 'ethers';
+import { Box, BoxExtendedProps, Spinner } from 'grommet';
+import { FormNext, FormPrevious, StatusGood } from 'grommet-icons';
 import { FC } from 'react';
 import { IElement } from './styles/BasicElements';
-
-interface Column {
-  property: string;
-  label: string;
-}
 
 interface Data {
   id: string;
   user: string;
-  reward: string;
   badge: boolean;
   info: string;
+  reward?: string;
+  percentage: string;
 }
 
-const columns: Column[] = [
-  { property: 'user', label: 'user' },
-  { property: 'reward', label: 'reward' },
-  { property: 'badge', label: 'verified' },
-  { property: 'info', label: '' },
-];
+interface IPageNumber extends BoxExtendedProps {
+  number: number;
+  selected?: boolean;
+}
+const PageNumber: FC<IPageNumber> = (props: IPageNumber) => {
+  return (
+    <Box
+      {...props}
+      style={{
+        ...props.style,
+        cursor: 'pointer',
+        height: '32px',
+        width: '32px',
+        backgroundColor: '#D9D9D9',
+        borderRadius: '8px',
+        fontSize: '14px',
+        fontWeight: props.selected ? 'bold' : 'normal',
+        userSelect: 'none',
+      }}
+      align="center"
+      justify="center">
+      {props.number}
+    </Box>
+  );
+};
 
 export interface RewardsTableI extends IElement {
-  rewards?: SharesRead;
+  shares: SharesRead;
+  showReward?: boolean;
+  raised?: TokenBalance[];
+  updatePage: (page: Page) => void;
 }
 
 export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
-  const data: Data[] =
-    props === undefined || props.rewards === undefined
-      ? []
-      : Object.entries(props.rewards.shares).map(([address, reward]) => {
-          const percentage = BigNumber.from(reward).mul(100).div(BigNumber.from('1000000000000000000')).toString();
-          return {
-            id: address,
-            user: address,
-            reward: `${percentage}%`,
-            badge: true,
-            info: '',
-          };
-        });
+  const shares = props.shares;
+  const showReward = props.showReward !== undefined ? props.showReward : false;
+
+  if (shares === undefined) {
+    return (
+      <Box fill justify="center" align="center">
+        <Spinner></Spinner>
+      </Box>
+    );
+  }
+
+  const hasNext =
+    props.shares.page.totalPages !== undefined && props.shares.page.number < props.shares.page.totalPages - 1;
+
+  const hasPrev = props.shares.page.totalPages !== undefined && props.shares.page.number > 0;
+
+  const nextPage = () => {
+    if (hasNext) {
+      props.updatePage({ ...props.shares.page, number: props.shares.page.number + 1 });
+    }
+  };
+
+  const prevPage = () => {
+    if (hasPrev) {
+      props.updatePage({ ...props.shares.page, number: props.shares.page.number - 1 });
+    }
+  };
+
+  const setPage = (number: number) => {
+    if (props.shares.page.totalPages !== undefined && number <= props.shares.page.totalPages) {
+      props.updatePage({ ...props.shares.page, number });
+    }
+  };
+
+  const data: Data[] = Object.entries(shares.shares).map(([address, share]) => {
+    const percentage = Math.floor(+ethers.utils.formatEther(share) * 100 * 100) / 100;
+
+    let reward: string | undefined;
+
+    if (showReward && props.raised) {
+      const raisedWithPrice = props.raised.filter((token) => token.price !== undefined);
+      const rewardUSD = raisedWithPrice
+        .map((token) => {
+          const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
+          return raised * percentage;
+        })
+        .reduce((total, reward) => total + reward, 0);
+
+      const raisedCustom = props.raised.filter((token) => token.price === undefined);
+      const customStr = raisedCustom
+        .map((token) => {
+          const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
+          return `${raised * percentage} ${token.name}`;
+        })
+        .reduce((total, reward) => total.concat(' ' + reward));
+
+      reward = `$${rewardUSD} + ${customStr}`;
+    }
+
+    return {
+      id: address,
+      user: address,
+      percentage: percentage.toString(),
+      reward,
+      badge: true,
+      info: '',
+    };
+  });
+
+  const widths = showReward ? ['50%', '25%', '25%'] : ['60%', '40%'];
 
   return (
-    <Box style={props.style}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((c) => (
-              <TableCell key={c.property}>
-                <Text>{c.label}</Text>
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((datum) => (
-            <TableRow key={datum.id}>
-              {columns.map((c) => (
-                <TableCell key={c.property}>
-                  <Text>{datum[c.property as keyof Data]}</Text>
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <Box style={{ width: '100%', ...props.style }}>
+      <Box
+        direction="row"
+        style={{
+          width: '100%',
+          textTransform: 'uppercase',
+          fontSize: '12px',
+          fontWeight: '700',
+          marginBottom: '26px',
+          padding: '10px 36px',
+        }}>
+        <Box style={{ width: widths[0] }}>user handle</Box>
+        <Box direction="row" justify="center" style={{ width: widths[1] }}>
+          score
+        </Box>
+        {showReward ? (
+          <Box direction="row" justify="center" style={{ width: widths[2] }}>
+            reward
+          </Box>
+        ) : (
+          <></>
+        )}
+      </Box>
+      <Box direction="column" style={{ width: '100%' }}>
+        {data.map((datum) => (
+          <Box
+            fill
+            direction="row"
+            align="center"
+            key={datum.id}
+            style={{
+              border: '1px solid',
+              borderColor: '#F0EDED',
+              borderRadius: '20px',
+              height: '40px',
+              marginBottom: '16px',
+              padding: '10px 36px',
+              backgroundImage: 'white',
+            }}>
+            <Box direction="row" align="center" style={{ width: widths[0] }}>
+              @{datum.user}
+              {datum.badge ? <StatusGood style={{ marginLeft: '6px' }} color="#5762D5"></StatusGood> : <></>}
+            </Box>
+            <Box direction="row" justify="center" style={{ width: widths[1] }}>
+              {datum.percentage}
+            </Box>
+            {showReward ? (
+              <Box direction="row" justify="center" style={{ width: widths[2] }}>
+                {datum.reward}
+              </Box>
+            ) : (
+              <></>
+            )}
+          </Box>
+        ))}
+      </Box>
+      <Box direction="row" justify="center" align="center" style={{ height: '60px' }}>
+        <Box style={{ marginRight: '12px', cursor: 'pointer' }} onClick={() => prevPage()}>
+          <FormPrevious></FormPrevious>
+        </Box>
+
+        {Array.from(Array(shares.page.totalPages).keys()).map((ix) => {
+          return (
+            <PageNumber
+              onClick={() => setPage(ix)}
+              style={{ marginRight: '8px' }}
+              key={ix}
+              number={ix + 1}
+              selected={shares.page.number === ix}></PageNumber>
+          );
+        })}
+        <Box style={{ marginLeft: '12px', cursor: 'pointer' }} onClick={() => nextPage()}>
+          <FormNext></FormNext>
+        </Box>
+      </Box>
     </Box>
   );
 };

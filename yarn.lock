@@ -1863,7 +1863,9 @@ __metadata:
     nodemon: ^2.0.15
     octokit: ^1.7.1
     pg: ^8.4.0
+    random: ^3.0.6
     reflect-metadata: ^0.1.13
+    seedrandom: ^3.0.5
     siwe: ^1.1.6
     ts-jest: ^28.0.3
     ts-node: ^10.8.1
@@ -22619,6 +22621,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"random@npm:^3.0.6":
+  version: 3.0.6
+  resolution: "random@npm:3.0.6"
+  dependencies:
+    seedrandom: ^3.0.5
+  checksum: 3e900ebadafda77e6e321180e1f813a08adbed35dcc0d283fea4d73ddd82eaabd5aa1c26ce251d6e7e3205650ae5d9210a82be058b03e4607eb3ae53adb8798b
+  languageName: node
+  linkType: hard
+
 "randombytes@npm:^2.0.0, randombytes@npm:^2.0.1, randombytes@npm:^2.0.5, randombytes@npm:^2.0.6, randombytes@npm:^2.1.0":
   version: 2.1.0
   resolution: "randombytes@npm:2.1.0"
@@ -24159,6 +24170,13 @@ __metadata:
   version: 3.0.1
   resolution: "seedrandom@npm:3.0.1"
   checksum: a8f5bd0e918c4d4b59afd6f5dbd28f5ab8d5f118ee59892c3712f581de51574ac6622aa38fa2d03476b661f8407e98d6ff32af3d7cfdb02c90d046e7f5f91952
+  languageName: node
+  linkType: hard
+
+"seedrandom@npm:^3.0.5":
+  version: 3.0.5
+  resolution: "seedrandom@npm:3.0.5"
+  checksum: 728b56bc3bc1b9ddeabd381e449b51cb31bdc0aa86e27fcd0190cea8c44613d5bcb2f6bb63ed79f78180cbe791c20b8ec31a9627f7b7fc7f476fd2bdb7e2da9f
   languageName: node
   linkType: hard
 

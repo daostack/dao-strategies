@@ -1,5 +1,9 @@
-import { StrategyComputation } from '@dao-strategies/core';
+import {
+  StrategyComputation,
+  IStrategyComputation,
+} from '@dao-strategies/core';
 import { PrismaClient } from '@prisma/client';
+import { StrategyComputationMock } from '../test/mocks/strategy.computation';
 
 import { PRICE_UPDATE_PERIOD } from './config';
 import { CampaignRepository } from './repositories/CampaignRepository';
@@ -22,7 +26,7 @@ export class ServiceManager {
   public campaignRepo: CampaignRepository;
   public userRepo: UserRepository;
 
-  public strategyComputation: StrategyComputation;
+  public strategyComputation: IStrategyComputation;
 
   private timeService: TimeService;
   private onChainService: OnChainService;
@@ -41,7 +45,9 @@ export class ServiceManager {
     this.campaignRepo = new CampaignRepository(this.client);
     this.userRepo = new UserRepository(this.client);
 
-    this.strategyComputation = new StrategyComputation(config.world);
+    this.strategyComputation = new StrategyComputationMock();
+    // this.strategyComputation = new StrategyComputation();
+
     this.timeService = new TimeService();
     this.onChainService = new OnChainService();
 

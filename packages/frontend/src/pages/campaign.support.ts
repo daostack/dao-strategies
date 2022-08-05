@@ -13,6 +13,7 @@ import { ethers } from 'ethers';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/date.manager';
+import { Page } from '@dao-strategies/core';
 
 /** The period string is parsed to derive the actual period. That's why
  * we need to use enums and maps to avoid using manual strings as keys
@@ -119,11 +120,11 @@ export const getPeriodType = (
   return type;
 };
 
-export const simulateCampaign = async (details: CampaignUriDetails): Promise<SharesRead> => {
+export const sharesFromDetails = async (details: CampaignUriDetails, page: Page): Promise<SharesRead> => {
   const response = await fetch(ORACLE_NODE_URL + '/campaign/sharesFromDetails', {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ details }),
+    body: JSON.stringify({ details, page }),
     credentials: 'include',
   });
 

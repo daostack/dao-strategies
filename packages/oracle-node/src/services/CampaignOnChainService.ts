@@ -35,18 +35,20 @@ export class CampaignOnChainService {
 
   async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
     const campaign = await this.campaignService.getFromAddress(address);
+    const campaignContract = campaignProvider(campaign.address, this.provider);
 
-    const tokens = await this.getCampaignTokens(campaign);
+    const balances = await this.getCampaignBalances(campaign);
+    const raised = await this.getCampaignRaised(campaign, campaignContract);
     const publishInfo = await this.getPublishInfo(campaign.address);
     const root =
       publishInfo.status.validRoot !== ZERO_BYTES32
         ? await this.campaignService.getRoot(publishInfo.status.validRoot)
         : undefined;
 
-    return { tokens, publishInfo, root };
+    return { balances, raised, publishInfo, root };
   }
 
-  async getCampaignTokens(campaign: Campaign): Promise<TokenBalance[]> {
+  async getCampaignBalances(campaign: Campaign): Promise<TokenBalance[]> {
     const assets = ChainsDetails.chainAssets(campaign.chainId);
 
     const tokens = await Promise.all(
@@ -77,6 +79,29 @@ export class CampaignOnChainService {
     );
 
     return tokens.concat(custom);
+  }
+
+  async getCampaignRaised(
+    campaign: Campaign,
+    campaignContract: Typechain.Campaign
+  ): Promise<TokenBalance[]> {
+    const assets = ChainsDetails.chainAssets(campaign.chainId);
+    const custom = await this.getCustomAssets(campaign.customAssets);
+
+    const raised = await Promise.all(
+      assets.concat(custom).map(async (asset): Promise<TokenBalance> => {
+        const raised = await campaignContract.totalReceived(asset.address);
+        const price = await this.priceOf(campaign.chainId, asset.address);
+
+        return {
+          ...asset,
+          balance: raised.toString(),
+          price,
+        };
+      })
+    );
+
+    return raised;
   }
 
   async getCustomAssets(customAssets: string[]): Promise<Asset[]> {
@@ -276,7 +301,7 @@ export class CampaignOnChainService {
     };
   }
 
-  async priceOf(chainId: number, address: string): Promise<number> {
+  async priceOf(chainId: number, address: string): Promise<number | undefined> {
     return this.price.priceOf(chainId, address);
   }
 
