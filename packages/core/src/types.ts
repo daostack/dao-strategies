@@ -104,7 +104,8 @@ export interface RootDetails {
 
 export interface CampaignOnchainDetails {
   publishInfo?: PublishInfo;
-  tokens?: TokenBalance[];
+  balances?: TokenBalance[];
+  raised?: TokenBalance[];
   root?: RootDetails;
 }
 

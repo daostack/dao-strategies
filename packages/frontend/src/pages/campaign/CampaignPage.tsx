@@ -46,15 +46,15 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     );
 
   const valueLocked =
-    otherDetails && otherDetails.tokens
-      ? truncate(ChainsDetails.valueOfAssets(otherDetails.tokens).toString(), 2)
+    otherDetails && otherDetails.balances
+      ? truncate(ChainsDetails.valueOfAssets(otherDetails.balances).toString(), 2)
       : '0';
 
-  const assets = otherDetails && otherDetails.tokens ? otherDetails.tokens : [];
+  const assets = otherDetails && otherDetails.balances ? otherDetails.balances : [];
 
   const customAsset =
-    otherDetails && otherDetails.tokens
-      ? otherDetails.tokens.find((token) => token.address === campaign.customAssets[0])
+    otherDetails && otherDetails.balances
+      ? otherDetails.balances.find((token) => token.address === campaign.customAssets[0])
       : undefined;
 
   const state = (
@@ -105,8 +105,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     otherDetails !== undefined ? (
       <Box direction="row">
         <Refresh onClick={() => getOtherDetails()}></Refresh>
-        {otherDetails.tokens ? (
-          otherDetails.tokens.map((token: TokenBalance) => {
+        {otherDetails.balances ? (
+          otherDetails.balances.map((token: TokenBalance) => {
             if (token.balance === '0' || campaign.customAssets.includes(token.address)) return <></>;
             return <AssetBalance asset={token}></AssetBalance>;
           })
@@ -160,10 +160,20 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const table = (
     <>
-      <Heading style={{ fontSize: HEADING_SIZE }}>Contributors Board</Heading>
-      <AppCard>
-        <RewardsTable style={{ marginBottom: '36px' }}></RewardsTable>
-      </AppCard>
+      {shares !== undefined ? (
+        <>
+          <Heading style={{ fontSize: HEADING_SIZE }}>Contributors Board</Heading>
+          <AppCard>
+            <RewardsTable
+              shares={shares}
+              showReward
+              raised={otherDetails?.raised}
+              style={{ marginBottom: '36px' }}></RewardsTable>
+          </AppCard>
+        </>
+      ) : (
+        <Spinner></Spinner>
+      )}
     </>
   );
 
