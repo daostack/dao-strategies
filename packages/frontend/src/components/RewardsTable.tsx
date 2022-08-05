@@ -54,7 +54,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
         })
         .reduce((total, reward) => total.concat(' ' + reward));
 
-      reward = `${rewardUSD} + ${customStr}`;
+      reward = `$${rewardUSD} + ${customStr}`;
     }
 
     return {
