@@ -25,7 +25,9 @@ export class PriceService {
       return new Promise<number>((resolve) => {
         void this.getting
           .get(unique)
-          .then((assetPrice) => resolve(assetPrice.price));
+          .then((assetPrice) =>
+            resolve(assetPrice !== null ? assetPrice.price : undefined)
+          );
       });
     }
 

@@ -1,4 +1,4 @@
-import { Box, Paragraph, Spinner, Tabs, Tab, Layer, Text, Heading, GridSizeType } from 'grommet';
+import { Box, Spinner, Layer, Text, Heading, GridSizeType } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { FC, useEffect, useState } from 'react';
 import { ChainsDetails, TokenBalance, Page } from '@dao-strategies/core';
@@ -29,10 +29,12 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails } = useCampaignContext();
 
-  const updatePage = (page: Page) => {};
+  const updatePage = (page: Page) => {
+    getShares(page);
+  };
 
   useEffect(() => {
-    getShares();
+    getShares({ number: 0, perPage: 10 });
     getOtherDetails();
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
