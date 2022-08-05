@@ -76,17 +76,18 @@ export const AppCallout = styled(Box)`
 `;
 
 interface AppCardProps extends BoxExtendedProps {}
+
 export const AppCard: FC<AppCardProps> = (props: AppCardProps) => {
   return (
     <Box
       {...props}
       style={{
-        ...props.style,
         backgroundColor: '#FBFDFC',
         border: 'solid 1px  #F0EDED',
         padding: '16px 24px',
         borderRadius: '8px',
         minHeight: '122px',
+        ...props.style,
       }}>
       {props.children}
     </Box>

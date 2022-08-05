@@ -13,12 +13,17 @@ export const AssetIcon: FC<IAsset> = (props: IAsset) => {
   return (
     <Box
       direction="row"
+      align="center"
+      justify="center"
       style={{
-        width: '120px',
-        backgroundColor: '#ccc',
-        borderRadius: '10px',
+        height: '40px',
+        width: '96px',
+        backgroundColor: '#fff',
+        borderRadius: '20px',
+        border: 'solid 1px',
+        borderColor: '#F0EDED',
       }}>
-      <Box style={{ textAlign: 'center', height: '40px', width: '40px' }}>
+      <Box style={{ textAlign: 'center', height: '20px', width: '20px' }}>
         <img src={props.asset.icon} alt={props.asset.name} />
       </Box>
       <Box style={{ textAlign: 'center' }}>{props.asset.name}</Box>

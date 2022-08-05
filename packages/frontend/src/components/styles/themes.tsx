@@ -10,6 +10,8 @@ export const theme = {
   primary: '#4BA664',
   primaryLight: 'rgba(75, 166, 99, 0.05)',
   links: '#5762D5',
+  buttonLight: 'rgb(75, 166, 100, 0.05)',
+  buttonLightBorder: 'rgb(75, 166, 100, 0.2)',
 };
 
 const extension: ThemeType = {

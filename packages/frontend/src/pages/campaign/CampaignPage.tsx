@@ -5,7 +5,7 @@ import { ChainsDetails, TokenBalance, Page } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
-import { AppCallout, AppCard, ExpansiveParagraph } from '../../components/styles/BasicElements';
+import { AppButton, AppCallout, AppCard, ExpansiveParagraph } from '../../components/styles/BasicElements';
 import { Breakpoint, ResponsiveGrid, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
@@ -17,6 +17,8 @@ import { HEADER_HEIGHT } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
 import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
+import { theme } from '../../components/styles/themes';
+import { ClaimButton } from '../../components/ClaimRewards';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -25,7 +27,7 @@ export interface ICampaignPageProps {
 const HEADING_SIZE = '24px';
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
-  const [showFund, setShowFund] = useState<boolean>(false);
+  const [showFund, setShowFund] = useState<boolean>(true);
 
   const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails } = useCampaignContext();
 
@@ -182,9 +184,71 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     </>
   );
 
-  const fund = <Box>fund</Box>;
+  const leftPadLeft = '3vw';
+  const buttonPad = 8;
+  const buttonHeight = 50;
+
+  const buttonStyle: React.CSSProperties = {
+    height: `${buttonHeight}px`,
+    width: `calc(50% - ${buttonPad / 2}px)`,
+    color: '#0E0F19',
+  };
+
+  const buttonStyleSelected: React.CSSProperties = {
+    borderRadius: `${buttonHeight / 2}px`,
+    backgroundColor: theme.buttonLight,
+    borderColor: theme.buttonLightBorder,
+    border: 'solid 1px',
+  };
+
+  const fund = (
+    <AppCard fill style={{ padding: '40px 24px', height: '350px' }}>
+      <Box
+        direction="row"
+        align="center"
+        style={{
+          width: '100%',
+          height: `${buttonHeight + 2 * buttonPad}px`,
+          backgroundColor: '#fffFFF',
+          borderRadius: `${(buttonHeight + 2 * buttonPad) / 2}px`,
+          border: 'solid 1px',
+          borderColor: '#F0EDED',
+          padding: `${buttonPad}px`,
+        }}>
+        <AppButton
+          style={{ ...buttonStyle, ...(showFund && buttonStyleSelected), marginRight: `${buttonPad}px` }}
+          onClick={() => setShowFund(true)}>
+          Fund
+        </AppButton>
+        <AppButton style={{ ...buttonStyle, ...(!showFund && buttonStyleSelected) }} onClick={() => setShowFund(false)}>
+          Withdraw
+        </AppButton>
+      </Box>
+      {showFund ? (
+        <Box fill justify="center">
+          <FundCampaign
+            onSuccess={() => {
+              setShowFund(false);
+              getOtherDetails();
+            }}
+            assets={assets}
+            chainId={campaign.chainId}
+            address={campaign.address}></FundCampaign>
+        </Box>
+      ) : (
+        <ClaimButton campaignAddress={campaign.address}></ClaimButton>
+      )}
+    </AppCard>
+  );
 
   const info = <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>;
+
+  const rightPane = (
+    <Box style={{ paddingLeft: leftPadLeft }}>
+      {fund}
+      {info}
+    </Box>
+  );
 
   return (
     <Box
@@ -196,29 +260,13 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         maxWidth: '1400px',
         margin: '0 auto',
       }}>
-      {showFund ? (
-        <Layer onEsc={() => setShowFund(false)} onClickOutside={() => setShowFund(false)}>
-          <FundCampaign
-            onSuccess={() => {
-              setShowFund(false);
-              getOtherDetails();
-            }}
-            assets={assets}
-            chainId={campaign.chainId}
-            address={campaign.address}></FundCampaign>
-        </Layer>
-      ) : (
-        <></>
-      )}
-
       <CampaignGrid>
         <Box gridArea={CampaignAreas.state}>{state}</Box>
         <Box gridArea={CampaignAreas.details}>{details}</Box>
         <Box gridArea={CampaignAreas.funds}>{funds}</Box>
         <Box gridArea={CampaignAreas.description}>{description}</Box>
         <Box gridArea={CampaignAreas.table}>{table}</Box>
-        <Box gridArea={CampaignAreas.fund}>{fund}</Box>
-        <Box gridArea={CampaignAreas.info}>{info}</Box>
+        <Box gridArea={CampaignAreas.rightPane}>{rightPane}</Box>
       </CampaignGrid>
     </Box>
   );

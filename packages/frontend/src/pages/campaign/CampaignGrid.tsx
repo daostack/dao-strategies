@@ -10,12 +10,13 @@ export enum CampaignAreas {
   description = 'description',
   table = 'table',
   fund = 'fund',
+  rightPane = 'rightPane',
   funds = 'funds',
   info = 'info',
 }
 
 export const CampaignGrid: FC<ICampaignGrid> = (props: ICampaignGrid) => {
-  const columnsLarge: GridSizeType[] = ['2/3', '1/3'];
+  const columnsLarge: GridSizeType[] = ['3fr', '2fr'];
   const rowsLarge: GridSizeType[] = ['auto', 'auto', 'auto', 'auto', 'auto', 'auto'];
   const areasLarge: AreasType = [
     { name: CampaignAreas.state, start: [0, 0], end: [1, 0] },
@@ -23,8 +24,7 @@ export const CampaignGrid: FC<ICampaignGrid> = (props: ICampaignGrid) => {
     { name: CampaignAreas.funds, start: [0, 2], end: [0, 2] },
     { name: CampaignAreas.description, start: [0, 3], end: [0, 3] },
     { name: CampaignAreas.table, start: [0, 4], end: [0, 5] },
-    { name: CampaignAreas.fund, start: [1, 1], end: [1, 3] },
-    { name: CampaignAreas.info, start: [1, 4], end: [1, 5] },
+    { name: CampaignAreas.rightPane, start: [1, 1], end: [1, 5] },
   ];
 
   const columnsSmall: GridSizeType[] = [];

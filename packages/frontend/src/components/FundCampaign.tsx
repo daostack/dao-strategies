@@ -1,6 +1,6 @@
 import { Asset, ChainsDetails, ContractsJson } from '@dao-strategies/core';
 import { Contract, ethers } from 'ethers';
-import { Select, Box, Header, FormField, TextInput } from 'grommet';
+import { Select, Box, Header, FormField, TextInput, Spinner } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 import { useSigner } from 'wagmi';
 import { useLoggedUser } from '../hooks/useLoggedUser';
@@ -28,14 +28,7 @@ interface IFundCampaign extends IElement {
 export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const [formValues, setFormValues] = useState<FundFormValues>(initialValues);
   const { account, connect } = useLoggedUser();
-  const isLogged = account !== undefined;
-  const assets = props.assets;
-
   const { data: signer } = useSigner();
-
-  const onValuesUpdated = (values: FundFormValues) => {
-    setFormValues({ ...values });
-  };
 
   useEffect(() => {
     if (props.assets.length > 0) {
@@ -45,6 +38,13 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
       });
     }
   }, [props]);
+
+  const isLogged = account !== undefined;
+  const assets = props.assets;
+
+  const onValuesUpdated = (values: FundFormValues) => {
+    setFormValues({ ...values });
+  };
 
   const selectedAsset = props.assets.find((asset) => asset.id === formValues.asset);
 
@@ -74,28 +74,30 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
 
   return (
     <>
-      <Box style={{ width: '600px' }} pad="large" direction="column" align="center">
-        <AppForm value={formValues} onChange={onValuesUpdated as any}>
-          <Header>Fund Campaign</Header>
+      <Box style={{ width: '100%' }} direction="column" align="center">
+        <AppForm style={{ width: '100%' }} value={formValues} onChange={onValuesUpdated as any}>
           <Box>
-            <FormField name="asset" label="Asset" style={{ border: '0px none' }}>
-              <Select
-                name="asset"
-                style={{ border: '0px none' }}
-                options={assets.map((asset) => asset.id)}
-                value={
-                  <Box pad="small">
-                    <AssetIcon asset={selectedAsset !== undefined ? selectedAsset : undefined}></AssetIcon>
-                  </Box>
-                }>
-                {(key) => {
-                  return <AssetIcon asset={assets.find((asset) => asset.id === key)}></AssetIcon>;
-                }}
-              </Select>
-            </FormField>
-            <FormField name="amount" label="Amount">
-              <TextInput name="amount" placeholder="0"></TextInput>
-            </FormField>
+            <Box style={{ position: 'relative' }}>
+              <FormField name="amount" label="Amount">
+                <TextInput name="amount" placeholder="0"></TextInput>
+              </FormField>
+              <FormField name="asset" style={{ border: '0px none', position: 'absolute', right: '0px', top: '32px' }}>
+                <Select
+                  name="asset"
+                  style={{ border: '0px none' }}
+                  options={assets.map((asset) => asset.id)}
+                  value={
+                    <Box pad="small">
+                      <AssetIcon asset={selectedAsset !== undefined ? selectedAsset : undefined}></AssetIcon>
+                    </Box>
+                  }>
+                  {(key) => {
+                    return <AssetIcon asset={assets.find((asset) => asset.id === key)}></AssetIcon>;
+                  }}
+                </Select>
+              </FormField>
+            </Box>
+
             <AppButton primary onClick={() => fund()}>
               {isLogged ? 'Fund' : 'Connect & Fund'}
             </AppButton>

@@ -98,14 +98,18 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
         .reduce((total, reward) => total + reward, 0);
 
       const raisedCustom = props.raised.filter((token) => token.price === undefined);
+      let hasCustom = false;
       const customStr = raisedCustom
         .map((token) => {
           const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
+          if (raised > 0) {
+            hasCustom = true;
+          }
           return `${raised * percentage} ${token.name}`;
         })
         .reduce((total, reward) => total.concat(' ' + reward));
 
-      reward = `$${rewardUSD} + ${customStr}`;
+      reward = `${rewardUSD > 0 ? rewardUSD : '-'}${hasCustom ? ` + ${customStr}` : '-'}`;
     }
 
     return {
@@ -121,7 +125,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
   const widths = showReward ? ['50%', '25%', '25%'] : ['60%', '40%'];
 
   return (
-    <Box style={{ width: '100%', ...props.style }}>
+    <Box style={{ width: '100%', userSelect: 'none', ...props.style }}>
       <Box
         direction="row"
         style={{
@@ -160,15 +164,15 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
               padding: '10px 36px',
               backgroundImage: 'white',
             }}>
-            <Box direction="row" align="center" style={{ width: widths[0] }}>
+            <Box direction="row" align="center" style={{ width: widths[0], userSelect: 'text' }}>
               @{datum.user}
               {datum.badge ? <StatusGood style={{ marginLeft: '6px' }} color="#5762D5"></StatusGood> : <></>}
             </Box>
-            <Box direction="row" justify="center" style={{ width: widths[1] }}>
+            <Box direction="row" justify="center" style={{ width: widths[1], userSelect: 'text' }}>
               {datum.percentage}
             </Box>
             {showReward ? (
-              <Box direction="row" justify="center" style={{ width: widths[2] }}>
+              <Box direction="row" justify="center" style={{ width: widths[2], userSelect: 'text' }}>
                 {datum.reward}
               </Box>
             ) : (
