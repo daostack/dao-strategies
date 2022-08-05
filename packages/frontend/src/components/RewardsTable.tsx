@@ -1,7 +1,8 @@
+import { Page } from '@dao-strategies/core';
 import { SharesRead, TokenBalance } from '@dao-strategies/core';
 import { ethers } from 'ethers';
-import { Box, Spinner } from 'grommet';
-import { StatusGood } from 'grommet-icons';
+import { Box, BoxExtendedProps, Spinner } from 'grommet';
+import { FormNext, FormPrevious, StatusGood } from 'grommet-icons';
 import { FC } from 'react';
 import { IElement } from './styles/BasicElements';
 
@@ -14,10 +15,37 @@ interface Data {
   percentage: string;
 }
 
+interface IPageNumber extends BoxExtendedProps {
+  number: number;
+  selected?: boolean;
+}
+const PageNumber: FC<IPageNumber> = (props: IPageNumber) => {
+  return (
+    <Box
+      {...props}
+      style={{
+        ...props.style,
+        cursor: 'pointer',
+        height: '32px',
+        width: '32px',
+        backgroundColor: '#D9D9D9',
+        borderRadius: '8px',
+        fontSize: '14px',
+        fontWeight: props.selected ? 'bold' : 'normal',
+        userSelect: 'none',
+      }}
+      align="center"
+      justify="center">
+      {props.number}
+    </Box>
+  );
+};
+
 export interface RewardsTableI extends IElement {
   shares: SharesRead;
   showReward?: boolean;
   raised?: TokenBalance[];
+  updatePage: (page: Page) => void;
 }
 
 export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
@@ -31,6 +59,29 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
       </Box>
     );
   }
+
+  const hasNext =
+    props.shares.page.totalPages !== undefined && props.shares.page.number < props.shares.page.totalPages - 1;
+
+  const hasPrev = props.shares.page.totalPages !== undefined && props.shares.page.number > 0;
+
+  const nextPage = () => {
+    if (hasNext) {
+      props.updatePage({ ...props.shares.page, number: props.shares.page.number + 1 });
+    }
+  };
+
+  const prevPage = () => {
+    if (hasPrev) {
+      props.updatePage({ ...props.shares.page, number: props.shares.page.number - 1 });
+    }
+  };
+
+  const setPage = (number: number) => {
+    if (props.shares.page.totalPages !== undefined && number <= props.shares.page.totalPages) {
+      props.updatePage({ ...props.shares.page, number });
+    }
+  };
 
   const data: Data[] = Object.entries(shares.shares).map(([address, share]) => {
     const percentage = Math.floor(+ethers.utils.formatEther(share) * 100 * 100) / 100;
@@ -125,6 +176,25 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
             )}
           </Box>
         ))}
+      </Box>
+      <Box direction="row" justify="center" align="center" style={{ height: '60px' }}>
+        <Box style={{ marginRight: '12px', cursor: 'pointer' }} onClick={() => prevPage()}>
+          <FormPrevious></FormPrevious>
+        </Box>
+
+        {Array.from(Array(shares.page.totalPages).keys()).map((ix) => {
+          return (
+            <PageNumber
+              onClick={() => setPage(ix)}
+              style={{ marginRight: '8px' }}
+              key={ix}
+              number={ix + 1}
+              selected={shares.page.number === ix}></PageNumber>
+          );
+        })}
+        <Box style={{ marginLeft: '12px', cursor: 'pointer' }} onClick={() => nextPage()}>
+          <FormNext></FormNext>
+        </Box>
       </Box>
     </Box>
   );

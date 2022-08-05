@@ -1,19 +1,28 @@
 /* eslint-disable unused-imports/no-unused-vars-ts */
-import { Balances, Strategy_ID } from '@dao-strategies/core';
-import { BigNumber } from 'ethers';
+import {
+  Balances,
+  BalancesFloat,
+  normalizeShares,
+  Strategy_ID,
+  IStrategyComputation,
+} from '@dao-strategies/core';
+import random from 'random';
+import seedrandom from 'seedrandom';
 
-export const TEST_SHARES = {
-  user1: BigNumber.from('10000'),
-};
+random.use(seedrandom('0001'));
+const N = 100;
 
-export const StrategyComputationMockFunctions = {
-  runStrategy: (strategyId: Strategy_ID, params: any): Promise<Balances> => {
-    const balances: Balances = new Map();
+const userNames = Array.from(Array(N).keys()).map((e) => `user${e}`);
+const randomShare = random.uniform(0, 1);
 
-    Object.getOwnPropertyNames(TEST_SHARES).forEach((user: string) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      balances.set(user, TEST_SHARES[user]);
+export class StrategyComputationMock implements IStrategyComputation {
+  async runStrategy(strategyId: Strategy_ID, params: any): Promise<Balances> {
+    const shares: BalancesFloat = new Map();
+
+    userNames.forEach((user: string) => {
+      shares.set(user, randomShare());
     });
-    return Promise.resolve(balances);
-  },
-};
+
+    return Promise.resolve(normalizeShares(shares));
+  }
+}

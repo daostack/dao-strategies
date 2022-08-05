@@ -124,8 +124,8 @@ export class CampaignRepository {
         orderBy: {
           amount: 'desc',
         },
-        skip: page.skip,
-        take: page.take,
+        skip: page.number * page.perPage,
+        take: page.perPage,
       }),
       this.client.share.count({
         where: {
@@ -141,11 +141,13 @@ export class CampaignRepository {
       shares[share.account] = share.amount.toString();
     });
 
+    page.total = total;
+    page.totalPages = Math.floor(total / page.perPage);
+
     return {
       uri,
       shares,
       page,
-      total,
     };
   }
 

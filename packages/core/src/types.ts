@@ -12,8 +12,10 @@ export type SharesToAddresses = Map<
 >;
 
 export interface Page {
-  skip: number;
-  take: number;
+  number: number;
+  perPage: number;
+  total?: number;
+  totalPages?: number;
 }
 
 /** Necessary and sufficient properties needed to derive the URI */
@@ -64,7 +66,6 @@ export interface SharesRead {
   uri: string;
   shares: BalancesObject;
   page: Page;
-  total: number;
   details?: CampaignUriDetails;
 }
 

@@ -35,7 +35,7 @@ export const CampaignGuardian: FC<ICampaignAdmin> = (props: ICampaignAdmin) => {
   }
 
   const nLeafs = otherDetails.root ? otherDetails.root.nLeafs : 0;
-  const nReceivers = shares.total;
+  const nReceivers = shares.page && shares.page.total !== undefined ? shares.page.total : 0;
   const hasPending = otherDetails.publishInfo.status.validRoot !== otherDetails.publishInfo.status.pendingRoot;
 
   const info = {

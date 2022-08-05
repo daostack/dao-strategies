@@ -14,7 +14,8 @@ export const Address: FC<IAddress> = (props: IAddress) => {
     return <></>;
   }
 
-  const exploreAddress = ChainsDetails.chainOfId(props.chainId).exploreAddress;
+  const exploreAddress = ChainsDetails.chainOfId(props.chainId)?.exploreAddress;
+
   const length = props.address.length;
   const addressStr = `${props.address.toLowerCase().slice(0, 5)}...${props.address
     .toLowerCase()

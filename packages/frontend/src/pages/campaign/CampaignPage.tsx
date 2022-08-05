@@ -1,7 +1,7 @@
 import { Box, Paragraph, Spinner, Tabs, Tab, Layer, Text, Heading, GridSizeType } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { FC, useEffect, useState } from 'react';
-import { ChainsDetails, TokenBalance } from '@dao-strategies/core';
+import { ChainsDetails, TokenBalance, Page } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
@@ -28,6 +28,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
 
   const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails } = useCampaignContext();
+
+  const updatePage = (page: Page) => {};
 
   useEffect(() => {
     getShares();
@@ -168,7 +170,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
               shares={shares}
               showReward
               raised={otherDetails?.raised}
-              style={{ marginBottom: '36px' }}></RewardsTable>
+              style={{ marginBottom: '36px' }}
+              updatePage={updatePage}></RewardsTable>
           </AppCard>
         </>
       ) : (

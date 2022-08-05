@@ -5,7 +5,7 @@ import {
   CampaignCreateDetails,
   CampaignUriDetails,
   getCampaignUri,
-  StrategyComputation,
+  IStrategyComputation,
   Strategy_ID,
   bigIntToNumber,
   RootDetails,
@@ -69,7 +69,7 @@ export class CampaignService {
   constructor(
     protected campaignRepo: CampaignRepository,
     protected timeService: TimeService,
-    protected strategyComputation: StrategyComputation,
+    protected strategyComputation: IStrategyComputation,
     protected onChainService: OnChainService,
     protected config: CampaigServiceConfig
   ) {}
@@ -163,7 +163,7 @@ export class CampaignService {
    */
   async getSharesThrottled(
     uri: string,
-    page: Page = { skip: 0, take: 10 }
+    page: Page = { number: 0, perPage: 10 }
   ): Promise<SharesRead> {
     if (this.running.has(uri)) {
       return this.running.get(uri);
@@ -386,7 +386,7 @@ export class CampaignService {
 
   async getSharesPaginated(
     uri: string,
-    page: Page = { skip: 0, take: 10 }
+    page: Page = { number: 0, perPage: 10 }
   ): Promise<SharesRead> {
     return this.campaignRepo.getSharesPaginated(uri, page);
   }
