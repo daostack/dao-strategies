@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 
 import { DateManager } from '../utils/date.manager';
+import { useUserError } from './useErrorContext';
 
 /** now is asynchronously synchronizing with the oracle clock at creation. */
 export const useNow = (): {
   now: DateManager | undefined;
 } => {
   const [now, setNow] = useState<DateManager>();
+  const { showError } = useUserError();
   /**
    * Time management: frontend's time is syncronized with the oracle time.
    *
@@ -15,9 +17,14 @@ export const useNow = (): {
    */
   useEffect(() => {
     const _now = new DateManager();
-    _now.sync().then(() => {
-      setNow(_now);
-    });
+    _now
+      .sync()
+      .then(() => {
+        setNow(_now);
+      })
+      .catch((e) => {
+        showError(`Error fetching time from the oracle`);
+      });
   }, []);
 
   return {

@@ -16,6 +16,7 @@ import { truncate } from '../utils/ethers';
 
 import { AppButton } from './styles/BasicElements';
 import { AssetBalance } from './Assets';
+import { GithubVerification } from './GithubVerification';
 
 interface IParams {
   campaignAddress: string;
@@ -35,9 +36,10 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
   const { campaign } = useCampaignContext();
 
   const [showClaim, setShowClaim] = useState<boolean>(false);
+  const [showVerifyIdentity, setShowVerifyIdentity] = useState<boolean>(false);
+
   const { now } = useNow();
   const { user, connect, account } = useLoggedUser();
-  const navigate = useNavigate();
 
   const { claimInfo, check } = useClaimer(props.campaignAddress, user?.address);
   const campaignInstance = useCampaignInstance(props.campaignAddress);
@@ -95,14 +97,21 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
     );
   };
 
-  if (status.wasExecuted && !status.wasPublished) {
-    return <Text>No rewards published yet</Text>;
+  if (!status.wasExecuted) {
+    return <Text>Campaign not yet executed</Text>;
   }
 
   if (!status.isVerified) {
     return (
       <>
-        <AppButton onClick={() => navigate(RouteNames.Profile)}>Verify Github</AppButton>
+        {showVerifyIdentity ? (
+          <Layer onEsc={() => setShowVerifyIdentity(false)} onClickOutside={() => setShowVerifyIdentity(false)}>
+            <GithubVerification></GithubVerification>
+          </Layer>
+        ) : (
+          <></>
+        )}
+        <AppButton onClick={() => setShowVerifyIdentity(true)}>Verify Github</AppButton>
       </>
     );
   }
@@ -146,5 +155,9 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
     );
   }
 
-  return <></>;
+  return (
+    <Box pad="medium" style={{ textAlign: 'center' }}>
+      Your github account @{user.verified.github} is not eligible for claiming rewards out of this campaign.
+    </Box>
+  );
 };

@@ -78,6 +78,7 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ signature: data, github_username: handle }),
+      credentials: 'include',
     }).then((response) => {
       response.json().then((res: { address: string }) => {
         setVerifyinfSig(false);
@@ -92,6 +93,7 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ handle }),
+      credentials: 'include',
     }).then((response) => {
       response.json().then((res: { address: string }) => {
         if (res.address.toLowerCase() === user?.address.toLowerCase()) {

@@ -75,10 +75,15 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
   // };
 
   const connect = async () => {
-    const connectResult = await connectHook.connectAsync();
-    if (connectResult.connector != null) {
-      const signer = await connectResult.connector.getSigner();
-      checkAndLogin(signer);
+    try {
+      const connectResult = await connectHook.connectAsync();
+
+      if (connectResult.connector != null) {
+        const signer = await connectResult.connector.getSigner();
+        checkAndLogin(signer);
+      }
+    } catch (e) {
+      disconnect();
     }
   };
 

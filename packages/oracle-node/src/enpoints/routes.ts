@@ -117,14 +117,14 @@ export const Routes: RouteConfig[] = [
     route: '/user/verifyAddressOfGithub',
     controller: UserController,
     action: 'verifyAddressOfGithub',
-    protected: false,
+    protected: true,
   },
   {
     method: 'post',
     route: '/user/verifyGithubOfAddress',
     controller: UserController,
     action: 'verifyGithubOfAddress',
-    protected: false,
+    protected: true,
   },
   {
     method: 'post',

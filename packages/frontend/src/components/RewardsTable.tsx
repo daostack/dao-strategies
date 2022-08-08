@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import { Box, BoxExtendedProps, Spinner } from 'grommet';
 import { FormNext, FormPrevious, StatusGood } from 'grommet-icons';
 import { FC } from 'react';
+import { valueToString } from '../utils/general';
 import { IElement } from './styles/BasicElements';
 
 interface Data {
@@ -84,7 +85,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
   };
 
   const data: Data[] = Object.entries(shares.shares).map(([address, share]) => {
-    const percentage = Math.floor(+ethers.utils.formatEther(share) * 100 * 100) / 100;
+    const ratio = +ethers.utils.formatEther(share);
 
     let reward: string | undefined;
 
@@ -92,37 +93,39 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
       const raisedWithPrice = props.raised.filter((token) => token.price !== undefined);
       const rewardUSD = raisedWithPrice
         .map((token) => {
-          const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
-          return raised * percentage;
+          const raised = +ethers.utils.formatUnits(token.balance, token.decimals) * (token.price as number);
+          return raised * ratio;
         })
         .reduce((total, reward) => total + reward, 0);
 
       const raisedCustom = props.raised.filter((token) => token.price === undefined);
+
       let hasCustom = false;
+
       const customStr = raisedCustom
         .map((token) => {
           const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
           if (raised > 0) {
             hasCustom = true;
           }
-          return `${raised * percentage} ${token.name}`;
+          return `${valueToString(raised * ratio)} ${token.name}`;
         })
         .reduce((total, reward) => total.concat(' ' + reward));
 
-      reward = `${rewardUSD > 0 ? rewardUSD : '-'}${hasCustom ? ` + ${customStr}` : '-'}`;
+      reward = `${rewardUSD > 0 ? `~$${valueToString(rewardUSD)}` : '-'}${hasCustom ? ` + ${customStr}` : '-'}`;
     }
 
     return {
       id: address,
       user: address,
-      percentage: percentage.toString(),
+      percentage: valueToString(ratio * 100),
       reward,
       badge: true,
       info: '',
     };
   });
 
-  const widths = showReward ? ['50%', '25%', '25%'] : ['60%', '40%'];
+  const widths = showReward ? ['40%', '20%', '40%'] : ['60%', '40%'];
 
   return (
     <Box style={{ width: '100%', userSelect: 'none', ...props.style }}>
@@ -138,7 +141,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
         }}>
         <Box style={{ width: widths[0] }}>user handle</Box>
         <Box direction="row" justify="center" style={{ width: widths[1] }}>
-          score
+          score (%)
         </Box>
         {showReward ? (
           <Box direction="row" justify="center" style={{ width: widths[2] }}>

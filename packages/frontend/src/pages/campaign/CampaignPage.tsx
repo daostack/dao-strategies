@@ -19,6 +19,7 @@ import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
 import { theme } from '../../components/styles/themes';
 import { ClaimButton } from '../../components/ClaimRewards';
+import { ethers } from 'ethers';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -64,7 +65,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       : undefined;
 
   const state = (
-    <Box style={{ paddingBottom: '60px' }}>
+    <Box style={{ padding: '30px 0px 60px 0px' }}>
       <AppCallout>
         {campaign.executed ? (
           <Text>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Text>
@@ -146,7 +147,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       <BalanceCard title="Total Rewards" value={valueLocked} symbol="$"></BalanceCard>
       {customAsset ? (
         <>
-          <BalanceCard title="Custom Assets" value={customAsset.balance} coin={customAsset.name}></BalanceCard>
+          <BalanceCard
+            title="Custom Assets"
+            value={ethers.utils.formatUnits(customAsset.balance, customAsset.decimals)}
+            coin={customAsset.name}></BalanceCard>
         </>
       ) : (
         <></>
@@ -224,8 +228,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           Withdraw
         </AppButton>
       </Box>
-      {showFund ? (
-        <Box fill justify="center">
+      <Box fill justify="center">
+        {showFund ? (
           <FundCampaign
             onSuccess={() => {
               setShowFund(false);
@@ -234,10 +238,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             assets={assets}
             chainId={campaign.chainId}
             address={campaign.address}></FundCampaign>
-        </Box>
-      ) : (
-        <ClaimButton campaignAddress={campaign.address}></ClaimButton>
-      )}
+        ) : (
+          <ClaimButton campaignAddress={campaign.address}></ClaimButton>
+        )}
+      </Box>
     </AppCard>
   );
 

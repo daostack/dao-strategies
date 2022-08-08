@@ -113,12 +113,14 @@ export class UserController extends Controller {
   verifyAddressOfGithub(
     request: Request,
     _response: Response,
-    _next: NextFunction
+    _next: NextFunction,
+    loggedUser: string
   ): Promise<{ address: string }> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return this.manager.services.user.verifyAddressOfGithub(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      request.body.handle as string
+      request.body.handle as string,
+      loggedUser
     );
   }
 }

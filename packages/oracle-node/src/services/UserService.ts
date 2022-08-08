@@ -1,6 +1,7 @@
 import { Prisma, User } from '@prisma/client';
 import { verifyMessage } from 'ethers/lib/utils';
 import { Octokit } from 'octokit';
+import { DISABLE_VERIFICATION } from '../config';
 
 import { UserRepository } from '../repositories/UserRepository';
 
@@ -71,36 +72,44 @@ export class UserService {
   }
 
   async verifyAddressOfGithub(
-    gihub_username: string
+    gihub_username: string,
+    loggedUser: string
   ): Promise<{ address: string }> {
-    const { data: gists } = await this.octokit.rest.gists.listForUser({
-      username: gihub_username,
-      per_page: 3,
-    });
-
-    const ethAddressRegex = new RegExp('0x[a-fA-F0-9]{40}');
+    let valid = false;
     let readAddress: string | undefined = undefined;
 
-    /** check gist contents */
-    for await (const gist of gists) {
-      const { data: gistFull } = await this.octokit.rest.gists.get({
-        gist_id: gist.id,
+    if (!DISABLE_VERIFICATION) {
+      const { data: gists } = await this.octokit.rest.gists.listForUser({
+        username: gihub_username,
+        per_page: 3,
       });
 
-      Object.values(gistFull.files).forEach((file) => {
-        const found = ethAddressRegex.exec(file.content);
-        if (found.length > 0) {
-          readAddress = found[0].toString();
+      const ethAddressRegex = new RegExp('0x[a-fA-F0-9]{40}');
+
+      /** check gist contents */
+      for await (const gist of gists) {
+        const { data: gistFull } = await this.octokit.rest.gists.get({
+          gist_id: gist.id,
+        });
+
+        Object.values(gistFull.files).forEach((file) => {
+          const found = ethAddressRegex.exec(file.content);
+          if (found.length > 0) {
+            readAddress = found[0].toString();
+          }
+        });
+
+        /** must be verified by the logged user */
+        if (readAddress !== undefined) {
+          break;
         }
-      });
-
-      /** must be verified by the logged user */
-      if (readAddress !== undefined) {
-        break;
       }
-    }
 
-    const valid = readAddress !== undefined;
+      valid = readAddress !== undefined;
+    } else {
+      valid = true;
+      readAddress = loggedUser;
+    }
 
     if (valid) {
       /** only set verified github if signedGithub is already set and the same */
