@@ -162,11 +162,26 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
 interface INumberedRow extends IElement {
   number: number;
   text: React.ReactNode;
+  disabled?: boolean;
+  hideLine?: boolean;
 }
 
 export const NumberedRow: FC<INumberedRow> = (props: INumberedRow) => {
   return (
-    <Box direction="row">
+    <Box direction="row" style={{ position: 'relative' }}>
+      {props.disabled ? (
+        <Box
+          fill
+          style={{
+            zIndex: '2',
+            backgroundColor: 'rgba(153, 156, 154, 0.4)',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+          }}></Box>
+      ) : (
+        <></>
+      )}
       <Box style={{ width: '28px', marginRight: '24px' }}>
         <Box
           style={{
@@ -174,19 +189,23 @@ export const NumberedRow: FC<INumberedRow> = (props: INumberedRow) => {
             width: '24px',
             height: '24px',
             borderRadius: '12px',
-            backgroundColor: theme.buttonLightBorder,
-            color: theme.primary,
+            backgroundColor: props.disabled ? theme.primaryLight : theme.buttonLightBorder,
+            color: props.disabled ? '#6D6D6D' : theme.primary,
             textAlign: 'center',
           }}>
           {props.number}
         </Box>
         <Box fill style={{ padding: '8px 0px' }} align="center">
-          <Box
-            fill
-            style={{
-              width: '1.5px',
-              backgroundColor: '#ccc',
-            }}></Box>
+          {props.hideLine ? (
+            <></>
+          ) : (
+            <Box
+              fill
+              style={{
+                width: '1.5px',
+                backgroundColor: '#ccc',
+              }}></Box>
+          )}
         </Box>
       </Box>
       <Box fill>

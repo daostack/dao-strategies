@@ -15,16 +15,18 @@ export class UserController extends Controller {
   async me(
     request: Request,
     _response: Response,
-    _next: NextFunction
+    _next: NextFunction,
+    loggedUser: string | undefined
   ): Promise<LoggedUserDetails | undefined> {
     /* eslint-disable */
     if (!request.session.siwe) {
       return undefined;
     }
-    const address = request.session.siwe.address;
-    const user = await this.manager.services.user.get(address);
-    return { address: user.address, verified: { github: user.verifiedGithub } };
+
     /* eslint-enable */
+    return loggedUser
+      ? this.manager.services.user.getVerified(loggedUser)
+      : undefined;
   }
 
   nonce(
@@ -63,20 +65,12 @@ export class UserController extends Controller {
         );
       }
 
-      /** If signature is valid, add or create user */
-      const user = await this.manager.services.user.getOrCreate({
-        address: fields.address,
-      });
-
       /* eslint-disable */
       request.session.siwe = fields;
       request.session.cookie.expires = new Date(fields.expirationTime);
       return {
         valid: true,
-        user: {
-          address: user.address,
-          verified: { github: user.verifiedGithub },
-        },
+        user: await this.manager.services.user.getVerified(fields.address),
       };
     } catch (e) {
       request.session.siwe = null;

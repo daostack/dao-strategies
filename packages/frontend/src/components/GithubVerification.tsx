@@ -1,32 +1,55 @@
-import { Box, Heading } from 'grommet';
-import { FC, useState } from 'react';
+import { Box, Heading, Spinner } from 'grommet';
+import { FC, useEffect, useState } from 'react';
 import { useSignMessage } from 'wagmi';
-import { AppButton, AppInput, NumberedRow } from './styles/BasicElements';
+import { getGithubVerificationMessage } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { useLoggedUser } from '../hooks/useLoggedUser';
+
+import { AppButton, AppInput, NumberedRow } from './styles/BasicElements';
+import { useDebounce } from 'use-debounce';
 
 export interface IUserProfileProps {
   dum?: string;
 }
 
-const getMessage = (github_username: string) => {
-  return `Associate the github account "${github_username}" with this ethereum address`;
-};
+enum VerificationStatus {
+  empty = 0,
+  handleFound = 1,
+  gistFound = 2,
+  signatureVerified = 3,
+}
 
 export const GithubVerification: FC<IUserProfileProps> = () => {
   const { user, refresh } = useLoggedUser();
   const [handle, setHandle] = useState<string>('');
-  const [handleWasSet, setHandleWasSet] = useState<boolean>(false);
 
-  const [addressCopied, setAddressCopied] = useState<boolean>(false);
+  const [debouncedHandle] = useDebounce(handle, 1200);
+  const [checkingHandle, setCheckingHandle] = useState<boolean>(false);
+  const [githubProfile, setGithubProfile] = useState<any>();
 
-  const [verifyingSig, setVerifyinfSig] = useState<boolean>(false);
-  const [verifiedSig, setVerifidSig] = useState<boolean>(false);
+  useEffect(() => {
+    setCheckingHandle(true);
+    if (debouncedHandle !== '') {
+      fetch(ORACLE_NODE_URL + `/social/github/profile/${debouncedHandle}`, {
+        method: 'get',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      }).then((response) => {
+        response.json().then((data) => {
+          setCheckingHandle(false);
+          setGithubProfile(data);
+        });
+      });
+    } else {
+      setCheckingHandle(false);
+      setGithubProfile(undefined);
+    }
+  }, [debouncedHandle]);
 
-  const [verifying, setVerifying] = useState<boolean>(false);
-  const [verifyingError, setVerifyingError] = useState<boolean>(false);
-  const [verified, setVerified] = useState<boolean>(false);
+  const verified = user?.verified.github !== undefined;
+
+  const status: VerificationStatus = githubProfile === undefined ? 0 : 1;
 
   const { signMessage } = useSignMessage({
     onSuccess(data) {
@@ -35,24 +58,13 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
     },
   });
 
-  const isVerified = () => {
-    return false; //user !== undefined && user.verified.github != null && user.verified.github.trim() !== '';
-  };
-
   const isLogged = () => {
     return user !== undefined;
   };
 
-  const copyAddress = async () => {
-    if (user === undefined) throw new Error();
-    await navigator.clipboard.writeText(user.address);
-    setAddressCopied(true);
-  };
-
   const sign = async () => {
-    setVerifyinfSig(true);
     signMessage({
-      message: getMessage(handle),
+      message: getGithubVerificationMessage(handle),
     });
   };
 
@@ -71,15 +83,11 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
       body: JSON.stringify({ signature: data, github_username: handle }),
       credentials: 'include',
     }).then((response) => {
-      response.json().then((res: { address: string }) => {
-        setVerifyinfSig(false);
-        setVerifidSig(res.address.toLowerCase() === user?.address.toLowerCase());
-      });
+      response.json().then((res: { address: string }) => {});
     });
   };
 
   const verifyAddressOfGithub = () => {
-    setVerifying(true);
     fetch(ORACLE_NODE_URL + '/user/verifyAddressOfGithub', {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
@@ -88,11 +96,8 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
     }).then((response) => {
       response.json().then((res: { address: string }) => {
         if (res.address.toLowerCase() === user?.address.toLowerCase()) {
-          setVerifying(false);
-          setVerified(true);
           refresh();
         } else {
-          setVerifyingError(true);
         }
       });
     });
@@ -101,15 +106,17 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
   return (
     <>
       {isLogged() ? (
-        !isVerified() ? (
+        !verified ? (
           <Box pad="large">
             <Box style={{ paddingBottom: '40px' }}>
               <Heading size="small">Verify your Github account and start getting rewards!</Heading>
             </Box>
-            <NumberedRow number={1} text={<>Enter your github handle below.</>}>
+            <NumberedRow disabled={status < 0} number={1} text={<>Enter your github handle below.</>}>
               <AppInput value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></AppInput>
+              {checkingHandle ? <Spinner></Spinner> : <></>}
             </NumberedRow>
             <NumberedRow
+              disabled={status < 1}
               number={2}
               text={
                 <>
@@ -123,13 +130,16 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
                 </AppButton>
               </Box>
             </NumberedRow>
-            <NumberedRow number={3} text={<>Verify this github account with your ethererum wallet</>}>
+            <NumberedRow
+              hideLine
+              disabled={status < 2}
+              number={3}
+              text={<>Verify this github account with your ethererum wallet</>}>
               <AppButton primary onClick={verifyAddressOfGithub}>
-                {!verifying ? <>Verify</> : <>Verifying...</>}
+                Verify
               </AppButton>
             </NumberedRow>
 
-            {verifyingError ? <>Error verifying</> : <></>}
             {verified ? <>Verified</> : <></>}
 
             <br></br>

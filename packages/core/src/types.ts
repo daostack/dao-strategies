@@ -184,3 +184,9 @@ export type Strategy = {
 };
 
 export type { WorldConfig };
+
+export interface GithubProfile {
+  handle: string;
+  avatar_url: string;
+  url: string;
+}

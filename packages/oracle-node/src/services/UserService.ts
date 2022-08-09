@@ -31,6 +31,21 @@ export class UserService {
     return this.userRepo.get(address.toLowerCase());
   }
 
+  async getVerified(address: string): Promise<LoggedUserDetails | undefined> {
+    const user = await this.get(address);
+    return user
+      ? {
+          address: user.address,
+          verified: {
+            github:
+              user.signedGithub !== null && user.verifiedGithub !== null
+                ? user.verifiedGithub
+                : undefined,
+          },
+        }
+      : undefined;
+  }
+
   /** Sensitive method, call only after signature has been verified. */
   async getOrCreate(details: UserCreateDetails): Promise<User> {
     const exist = await this.exist(details.address);
@@ -105,22 +120,13 @@ export class UserService {
         }
       }
 
-      valid = readAddress !== undefined;
+      valid = readAddress !== undefined && readAddress === loggedUser;
     } else {
       valid = true;
       readAddress = loggedUser;
     }
 
     if (valid) {
-      /** only set verified github if signedGithub is already set and the same */
-      const user = await this.get(readAddress);
-      if (user.signedGithub !== gihub_username) {
-        throw new Error(
-          `Trying to verify github ${gihub_username} for address ${readAddress}, 
-          but that address current signed github account is ${user.signedGithub}`
-        );
-      }
-
       /** delete this verifiedGithub of any previously existing address*/
       await this.userRepo.clearVerifiedGithub(gihub_username);
       await this.userRepo.setVerifiedGithub(readAddress, gihub_username);

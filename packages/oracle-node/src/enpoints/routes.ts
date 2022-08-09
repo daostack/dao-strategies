@@ -127,10 +127,17 @@ export const Routes: RouteConfig[] = [
     protected: true,
   },
   {
-    method: 'post',
-    route: '/social/github/exist',
+    method: 'get',
+    route: '/social/github/repo/:org/:name',
     controller: SocialApiController,
     action: 'repoIsValid',
+    protected: false, // TODO, change to true
+  },
+  {
+    method: 'get',
+    route: '/social/github/profile/:handle',
+    controller: SocialApiController,
+    action: 'getGithubProfile',
     protected: false, // TODO, change to true
   },
 ];

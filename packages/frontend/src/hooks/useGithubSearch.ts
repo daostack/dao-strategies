@@ -21,7 +21,7 @@ export const useGithubSearch = (): {
   useEffect(() => {
     setLoading(true);
     if (debouncedQuery !== '') {
-      fetch(ORACLE_NODE_URL + `/search/github`, {
+      fetch(ORACLE_NODE_URL + `/social/github/searchRepo`, {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
