@@ -112,7 +112,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
         })
         .reduce((total, reward) => total.concat(' ' + reward));
 
-      reward = `${rewardUSD > 0 ? `~$${valueToString(rewardUSD)}` : '-'}${hasCustom ? ` + ${customStr}` : '-'}`;
+      reward = `${rewardUSD > 0 ? `~$${valueToString(rewardUSD)}` : '-'}${hasCustom ? ` + ${customStr}` : ''}`;
     }
 
     return {

@@ -45,7 +45,11 @@ export const AppButton = (props: IButton) => {
 
 export const AppForm = Form;
 
-export const AppInput = TextInput;
+export const AppInput = styled(TextInput)`
+  & {
+    height: 40px;
+  }
+`;
 
 export const AppTextArea = TextArea;
 
@@ -151,6 +155,44 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
       ) : (
         <></>
       )}
+    </Box>
+  );
+};
+
+interface INumberedRow extends IElement {
+  number: number;
+  text: React.ReactNode;
+}
+
+export const NumberedRow: FC<INumberedRow> = (props: INumberedRow) => {
+  return (
+    <Box direction="row">
+      <Box style={{ width: '28px', marginRight: '24px' }}>
+        <Box
+          style={{
+            flexShrink: 0,
+            width: '24px',
+            height: '24px',
+            borderRadius: '12px',
+            backgroundColor: theme.buttonLightBorder,
+            color: theme.primary,
+            textAlign: 'center',
+          }}>
+          {props.number}
+        </Box>
+        <Box fill style={{ padding: '8px 0px' }} align="center">
+          <Box
+            fill
+            style={{
+              width: '1.5px',
+              backgroundColor: '#ccc',
+            }}></Box>
+        </Box>
+      </Box>
+      <Box fill>
+        <Text>{props.text}</Text>
+        <Box style={{ padding: '16px 0px 40px 0px' }}>{props.children}</Box>
+      </Box>
     </Box>
   );
 };

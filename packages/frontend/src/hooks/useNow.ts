@@ -23,7 +23,7 @@ export const useNow = (): {
         setNow(_now);
       })
       .catch((e) => {
-        showError(`Error fetching time from the oracle`);
+        showError(`Error connecting to the oracle`);
       });
   }, []);
 
