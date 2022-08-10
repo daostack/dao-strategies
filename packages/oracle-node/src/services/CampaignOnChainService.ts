@@ -171,7 +171,7 @@ export class CampaignOnChainService {
     uri: string,
     root: string,
     address: string,
-    share: Share,
+    shares: Share[],
     campaignContract: Typechain.Campaign,
     chainId: number,
     customAssets: string[],
@@ -185,13 +185,18 @@ export class CampaignOnChainService {
     if (leaf == null) return undefined;
 
     /** protection: the shares in the root should not be other than the shares computed for this address */
+    const totalShares = shares.reduce(
+      (sum: bigint, share) => sum + share.amount,
+      BigInt(0)
+    );
+
     if (
-      !ethers.BigNumber.from(share.amount.toString()).eq(
+      !ethers.BigNumber.from(totalShares.toString()).eq(
         ethers.BigNumber.from(leaf.balance)
       )
     ) {
       throw new Error(
-        `Unexpected shares for account ${address}. Share was ${share.amount} but leaf is ${leaf.balance}`
+        `Unexpected shares for account ${address}. Share was ${totalShares} but leaf is ${leaf.balance}`
       );
     }
 

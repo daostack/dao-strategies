@@ -38,9 +38,7 @@ export class UserService {
           address: user.address,
           verified: {
             github:
-              user.signedGithub !== null && user.verifiedGithub !== null
-                ? user.verifiedGithub
-                : undefined,
+              user.verifiedGithub !== null ? user.verifiedGithub : undefined,
           },
         }
       : undefined;

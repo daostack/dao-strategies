@@ -130,15 +130,6 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
                 </AppButton>
               </Box>
             </NumberedRow>
-            <NumberedRow
-              hideLine
-              disabled={status < 2}
-              number={3}
-              text={<>Verify this github account with your ethererum wallet</>}>
-              <AppButton primary onClick={verifyAddressOfGithub}>
-                Verify
-              </AppButton>
-            </NumberedRow>
 
             {verified ? <>Verified</> : <></>}
 

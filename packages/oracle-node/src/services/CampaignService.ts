@@ -336,7 +336,7 @@ export class CampaignService {
         ([address, share]): Prisma.BalanceLeafCreateManyRootInput => {
           const proof = tree.getProof(address, share.amount);
           return {
-            account: share.account,
+            accounts: share.accounts,
             address,
             balance: share.amount.toString(),
             proof,
@@ -410,14 +410,15 @@ export class CampaignService {
     const sharesToAddresses: SharesToAddresses = new Map();
 
     /** filtering existing users here */
-    const usersInTree = new Map<string, string>();
+    const usersInTree = new Set<string>();
 
     if (latest !== null) {
       /** the tree starts with its previous version */
       latest.leafs.forEach((leaf) => {
-        usersInTree.set(leaf.account, leaf.address);
+        leaf.accounts.forEach((account) => usersInTree.add(account));
+
         sharesToAddresses.set(leaf.address, {
-          account: leaf.account,
+          accounts: leaf.accounts,
           amount: ethers.BigNumber.from(leaf.balance),
         });
       });
@@ -425,25 +426,30 @@ export class CampaignService {
 
     /** the new values are then added as long as they are not yet present (in terms of account) */
     extension.forEach((share, address) => {
-      const addressInTree = usersInTree.get(share.account);
-      if (addressInTree !== undefined) {
-        /** user should not be already in the tree (only new users can be appended) */
-        /** TODO: getNewSharesToAddresses should do the filtering, but we currently do it here
-         * for simplicity */
-        // throw new Error();
-      } else {
-        /** new users are added in addition to the latests */
-        sharesToAddresses.set(address, {
-          account: share.account,
-          amount: share.amount,
-        });
-      }
+      share.accounts.forEach((account) => {
+        if (usersInTree.has(account)) {
+          /** user should not be already in the tree (only new users can be appended) */
+          /** TODO: getNewSharesToAddresses should do the filtering, but we currently do it here
+           * for simplicity */
+          // throw new Error();
+        } else {
+          /** new users are added in addition to the latests */
+          /** one address may be the target of many accounts */
+          const current = sharesToAddresses.get(address);
+          const accounts = current ? current.accounts : [];
+
+          sharesToAddresses.set(address, {
+            accounts: accounts.concat([account]),
+            amount: share.amount,
+          });
+        }
+      });
     });
 
     return sharesToAddresses;
   }
 
-  getSharesOfAddress(uri: string, account: string): Promise<Share | null> {
+  getSharesOfAddress(uri: string, account: string): Promise<Share[] | null> {
     return this.campaignRepo.getSharesOfAddress(uri, account);
   }
 

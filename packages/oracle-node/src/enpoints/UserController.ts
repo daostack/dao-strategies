@@ -65,9 +65,15 @@ export class UserController extends Controller {
         );
       }
 
+      /** If signature is valid, add or create user */
+      await this.manager.services.user.getOrCreate({
+        address: fields.address,
+      });
+
       /* eslint-disable */
       request.session.siwe = fields;
       request.session.cookie.expires = new Date(fields.expirationTime);
+
       return {
         valid: true,
         user: await this.manager.services.user.getVerified(fields.address),

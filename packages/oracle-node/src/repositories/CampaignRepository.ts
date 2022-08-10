@@ -247,12 +247,25 @@ export class CampaignRepository {
       `;
 
     const shares: SharesToAddresses = new Map();
+
     result.forEach((share) => {
-      if (share.address != null)
+      if (share.address != null) {
+        /** one address can be the target of multiple accounts, shares accumulate */
+        const current = shares.get(share.address);
+
+        const newAmount = ethers.BigNumber.from(share.amount.toString());
+        const amount =
+          current !== undefined ? current.amount.add(newAmount) : newAmount;
+
+        const accounts = current
+          ? current.accounts.concat(share.account)
+          : [share.account];
+
         shares.set(share.address, {
-          amount: ethers.BigNumber.from(share.amount.toString()),
-          account: share.account,
+          amount,
+          accounts,
         });
+      }
     });
     return shares;
   }
@@ -260,7 +273,7 @@ export class CampaignRepository {
   async getSharesOfAddress(
     uri: string,
     address: string
-  ): Promise<Share | null> {
+  ): Promise<Share[] | null> {
     const result = await this.client.$queryRaw`
       SELECT account, address, amount FROM 
       (
@@ -273,9 +286,8 @@ export class CampaignRepository {
       WHERE address = ${address}
     `;
 
-    /* eslint-disable */
-    return result && (result as any).length > 0 ? result[0] : null;
-    /* eslint-enable */
+    /** one address can be the target of multiple accounts */
+    return result as Share[];
   }
 
   /** campaigns whose execution date is older and has not been executed */

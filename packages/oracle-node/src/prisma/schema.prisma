@@ -74,7 +74,7 @@ model BalanceLeaf {
   root            CampaignRoot  @relation(fields: [campaignId, order], references: [campaignId, order])
   campaignId      String
   order           Int           
-  account         String        // the social account of the leaf is used to prevent double payments
+  accounts        String[]       // the social account of the leaf is used to prevent double payments
   address         String
   balance         String
   proof           String[]      // Store the proofs so that they don't have to be recomputed eveytime they are needed

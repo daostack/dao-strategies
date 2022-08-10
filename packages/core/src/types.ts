@@ -8,7 +8,7 @@ export type BalancesFloat = Map<string, number>;
 export type Balances = Map<string, BigNumber>;
 export type SharesToAddresses = Map<
   string,
-  { account: string; amount: BigNumber }
+  { accounts: string[]; amount: BigNumber }
 >;
 
 export interface Page {
@@ -129,7 +129,7 @@ export interface CampaignClaimInfo {
   campaignAddress?: string;
   /** true if the campaign was already executed  */
   executed: boolean;
-  /** true if the campaign was already executed  */
+  /** true if the campaign was already published  */
   published: boolean;
   /** current claim info */
   current?: TreeClaimInfo;

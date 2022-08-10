@@ -64,7 +64,7 @@ CREATE TABLE "CampaignRoot" (
 CREATE TABLE "BalanceLeaf" (
     "campaignId" TEXT NOT NULL,
     "order" INTEGER NOT NULL,
-    "account" TEXT NOT NULL,
+    "accounts" TEXT[],
     "address" TEXT NOT NULL,
     "balance" TEXT NOT NULL,
     "proof" TEXT[],
