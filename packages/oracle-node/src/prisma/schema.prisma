@@ -46,10 +46,10 @@ enum CampaignState {
 
 model User {
   address         String    @id
-  verifiedGithub  String?
-  signedGithub    String?
   created         Campaign[]
 } 
+
+
 
 model Share {  
   @@id([campaignId, account])

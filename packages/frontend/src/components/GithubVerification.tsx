@@ -1,13 +1,13 @@
-import { Box, Heading, Spinner } from 'grommet';
+import { Box, Heading, Text } from 'grommet';
 import { FC, useEffect, useState } from 'react';
-import { useSignMessage } from 'wagmi';
-import { getGithubVerificationMessage } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 
 import { AppButton, AppInput, NumberedRow } from './styles/BasicElements';
 import { useDebounce } from 'use-debounce';
+import { GithubProfileCard } from './GithubProfileCard';
+import { GithubProfile } from '@dao-strategies/core';
 
 export interface IUserProfileProps {
   dum?: string;
@@ -25,8 +25,8 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
   const [handle, setHandle] = useState<string>('');
 
   const [debouncedHandle] = useDebounce(handle, 1200);
-  const [checkingHandle, setCheckingHandle] = useState<boolean>(false);
-  const [githubProfile, setGithubProfile] = useState<any>();
+  const [checkingHandle, setCheckingHandle] = useState<boolean>(true);
+  const [githubProfile, setGithubProfile] = useState<GithubProfile>();
 
   useEffect(() => {
     setCheckingHandle(true);
@@ -42,7 +42,7 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
         });
       });
     } else {
-      setCheckingHandle(false);
+      // setCheckingHandle(false);
       setGithubProfile(undefined);
     }
   }, [debouncedHandle]);
@@ -50,23 +50,6 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
   const verified = user?.verified.github !== undefined;
 
   const status: VerificationStatus = githubProfile === undefined ? 0 : 1;
-
-  const { signMessage } = useSignMessage({
-    onSuccess(data) {
-      // Verify signature when sign message succeeds
-      verifyGithubOfAddress(data);
-    },
-  });
-
-  const isLogged = () => {
-    return user !== undefined;
-  };
-
-  const sign = async () => {
-    signMessage({
-      message: getGithubVerificationMessage(handle),
-    });
-  };
 
   const goToGithub = async () => {
     window.open('https://gist.github.com/', '_blank');
@@ -76,71 +59,39 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
     setHandle(e.target.value);
   };
 
-  const verifyGithubOfAddress = (data: string) => {
-    fetch(ORACLE_NODE_URL + '/user/verifyGithubOfAddress', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ signature: data, github_username: handle }),
-      credentials: 'include',
-    }).then((response) => {
-      response.json().then((res: { address: string }) => {});
-    });
-  };
-
-  const verifyAddressOfGithub = () => {
-    fetch(ORACLE_NODE_URL + '/user/verifyAddressOfGithub', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ handle }),
-      credentials: 'include',
-    }).then((response) => {
-      response.json().then((res: { address: string }) => {
-        if (res.address.toLowerCase() === user?.address.toLowerCase()) {
-          refresh();
-        } else {
-        }
-      });
-    });
-  };
-
   return (
     <>
-      {isLogged() ? (
-        !verified ? (
-          <Box pad="large">
-            <Box style={{ paddingBottom: '40px' }}>
-              <Heading size="small">Verify your Github account and start getting rewards!</Heading>
-            </Box>
-            <NumberedRow disabled={status < 0} number={1} text={<>Enter your github handle below.</>}>
-              <AppInput value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></AppInput>
-              {checkingHandle ? <Spinner></Spinner> : <></>}
-            </NumberedRow>
-            <NumberedRow
-              disabled={status < 1}
-              number={2}
-              text={
-                <>
-                  Create a <b>public</b> gist on github pasting your etheruem address in it’s body.
-                </>
-              }>
-              <Box>
-                <AppInput value={user?.address}></AppInput>
-                <AppButton onClick={goToGithub} style={{ marginTop: '10px' }} primary>
-                  Create gist
-                </AppButton>
-              </Box>
-            </NumberedRow>
-
-            {verified ? <>Verified</> : <></>}
-
-            <br></br>
+      <Box pad="large">
+        <Box style={{ paddingBottom: '40px' }}>
+          <Heading size="small">Set the target address for your github rewards</Heading>
+          <Text style={{ padding: '0px 12px' }}>This must be done from github to prove you control that account</Text>
+        </Box>
+        <NumberedRow disabled={status < 0} number={1} text={<>Enter your github handle below.</>}>
+          <Box>
+            <AppInput value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></AppInput>
+            <GithubProfileCard></GithubProfileCard>
           </Box>
-        ) : (
-          <>Github Verified</>
-        )
-      ) : (
-        <>User not Logged</>
-      )}
+        </NumberedRow>
+        <NumberedRow
+          disabled={status < 1}
+          number={2}
+          text={
+            <>
+              Create a <b>public</b> gist on github pasting your etheruem address in it’s body.
+            </>
+          }>
+          <Box>
+            <AppInput value={user?.address}></AppInput>
+            <AppButton onClick={goToGithub} style={{ marginTop: '10px' }} primary>
+              Create gist
+            </AppButton>
+          </Box>
+        </NumberedRow>
+
+        {verified ? <>Verified</> : <></>}
+
+        <br></br>
+      </Box>
     </>
   );
 };

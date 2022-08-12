@@ -126,7 +126,6 @@ export class UserService {
 
     if (valid) {
       /** delete this verifiedGithub of any previously existing address*/
-      await this.userRepo.clearVerifiedGithub(gihub_username);
       await this.userRepo.setVerifiedGithub(readAddress, gihub_username);
     }
 
