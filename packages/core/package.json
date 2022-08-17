@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "rollup -w -c rollup.config.ts",
     "build": "rollup -c rollup.config.ts",
-    "test": "jest test/main.test.ts --runInBand",
+    "test-github": "jest test/github.test.ts --runInBand",
+    "test-twitter": "jest test/twitter.test.ts --runInBand",
     "build-test": "cd test && tsc --sourceMap test.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
@@ -17,7 +18,8 @@
     "ethereumjs-util": "^7.1.4",
     "ethers": "^5.5.4",
     "multiformats": "^9.6.5",
-    "octokit": "^1.7.1"
+    "octokit": "^1.7.1",
+    "twitter-api-v2": "^1.12.3"
   },
   "devDependencies": {
     "@rollup/plugin-json": "^4.1.0",
