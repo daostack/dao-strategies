@@ -41,7 +41,7 @@ describe(`\nTest strategy "${strategyName}"`, () => {
             strategies[strategyName as Strategy_ID].strategyInfo.exapmle_Params
         );
 
-        console.log(JSON.stringify(balancesToObject(shares)));
+        console.log('shares map size:', shares.size);
     }, 7200e3);
 
     test('check sum of shares equals 1e18', () => {
