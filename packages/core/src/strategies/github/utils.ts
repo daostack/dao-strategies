@@ -1,5 +1,4 @@
 import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
-import { paginateRest } from "@octokit/plugin-paginate-rest";
 
 import { World } from '../../world/World';
 
@@ -11,7 +10,6 @@ type ReactionsListData =
 
 type ContributorsListData =
   RestEndpointMethodTypes['repos']['listContributors']['response']['data'];
-
 
 export async function repoAvailable(
   world: World,
@@ -32,60 +30,62 @@ export async function getPrsInRepo(
   repo: { owner: string; repo: string },
   filter?: (pull: any) => boolean
 ): Promise<PullRequestListData> {
-  let allPulls: PullRequestListData = [];
+  const allPulls: PullRequestListData = [];
 
-  let firstReq = await world.github.rest.pulls.list({
+  const firstReq = await world.github.rest.pulls.list({
     ...repo,
     state: 'all',
     per_page: 100,
   });
 
-  if (firstReq.headers.link == undefined) { // no pagination needed
-    firstReq.data.forEach(pull => {
-      if (filter != undefined) { // filter pull requests
+  if (firstReq.headers.link === undefined) {
+    // no pagination needed
+    firstReq.data.forEach((pull) => {
+      if (filter !== undefined) {
+        // filter pull requests
         if (filter(pull)) {
           allPulls.push(pull);
         }
-      }
-      else {
+      } else {
         allPulls.push(pull);
       }
     });
-  }
-  else {
-    let numPagesReg = firstReq.headers.link?.match(/<.*page=(\d+).*>; rel="last"/);
-    if (numPagesReg != undefined && numPagesReg != null) {
-      let numPages: number = Number(numPagesReg[1]);
-      console.log("Num Pages:", numPages);
-      let reqs = [];
+  } else {
+    const numPagesReg = firstReq.headers.link?.match(
+      /<.*page=(\d+).*>; rel="last"/
+    );
+    if (numPagesReg !== undefined && numPagesReg != null) {
+      const numPages: number = Number(numPagesReg[1]);
+      console.log('Num Pages:', numPages);
+      const reqs = [];
       reqs.push(firstReq);
       for (let i = 2; i < numPages; i++) {
-        reqs.push(world.github.rest.pulls.list({
-          ...repo,
-          state: 'all',
-          per_page: 100,
-          page: i
-        }));
+        reqs.push(
+          world.github.rest.pulls.list({
+            ...repo,
+            state: 'all',
+            per_page: 100,
+            page: i,
+          })
+        );
       }
 
-      await Promise.all(reqs)
-        .then(responses => {
-          for (let response of responses) {
-            for (let pull of response.data) {
-              if (filter != undefined) { // filter pull requests
-                if (filter(pull)) {
-                  allPulls.push(pull);
-                }
-              }
-              else {
+      await Promise.all(reqs).then((responses) => {
+        for (const response of responses) {
+          for (const pull of response.data) {
+            if (filter !== undefined) {
+              // filter pull requests
+              if (filter(pull)) {
                 allPulls.push(pull);
               }
+            } else {
+              allPulls.push(pull);
             }
           }
-        })
-    }
-    else {
-      throw new Error("Error: cannot paginate all pull requests");
+        }
+      });
+    } else {
+      throw new Error('Error: cannot paginate all pull requests');
     }
   }
 
@@ -104,7 +104,6 @@ export async function getRepoContributors(
       per_page: 100,
     }
   );
-
 
   // iterate through each response
   for await (const { data: contibutors } of iterator) {

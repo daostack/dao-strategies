@@ -12,6 +12,7 @@
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
   },
   "dependencies": {
+    "@octokit/plugin-paginate-rest": "^4.0.0",
     "@octokit/plugin-rest-endpoint-methods": "^5.13.0",
     "@wagmi/core": "^0.4.4",
     "ethereum-multicall": "^2.14.0",

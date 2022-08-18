@@ -17,17 +17,22 @@ if (strategyName == undefined) {
 
 describe(`\nTest strategy "${strategyName}"`, () => {
 
-    let token: string | undefined;
+    let githubToken: string | undefined;
+    let twitterBearerToken: string | undefined;
     let config: WorldConfig;
     let strategyComp: StrategyComputation;
     let shares: Balances;
 
     test('init', () => {
-        token = process.env.GITHUB_TOKEN;
-        if (token == undefined) {
+        githubToken = process.env.GITHUB_TOKEN;
+        twitterBearerToken = process.env.TWITTER_BEARER_TOKEN;
+        if (githubToken == undefined) {
             throw 'Github token not defined';
         }
-        config = { GITHUB_TOKEN: token as string };
+        if (twitterBearerToken == undefined) {
+            throw 'Twitter bearer token not defined';
+        }
+        config = { GITHUB_TOKEN: githubToken as string, TWITTER_BEARER_TOKEN: twitterBearerToken as string };
         strategyComp = new StrategyComputation(config);
     });
 

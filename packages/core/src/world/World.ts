@@ -1,5 +1,5 @@
+import { paginateRest } from '@octokit/plugin-paginate-rest';
 import { Octokit } from 'octokit';
-import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { TwitterApi } from 'twitter-api-v2';
 
 export interface WorldConfig {
