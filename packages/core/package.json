@@ -43,6 +43,9 @@
     "ts-jest": "^28.0.2",
     "typescript": "^4.5.5"
   },
+  "browser": {
+    "twitter-api-v2": false
+  },
   "main": "dist/dao-strategies-core.umd.js",
   "module": "dist/dao-strategies-core.es5.js",
   "typings": "dist/types/dao-strategies-core.d.ts",
