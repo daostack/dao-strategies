@@ -5,7 +5,7 @@ import {
   getRepoContributors,
   getPullReactions,
   repoAvailable,
-  toTimeStamp
+  toTimeStamp,
 } from '../utils';
 
 interface Params {
@@ -13,13 +13,16 @@ interface Params {
   timeRange: { start: number; end: number };
 }
 
-export const strategyFunc: StrategyFunc = async (world: World, params: Params) => {
+export const strategyFunc: StrategyFunc = async (
+  world: World,
+  params: Params
+) => {
   if (params.timeRange.start >= params.timeRange.end) {
     throw new Error('time params incorrect: start must be smaller than end');
   }
 
   const reactionsPerContributor = new Map<string, Array<number>>();
-  let contributors = new Set<string>();
+  const contributors = new Set<string>();
 
   // get all contributors in the repositories
   for (const repo of params.repositories) {
@@ -30,7 +33,7 @@ export const strategyFunc: StrategyFunc = async (world: World, params: Params) =
 
     const repoContributors = await getRepoContributors(world, repo);
     for (const contributor of repoContributors) {
-      if (contributor.login != null && contributor.login != undefined)
+      if (contributor.login != null && contributor.login !== undefined)
         contributors.add(contributor.login);
     }
   }
@@ -39,12 +42,12 @@ export const strategyFunc: StrategyFunc = async (world: World, params: Params) =
     // get all pulls that were merged at the specified time range
     const allPulls = await getPrsInRepo(world, repo, (pull) => {
       if (
-        pull.merged_at != null &&
-        params.timeRange.start <= toTimeStamp(pull.merged_at) &&
-        params.timeRange.end >= toTimeStamp(pull.merged_at)) {
+        (pull.merged_at as string) != null &&
+        params.timeRange.start <= toTimeStamp(pull.merged_at as string) &&
+        params.timeRange.end >= toTimeStamp(pull.merged_at as string)
+      ) {
         return true;
-      }
-      else {
+      } else {
         return false;
       }
     });
@@ -63,10 +66,10 @@ export const strategyFunc: StrategyFunc = async (world: World, params: Params) =
         if (
           reaction.user != null && // only reactions by users
           contributors.has(reaction.user.login) && // only reactions by contributors
-          (reaction.content == '+1' ||
-            reaction.content == 'hooray' ||
-            reaction.content == 'heart' ||
-            reaction.content == 'rocket') && // only "thumbs up", "rocket", "heart" or "celebration" reactions 
+          (reaction.content === '+1' ||
+            reaction.content === 'hooray' ||
+            reaction.content === 'heart' ||
+            reaction.content === 'rocket') && // only "thumbs up", "rocket", "heart" or "celebration" reactions
           !reacted.has(reaction.user.login) // one reaction per contributor
         ) {
           reactionsNum += 1;
@@ -104,4 +107,3 @@ export const strategyFunc: StrategyFunc = async (world: World, params: Params) =
 
   return scores;
 };
-
