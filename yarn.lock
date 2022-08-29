@@ -1803,6 +1803,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@dao-strategies/core@workspace:packages/core"
   dependencies:
+    "@octokit/plugin-paginate-rest": ^4.0.0
     "@octokit/plugin-rest-endpoint-methods": ^5.13.0
     "@rollup/plugin-json": ^4.1.0
     "@types/jest": ^27.5.1
@@ -1828,6 +1829,7 @@ __metadata:
     rollup-plugin-typescript2: ^0.31.2
     temp-dir: ^2.0.0
     ts-jest: ^28.0.2
+    twitter-api-v2: ^1.12.3
     typescript: ^4.5.5
   languageName: unknown
   linkType: soft
@@ -3558,6 +3560,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@octokit/openapi-types@npm:^13.1.0":
+  version: 13.1.0
+  resolution: "@octokit/openapi-types@npm:13.1.0"
+  checksum: a44017cbf0e168a1fd4a0460a32842f50c08a29e364b49064529d08c2332594ee45a8c559241914b430820394a3858c82f2f962ddf7002f24e297a324804211a
+  languageName: node
+  linkType: hard
+
 "@octokit/plugin-paginate-rest@npm:^2.13.3, @octokit/plugin-paginate-rest@npm:^2.18.0":
   version: 2.21.3
   resolution: "@octokit/plugin-paginate-rest@npm:2.21.3"
@@ -3566,6 +3575,17 @@ __metadata:
   peerDependencies:
     "@octokit/core": ">=2"
   checksum: acf31de2ba4021bceec7ff49c5b0e25309fc3c009d407f153f928ddf436ab66cd4217344138378d5523f5fb233896e1db58c9c7b3ffd9612a66d760bc5d319ed
+  languageName: node
+  linkType: hard
+
+"@octokit/plugin-paginate-rest@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@octokit/plugin-paginate-rest@npm:4.0.0"
+  dependencies:
+    "@octokit/types": ^7.0.0
+  peerDependencies:
+    "@octokit/core": ">=4"
+  checksum: a3fbc1d540cc919df8935dea88b36d59ae85f417713476d8679f1cf8b733cfb44b96d3020094bd7f8daa7b84e4ac9b8403c1cdad323289d586fdb2ed1dcae7c0
   languageName: node
   linkType: hard
 
@@ -3659,6 +3679,15 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": ^12.10.0
   checksum: e8854fefd24003423bb03c3530449d1b390d340dc21f078a34adfa89a356138e9ab8f02493c6aa1e1bd101f630658dce24877e0615c130911fac8adc721eac42
+  languageName: node
+  linkType: hard
+
+"@octokit/types@npm:^7.0.0":
+  version: 7.1.0
+  resolution: "@octokit/types@npm:7.1.0"
+  dependencies:
+    "@octokit/openapi-types": ^13.1.0
+  checksum: d60b6b94b0fc851c2de99cabfd709810ff539ea5461ccff6bc8f4af69341fcabdee7ee983eb6a2054957696c0d59afcf71f7792cec8d1daee08b1845024c7125
   languageName: node
   linkType: hard
 
@@ -26533,6 +26562,13 @@ __metadata:
   version: 1.0.3
   resolution: "tweetnacl@npm:1.0.3"
   checksum: e4a57cac188f0c53f24c7a33279e223618a2bfb5fea426231991652a13247bea06b081fd745d71291fcae0f4428d29beba1b984b1f1ce6f66b06a6d1ab90645c
+  languageName: node
+  linkType: hard
+
+"twitter-api-v2@npm:^1.12.3":
+  version: 1.12.3
+  resolution: "twitter-api-v2@npm:1.12.3"
+  checksum: ec6d08a6c01e26cb99e3d6bffe7bb4498ec0d985e2ad19158141aecde433fc12649892e5de26701ad78bf291f700c4dc3720aef3f5fb59be74b7214a167a9d24
   languageName: node
   linkType: hard
 

@@ -9,6 +9,7 @@ require('dotenv').config();
 
 export const worldConfig: WorldConfig = {
   GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+  TWITTER_BEARER_TOKEN: process.env.TWITTER_BEARER_TOKEN,
 };
 
 export const port = process.env.PORT;
