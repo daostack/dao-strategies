@@ -35,8 +35,6 @@ CREATE TABLE "Campaign" (
 -- CreateTable
 CREATE TABLE "User" (
     "address" TEXT NOT NULL,
-    "verifiedGithub" TEXT,
-    "signedGithub" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("address")
 );

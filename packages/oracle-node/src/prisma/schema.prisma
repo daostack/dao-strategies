@@ -49,7 +49,15 @@ model User {
   created         Campaign[]
 } 
 
-
+// A table that stores the verified link between a user from a given platform to a user of another platform
+// with a given intent. 
+model CrossVerification {
+  @@id([from, to, intent])
+  from            String
+  to              String
+  intent          String
+  proof           String
+}
 
 model Share {  
   @@id([campaignId, account])

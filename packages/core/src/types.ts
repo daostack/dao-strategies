@@ -190,3 +190,16 @@ export interface GithubProfile {
   avatar_url: string;
   url: string;
 }
+
+/** should be the same as Primsa.CrossVerification */
+export interface Verification {
+  from: string;
+  to: string;
+  intent: string;
+  proof: string;
+}
+
+export interface LoggedUserDetails {
+  address: string;
+  verifications: Verification[];
+}

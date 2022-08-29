@@ -1,9 +1,10 @@
+import { GithubProfile } from '@dao-strategies/core';
 import { Box } from 'grommet';
 import { FC } from 'react';
 import { IElement } from './styles/BasicElements';
 
 interface IGithubProfile extends IElement {
-    profile?: 
+  profile?: GithubProfile;
 }
 
 export const GithubProfileCard: FC<IGithubProfile> = (props: IGithubProfile) => {

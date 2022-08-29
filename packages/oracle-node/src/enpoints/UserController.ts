@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { generateNonce, SiweMessage } from 'siwe';
+import { LoggedUserDetails } from '@dao-strategies/core';
 
 import { ServiceManager } from '../service.manager';
-import { LoggedUserDetails } from '../services/UserService';
 
 import { Controller } from './Controller';
 
@@ -96,28 +96,14 @@ export class UserController extends Controller {
     /* eslint-enable */
   }
 
-  verifyGithubOfAddress(
-    request: Request,
-    _response: Response,
-    _next: NextFunction
-  ): Promise<{ address: string }> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return this.manager.services.user.verifyGithubOfAddress(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      request.body.signature as string,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      request.body.github_username as string
-    );
-  }
-
-  verifyAddressOfGithub(
+  checkVerifications(
     request: Request,
     _response: Response,
     _next: NextFunction,
     loggedUser: string
-  ): Promise<{ address: string }> {
+  ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return this.manager.services.user.verifyAddressOfGithub(
+    return this.manager.services.user.checkVerifications(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       request.body.handle as string,
       loggedUser

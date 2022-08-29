@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma, User } from '@prisma/client';
+import { PrismaClient, Prisma, User, CrossVerification } from '@prisma/client';
 
 export class UserRepository {
   constructor(protected client: PrismaClient) {}
@@ -13,52 +13,27 @@ export class UserRepository {
     return this.client.user.findUnique({ where: { address: address } });
   }
 
-  async clearVerifiedGithub(github_username: string): Promise<void> {
-    await this.client.user.updateMany({
-      where: {
-        verifiedGithub: github_username,
-      },
-      data: {
-        verifiedGithub: '',
-      },
-    });
-  }
-
   async exist(address: string): Promise<boolean> {
     return this.client.user
       .findFirst({ where: { address: address } })
       .then(Boolean);
   }
 
-  async setVerifiedGithub(
-    address: string,
-    github_username: string
-  ): Promise<User> {
-    return this.client.user.update({
-      where: {
-        address: address.toLowerCase(),
-      },
-      data: {
-        verifiedGithub: github_username,
-      },
-    });
-  }
-
-  async setSignedGithub(
-    address: string,
-    github_username: string
-  ): Promise<User> {
-    return this.client.user.update({
-      where: {
-        address: address.toLowerCase(),
-      },
-      data: {
-        signedGithub: github_username,
-      },
-    });
-  }
-
   async deleteAll(): Promise<void> {
     await this.client.user.deleteMany();
+  }
+
+  async addVerification(verification: CrossVerification): Promise<void> {
+    await this.client.crossVerification.create({ data: verification });
+  }
+
+  async getVerificationsTo(address: string): Promise<CrossVerification[]> {
+    return this.client.crossVerification.findMany({
+      where: {
+        to: {
+          endsWith: address,
+        },
+      },
+    });
   }
 }
