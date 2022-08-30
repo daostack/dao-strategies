@@ -7,6 +7,7 @@ import {
   SharesRead,
   BalancesObject,
   Page,
+  VerificationIntent,
 } from '@dao-strategies/core';
 import {
   PrismaClient,
@@ -236,14 +237,15 @@ export class CampaignRepository {
   ): Promise<SharesToAddresses> {
     // TODO: filter existing accounts
     const result: AddressShares[] = await this.client.$queryRaw`
-      SELECT account, address, amount FROM 
+      SELECT shares.account, crossver.to as address, shares.amount FROM 
       (
         SELECT * FROM public."Share" 
         WHERE "campaignId" = ${uri}
       ) as shares
       LEFT JOIN 
-      public."User" 
-      ON shares.account = "verifiedGithub"
+        public."CrossVerification" as crossver
+      ON shares.account = "from"
+	    WHERE crossver.intent = ${VerificationIntent.SEND_REWARDS}
       `;
 
     const shares: SharesToAddresses = new Map();

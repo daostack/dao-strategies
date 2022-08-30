@@ -65,6 +65,7 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       }).then((response) => {
         response.json().then((data) => {
           setReadingGists(false);

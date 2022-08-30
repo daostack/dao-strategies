@@ -1,3 +1,4 @@
+import { VerificationIntent } from '@dao-strategies/core';
 import { PrismaClient, Prisma, User, CrossVerification } from '@prisma/client';
 
 export class UserRepository {
@@ -34,7 +35,19 @@ export class UserRepository {
       },
     });
 
+    const uniqueIntents = [VerificationIntent.SEND_REWARDS];
+
     if (current === null) {
+      /** delete previous verifications if intent must be unique */
+      if (uniqueIntents.includes(verification.intent as VerificationIntent)) {
+        await this.client.crossVerification.deleteMany({
+          where: {
+            from: verification.from,
+            intent: verification.intent,
+          },
+        });
+      }
+
       await this.client.crossVerification.create({ data: verification });
     }
   }

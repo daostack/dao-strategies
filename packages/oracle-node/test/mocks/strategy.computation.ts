@@ -9,10 +9,11 @@ import {
 import random from 'random';
 import seedrandom from 'seedrandom';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 random.use(seedrandom('0001'));
-const N = 100;
+const N = 90;
 
-const userNames = Array.from(Array(N).keys()).map((e) => `user${e}`);
+const userNames = Array.from(Array(N).keys()).map((e) => `github:user${e}`);
 const randomShare = random.uniform(0, 1);
 
 export class StrategyComputationMock implements IStrategyComputation {

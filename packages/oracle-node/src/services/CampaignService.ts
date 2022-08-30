@@ -99,7 +99,7 @@ export class CampaignService {
         uri,
         nonce: details.nonce,
         execDate: details.execDate,
-        stratID: details.strategyID as Strategy_ID,
+        stratID: details.strategyID,
         stratParamsStr: JSON.stringify(details.strategyParams),
         registered: false,
         executed: false,
@@ -145,7 +145,7 @@ export class CampaignService {
     await this.campaignRepo.setRunning(campaign.uri, true);
 
     const shares = await this.runStrategy(
-      details.strategyID as Strategy_ID,
+      details.strategyID,
       details.strategyParams
     );
 
@@ -325,7 +325,11 @@ export class CampaignService {
 
       const balances: Balances = new Map();
       shares.forEach((share, address) => {
-        balances.set(address, share.amount);
+        const addressParts = address.split(':');
+        if (addressParts[0] !== 'ethereum-all') {
+          throw new Error('Not yet supporting chain specific addresses. Soon');
+        }
+        balances.set(addressParts[1], share.amount);
       });
 
       const tree = new BalanceTree(balances);
@@ -334,7 +338,8 @@ export class CampaignService {
       /** compute proofs */
       const leafs = Array.from(shares.entries()).map(
         ([address, share]): Prisma.BalanceLeafCreateManyRootInput => {
-          const proof = tree.getProof(address, share.amount);
+          const addressParts = address.split(':');
+          const proof = tree.getProof(addressParts[1], share.amount);
           return {
             accounts: share.accounts,
             address,
