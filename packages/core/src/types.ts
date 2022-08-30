@@ -189,6 +189,8 @@ export interface GithubProfile {
   handle: string;
   avatar_url: string;
   url: string;
+  name?: string;
+  bio?: string;
 }
 
 /** should be the same as Primsa.CrossVerification */

@@ -17,7 +17,7 @@ const imageAndText = (url: string | ReactNode, text: string) => {
 };
 
 export const LoggedUser: FC = () => {
-  const { account, connect, startLogout, user } = useLoggedUser();
+  const { account, connect, startLogout, githubAccount } = useLoggedUser();
   const [showLinkGithub, setShowLinkGithub] = useState<boolean>(false);
 
   if (account === undefined) {
@@ -31,11 +31,11 @@ export const LoggedUser: FC = () => {
   const option = (key: number) => {
     switch (key) {
       case 0:
-        return user && user.verified.github != null ? (
-          <Box pad="small">{imageAndText('/images/Github.png', `@${user.verified.github}`)}</Box>
+        return githubAccount ? (
+          <Box pad="small">{imageAndText('/images/Github.png', `@${githubAccount}`)}</Box>
         ) : (
           <Box onClick={() => setShowLinkGithub(true)} pad="small">
-            {imageAndText('/images/Github.png', 'Link Github Account')}
+            {imageAndText('/images/Github.png', 'link account')}
           </Box>
         );
       case 1:

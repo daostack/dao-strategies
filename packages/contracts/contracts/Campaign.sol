@@ -151,12 +151,13 @@ contract Campaign is Initializable, ReentrancyGuard {
         address account,
         uint256 share,
         bytes32[] calldata proof,
-        address[] calldata assets
+        address[] calldata assets,
+        address target
     ) external {
         verifyShares(account, share, proof);
 
         for (uint8 ix = 0; ix < assets.length; ix++) {
-            _claim(account, share, assets[ix]);
+            _claim(account, share, assets[ix], msg.sender, target);
         }
     }
 
@@ -164,14 +165,20 @@ contract Campaign is Initializable, ReentrancyGuard {
     function _claim(
         address account,
         uint256 share,
-        address asset
+        address asset,
+        address sender,
+        address target
     ) private {
         uint256 reward = rewardsAvailableToClaimer(account, share, asset);
 
         claimed[asset][account] += reward;
         totalClaimed[asset] += reward;
 
-        transferAssetOut(account, reward, asset);
+        if (sender == account && target != address(0)) {
+            transferAssetOut(target, reward, asset);
+        } else {
+            transferAssetOut(account, reward, asset);
+        }
 
         emit Claim(account, share, reward, asset);
     }

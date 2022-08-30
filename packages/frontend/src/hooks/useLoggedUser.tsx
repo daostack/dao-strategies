@@ -1,19 +1,14 @@
+import { LoggedUserDetails, VerificationIntent } from '@dao-strategies/core';
 import { InjectedConnector } from '@wagmi/core';
 import { Signer } from 'ethers';
 import { ReactNode, createContext, useContext, FC, useState, useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect, useSigner } from 'wagmi';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { checkLoggedUser, logout, signInWithEthereum } from '../utils/loggedUser';
-
-export interface UserDetails {
-  address: string;
-  verified: {
-    github: string;
-  };
-}
 
 export type LoggedUserContextType = {
   account: string | undefined;
-  user: UserDetails | undefined;
+  user: LoggedUserDetails | undefined;
+  githubAccount: string | undefined;
   checkAndLogin: (signer: Signer) => void;
   connect: () => void;
   startLogout: () => void;
@@ -34,7 +29,7 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
   const { disconnect } = useDisconnect();
 
   const { address, isConnecting } = useAccount();
-  const [user, setUser] = useState<UserDetails | undefined>(undefined);
+  const [user, setUser] = useState<LoggedUserDetails | undefined>(undefined);
 
   const checkAndLogin = async (signer: Signer) => {
     let userRead = await checkLoggedUser();
@@ -106,9 +101,26 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
         : undefined
       : undefined;
 
+  /**
+   * for exernal accounts that are logged we consider the account verified if they have already
+   * had a github account that setup them as the target of rewards
+   */
+  const verification =
+    user && accountAddress
+      ? user.verifications.find((v) => v.intent === VerificationIntent.SEND_REWARDS || v.to.endsWith(accountAddress))
+      : undefined;
+
   return (
     <LoggedUserContextValue.Provider
-      value={{ account: accountAddress, checkAndLogin, user, connect, startLogout, refresh }}>
+      value={{
+        account: accountAddress,
+        githubAccount: verification ? verification.from : undefined,
+        checkAndLogin,
+        user,
+        connect,
+        startLogout,
+        refresh,
+      }}>
       {props.children}
     </LoggedUserContextValue.Provider>
   );

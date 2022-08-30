@@ -40,6 +40,16 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
+CREATE TABLE "CrossVerification" (
+    "from" TEXT NOT NULL,
+    "to" TEXT NOT NULL,
+    "intent" TEXT NOT NULL,
+    "proof" TEXT NOT NULL,
+
+    CONSTRAINT "CrossVerification_pkey" PRIMARY KEY ("from","to","intent")
+);
+
+-- CreateTable
 CREATE TABLE "Share" (
     "account" TEXT NOT NULL,
     "amount" BIGINT NOT NULL,

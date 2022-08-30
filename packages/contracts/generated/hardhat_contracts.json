@@ -328,6 +328,11 @@
                   "internalType": "address[]",
                   "name": "assets",
                   "type": "address[]"
+                },
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
                 }
               ],
               "name": "claim",

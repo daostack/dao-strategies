@@ -1,6 +1,5 @@
 export enum VerificationIntent {
   SEND_REWARDS = 'SEND_REWARDS',
-  SEND_CAMPAIGN_REWARDS = 'SEND_CAMPAIGN_REWARDS',
 }
 
 const rewardIntro =

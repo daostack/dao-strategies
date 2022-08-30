@@ -1,3 +1,4 @@
+import { Verification } from '@dao-strategies/core';
 import { VerificationIntent, LoggedUserDetails } from '@dao-strategies/core';
 import { CrossVerification, Prisma, User } from '@prisma/client';
 
@@ -43,7 +44,7 @@ export class UserService {
   async checkVerifications(
     github_username: string,
     loggedUser: string
-  ): Promise<void> {
+  ): Promise<Verification[]> {
     const verifications = !DISABLE_VERIFICATION
       ? await this.verifications.getVericationsGithub(
           github_username,
@@ -63,6 +64,8 @@ export class UserService {
         return this.userRepo.addVerification(verfication);
       })
     );
+
+    return verifications;
   }
 
   /** Sensitive method, call only after signature has been verified. */

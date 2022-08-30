@@ -1,9 +1,9 @@
+import { LoggedUserDetails } from '@dao-strategies/core';
 import { Signer } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { DOMAIN, ORACLE_NODE_URL, ORIGIN } from '../config/appConfig';
-import { UserDetails } from '../hooks/useLoggedUser';
 
-export const checkLoggedUser = async (): Promise<UserDetails | undefined> => {
+export const checkLoggedUser = async (): Promise<LoggedUserDetails | undefined> => {
   const res = await fetch(`${ORACLE_NODE_URL}/user/me`, {
     method: 'get',
     credentials: 'include',
@@ -51,7 +51,7 @@ const createSiweMessage = async (address: string, statement: string, chainId: nu
   return message.prepareMessage();
 };
 
-export const signInWithEthereum = async (address: string, signer: Signer): Promise<UserDetails | undefined> => {
+export const signInWithEthereum = async (address: string, signer: Signer): Promise<LoggedUserDetails | undefined> => {
   const chainId = await signer.getChainId();
   const message = await createSiweMessage(address, 'Login with my Ethereum account', chainId);
   const signature = await signer.signMessage(message);

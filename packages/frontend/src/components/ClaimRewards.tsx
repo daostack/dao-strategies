@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { Refresh } from 'grommet-icons';
 import { Box, Layer, Text } from 'grommet';
 import { ChainsDetails, TreeClaimInfo } from '@dao-strategies/core';
@@ -7,7 +6,6 @@ import { FC, useEffect, useState } from 'react';
 import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { useClaimer } from '../hooks/useClaimer';
-import { RouteNames } from '../pages/MainPage';
 import { claimRewards } from '../pages/campaign.support';
 
 import { useNow } from '../hooks/useNow';
@@ -39,7 +37,7 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
   const [showVerifyIdentity, setShowVerifyIdentity] = useState<boolean>(false);
 
   const { now } = useNow();
-  const { user, connect, account } = useLoggedUser();
+  const { user, connect, account, githubAccount } = useLoggedUser();
 
   const { claimInfo, check } = useClaimer(props.campaignAddress, user?.address);
   const campaignInstance = useCampaignInstance(props.campaignAddress);
@@ -50,6 +48,7 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
       check();
     }, 10000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (user === undefined) {
@@ -67,7 +66,7 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
 
   const status: UserClaimStatus = {
     isLogged: user !== undefined,
-    isVerified: user.verified.github != null,
+    isVerified: githubAccount !== undefined,
     canClaim: currentClaim !== undefined && currentClaim.shares !== undefined,
     willCanClaim: pendingClaim !== undefined && pendingClaim.shares !== undefined,
     claim: currentClaim !== undefined ? currentClaim : pendingClaim !== undefined ? pendingClaim : undefined,
@@ -157,7 +156,7 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
 
   return (
     <Box pad="medium" style={{ textAlign: 'center' }}>
-      Your github account @{user.verified.github} is not eligible for claiming rewards out of this campaign.
+      Your github account @{githubAccount} is not eligible for claiming rewards out of this campaign.
     </Box>
   );
 };

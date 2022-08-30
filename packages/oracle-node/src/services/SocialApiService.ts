@@ -39,8 +39,10 @@ export class SocialApiService {
     });
     return {
       handle: user.data.login,
+      name: user.data.name,
+      bio: user.data.bio,
       avatar_url: user.data.avatar_url,
-      url: user.data.url,
+      url: user.data.html_url,
     };
   }
 

@@ -5,6 +5,7 @@ import { LoggedUserDetails } from '@dao-strategies/core';
 import { ServiceManager } from '../service.manager';
 
 import { Controller } from './Controller';
+import { Verification } from '@dao-strategies/core';
 
 export class UserController extends Controller {
   constructor(manager: ServiceManager) {
@@ -101,7 +102,7 @@ export class UserController extends Controller {
     _response: Response,
     _next: NextFunction,
     loggedUser: string
-  ): Promise<void> {
+  ): Promise<Verification[]> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return this.manager.services.user.checkVerifications(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
