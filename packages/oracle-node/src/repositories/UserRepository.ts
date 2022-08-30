@@ -24,15 +24,35 @@ export class UserRepository {
   }
 
   async addVerification(verification: CrossVerification): Promise<void> {
-    await this.client.crossVerification.create({ data: verification });
+    const current = await this.client.crossVerification.findUnique({
+      where: {
+        from_to_intent: {
+          from: verification.from,
+          to: verification.to,
+          intent: verification.intent,
+        },
+      },
+    });
+
+    if (current === null) {
+      await this.client.crossVerification.create({ data: verification });
+    }
   }
 
   async getVerificationsTo(address: string): Promise<CrossVerification[]> {
     return this.client.crossVerification.findMany({
       where: {
         to: {
-          endsWith: address,
+          endsWith: address.toLocaleLowerCase(),
         },
+      },
+    });
+  }
+
+  async getVerificationsFrom(username: string): Promise<CrossVerification[]> {
+    return this.client.crossVerification.findMany({
+      where: {
+        from: username,
       },
     });
   }

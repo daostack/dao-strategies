@@ -110,21 +110,14 @@ export const Routes: RouteConfig[] = [
     route: '/user/logout',
     controller: UserController,
     action: 'logout',
+    protected: true,
+  },
+  {
+    method: 'post',
+    route: '/user/checkVerification',
+    controller: UserController,
+    action: 'checkVerification',
     protected: false,
-  },
-  {
-    method: 'post',
-    route: '/user/verifyAddressOfGithub',
-    controller: UserController,
-    action: 'verifyAddressOfGithub',
-    protected: true,
-  },
-  {
-    method: 'post',
-    route: '/user/verifyGithubOfAddress',
-    controller: UserController,
-    action: 'verifyGithubOfAddress',
-    protected: true,
   },
   {
     method: 'get',

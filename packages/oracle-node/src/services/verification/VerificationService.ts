@@ -9,37 +9,40 @@ export class VerificationService {
     this.octokit = new Octokit({ auth: token });
   }
 
-  async getVericationsGithub(
-    github_username: string,
-    intent: string
-  ): Promise<Array<CrossVerification>> {
-    const verifications: Array<CrossVerification> = [];
-
+  async getVerificationGithub(
+    github_username: string
+  ): Promise<CrossVerification | undefined> {
     const { data: gists } = await this.octokit.rest.gists.listForUser({
       username: github_username,
       per_page: 10,
     });
 
     /** check gist contents */
-    for await (const gist of gists) {
+    for (const gist of gists) {
       const { data: gistFull } = await this.octokit.rest.gists.get({
         gist_id: gist.id,
       });
 
-      Object.values(gistFull.files).forEach((file) => {
+      let found: CrossVerification;
+      Object.values(gistFull.files).find((file) => {
         const sendRewards = isSendRewards(file.content);
 
         if (sendRewards) {
-          verifications.push({
+          found = {
             from: `github:${github_username}`,
-            to: `ethereum-${sendRewards.params.chain}:${sendRewards.params.address}`,
+            to: `ethereum-${
+              sendRewards.params.chain
+            }:${sendRewards.params.address.toLowerCase()}`,
             intent: VerificationIntent.SEND_REWARDS,
-            proof: gist.url,
-          });
+            proof: gist.html_url,
+          };
+          return true;
         }
       });
+
+      return found;
     }
 
-    return verifications;
+    return undefined;
   }
 }

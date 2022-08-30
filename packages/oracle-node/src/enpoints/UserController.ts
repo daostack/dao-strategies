@@ -1,11 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { generateNonce, SiweMessage } from 'siwe';
-import { LoggedUserDetails } from '@dao-strategies/core';
+import { LoggedUserDetails, Verification } from '@dao-strategies/core';
 
 import { ServiceManager } from '../service.manager';
 
 import { Controller } from './Controller';
-import { Verification } from '@dao-strategies/core';
 
 export class UserController extends Controller {
   constructor(manager: ServiceManager) {
@@ -97,15 +96,13 @@ export class UserController extends Controller {
     /* eslint-enable */
   }
 
-  checkVerifications(
+  checkVerification(
     request: Request,
     _response: Response,
     _next: NextFunction,
     loggedUser: string
-  ): Promise<Verification[]> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return this.manager.services.user.checkVerifications(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  ): Promise<Verification> {
+    return this.manager.services.user.checkVerification(
       request.body.handle as string,
       loggedUser
     );

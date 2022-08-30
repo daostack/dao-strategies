@@ -9,10 +9,10 @@ export type LoggedUserContextType = {
   account: string | undefined;
   user: LoggedUserDetails | undefined;
   githubAccount: string | undefined;
-  checkAndLogin: (signer: Signer) => void;
-  connect: () => void;
-  startLogout: () => void;
-  refresh: () => void;
+  checkAndLogin: (signer: Signer) => Promise<void>;
+  connect: () => Promise<void>;
+  startLogout: () => Promise<void>;
+  refresh: () => Promise<void>;
 };
 
 const LoggedUserContextValue = createContext<LoggedUserContextType | undefined>(undefined);

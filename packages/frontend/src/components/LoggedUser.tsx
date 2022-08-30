@@ -51,7 +51,7 @@ export const LoggedUser: FC = () => {
     <>
       {showLinkGithub ? (
         <Layer onEsc={() => setShowLinkGithub(false)} onClickOutside={() => setShowLinkGithub(false)}>
-          <GithubVerification></GithubVerification>
+          <GithubVerification onClose={() => setShowLinkGithub(false)}></GithubVerification>
         </Layer>
       ) : (
         <></>

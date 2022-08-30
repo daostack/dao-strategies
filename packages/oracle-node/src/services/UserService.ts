@@ -41,31 +41,22 @@ export class UserService {
     return this.userRepo.getVerificationsTo(address);
   }
 
-  async checkVerifications(
+  async checkVerification(
     github_username: string,
     loggedUser: string
-  ): Promise<Verification[]> {
-    const verifications = !DISABLE_VERIFICATION
-      ? await this.verifications.getVericationsGithub(
-          github_username,
-          loggedUser
-        )
-      : [
-          {
-            from: github_username,
-            to: loggedUser,
-            intent: VerificationIntent.SEND_REWARDS,
-            proof: 'http://www.github.com',
-          },
-        ];
+  ): Promise<Verification> {
+    const verification = !DISABLE_VERIFICATION
+      ? await this.verifications.getVerificationGithub(github_username)
+      : {
+          from: `github:${github_username}`,
+          to: `ethereum-${'all'}:${loggedUser}`,
+          intent: VerificationIntent.SEND_REWARDS,
+          proof: 'http://www.github.com',
+        };
 
-    await Promise.all(
-      verifications.map((verfication) => {
-        return this.userRepo.addVerification(verfication);
-      })
-    );
+    if (verification) await this.userRepo.addVerification(verification);
 
-    return verifications;
+    return verification;
   }
 
   /** Sensitive method, call only after signature has been verified. */

@@ -1,17 +1,17 @@
-import { GithubProfile, VerificationIntent, getGithubGistContent } from '@dao-strategies/core';
+import { GithubProfile, VerificationIntent, getGithubGistContent, Verification } from '@dao-strategies/core';
 import { Box, Heading, Spinner, Text, TextArea } from 'grommet';
 import { FC, useCallback, useEffect, useState } from 'react';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 
-import { AppButton, AppInput, NumberedRow } from './styles/BasicElements';
+import { AppButton, AppInput, IElement, NumberedRow } from './styles/BasicElements';
 import { useDebounce } from 'use-debounce';
 import { GithubProfileCard } from './GithubProfileCard';
 import { Copy } from 'grommet-icons';
 
-export interface IUserProfileProps {
-  dum?: string;
+export interface IVerificationProps extends IElement {
+  onClose: () => void;
 }
 
 enum VerificationStatus {
@@ -20,8 +20,8 @@ enum VerificationStatus {
   gistSearching = 2,
 }
 
-export const GithubVerification: FC<IUserProfileProps> = () => {
-  const { user } = useLoggedUser();
+export const GithubVerification: FC<IVerificationProps> = (props: IVerificationProps) => {
+  const { user, refresh } = useLoggedUser();
   const [handle, setHandle] = useState<string>('');
 
   const [debouncedHandle] = useDebounce(handle, 1200);
@@ -31,7 +31,10 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
   const [copied, setCopied] = useState<boolean>(false);
   const [gistClicked, setGistClicked] = useState<boolean>(false);
 
-  const [searchGist, setSearchGist] = useState<boolean>(false);
+  const [readingGists, setReadingGists] = useState<boolean>(false);
+  const [verification, setVerification] = useState<Verification>();
+
+  const verified = verification !== undefined;
 
   const checkHandle = () => {
     setCheckingHandle(true);
@@ -54,33 +57,27 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
   };
 
   const checkGist = useCallback(() => {
-    fetch(ORACLE_NODE_URL + `/social/github/profile/${debouncedHandle}`, {
-      method: 'get',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    }).then((response) => {
-      response.json().then((data) => {
-        setCheckingHandle(false);
-        setGithubProfile(data);
+    if (githubProfile) {
+      setReadingGists(true);
+      fetch(ORACLE_NODE_URL + `/user/checkVerification`, {
+        method: 'post',
+        body: JSON.stringify({ handle: githubProfile.handle }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((response) => {
+        response.json().then((data) => {
+          setReadingGists(false);
+          setVerification(data);
+          refresh();
+        });
       });
-    });
-  }, []);
+    }
+  }, [githubProfile]);
 
   useEffect(() => {
     checkHandle();
   }, [debouncedHandle]);
-
-  useEffect(() => {
-    setInterval(() => {
-      if (searchGist) checkGist();
-    }, 5000);
-  }, []);
-
-  const verification = user
-    ? user.verifications.find((v) => v.intent === VerificationIntent.SEND_REWARDS || v.to.endsWith(user.address))
-    : undefined;
-
-  const verified = verification !== undefined;
 
   const status: VerificationStatus =
     githubProfile === undefined
@@ -110,6 +107,10 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const close = async () => {
+    props.onClose();
+  };
+
   return (
     <>
       <Box pad="large">
@@ -122,7 +123,6 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
         <NumberedRow disabled={status < 0} number={1} text={<>Enter the github handle below.</>}>
           <Box>
             <AppInput value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></AppInput>
-            <GithubProfileCard style={{ marginTop: '16px' }} profile={githubProfile}></GithubProfileCard>
           </Box>
         </NumberedRow>
         <NumberedRow
@@ -135,9 +135,11 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
           }>
           <Box>
             <Box style={{ position: 'relative' }}>
-              <TextArea disabled resize={false} style={{ height: '120px', fontSize: '14px', fontFamily: 'monospace' }}>
-                {text}
-              </TextArea>
+              <TextArea
+                disabled
+                resize={false}
+                style={{ height: '120px', fontSize: '14px', fontFamily: 'monospace' }}
+                value={text}></TextArea>
               <Box
                 onClick={() => copyText()}
                 justify="center"
@@ -156,20 +158,36 @@ export const GithubVerification: FC<IUserProfileProps> = () => {
               </Box>
             </Box>
             <AppButton onClick={goToGithub} style={{ marginTop: '10px' }} primary>
-              Create gist
+              Open Github in a new tab
             </AppButton>
           </Box>
         </NumberedRow>
 
-        <NumberedRow disabled={status < 2} number={3} text={<>Wait for the gist to be found.</>}>
-          <Box justify="center" align="center">
-            {status >= VerificationStatus.gistSearching ? <Spinner></Spinner> : <></>}
-          </Box>
-        </NumberedRow>
-
-        {verified ? <>Verified</> : <></>}
-
-        <br></br>
+        <Box>
+          <GithubProfileCard style={{ marginTop: '16px' }} profile={githubProfile}></GithubProfileCard>
+          {status >= 1 ? (
+            <Box style={{ margin: '12px 0px' }}>
+              {verification === undefined ? (
+                <>
+                  Please click below once the gist has been created
+                  <AppButton onClick={() => checkGist()} primary>
+                    Check gist {readingGists ? <Spinner></Spinner> : <></>}
+                  </AppButton>
+                </>
+              ) : (
+                <>
+                  Gist found! rewards received by this user will be sent to:
+                  <AppInput style={{ marginBottom: '12px' }} value={verification ? verification.to : ''}></AppInput>
+                  <AppButton onClick={() => close()} primary>
+                    Close
+                  </AppButton>
+                </>
+              )}
+            </Box>
+          ) : (
+            <></>
+          )}
+        </Box>
       </Box>
     </>
   );

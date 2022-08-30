@@ -105,7 +105,7 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
       <>
         {showVerifyIdentity ? (
           <Layer onEsc={() => setShowVerifyIdentity(false)} onClickOutside={() => setShowVerifyIdentity(false)}>
-            <GithubVerification></GithubVerification>
+            <GithubVerification onClose={() => setShowVerifyIdentity(false)}></GithubVerification>
           </Layer>
         ) : (
           <></>
