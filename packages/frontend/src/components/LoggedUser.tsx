@@ -32,7 +32,7 @@ export const LoggedUser: FC = () => {
     switch (key) {
       case 0:
         return githubAccount ? (
-          <Box pad="small">{imageAndText('/images/Github.png', `@${githubAccount}`)}</Box>
+          <Box pad="small">{imageAndText('/images/Github.png', `linked from @${githubAccount.split(':')[1]}`)}</Box>
         ) : (
           <Box onClick={() => setShowLinkGithub(true)} pad="small">
             {imageAndText('/images/Github.png', 'link account')}

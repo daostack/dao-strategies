@@ -1,4 +1,13 @@
-import { AreasType, Box, Grid, GridColumnsType, GridExtendedProps, GridSizeType, ResponsiveContext } from 'grommet';
+import {
+  AreasType,
+  Box,
+  BoxExtendedProps,
+  Grid,
+  GridColumnsType,
+  GridExtendedProps,
+  GridSizeType,
+  ResponsiveContext,
+} from 'grommet';
 import { FC } from 'react';
 import { IElement } from './BasicElements';
 
@@ -20,7 +29,9 @@ export const ColumnView: FC<any> = (props: IElement) => {
   );
 };
 
-export const TwoColumns = (props: IElement) => {
+export interface ITwoColumns extends BoxExtendedProps {}
+
+export const TwoColumns: FC<ITwoColumns> = (props: ITwoColumns) => {
   return (
     <Grid
       fill
@@ -30,21 +41,11 @@ export const TwoColumns = (props: IElement) => {
         { name: 'left', start: [0, 0], end: [0, 0] },
         { name: 'right', start: [1, 0], end: [1, 0] },
       ]}
-      {...props}>
-      <Box
-        gridArea="left"
-        direction="column"
-        align="center"
-        justify="start"
-        pad={{ horizontal: 'none', vertical: 'small' }}>
+      style={{ ...props.style }}>
+      <Box gridArea="left" direction="column" align={props.align} justify={props.justify}>
         {(props.children as React.ReactNode[])[0]}
       </Box>
-      <Box
-        gridArea="right"
-        direction="column"
-        align="center"
-        justify="start"
-        pad={{ horizontal: 'none', vertical: 'small' }}>
+      <Box gridArea="right" direction="column" align={props.align} justify={props.justify}>
         {(props.children as React.ReactNode[])[1]}
       </Box>
     </Grid>

@@ -1,10 +1,12 @@
 import { StrategyInfo } from '../../../types';
 
-export const strategyInfo: StrategyInfo = {
+import { Params } from './strategy';
+
+export const strategyInfo: StrategyInfo<Params> = {
   name: 'Github Contributors - PRs Weighted By Reactions',
   description:
     'Strategy description, including description regarding the configurable parameters and the strategy logic',
-  exapmle_Params: {
+  example_params: {
     repositories: [
       {
         owner: 'ethereum',

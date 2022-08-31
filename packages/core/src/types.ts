@@ -172,10 +172,10 @@ export type StrategyFunc = (
   params: any
 ) => Promise<BalancesFloat>;
 
-export type StrategyInfo = {
+export type StrategyInfo<P = any> = {
   name: string;
   description: string;
-  exapmle_Params: any;
+  example_params: P;
 };
 
 export type Strategy = {

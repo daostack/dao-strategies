@@ -9,8 +9,6 @@ import {
   Select,
   FileInput,
   BoxExtendedProps,
-  Paragraph,
-  ParagraphProps,
 } from 'grommet';
 import { FormDown, FormUp } from 'grommet-icons';
 import React, { FC, useEffect, useRef, useState } from 'react';
@@ -22,6 +20,12 @@ export interface IElement {
   style?: React.CSSProperties;
   children?: JSX.Element | React.ReactNode | Array<React.ReactNode> | Array<JSX.Element> | string;
 }
+
+export const AppTag = styled(Box)`
+  border-radius: 30px;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 6.5px 16px;
+`;
 
 export interface IValueElement extends IElement {
   value?: string;
@@ -79,6 +83,14 @@ export const AppCallout = styled(Box)`
   padding: 16px 48px;
 `;
 
+const cardStyle: React.CSSProperties = {
+  backgroundColor: '#FBFDFC',
+  border: 'solid 1px  #F0EDED',
+  padding: '16px 24px',
+  borderRadius: '8px',
+  minHeight: '122px',
+};
+
 interface AppCardProps extends BoxExtendedProps {}
 
 export const AppCard: FC<AppCardProps> = (props: AppCardProps) => {
@@ -86,11 +98,7 @@ export const AppCard: FC<AppCardProps> = (props: AppCardProps) => {
     <Box
       {...props}
       style={{
-        backgroundColor: '#FBFDFC',
-        border: 'solid 1px  #F0EDED',
-        padding: '16px 24px',
-        borderRadius: '8px',
-        minHeight: '122px',
+        ...cardStyle,
         ...props.style,
       }}>
       {props.children}
@@ -159,6 +167,63 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
   );
 };
 
+interface IExpansibleCard extends BoxExtendedProps {
+  hiddenPart: React.ReactElement | React.ReactElement[];
+  padding?: number[];
+}
+
+export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
+  const [expanded, setExpanded] = useState(true);
+  const padding = props.padding ? props.padding : [0, 0, 0, 0];
+
+  const circleStyle: React.CSSProperties = {
+    borderRadius: '15px',
+    border: 'solid 1px  #F0EDED',
+    backgroundColor: 'white',
+    height: '30px',
+    width: '30px',
+  };
+
+  const iconStyle: React.CSSProperties = { height: '20px', width: '20px' };
+
+  return (
+    <Box
+      {...props}
+      style={{
+        ...cardStyle,
+        ...props.style,
+        position: 'relative',
+        padding: `${padding[0]}px ${padding[1]}px ${padding[2]}px ${padding[3]}px`,
+      }}>
+      {props.children}
+      {expanded ? props.hiddenPart : <></>}
+
+      <Box
+        fill
+        align="center"
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          height: '30px',
+          position: 'absolute',
+          paddingTop: '3px',
+          bottom: '-15px',
+          cursor: 'pointer',
+          width: `calc(100% - ${padding[1]}px - ${padding[3]}px)`,
+        }}>
+        {expanded ? (
+          <Box align="center" justify="center" style={{ ...circleStyle }}>
+            <FormUp style={{ ...iconStyle }}></FormUp>
+          </Box>
+        ) : (
+          <Box align="center" justify="center" style={{ ...circleStyle }}>
+            <FormDown style={{ ...iconStyle }}></FormDown>
+          </Box>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
 interface INumberedRow extends IElement {
   number: number;
   text: React.ReactNode;
@@ -212,6 +277,21 @@ export const NumberedRow: FC<INumberedRow> = (props: INumberedRow) => {
         <Text>{props.text}</Text>
         <Box style={{ padding: '16px 0px 40px 0px' }}>{props.children}</Box>
       </Box>
+    </Box>
+  );
+};
+
+export interface IInfoProperty extends BoxExtendedProps {
+  title: string;
+}
+
+export const InfoProperty: FC<IInfoProperty> = (props: IInfoProperty) => {
+  return (
+    <Box style={{ ...props.style }}>
+      <Box style={{ textTransform: 'uppercase', fontSize: '14px', color: '#989BA0', marginBottom: '12px' }}>
+        {props.title}
+      </Box>
+      <Box>{props.children}</Box>
     </Box>
   );
 };

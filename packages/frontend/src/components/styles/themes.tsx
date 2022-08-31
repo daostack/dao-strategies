@@ -3,7 +3,8 @@ import { deepMerge } from 'grommet/utils';
 import { css } from 'styled-components';
 
 export const styleConstants = {
-  fontSize: '18px',
+  headingFontSizes: ['28px', '20px'],
+  textFontSizes: ['16px', '14px'],
 };
 
 export const theme = {
@@ -19,6 +20,10 @@ const extension: ThemeType = {
     colors: {
       brand: theme.primary,
       brandLight: theme.primaryLight,
+      background: '#F3F2EF',
+    },
+    font: {
+      size: styleConstants.textFontSizes[0],
     },
   },
   button: {

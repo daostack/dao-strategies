@@ -8,7 +8,7 @@ import {
   toTimeStamp,
 } from '../utils';
 
-interface Params {
+export interface Params {
   repositories: Array<{ owner: string; repo: string }>;
   timeRange: { start: number; end: number };
 }
