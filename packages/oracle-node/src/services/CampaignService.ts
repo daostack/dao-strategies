@@ -325,24 +325,19 @@ export class CampaignService {
 
       const balances: Balances = new Map();
       shares.forEach((share, address) => {
-        const addressParts = address.split(':');
-        if (addressParts[0] !== 'ethereum-all') {
-          throw new Error('Not yet supporting chain specific addresses. Soon');
-        }
-        balances.set(addressParts[1], share.amount);
+        balances.set(address, share.amount);
       });
 
       const tree = new BalanceTree(balances);
       const root = tree.getHexRoot();
 
-      /** compute proofs */
+      /** compute leafs and include proofs */
       const leafs = Array.from(shares.entries()).map(
         ([address, share]): Prisma.BalanceLeafCreateManyRootInput => {
-          const addressParts = address.split(':');
-          const proof = tree.getProof(addressParts[1], share.amount);
+          const proof = tree.getProof(address, share.amount);
           return {
             accounts: share.accounts,
-            address,
+            address: address,
             balance: share.amount.toString(),
             proof,
           };
@@ -454,8 +449,8 @@ export class CampaignService {
     return sharesToAddresses;
   }
 
-  getSharesOfAddress(uri: string, account: string): Promise<Share[] | null> {
-    return this.campaignRepo.getSharesOfAddress(uri, account);
+  getSharesOfAddress(uri: string, address: string): Promise<Share[] | null> {
+    return this.campaignRepo.getSharesOfAddress(uri, address);
   }
 
   async setShares(uri: string, shares: Balances): Promise<void> {
@@ -465,9 +460,9 @@ export class CampaignService {
   async getBalanceLeaf(
     uri: string,
     root: string,
-    account: string
+    address: string
   ): Promise<BalanceLeaf> {
-    return this.campaignRepo.getBalanceLeaf(uri, root, account);
+    return this.campaignRepo.getBalanceLeaf(uri, root, address);
   }
 
   async register(

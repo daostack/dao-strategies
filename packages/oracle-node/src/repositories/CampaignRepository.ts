@@ -231,6 +231,7 @@ export class CampaignRepository {
     return root;
   }
 
+  /** returns the sahres to addresses using plain addresses (without the chain) */
   async getNewSharesToAddresses(
     uri: string,
     prev_order: number | undefined
@@ -252,8 +253,11 @@ export class CampaignRepository {
 
     result.forEach((share) => {
       if (share.address != null) {
+        /** TODO: When multi-chain, we might find more than one target address per account. Thus,
+         * we need to chosee the correct one based on the campaign chain. */
+        const address = share.address.split(':')[1];
         /** one address can be the target of multiple accounts, shares accumulate */
-        const current = shares.get(share.address);
+        const current = shares.get(address);
 
         const newAmount = ethers.BigNumber.from(share.amount.toString());
         const amount =
@@ -263,7 +267,7 @@ export class CampaignRepository {
           ? current.accounts.concat(share.account)
           : [share.account];
 
-        shares.set(share.address, {
+        shares.set(address, {
           amount,
           accounts,
         });

@@ -1,7 +1,6 @@
-import { Refresh } from 'grommet-icons';
-import { Box, Layer, Text } from 'grommet';
+import { Box, Layer } from 'grommet';
 import { ChainsDetails, TreeClaimInfo } from '@dao-strategies/core';
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 
 import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
@@ -11,11 +10,11 @@ import { useNow } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { truncate } from '../utils/ethers';
 
-import { AppButton } from './styles/BasicElements';
+import { AppButton, IElement } from './styles/BasicElements';
 import { AssetBalance } from './Assets';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
 
-interface IParams {
+interface IParams extends IElement {
   campaignAddress: string;
 }
 
@@ -30,7 +29,7 @@ interface UserClaimStatus {
 }
 
 export const ClaimCard: FC<IParams> = (props: IParams) => {
-  const { campaign, claimInfo, checkClaimInfo } = useCampaignContext();
+  const { campaign, claimInfo } = useCampaignContext();
 
   const [showClaim, setShowClaim] = useState<boolean>(false);
 
@@ -38,15 +37,6 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
   const { user, account, githubAccount } = useLoggedUser();
 
   const campaignInstance = useCampaignInstance(props.campaignAddress);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      console.log('checking claim info');
-      checkClaimInfo();
-    }, 10000);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   if (campaign === undefined) return <></>;
 
@@ -115,7 +105,7 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
     <>
       {status.canClaim && showClaim ? { claimModal } : <></>}
       <BalanceCard
-        style={{ padding: '24px' }}
+        style={{ padding: '24px', ...props.style }}
         title="My Rewards"
         value={claimValue}
         symbol="$"

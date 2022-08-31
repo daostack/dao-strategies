@@ -171,7 +171,6 @@ export class CampaignOnChainService {
     uri: string,
     root: string,
     address: string,
-    shares: Share[],
     campaignContract: Typechain.Campaign,
     chainId: number,
     customAssets: string[],
@@ -183,22 +182,6 @@ export class CampaignOnChainService {
 
     /** is this an error? */
     if (leaf == null) return undefined;
-
-    /** protection: the shares in the root should not be other than the shares computed for this address */
-    const totalShares = shares.reduce(
-      (sum: bigint, share) => sum + share.amount,
-      BigInt(0)
-    );
-
-    if (
-      !ethers.BigNumber.from(totalShares.toString()).eq(
-        ethers.BigNumber.from(leaf.balance)
-      )
-    ) {
-      throw new Error(
-        `Unexpected shares for account ${address}. Share was ${totalShares} but leaf is ${leaf.balance}`
-      );
-    }
 
     /** protection: check that the proof is valid */
     if (verify) {
@@ -246,21 +229,6 @@ export class CampaignOnChainService {
   ): Promise<CampaignClaimInfo | undefined> {
     const campaign = await this.campaignService.getFromAddress(campaignAddress);
 
-    /** get the shares of the address () */
-    const shares = await this.campaignService.getSharesOfAddress(
-      campaign.uri,
-      address
-    );
-
-    /** if there is not shares, then there should not be any entry in the root */
-    if (shares == null) return undefined;
-
-    /**
-     * if there are shares to this address is because it is already a verified
-     * address of a social account. Accordingly this address should be in the
-     * merkle root of that campaign
-     */
-
     /** read the root details (including the tree) of the current campaign root (use the root
      * from the contract since maybe there is a recent one in the DB that has not been published) */
     const campaignContract = campaignProvider(campaign.address, this.provider);
@@ -271,7 +239,6 @@ export class CampaignOnChainService {
       campaign.uri,
       currentRoot,
       address,
-      shares,
       campaignContract,
       campaign.chainId,
       campaign.customAssets,
@@ -289,7 +256,6 @@ export class CampaignOnChainService {
           campaign.uri,
           pendingRoot,
           address,
-          shares,
           campaignContract,
           campaign.chainId,
           campaign.customAssets

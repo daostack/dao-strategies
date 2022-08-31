@@ -1,4 +1,4 @@
-import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react';
+import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { CampaignClaimInfo, CampaignOnchainDetails, CampaignReadDetails, SharesRead } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
@@ -32,29 +32,34 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
   const [otherDetails, setOtherDetails] = useState<CampaignOnchainDetails>();
   const [claimInfo, setClaimInfo] = useState<CampaignClaimInfo>();
 
-  const getShares = async (page: Page): Promise<void> => {
-    if (campaign === undefined) return undefined;
+  const getShares = useCallback(
+    async (page: Page): Promise<void> => {
+      if (campaign === undefined) return undefined;
 
-    const response = await fetch(ORACLE_NODE_URL + `/campaign/sharesFromUri/${campaign.uri}`, {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ page }),
-      credentials: 'include',
-    });
+      const response = await fetch(ORACLE_NODE_URL + `/campaign/sharesFromUri/${campaign.uri}`, {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page }),
+        credentials: 'include',
+      });
 
-    const rewards = await response.json();
-    setShares(rewards);
-  };
+      const rewards = await response.json();
+      setShares(rewards);
+    },
+    [campaign]
+  );
 
-  const getOtherDetails = async (): Promise<void> => {
+  const getOtherDetails = useCallback(async (): Promise<void> => {
     fetch(ORACLE_NODE_URL + `/campaign/${props.address}/otherDetails`, {}).then((response) => {
       response.json().then((_details) => {
         setOtherDetails(_details);
       });
     });
-  };
+  }, [props.address]);
 
-  const checkClaimInfo = async (): Promise<void> => {
+  const checkClaimInfo = useCallback(async (): Promise<void> => {
+    console.log('checking claim info');
+
     if (!campaign) return;
     if (!user) return;
 
@@ -65,7 +70,7 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
 
     const claimInfo = await response.json();
     setClaimInfo(Object.keys(claimInfo).length > 0 ? claimInfo : undefined);
-  };
+  }, [campaign, user]);
 
   useEffect(() => {
     if (props.address !== undefined) {
@@ -77,6 +82,10 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
       });
     }
   }, [props.address]);
+
+  useEffect(() => {
+    checkClaimInfo();
+  }, [user]);
 
   return (
     <CampaignContextValue.Provider

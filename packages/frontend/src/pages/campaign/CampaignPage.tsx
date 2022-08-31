@@ -24,6 +24,7 @@ import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
 import { styleConstants } from '../../components/styles/themes';
 import { ClaimCard } from '../../components/ClaimRewards';
+import { useLoggedUser } from '../../hooks/useLoggedUser';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -34,8 +35,10 @@ const HEADING_SIZE = '24px';
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
 
-  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, claimInfo, checkClaimInfo } =
+  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, checkClaimInfo } =
     useCampaignContext();
+
+  const { user } = useLoggedUser();
 
   const updatePage = (page: Page) => {
     getShares(page);
@@ -198,7 +201,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         <></>
       )}
       <BalanceCard
-        style={{ padding: '24px', marginTop: '40px' }}
+        style={{ padding: '24px' }}
         title="Rewards Raised"
         value={valueLocked}
         symbol="$"
@@ -210,7 +213,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     </>
   );
 
-  const claim = <ClaimCard campaignAddress={campaign.address}></ClaimCard>;
+  const claim = <ClaimCard style={{ marginBottom: '40px' }} campaignAddress={campaign.address}></ClaimCard>;
 
   const guardian = <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>;
 
@@ -225,7 +228,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const right = (
     <>
-      {claim}
+      {user !== undefined ? claim : <></>}
       {funds}
       {guardian}
     </>
