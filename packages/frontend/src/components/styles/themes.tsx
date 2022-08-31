@@ -5,6 +5,9 @@ import { css } from 'styled-components';
 export const styleConstants = {
   headingFontSizes: ['28px', '20px'],
   textFontSizes: ['16px', '14px'],
+  colors: {
+    ligthGrayText: '#989BA0',
+  },
 };
 
 export const theme = {

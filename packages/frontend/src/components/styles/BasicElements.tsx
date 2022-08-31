@@ -13,7 +13,7 @@ import {
 import { FormDown, FormUp } from 'grommet-icons';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { theme } from './themes';
+import { styleConstants, theme } from './themes';
 
 export interface IElement {
   onClick?: () => void;
@@ -173,7 +173,7 @@ interface IExpansibleCard extends BoxExtendedProps {
 }
 
 export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const padding = props.padding ? props.padding : [0, 0, 0, 0];
 
   const circleStyle: React.CSSProperties = {
@@ -288,7 +288,13 @@ export interface IInfoProperty extends BoxExtendedProps {
 export const InfoProperty: FC<IInfoProperty> = (props: IInfoProperty) => {
   return (
     <Box style={{ ...props.style }}>
-      <Box style={{ textTransform: 'uppercase', fontSize: '14px', color: '#989BA0', marginBottom: '12px' }}>
+      <Box
+        style={{
+          textTransform: 'uppercase',
+          fontSize: '14px',
+          color: styleConstants.colors.ligthGrayText,
+          marginBottom: '12px',
+        }}>
         {props.title}
       </Box>
       <Box>{props.children}</Box>

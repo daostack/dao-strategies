@@ -5,7 +5,6 @@ import { FC, useEffect, useState } from 'react';
 
 import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
-import { useClaimer } from '../hooks/useClaimer';
 import { claimRewards } from '../pages/campaign.support';
 
 import { useNow } from '../hooks/useNow';
@@ -14,7 +13,7 @@ import { truncate } from '../utils/ethers';
 
 import { AppButton } from './styles/BasicElements';
 import { AssetBalance } from './Assets';
-import { GithubVerification } from './GithubVerification';
+import { BalanceCard } from '../pages/campaign/BalanceCard';
 
 interface IParams {
   campaignAddress: string;
@@ -30,34 +29,24 @@ interface UserClaimStatus {
   wasPublished: boolean;
 }
 
-export const ClaimButton: FC<IParams> = (props: IParams) => {
-  const { campaign } = useCampaignContext();
+export const ClaimCard: FC<IParams> = (props: IParams) => {
+  const { campaign, claimInfo, checkClaimInfo } = useCampaignContext();
 
   const [showClaim, setShowClaim] = useState<boolean>(false);
-  const [showVerifyIdentity, setShowVerifyIdentity] = useState<boolean>(false);
 
   const { now } = useNow();
-  const { user, connect, account, githubAccount } = useLoggedUser();
+  const { user, account, githubAccount } = useLoggedUser();
 
-  const { claimInfo, check } = useClaimer(props.campaignAddress, user?.address);
   const campaignInstance = useCampaignInstance(props.campaignAddress);
 
   useEffect(() => {
     const interval = setInterval(() => {
       console.log('checking claim info');
-      check();
+      checkClaimInfo();
     }, 10000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (user === undefined) {
-    return (
-      <>
-        <AppButton onClick={() => connect()}>Connect Wallet</AppButton>
-      </>
-    );
-  }
 
   if (campaign === undefined) return <></>;
 
@@ -96,67 +85,43 @@ export const ClaimButton: FC<IParams> = (props: IParams) => {
     );
   };
 
-  if (!status.wasExecuted) {
-    return <Text>Campaign not yet executed</Text>;
-  }
-
-  if (!status.isVerified) {
-    return (
-      <>
-        {showVerifyIdentity ? (
-          <Layer onEsc={() => setShowVerifyIdentity(false)} onClickOutside={() => setShowVerifyIdentity(false)}>
-            <GithubVerification onClose={() => setShowVerifyIdentity(false)}></GithubVerification>
-          </Layer>
-        ) : (
-          <></>
-        )}
-        <AppButton onClick={() => setShowVerifyIdentity(true)}>Verify Github</AppButton>
-      </>
-    );
-  }
+  let claimValue: string = '0';
+  let claimModal;
+  let claimAvailable: boolean = false;
 
   if ((status.canClaim || status.willCanClaim) && status.claim !== undefined) {
-    const claimValue = status.claim.assets
-      ? truncate(ChainsDetails.valueOfAssets(status.claim.assets).toString(), 2)
-      : 0;
-    return (
-      <>
-        {status.canClaim && showClaim ? (
-          <Layer onEsc={() => setShowClaim(false)} onClickOutside={() => setShowClaim(false)}>
-            <Box pad="medium">
-              {status.claim.assets !== undefined ? (
-                status.claim.assets.map((asset) => {
-                  return <AssetBalance asset={asset}></AssetBalance>;
-                })
-              ) : (
-                <></>
-              )}
-              <div>~{claimValue} usd</div>
-              <AppButton primary onClick={() => claim()}>
-                Claim
-              </AppButton>
-            </Box>
-          </Layer>
-        ) : (
-          <></>
-        )}
-        {!status.canClaim && status.willCanClaim && now && claimInfo && claimInfo.activationTime ? (
-          <>Pending {now.prettyDiff(claimInfo.activationTime)}</>
-        ) : (
-          <></>
-        )}
-        <AppButton disabled={!status.canClaim} onClick={() => setShowClaim(true)}>
-          Claim
-        </AppButton>
-        <div>~{claimValue} usd</div>
-        <Refresh onClick={() => check()}></Refresh>
-      </>
+    claimAvailable = true;
+    claimValue = status.claim.assets ? truncate(ChainsDetails.valueOfAssets(status.claim.assets).toString(), 2) : '0';
+    claimModal = (
+      <Layer onEsc={() => setShowClaim(false)} onClickOutside={() => setShowClaim(false)}>
+        <Box pad="medium">
+          {status.claim.assets !== undefined ? (
+            status.claim.assets.map((asset) => {
+              return <AssetBalance asset={asset}></AssetBalance>;
+            })
+          ) : (
+            <></>
+          )}
+          <div>~{claimValue} usd</div>
+          <AppButton primary onClick={() => claim()}>
+            Claim
+          </AppButton>
+        </Box>
+      </Layer>
     );
   }
 
   return (
-    <Box pad="medium" style={{ textAlign: 'center' }}>
-      Your github account @{githubAccount} is not eligible for claiming rewards out of this campaign.
-    </Box>
+    <>
+      {status.canClaim && showClaim ? { claimModal } : <></>}
+      <BalanceCard
+        style={{ padding: '24px' }}
+        title="My Rewards"
+        value={claimValue}
+        symbol="$"
+        action={
+          claimAvailable ? <AppButton onClick={() => setShowClaim(true)}>Claim</AppButton> : <>Can't claim</>
+        }></BalanceCard>
+    </>
   );
 };

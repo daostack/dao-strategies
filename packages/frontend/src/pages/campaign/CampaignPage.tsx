@@ -1,24 +1,18 @@
-import { ethers } from 'ethers';
-import { Box, Spinner, Text, Heading, GridSizeType } from 'grommet';
+import { Box, Spinner, Heading, Layer } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 import { ChainsDetails, Page } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
 import {
-  AppCallout,
+  AppButton,
   AppCard,
   AppTag,
   ExpansibleCard,
   ExpansiveParagraph,
   InfoProperty,
 } from '../../components/styles/BasicElements';
-import {
-  Breakpoint,
-  ResponsiveGrid,
-  TwoColumns,
-  ViewportContainer,
-} from '../../components/styles/LayoutComponents.styled';
+import { TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { truncate } from '../../utils/ethers';
@@ -28,8 +22,8 @@ import { HEADER_HEIGHT } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
 import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
-import { ClaimButton } from '../../components/ClaimRewards';
 import { styleConstants } from '../../components/styles/themes';
+import { ClaimCard } from '../../components/ClaimRewards';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -38,9 +32,10 @@ export interface ICampaignPageProps {
 const HEADING_SIZE = '24px';
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
-  const [showFund, setShowFund] = useState<boolean>(true);
+  const [showFund, setShowFund] = useState<boolean>(false);
 
-  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails } = useCampaignContext();
+  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, claimInfo, checkClaimInfo } =
+    useCampaignContext();
 
   const updatePage = (page: Page) => {
     getShares(page);
@@ -49,6 +44,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   useEffect(() => {
     getShares({ number: 0, perPage: 10 });
     getOtherDetails();
+    checkClaimInfo();
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
@@ -155,8 +151,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       </Box>
 
       <Box style={{ marginTop: '13px', flexShrink: 0 }}>
-        This campaign calculates total number of Pull requests and weighs them with respect to reactions to give points.
-        Verify Github to participate
+        This campaign calculates the total number of pull-requests made to one or more github repositories and weighs
+        them with respect to the reactions received.
       </Box>
     </ExpansibleCard>
   );
@@ -181,59 +177,40 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     </>
   );
 
-  const funders = <Box>Funders table</Box>;
-
-  const fundsColumns = ['1fr', '1fr', '1fr'];
-  const fundsRows = ['auto'];
-
-  const fundColumnsAt: Record<Breakpoint, GridSizeType[]> = {
-    small: fundsColumns,
-    medium: fundsColumns,
-    large: fundsColumns,
-    xlarge: fundsColumns,
-  };
-
-  const fundRowsAt: Record<Breakpoint, GridSizeType[]> = {
-    small: fundsRows,
-    medium: fundsRows,
-    large: fundsRows,
-    xlarge: fundsRows,
-  };
+  const funders = <AppCard style={{ marginTop: '130px' }}>Funders table</AppCard>;
 
   const funds = (
-    <ResponsiveGrid style={{ width: '100%' }} gap="1vw" columnsAt={fundColumnsAt} rowsAt={fundRowsAt}>
-      <BalanceCard title="Total Rewards" value={valueLocked} symbol="$"></BalanceCard>
-      {customAsset ? (
-        <>
-          <BalanceCard
-            title="Custom Assets"
-            value={ethers.utils.formatUnits(customAsset.balance, customAsset.decimals)}
-            coin={customAsset.name}></BalanceCard>
-        </>
+    <>
+      {showFund ? (
+        <Layer onClickOutside={() => setShowFund(false)}>
+          <AppCard>
+            <FundCampaign
+              onSuccess={() => {
+                setShowFund(false);
+                getOtherDetails();
+              }}
+              assets={assets}
+              chainId={campaign.chainId}
+              address={campaign.address}></FundCampaign>
+          </AppCard>
+        </Layer>
       ) : (
         <></>
       )}
-      <BalanceCard title="Available to Claim" value={valueLocked} symbol="$"></BalanceCard>
-      <Box>
-        <Box direction="row" align="center"></Box>
-      </Box>
-
-      <FundCampaign
-        onSuccess={() => {
-          setShowFund(false);
-          getOtherDetails();
-        }}
-        assets={assets}
-        chainId={campaign.chainId}
-        address={campaign.address}></FundCampaign>
-    </ResponsiveGrid>
-  );
-
-  const claim = (
-    <>
-      <ClaimButton campaignAddress={campaign.address}></ClaimButton>
+      <BalanceCard
+        style={{ padding: '24px', marginTop: '40px' }}
+        title="Rewards Raised"
+        value={valueLocked}
+        symbol="$"
+        action={
+          <AppButton onClick={() => setShowFund(true)} primary>
+            Fund Campaign
+          </AppButton>
+        }></BalanceCard>
     </>
   );
+
+  const claim = <ClaimCard campaignAddress={campaign.address}></ClaimCard>;
 
   const guardian = <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>;
 
@@ -271,7 +248,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           maxWidth: '1200px',
           margin: '0 auto',
         }}>
-        <CampaignGrid>
+        <CampaignGrid gap="24px">
           <Box gridArea={CampaignAreas.left}>{left}</Box>
           <Box gridArea={CampaignAreas.right}>{right}</Box>
         </CampaignGrid>
