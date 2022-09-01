@@ -7,6 +7,7 @@ export const styleConstants = {
   textFontSizes: ['16px', '14px'],
   colors: {
     ligthGrayText: '#989BA0',
+    lightGrayBorder: '#F0EDED',
   },
 };
 

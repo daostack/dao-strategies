@@ -10,6 +10,7 @@ import {
   FileInput,
   BoxExtendedProps,
   Layer,
+  Heading,
 } from 'grommet';
 import { Close, FormDown, FormUp } from 'grommet-icons';
 import React, { FC, useEffect, useRef, useState } from 'react';
@@ -86,7 +87,8 @@ export const AppCallout = styled(Box)`
 
 const cardStyle: React.CSSProperties = {
   backgroundColor: '#FBFDFC',
-  border: 'solid 1px  #F0EDED',
+  border: 'solid 1px',
+  borderColor: styleConstants.colors.lightGrayBorder,
   padding: '16px 24px',
   borderRadius: '8px',
   minHeight: '122px',
@@ -179,7 +181,8 @@ export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
 
   const circleStyle: React.CSSProperties = {
     borderRadius: '15px',
-    border: 'solid 1px  #F0EDED',
+    border: 'solid 1px',
+    borderColor: styleConstants.colors.lightGrayBorder,
     backgroundColor: 'white',
     height: '30px',
     width: '30px',
@@ -304,6 +307,7 @@ export const InfoProperty: FC<IInfoProperty> = (props: IInfoProperty) => {
 };
 
 export interface IAppModal extends BoxExtendedProps {
+  heading: string;
   onClosed?: () => void;
   onSuccess?: () => void;
   onError?: () => void;
@@ -326,6 +330,7 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
         <Box style={{ marginBottom: '20px' }} onClick={() => close()}>
           <Close style={{ height: '12px', width: '12px' }}></Close>
         </Box>
+        <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>{props.heading}</Heading>
         {child}
       </Box>
     </Layer>

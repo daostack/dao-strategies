@@ -1,4 +1,4 @@
-import { Box, Layer } from 'grommet';
+import { Box, CheckBox, Text } from 'grommet';
 import { ChainsDetails, TreeClaimInfo } from '@dao-strategies/core';
 import { FC, useState } from 'react';
 
@@ -10,9 +10,10 @@ import { useNow } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { truncate } from '../utils/ethers';
 
-import { AppButton, AppModal, IElement } from './styles/BasicElements';
+import { AppButton, AppInput, AppModal, IElement } from './styles/BasicElements';
 import { AssetBalance } from './Assets';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
+import { styleConstants } from './styles/themes';
 
 interface IParams extends IElement {
   campaignAddress: string;
@@ -32,6 +33,7 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
   const { campaign, claimInfo } = useCampaignContext();
 
   const [showClaim, setShowClaim] = useState<boolean>(false);
+  const [hasTargetAddress, setHasTargetAddress] = useState<boolean>(false);
 
   const { now } = useNow();
   const { user, account, githubAccount } = useLoggedUser();
@@ -88,17 +90,62 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
   return (
     <>
       {status.canClaim && showClaim ? (
-        <AppModal onClosed={() => setShowClaim(false)}>
-          <Box pad="medium">
+        <AppModal heading="Claim Reward" onClosed={() => setShowClaim(false)}>
+          <Box>
+            <Box
+              direction="row"
+              justify="between"
+              style={{
+                textTransform: 'uppercase',
+                fontSize: '14px',
+                color: styleConstants.colors.ligthGrayText,
+              }}>
+              <Text>Your share</Text>
+              <Text>Value (USD)</Text>
+            </Box>
             {status.claim && status.claim.assets !== undefined ? (
-              status.claim.assets.map((asset) => {
-                return <AssetBalance asset={asset}></AssetBalance>;
-              })
+              <Box
+                style={{
+                  marginTop: '16px',
+                  border: '1px solid',
+                  borderRadius: '8px',
+                  borderColor: styleConstants.colors.lightGrayBorder,
+                  padding: '25px 24px',
+                }}>
+                {status.claim.assets.map((asset) => {
+                  return asset.balance !== '0' ? (
+                    <AssetBalance style={{ marginBottom: '24px' }} asset={asset}></AssetBalance>
+                  ) : (
+                    <></>
+                  );
+                })}
+
+                <hr
+                  style={{
+                    width: '100%',
+                    margin: '24px 0px',
+                    border: 'none',
+                    borderTop: 'solid 1px',
+                    borderColor: styleConstants.colors.lightGrayBorder,
+                  }}></hr>
+
+                <Box direction="row" justify="between">
+                  <Box>Total Claim</Box>
+                  <Box style={{ fontSize: styleConstants.headingFontSizes[1], fontWeight: '700' }}>~{claimValue}</Box>
+                </Box>
+              </Box>
             ) : (
               <></>
             )}
-            <div>~{claimValue} usd</div>
-            <AppButton primary onClick={() => claim()}>
+
+            <Box style={{ marginTop: '32px' }} direction="row" align="center">
+              <Box style={{ marginRight: '16px' }}>Claim to custom address</Box>
+              <CheckBox toggle onChange={(event) => setHasTargetAddress(event.target.checked)}></CheckBox>
+            </Box>
+
+            {hasTargetAddress ? <AppInput style={{ marginTop: '20px' }} placeholder="0x..."></AppInput> : <></>}
+
+            <AppButton style={{ marginTop: '32px' }} primary onClick={() => claim()}>
               Claim
             </AppButton>
           </Box>

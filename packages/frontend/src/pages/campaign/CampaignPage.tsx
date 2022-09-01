@@ -184,15 +184,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const funds = (
     <>
       {showFund ? (
-        <AppModal onClosed={() => setShowFund(false)}>
-          <FundCampaign
-            onSuccess={() => {
-              setShowFund(false);
-              getOtherDetails();
-            }}
-            assets={assets}
-            chainId={campaign.chainId}
-            address={campaign.address}></FundCampaign>
+        <AppModal
+          heading="Fund Campaign"
+          onClosed={() => setShowFund(false)}
+          onSuccess={() => {
+            setShowFund(false);
+            getOtherDetails();
+          }}>
+          <FundCampaign assets={assets} chainId={campaign.chainId} address={campaign.address}></FundCampaign>
         </AppModal>
       ) : (
         <></>

@@ -6,6 +6,7 @@ import { FormNext, FormPrevious, StatusGood } from 'grommet-icons';
 import { FC } from 'react';
 import { valueToString } from '../utils/general';
 import { IElement } from './styles/BasicElements';
+import { styleConstants } from './styles/themes';
 
 interface Data {
   id: string;
@@ -160,7 +161,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
             key={datum.id}
             style={{
               border: '1px solid',
-              borderColor: '#F0EDED',
+              borderColor: styleConstants.colors.lightGrayBorder,
               borderRadius: '20px',
               height: '40px',
               marginBottom: '16px',

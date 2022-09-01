@@ -28,6 +28,8 @@ interface IFundCampaign extends IElement {
 
 export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const [formValues, setFormValues] = useState<FundFormValues>(initialValues);
+  const [funding, setFunding] = useState<boolean>(false);
+
   const { account, connect } = useLoggedUser();
   const { data: signer } = useSigner();
 
@@ -56,7 +58,6 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     }
 
     if (selectedAsset === undefined) throw new Error('selected asset undefined');
-
     if (signer == null) throw new Error('Signer null');
 
     let tx;
@@ -69,15 +70,19 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
       const token = new Contract(selectedAsset.address, ContractsJson.jsonOfChain().contracts.TestErc20.abi, signer);
       tx = await token.transfer(props.address, ethers.utils.parseEther(formValues.amount));
     }
+
+    setFunding(true);
     await tx.wait();
+    setFunding(false);
+
     if (props.onSuccess !== undefined) props.onSuccess();
   };
+
+  const disabled = funding || selectedAsset === undefined;
 
   return (
     <>
       <Box style={{ width: '100%' }} direction="column" align="start">
-        <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Fund Campaign</Heading>
-
         <AppForm style={{ width: '100%' }} value={formValues} onChange={onValuesUpdated as any}>
           <Box>
             <Box style={{ position: 'relative' }}>
@@ -101,11 +106,22 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
               </FormField>
             </Box>
 
-            <AppButton primary onClick={() => fund()} style={{ marginTop: '20px' }}>
+            <AppButton primary disabled={disabled} onClick={() => fund()} style={{ marginTop: '20px' }}>
               {isLogged ? 'Fund' : 'Connect & Fund'}
             </AppButton>
           </Box>
         </AppForm>
+
+        {funding ? (
+          <Box justify="center" align="center" style={{ marginTop: '30px', alignSelf: 'center' }}>
+            Waiting for tx confirmation...
+            <br></br>
+            <br></br>
+            <Spinner></Spinner>
+          </Box>
+        ) : (
+          <></>
+        )}
       </Box>
     </>
   );
