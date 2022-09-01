@@ -26,6 +26,7 @@ import { BalanceCard } from './BalanceCard';
 import { styleConstants } from '../../components/styles/themes';
 import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
+import { Link } from 'react-router-dom';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -33,6 +34,7 @@ export interface ICampaignPageProps {
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
+  const [showGuardianControl, setShowGuardianControl] = useState<boolean>(false);
 
   const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, checkClaimInfo } =
     useCampaignContext();
@@ -211,7 +213,22 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const claim = <ClaimCard style={{ marginBottom: '40px' }} campaignAddress={campaign.address}></ClaimCard>;
 
-  const guardian = <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>;
+  const guardian = (
+    <>
+      {showGuardianControl ? (
+        <AppModal heading="Advanced Status" onClosed={() => setShowGuardianControl(false)}>
+          <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>
+        </AppModal>
+      ) : (
+        <></>
+      )}
+      <Box style={{ padding: '0px 24px' }}>
+        <AppButton primary onClick={() => setShowGuardianControl(true)} style={{ marginTop: '36px' }}>
+          Show Advanced Status
+        </AppButton>
+      </Box>
+    </>
+  );
 
   const left = (
     <>
@@ -238,8 +255,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         paddingLeft: '5vw',
         paddingRight: '5vw',
       }}>
-      <Box style={{ margin: '50px 0px' }}>
-        Home {'>'} {campaign.title}
+      <Box style={{ margin: '50px 0px' }} direction="row" align="center">
+        <Link style={{ marginRight: '6px', textDecoration: 'none' }} to="/">
+          Home
+        </Link>{' '}
+        {'>'} {campaign.title}
       </Box>
 
       <Box
