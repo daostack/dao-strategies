@@ -10,7 +10,7 @@ import { useNow } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { truncate } from '../utils/ethers';
 
-import { AppButton, IElement } from './styles/BasicElements';
+import { AppButton, AppModal, IElement } from './styles/BasicElements';
 import { AssetBalance } from './Assets';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
 
@@ -76,41 +76,43 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
   };
 
   let claimValue: string = '0';
-  let claimModal = <></>;
-  let claimAvailable: boolean = false;
+  const canClaim = (status.canClaim || status.willCanClaim) && status.claim !== undefined;
 
-  if ((status.canClaim || status.willCanClaim) && status.claim !== undefined) {
-    claimAvailable = true;
-    claimValue = status.claim.assets ? truncate(ChainsDetails.valueOfAssets(status.claim.assets).toString(), 2) : '0';
-    claimModal = (
-      <Layer onEsc={() => setShowClaim(false)} onClickOutside={() => setShowClaim(false)}>
-        <Box pad="medium">
-          {status.claim.assets !== undefined ? (
-            status.claim.assets.map((asset) => {
-              return <AssetBalance asset={asset}></AssetBalance>;
-            })
-          ) : (
-            <></>
-          )}
-          <div>~{claimValue} usd</div>
-          <AppButton primary onClick={() => claim()}>
-            Claim
-          </AppButton>
-        </Box>
-      </Layer>
-    );
+  if (canClaim) {
+    claimValue =
+      status.claim && status.claim.assets
+        ? truncate(ChainsDetails.valueOfAssets(status.claim.assets).toString(), 2)
+        : '0';
   }
 
   return (
     <>
-      {status.canClaim && showClaim ? { claimModal } : <></>}
+      {status.canClaim && showClaim ? (
+        <AppModal onClosed={() => setShowClaim(false)}>
+          <Box pad="medium">
+            {status.claim && status.claim.assets !== undefined ? (
+              status.claim.assets.map((asset) => {
+                return <AssetBalance asset={asset}></AssetBalance>;
+              })
+            ) : (
+              <></>
+            )}
+            <div>~{claimValue} usd</div>
+            <AppButton primary onClick={() => claim()}>
+              Claim
+            </AppButton>
+          </Box>
+        </AppModal>
+      ) : (
+        <></>
+      )}
       <BalanceCard
         style={{ padding: '24px', ...props.style }}
         title="My Rewards"
         value={claimValue}
         symbol="$"
         action={
-          claimAvailable ? (
+          canClaim ? (
             <AppButton style={{ width: '100%' }} primary onClick={() => setShowClaim(true)}>
               Claim
             </AppButton>

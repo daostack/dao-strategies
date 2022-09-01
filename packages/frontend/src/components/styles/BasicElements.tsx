@@ -9,8 +9,9 @@ import {
   Select,
   FileInput,
   BoxExtendedProps,
+  Layer,
 } from 'grommet';
-import { FormDown, FormUp } from 'grommet-icons';
+import { Close, FormDown, FormUp } from 'grommet-icons';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { styleConstants, theme } from './themes';
@@ -299,5 +300,34 @@ export const InfoProperty: FC<IInfoProperty> = (props: IInfoProperty) => {
       </Box>
       <Box>{props.children}</Box>
     </Box>
+  );
+};
+
+export interface IAppModal extends BoxExtendedProps {
+  onClosed?: () => void;
+  onSuccess?: () => void;
+  onError?: () => void;
+}
+
+export const AppModal: FC<IAppModal> = (props: IAppModal) => {
+  const child = React.cloneElement(props.children as React.ReactElement, {
+    onSuccess: props.onSuccess,
+    onClosed: props.onClosed,
+    onError: props.onError,
+  });
+
+  const close = () => {
+    if (props.onClosed) props.onClosed();
+  };
+
+  return (
+    <Layer position="right" onEsc={() => close()} onClickOutside={() => close()}>
+      <Box style={{ padding: '5vh 2.5vw', height: '100vh', minWidth: '35vw' }}>
+        <Box style={{ marginBottom: '20px' }} onClick={() => close()}>
+          <Close style={{ height: '12px', width: '12px' }}></Close>
+        </Box>
+        {child}
+      </Box>
+    </Layer>
   );
 };

@@ -7,6 +7,7 @@ import { RewardsTable } from '../../components/RewardsTable';
 import {
   AppButton,
   AppCard,
+  AppModal,
   AppTag,
   ExpansibleCard,
   ExpansiveParagraph,
@@ -29,8 +30,6 @@ import { useLoggedUser } from '../../hooks/useLoggedUser';
 export interface ICampaignPageProps {
   dum?: any;
 }
-
-const HEADING_SIZE = '24px';
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
@@ -164,7 +163,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     <>
       {shares !== undefined ? (
         <>
-          <Heading style={{ fontSize: HEADING_SIZE }}>Contributors Board</Heading>
+          <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Contributors</Heading>
           <AppCard>
             <RewardsTable
               shares={shares}
@@ -185,18 +184,16 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const funds = (
     <>
       {showFund ? (
-        <Layer onClickOutside={() => setShowFund(false)}>
-          <AppCard>
-            <FundCampaign
-              onSuccess={() => {
-                setShowFund(false);
-                getOtherDetails();
-              }}
-              assets={assets}
-              chainId={campaign.chainId}
-              address={campaign.address}></FundCampaign>
-          </AppCard>
-        </Layer>
+        <AppModal onClosed={() => setShowFund(false)}>
+          <FundCampaign
+            onSuccess={() => {
+              setShowFund(false);
+              getOtherDetails();
+            }}
+            assets={assets}
+            chainId={campaign.chainId}
+            address={campaign.address}></FundCampaign>
+        </AppModal>
       ) : (
         <></>
       )}

@@ -1,11 +1,12 @@
 import { Asset, ChainsDetails, ContractsJson } from '@dao-strategies/core';
 import { Contract, ethers } from 'ethers';
-import { Select, Box, Header, FormField, TextInput, Spinner } from 'grommet';
+import { Select, Box, Header, FormField, TextInput, Spinner, Heading } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 import { useSigner } from 'wagmi';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { AssetIcon } from './Assets';
 import { AppForm, AppButton, IElement } from './styles/BasicElements';
+import { styleConstants } from './styles/themes';
 
 interface FundFormValues {
   asset: string;
@@ -74,14 +75,16 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
 
   return (
     <>
-      <Box style={{ width: '100%' }} direction="column" align="center">
+      <Box style={{ width: '100%' }} direction="column" align="start">
+        <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Fund Campaign</Heading>
+
         <AppForm style={{ width: '100%' }} value={formValues} onChange={onValuesUpdated as any}>
           <Box>
             <Box style={{ position: 'relative' }}>
-              <FormField name="amount" label="Amount">
+              <FormField name="amount" label="Enter amount to fund">
                 <TextInput name="amount" placeholder="0"></TextInput>
               </FormField>
-              <FormField name="asset" style={{ border: '0px none', position: 'absolute', right: '0px', top: '32px' }}>
+              <FormField name="asset" style={{ border: '0px none', position: 'absolute', right: '0px', top: '30px' }}>
                 <Select
                   name="asset"
                   style={{ border: '0px none' }}
@@ -98,7 +101,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
               </FormField>
             </Box>
 
-            <AppButton primary onClick={() => fund()}>
+            <AppButton primary onClick={() => fund()} style={{ marginTop: '20px' }}>
               {isLogged ? 'Fund' : 'Connect & Fund'}
             </AppButton>
           </Box>
