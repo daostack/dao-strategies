@@ -76,7 +76,7 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
   };
 
   let claimValue: string = '0';
-  let claimModal;
+  let claimModal = <></>;
   let claimAvailable: boolean = false;
 
   if ((status.canClaim || status.willCanClaim) && status.claim !== undefined) {
@@ -110,7 +110,13 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         value={claimValue}
         symbol="$"
         action={
-          claimAvailable ? <AppButton onClick={() => setShowClaim(true)}>Claim</AppButton> : <>Can't claim</>
+          claimAvailable ? (
+            <AppButton style={{ width: '100%' }} primary onClick={() => setShowClaim(true)}>
+              Claim
+            </AppButton>
+          ) : (
+            <>No rewards found</>
+          )
         }></BalanceCard>
     </>
   );

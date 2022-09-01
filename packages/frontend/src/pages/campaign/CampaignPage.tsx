@@ -206,7 +206,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         value={valueLocked}
         symbol="$"
         action={
-          <AppButton onClick={() => setShowFund(true)} primary>
+          <AppButton style={{ width: '100%' }} onClick={() => setShowFund(true)} primary>
             Fund Campaign
           </AppButton>
         }></BalanceCard>

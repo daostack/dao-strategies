@@ -14,6 +14,7 @@ import {
 } from '@dao-strategies/core';
 import { Campaign, Share } from '@prisma/client';
 import { BigNumber, ethers, providers } from 'ethers';
+import { awaitWithTimeout } from '../utils/utils';
 
 import { CampaignService } from './CampaignService';
 import { PriceService } from './PriceService';
@@ -53,7 +54,7 @@ export class CampaignOnChainService {
 
     const tokens = await Promise.all(
       assets.map(async (asset): Promise<TokenBalance> => {
-        let getBalance;
+        let getBalance: Promise<BigNumber>;
 
         if (!ChainsDetails.isNative(asset)) {
           const token = erc20Provider(asset.address, this.provider);
@@ -62,7 +63,11 @@ export class CampaignOnChainService {
           getBalance = this.provider.getBalance(campaign.address);
         }
         /* eslint-disable */
-        const balance = (await getBalance) as BigNumber;
+        const balance = await awaitWithTimeout<BigNumber>(
+          getBalance,
+          2000,
+          new Error('Timeout getting balance')
+        );
         const price = await this.priceOf(campaign.chainId, asset.address);
         /* eslint-enable */
         return {
