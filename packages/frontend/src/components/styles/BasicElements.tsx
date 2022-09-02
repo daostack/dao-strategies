@@ -326,7 +326,7 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
 
   return (
     <Layer position="right" onEsc={() => close()} onClickOutside={() => close()}>
-      <Box style={{ padding: '5vh 2.5vw', height: '100vh', minWidth: '35vw' }}>
+      <Box style={{ padding: '5vh 2.5vw', height: '100vh', minWidth: '35vw', maxWidth: '600px' }}>
         <Box style={{ marginBottom: '20px' }} onClick={() => close()}>
           <Close style={{ height: '12px', width: '12px' }}></Close>
         </Box>

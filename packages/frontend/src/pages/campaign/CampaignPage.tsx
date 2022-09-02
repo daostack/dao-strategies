@@ -6,6 +6,7 @@ import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
 import {
   AppButton,
+  AppCallout,
   AppCard,
   AppModal,
   AppTag,
@@ -17,7 +18,7 @@ import { TwoColumns, ViewportContainer } from '../../components/styles/LayoutCom
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { truncate } from '../../utils/ethers';
-import { CampaignGuardian } from '../../components/CampaignGuardian';
+import { AdvancedCampaignStatus } from '../../components/AdvancedCampaignStatus';
 import { DateManager } from '../../utils/date.manager';
 import { HEADER_HEIGHT } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
@@ -89,6 +90,12 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           <Heading size="small">{campaign.title}</Heading>
         </Box>
       </Box>
+
+      {otherDetails?.publishInfo?.status.locked ? (
+        <AppCallout style={{ marginBottom: '16px' }}>Campaign locked</AppCallout>
+      ) : (
+        <></>
+      )}
 
       <Box style={{ fontSize: styleConstants.textFontSizes[1] }}>
         {campaign.executed ? (
@@ -217,7 +224,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     <>
       {showGuardianControl ? (
         <AppModal heading="Advanced Status" onClosed={() => setShowGuardianControl(false)}>
-          <CampaignGuardian campaignAddress={campaign.address}></CampaignGuardian>
+          <AdvancedCampaignStatus campaignAddress={campaign.address}></AdvancedCampaignStatus>
         </AppModal>
       ) : (
         <></>

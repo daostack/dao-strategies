@@ -233,3 +233,12 @@ export const claimRewards = async (
   console.log(txReceipt);
   return;
 };
+
+export const lockCampaign = async (campaign: Typechain.Campaign, value: boolean) => {
+  const ex = await campaign.setLock(value);
+
+  const txReceipt = await ex.wait();
+
+  console.log(txReceipt);
+  return;
+};
