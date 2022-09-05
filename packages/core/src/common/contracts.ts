@@ -176,3 +176,5 @@ export const getCampaignPublishInfo = async (
 
   return info;
 };
+
+const getCampaignFunders = async (provider: Provider, address: string) => {};

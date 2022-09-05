@@ -39,6 +39,7 @@ export interface CampaignInterface extends utils.Interface {
     "isChallengePeriod()": FunctionFragment;
     "isPendingActive()": FunctionFragment;
     "isProposeWindowActive()": FunctionFragment;
+    "lockForWithdrawals()": FunctionFragment;
     "locked()": FunctionFragment;
     "merkleRootUpdateAllowed()": FunctionFragment;
     "oracle()": FunctionFragment;
@@ -130,6 +131,10 @@ export interface CampaignInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "isProposeWindowActive",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lockForWithdrawals",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "locked", values?: undefined): string;
@@ -232,6 +237,10 @@ export interface CampaignInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isProposeWindowActive",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "lockForWithdrawals",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
@@ -437,6 +446,8 @@ export interface Campaign extends BaseContract {
 
     isProposeWindowActive(overrides?: CallOverrides): Promise<[boolean]>;
 
+    lockForWithdrawals(overrides?: CallOverrides): Promise<[boolean]>;
+
     locked(overrides?: CallOverrides): Promise<[boolean]>;
 
     merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<[boolean]>;
@@ -557,6 +568,8 @@ export interface Campaign extends BaseContract {
 
   isProposeWindowActive(overrides?: CallOverrides): Promise<boolean>;
 
+  lockForWithdrawals(overrides?: CallOverrides): Promise<boolean>;
+
   locked(overrides?: CallOverrides): Promise<boolean>;
 
   merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<boolean>;
@@ -673,6 +686,8 @@ export interface Campaign extends BaseContract {
     isPendingActive(overrides?: CallOverrides): Promise<boolean>;
 
     isProposeWindowActive(overrides?: CallOverrides): Promise<boolean>;
+
+    lockForWithdrawals(overrides?: CallOverrides): Promise<boolean>;
 
     locked(overrides?: CallOverrides): Promise<boolean>;
 
@@ -849,6 +864,8 @@ export interface Campaign extends BaseContract {
 
     isProposeWindowActive(overrides?: CallOverrides): Promise<BigNumber>;
 
+    lockForWithdrawals(overrides?: CallOverrides): Promise<BigNumber>;
+
     locked(overrides?: CallOverrides): Promise<BigNumber>;
 
     merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<BigNumber>;
@@ -971,6 +988,10 @@ export interface Campaign extends BaseContract {
     isPendingActive(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isProposeWindowActive(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    lockForWithdrawals(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

@@ -1,13 +1,14 @@
-import { campaignInstance } from '@dao-strategies/core';
 import {
+  campaignInstance,
   CampaignCreateDetails,
   ContractsJson,
   Typechain,
 } from '@dao-strategies/core';
+
 import { Wallet, Signer, Contract, providers } from 'ethers';
 import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
-import { appLogger } from '../logger';
+import { appLogger } from '../../logger';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -17,7 +18,7 @@ const CampaignFactoryJson =
   ContractsJson.jsonOfChain().contracts.CampaignFactory;
 /* eslint-enable */
 
-export class OnChainService {
+export class SendTransactionService {
   readonly signer: Signer;
   readonly provider: providers.JsonRpcProvider;
   readonly campaignFactory: Typechain.CampaignFactory;

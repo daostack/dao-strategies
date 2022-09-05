@@ -12,17 +12,18 @@ import {
   erc20Provider,
   Asset,
 } from '@dao-strategies/core';
-import { Campaign, Share } from '@prisma/client';
-import { BigNumber, ethers, providers } from 'ethers';
-import { awaitWithTimeout } from '../utils/utils';
+import { Campaign } from '@prisma/client';
+import { BigNumber, providers } from 'ethers';
 
-import { CampaignService } from './CampaignService';
-import { PriceService } from './PriceService';
+import { awaitWithTimeout } from '../../utils/utils';
+
+import { CampaignService } from '../CampaignService';
+import { PriceService } from '../PriceService';
 
 const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-export class CampaignOnChainService {
+export class ReadDataService {
   readonly provider: providers.JsonRpcProvider;
 
   constructor(

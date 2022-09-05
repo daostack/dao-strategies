@@ -36,6 +36,8 @@ model Campaign {
   address         String?   // cannot be @unique since it is null for simulated campaigns - Smart contract address
   shares          Share[] 
   roots           CampaignRoot[] 
+  funders         CampaignFunder[]
+  indexing        CampaignIndexed[]
 }
 
 enum CampaignState {
@@ -94,4 +96,21 @@ model AssetPrice {
   address         String
   price           Float
   lastUpdated     BigInt
+}
+
+model CampaignFunder {
+  id              Int           @id @default(autoincrement())
+  campaign        Campaign      @relation(fields: [campaignId], references: [uri])
+  blockNumber     BigInt
+  campaignId      String
+  funder          String
+  amount          String
+}
+
+// For each campaign, it stores which was the latest block it was indexed
+model CampaignIndex {
+  @@id([campaignId])
+  campaign        Campaign      @relation(fields: [campaignId], references: [uri])
+  campaignId      String
+  blockNumber     BigInt
 }
