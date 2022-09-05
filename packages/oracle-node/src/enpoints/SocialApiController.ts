@@ -1,3 +1,4 @@
+import { GithubProfile } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
 import { ServiceManager } from '../service.manager';
 
@@ -9,7 +10,7 @@ export class SocialApiController extends Controller {
   }
 
   /** */
-  async searchGithub(
+  async searchGithubRepo(
     request: Request,
     _response: Response,
     _next: NextFunction
@@ -20,6 +21,19 @@ export class SocialApiController extends Controller {
       request.body.query,
       request.body.page,
       request.body.per_page
+    );
+    /* eslint-enable */
+  }
+
+  /** */
+  async getGithubProfile(
+    request: Request,
+    _response: Response,
+    _next: NextFunction
+  ): Promise<GithubProfile> {
+    /* eslint-disable */
+    return this.manager.services.socialApi.getGithubProfile(
+      request.params.handle
     );
     /* eslint-enable */
   }

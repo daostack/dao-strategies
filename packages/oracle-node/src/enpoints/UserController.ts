@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { generateNonce, SiweMessage } from 'siwe';
+import { LoggedUserDetails, Verification } from '@dao-strategies/core';
 
 import { ServiceManager } from '../service.manager';
-import { LoggedUserDetails } from '../services/UserService';
 
 import { Controller } from './Controller';
 
@@ -15,16 +15,18 @@ export class UserController extends Controller {
   async me(
     request: Request,
     _response: Response,
-    _next: NextFunction
+    _next: NextFunction,
+    loggedUser: string | undefined
   ): Promise<LoggedUserDetails | undefined> {
     /* eslint-disable */
     if (!request.session.siwe) {
       return undefined;
     }
-    const address = request.session.siwe.address;
-    const user = await this.manager.services.user.get(address);
-    return { address: user.address, verified: { github: user.verifiedGithub } };
+
     /* eslint-enable */
+    return loggedUser
+      ? this.manager.services.user.getVerified(loggedUser)
+      : undefined;
   }
 
   nonce(
@@ -64,19 +66,17 @@ export class UserController extends Controller {
       }
 
       /** If signature is valid, add or create user */
-      const user = await this.manager.services.user.getOrCreate({
+      await this.manager.services.user.getOrCreate({
         address: fields.address,
       });
 
       /* eslint-disable */
       request.session.siwe = fields;
       request.session.cookie.expires = new Date(fields.expirationTime);
+
       return {
         valid: true,
-        user: {
-          address: user.address,
-          verified: { github: user.verifiedGithub },
-        },
+        user: await this.manager.services.user.getVerified(fields.address),
       };
     } catch (e) {
       request.session.siwe = null;
@@ -96,29 +96,15 @@ export class UserController extends Controller {
     /* eslint-enable */
   }
 
-  verifyGithubOfAddress(
+  checkVerification(
     request: Request,
     _response: Response,
-    _next: NextFunction
-  ): Promise<{ address: string }> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return this.manager.services.user.verifyGithubOfAddress(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      request.body.signature as string,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      request.body.github_username as string
-    );
-  }
-
-  verifyAddressOfGithub(
-    request: Request,
-    _response: Response,
-    _next: NextFunction
-  ): Promise<{ address: string }> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return this.manager.services.user.verifyAddressOfGithub(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      request.body.handle as string
+    _next: NextFunction,
+    loggedUser: string
+  ): Promise<Verification> {
+    return this.manager.services.user.checkVerification(
+      request.body.handle as string,
+      loggedUser
     );
   }
 }

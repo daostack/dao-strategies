@@ -46,10 +46,18 @@ enum CampaignState {
 
 model User {
   address         String    @id
-  verifiedGithub  String?
-  signedGithub    String?
   created         Campaign[]
 } 
+
+// A table that stores the verified link between a user from a given platform to a user of another platform
+// with a given intent. 
+model CrossVerification {
+  @@id([from, to, intent])
+  from            String
+  to              String
+  intent          String
+  proof           String
+}
 
 model Share {  
   @@id([campaignId, account])
@@ -74,7 +82,7 @@ model BalanceLeaf {
   root            CampaignRoot  @relation(fields: [campaignId, order], references: [campaignId, order])
   campaignId      String
   order           Int           
-  account         String        // the social account of the leaf is used to prevent double payments
+  accounts        String[]       // the social account of the leaf is used to prevent double payments
   address         String
   balance         String
   proof           String[]      // Store the proofs so that they don't have to be recomputed eveytime they are needed

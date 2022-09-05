@@ -132,7 +132,7 @@ export class CampaignController extends Controller {
   ): Promise<any> {
     /* eslint-disable */
     const campaign = await (this.manager.services.campaign.getFromAddress(
-      request.params.address as string
+      request.params.address.toLowerCase() as string
     ) as any);
 
     return toCampaignExternal(campaign);
@@ -160,7 +160,7 @@ export class CampaignController extends Controller {
   ): Promise<CampaignOnchainDetails> {
     /* eslint-disable */
     return this.manager.services.campaignOnChain.getCampaignDetails(
-      request.params.address as string
+      request.params.address.toLowerCase() as string
     );
     /* eslint-enable */
   }
@@ -173,8 +173,8 @@ export class CampaignController extends Controller {
   ): Promise<CampaignClaimInfo | undefined> {
     /* eslint-disable */
     return this.manager.services.campaignOnChain.getClaimInfo(
-      request.params.address as string,
-      request.params.account as string
+      request.params.address.toLowerCase() as string,
+      request.params.account.toLowerCase() as string
     );
     /* eslint-enable */
   }

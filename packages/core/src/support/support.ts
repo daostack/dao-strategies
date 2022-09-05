@@ -118,3 +118,9 @@ export const bigNumberToNumber = (
   }
   return Number(bn);
 };
+
+export const getGithubVerificationMessage = (
+  github_username: string
+): string => {
+  return `Associate the github account "${github_username}" with this ethereum address`;
+};

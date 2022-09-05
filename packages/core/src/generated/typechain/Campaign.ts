@@ -29,7 +29,7 @@ export interface CampaignInterface extends utils.Interface {
     "approvedMerkleRoot()": FunctionFragment;
     "balanceOfAsset(address)": FunctionFragment;
     "challenge(uint8)": FunctionFragment;
-    "claim(address,uint256,bytes32[],address[])": FunctionFragment;
+    "claim(address,uint256,bytes32[],address[],address)": FunctionFragment;
     "claimed(address,address)": FunctionFragment;
     "deployTime()": FunctionFragment;
     "fund(address,uint256)": FunctionFragment;
@@ -89,7 +89,7 @@ export interface CampaignInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "claim",
-    values: [string, BigNumberish, BytesLike[], string[]]
+    values: [string, BigNumberish, BytesLike[], string[], string]
   ): string;
   encodeFunctionData(
     functionFragment: "claimed",
@@ -394,6 +394,7 @@ export interface Campaign extends BaseContract {
       share: BigNumberish,
       proof: BytesLike[],
       assets: string[],
+      target: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -517,6 +518,7 @@ export interface Campaign extends BaseContract {
     share: BigNumberish,
     proof: BytesLike[],
     assets: string[],
+    target: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -633,6 +635,7 @@ export interface Campaign extends BaseContract {
       share: BigNumberish,
       proof: BytesLike[],
       assets: string[],
+      target: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -807,6 +810,7 @@ export interface Campaign extends BaseContract {
       share: BigNumberish,
       proof: BytesLike[],
       assets: string[],
+      target: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -929,6 +933,7 @@ export interface Campaign extends BaseContract {
       share: BigNumberish,
       proof: BytesLike[],
       assets: string[],
+      target: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

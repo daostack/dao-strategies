@@ -35,10 +35,18 @@ CREATE TABLE "Campaign" (
 -- CreateTable
 CREATE TABLE "User" (
     "address" TEXT NOT NULL,
-    "verifiedGithub" TEXT,
-    "signedGithub" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("address")
+);
+
+-- CreateTable
+CREATE TABLE "CrossVerification" (
+    "from" TEXT NOT NULL,
+    "to" TEXT NOT NULL,
+    "intent" TEXT NOT NULL,
+    "proof" TEXT NOT NULL,
+
+    CONSTRAINT "CrossVerification_pkey" PRIMARY KEY ("from","to","intent")
 );
 
 -- CreateTable
@@ -64,7 +72,7 @@ CREATE TABLE "CampaignRoot" (
 CREATE TABLE "BalanceLeaf" (
     "campaignId" TEXT NOT NULL,
     "order" INTEGER NOT NULL,
-    "account" TEXT NOT NULL,
+    "accounts" TEXT[],
     "address" TEXT NOT NULL,
     "balance" TEXT NOT NULL,
     "proof" TEXT[],

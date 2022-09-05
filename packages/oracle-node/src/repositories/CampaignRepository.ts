@@ -7,6 +7,7 @@ import {
   SharesRead,
   BalancesObject,
   Page,
+  VerificationIntent,
 } from '@dao-strategies/core';
 import {
   PrismaClient,
@@ -230,29 +231,47 @@ export class CampaignRepository {
     return root;
   }
 
+  /** returns the sahres to addresses using plain addresses (without the chain) */
   async getNewSharesToAddresses(
     uri: string,
     prev_order: number | undefined
   ): Promise<SharesToAddresses> {
     // TODO: filter existing accounts
     const result: AddressShares[] = await this.client.$queryRaw`
-      SELECT account, address, amount FROM 
+      SELECT shares.account, crossver.to as address, shares.amount FROM 
       (
         SELECT * FROM public."Share" 
         WHERE "campaignId" = ${uri}
       ) as shares
       LEFT JOIN 
-      public."User" 
-      ON shares.account = "verifiedGithub"
+        public."CrossVerification" as crossver
+      ON shares.account = "from"
+	    WHERE crossver.intent = ${VerificationIntent.SEND_REWARDS}
       `;
 
     const shares: SharesToAddresses = new Map();
+
     result.forEach((share) => {
-      if (share.address != null)
-        shares.set(share.address, {
-          amount: ethers.BigNumber.from(share.amount.toString()),
-          account: share.account,
+      if (share.address != null) {
+        /** TODO: When multi-chain, we might find more than one target address per account. Thus,
+         * we need to chosee the correct one based on the campaign chain. */
+        const address = share.address.split(':')[1];
+        /** one address can be the target of multiple accounts, shares accumulate */
+        const current = shares.get(address);
+
+        const newAmount = ethers.BigNumber.from(share.amount.toString());
+        const amount =
+          current !== undefined ? current.amount.add(newAmount) : newAmount;
+
+        const accounts = current
+          ? current.accounts.concat(share.account)
+          : [share.account];
+
+        shares.set(address, {
+          amount,
+          accounts,
         });
+      }
     });
     return shares;
   }
@@ -260,7 +279,7 @@ export class CampaignRepository {
   async getSharesOfAddress(
     uri: string,
     address: string
-  ): Promise<Share | null> {
+  ): Promise<Share[] | null> {
     const result = await this.client.$queryRaw`
       SELECT account, address, amount FROM 
       (
@@ -273,9 +292,8 @@ export class CampaignRepository {
       WHERE address = ${address}
     `;
 
-    /* eslint-disable */
-    return result && (result as any).length > 0 ? result[0] : null;
-    /* eslint-enable */
+    /** one address can be the target of multiple accounts */
+    return result as Share[];
   }
 
   /** campaigns whose execution date is older and has not been executed */

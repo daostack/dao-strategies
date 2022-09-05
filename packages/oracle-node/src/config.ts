@@ -28,3 +28,7 @@ export const config: ExecutionConfig = {
   republishWatcher: { enabled: true, period: 10 },
   republishTimeMargin: 5,
 };
+
+export const DISABLE_VERIFICATION =
+  process.env.DISABLE_VERIFICATION !== undefined &&
+  process.env.DISABLE_VERIFICATION.toLocaleLowerCase() === 'true';

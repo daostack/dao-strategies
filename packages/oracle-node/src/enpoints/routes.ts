@@ -110,27 +110,27 @@ export const Routes: RouteConfig[] = [
     route: '/user/logout',
     controller: UserController,
     action: 'logout',
-    protected: false,
+    protected: true,
   },
   {
     method: 'post',
-    route: '/user/verifyAddressOfGithub',
+    route: '/user/checkVerification',
     controller: UserController,
-    action: 'verifyAddressOfGithub',
+    action: 'checkVerification',
     protected: false,
   },
   {
-    method: 'post',
-    route: '/user/verifyGithubOfAddress',
-    controller: UserController,
-    action: 'verifyGithubOfAddress',
-    protected: false,
-  },
-  {
-    method: 'post',
-    route: '/social/github/exist',
+    method: 'get',
+    route: '/social/github/repo/:org/:name',
     controller: SocialApiController,
     action: 'repoIsValid',
+    protected: false, // TODO, change to true
+  },
+  {
+    method: 'get',
+    route: '/social/github/profile/:handle',
+    controller: SocialApiController,
+    action: 'getGithubProfile',
     protected: false, // TODO, change to true
   },
 ];

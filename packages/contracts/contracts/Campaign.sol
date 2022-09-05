@@ -24,7 +24,7 @@ contract Campaign is Initializable, ReentrancyGuard {
 
     enum ChallengeAction {
         CancelPending,
-        CacncelPendingAndLockCurrent,
+        CancelPendingAndLockCurrent,
         CancelCampaign
     }
 
@@ -48,8 +48,7 @@ contract Campaign is Initializable, ReentrancyGuard {
     /** amount of assets already claimed per claimer address, per asset address (zero address represents the native token) */
     mapping(address => mapping(address => uint256)) public claimed;
 
-    /** Once locked, the merkleRoot cannot be updated anymore.
-     * Once locked, it cannot be un-locked  */
+    /** Once locked, the merkleRoot cannot be updated anymore */
     bool public locked;
 
     /** amount of rewards provided per address of provider, per asset address (zero address represents the native token) */
@@ -151,12 +150,13 @@ contract Campaign is Initializable, ReentrancyGuard {
         address account,
         uint256 share,
         bytes32[] calldata proof,
-        address[] calldata assets
+        address[] calldata assets,
+        address target
     ) external {
         verifyShares(account, share, proof);
 
         for (uint8 ix = 0; ix < assets.length; ix++) {
-            _claim(account, share, assets[ix]);
+            _claim(account, share, assets[ix], msg.sender, target);
         }
     }
 
@@ -164,14 +164,20 @@ contract Campaign is Initializable, ReentrancyGuard {
     function _claim(
         address account,
         uint256 share,
-        address asset
+        address asset,
+        address sender,
+        address target
     ) private {
         uint256 reward = rewardsAvailableToClaimer(account, share, asset);
 
         claimed[asset][account] += reward;
         totalClaimed[asset] += reward;
 
-        transferAssetOut(account, reward, asset);
+        if (sender == account && target != address(0)) {
+            transferAssetOut(target, reward, asset);
+        } else {
+            transferAssetOut(account, reward, asset);
+        }
 
         emit Claim(account, share, reward, asset);
     }
@@ -186,7 +192,7 @@ contract Campaign is Initializable, ReentrancyGuard {
         }
 
         pendingMerkleRoot = bytes32(0);
-        if (action == ChallengeAction.CacncelPendingAndLockCurrent) {
+        if (action == ChallengeAction.CancelPendingAndLockCurrent) {
             locked = true;
         } else if (action == ChallengeAction.CancelCampaign) {
             locked = true;
@@ -301,9 +307,14 @@ contract Campaign is Initializable, ReentrancyGuard {
         return true;
     }
 
+    /** If true, a locked campaign means withdrawals are enabled */
+    function lockForWithdrawals() public view returns (bool) {
+        return approvedMerkleRoot == bytes32(0) && pendingMerkleRoot == bytes32(0);
+    }
+
     /** Indicates whether withdrawal for providers is allowed */
     function withdrawAllowed() public view returns (bool) {
-        if (locked && approvedMerkleRoot == bytes32(0) && pendingMerkleRoot == bytes32(0)) {
+        if (locked && lockForWithdrawals()) {
             return true;
         }
         return false;

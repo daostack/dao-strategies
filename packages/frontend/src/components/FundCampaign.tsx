@@ -1,11 +1,12 @@
 import { Asset, ChainsDetails, ContractsJson } from '@dao-strategies/core';
 import { Contract, ethers } from 'ethers';
-import { Select, Box, Header, FormField, TextInput } from 'grommet';
+import { Select, Box, Header, FormField, TextInput, Spinner, Heading } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 import { useSigner } from 'wagmi';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { AssetIcon } from './Assets';
 import { AppForm, AppButton, IElement } from './styles/BasicElements';
+import { styleConstants } from './styles/themes';
 
 interface FundFormValues {
   asset: string;
@@ -27,15 +28,10 @@ interface IFundCampaign extends IElement {
 
 export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const [formValues, setFormValues] = useState<FundFormValues>(initialValues);
+  const [funding, setFunding] = useState<boolean>(false);
+
   const { account, connect } = useLoggedUser();
-  const isLogged = account !== undefined;
-  const assets = props.assets;
-
   const { data: signer } = useSigner();
-
-  const onValuesUpdated = (values: FundFormValues) => {
-    setFormValues({ ...values });
-  };
 
   useEffect(() => {
     if (props.assets.length > 0) {
@@ -46,6 +42,13 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     }
   }, [props]);
 
+  const isLogged = account !== undefined;
+  const assets = props.assets;
+
+  const onValuesUpdated = (values: FundFormValues) => {
+    setFormValues({ ...values });
+  };
+
   const selectedAsset = props.assets.find((asset) => asset.id === formValues.asset);
 
   const fund = async () => {
@@ -55,7 +58,6 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     }
 
     if (selectedAsset === undefined) throw new Error('selected asset undefined');
-
     if (signer == null) throw new Error('Signer null');
 
     let tx;
@@ -68,39 +70,58 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
       const token = new Contract(selectedAsset.address, ContractsJson.jsonOfChain().contracts.TestErc20.abi, signer);
       tx = await token.transfer(props.address, ethers.utils.parseEther(formValues.amount));
     }
+
+    setFunding(true);
     await tx.wait();
+    setFunding(false);
+
     if (props.onSuccess !== undefined) props.onSuccess();
   };
 
+  const disabled = funding || selectedAsset === undefined;
+
   return (
     <>
-      <Box style={{ width: '600px' }} pad="large" direction="column" align="center">
-        <AppForm value={formValues} onChange={onValuesUpdated as any}>
-          <Header>Fund Campaign</Header>
+      <Box style={{ width: '100%' }} direction="column" align="start">
+        <AppForm style={{ width: '100%' }} value={formValues} onChange={onValuesUpdated as any}>
           <Box>
-            <FormField name="asset" label="Asset" style={{ border: '0px none' }}>
-              <Select
-                name="asset"
-                style={{ border: '0px none' }}
-                options={assets.map((asset) => asset.id)}
-                value={
-                  <Box pad="small">
-                    <AssetIcon asset={selectedAsset !== undefined ? selectedAsset : undefined}></AssetIcon>
-                  </Box>
-                }>
-                {(key) => {
-                  return <AssetIcon asset={assets.find((asset) => asset.id === key)}></AssetIcon>;
-                }}
-              </Select>
-            </FormField>
-            <FormField name="amount" label="Amount">
-              <TextInput name="amount" placeholder="0"></TextInput>
-            </FormField>
-            <AppButton primary onClick={() => fund()}>
+            <Box style={{ position: 'relative' }}>
+              <FormField name="amount" label="Enter amount to fund">
+                <TextInput name="amount" placeholder="0"></TextInput>
+              </FormField>
+              <FormField name="asset" style={{ border: '0px none', position: 'absolute', right: '0px', top: '30px' }}>
+                <Select
+                  name="asset"
+                  style={{ border: '0px none' }}
+                  options={assets.map((asset) => asset.id)}
+                  value={
+                    <Box pad="small">
+                      <AssetIcon asset={selectedAsset !== undefined ? selectedAsset : undefined}></AssetIcon>
+                    </Box>
+                  }>
+                  {(key) => {
+                    return <AssetIcon asset={assets.find((asset) => asset.id === key)}></AssetIcon>;
+                  }}
+                </Select>
+              </FormField>
+            </Box>
+
+            <AppButton primary disabled={disabled} onClick={() => fund()} style={{ marginTop: '20px' }}>
               {isLogged ? 'Fund' : 'Connect & Fund'}
             </AppButton>
           </Box>
         </AppForm>
+
+        {funding ? (
+          <Box justify="center" align="center" style={{ marginTop: '30px', alignSelf: 'center' }}>
+            Waiting for tx confirmation...
+            <br></br>
+            <br></br>
+            <Spinner></Spinner>
+          </Box>
+        ) : (
+          <></>
+        )}
       </Box>
     </>
   );

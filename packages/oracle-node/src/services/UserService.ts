@@ -1,25 +1,21 @@
-import { Prisma, User } from '@prisma/client';
-import { verifyMessage } from 'ethers/lib/utils';
-import { Octokit } from 'octokit';
+import { Verification } from '@dao-strategies/core';
+import { VerificationIntent, LoggedUserDetails } from '@dao-strategies/core';
+import { CrossVerification, Prisma, User } from '@prisma/client';
 
+import { DISABLE_VERIFICATION } from '../config';
 import { UserRepository } from '../repositories/UserRepository';
+
+import { VerificationService } from './verification/VerificationService';
 
 export interface UserCreateDetails {
   address: string;
 }
 
-export interface LoggedUserDetails {
-  address: string;
-  verified: {
-    github: string;
-  };
-}
-
 export class UserService {
-  protected octokit: Octokit;
+  private verifications: VerificationService;
 
   constructor(protected userRepo: UserRepository, token: string) {
-    this.octokit = new Octokit({ auth: token });
+    this.verifications = new VerificationService(token);
   }
 
   async exist(address: string): Promise<boolean> {
@@ -28,6 +24,39 @@ export class UserService {
 
   async get(address: string): Promise<User | undefined> {
     return this.userRepo.get(address.toLowerCase());
+  }
+
+  async getVerified(address: string): Promise<LoggedUserDetails | undefined> {
+    const user = await this.get(address);
+    if (!user) return undefined;
+
+    const verifications = await this.getVerificationsTo(address);
+    return {
+      address,
+      verifications,
+    };
+  }
+
+  async getVerificationsTo(address: string): Promise<CrossVerification[]> {
+    return this.userRepo.getVerificationsTo(address);
+  }
+
+  async checkVerification(
+    github_username: string,
+    loggedUser: string
+  ): Promise<Verification> {
+    const verification = !DISABLE_VERIFICATION
+      ? await this.verifications.getVerificationGithub(github_username)
+      : {
+          from: `github:${github_username}`,
+          to: `ethereum-${'all'}:${loggedUser}`,
+          intent: VerificationIntent.SEND_REWARDS,
+          proof: 'http://www.github.com',
+        };
+
+    if (verification) await this.userRepo.addVerification(verification);
+
+    return verification;
   }
 
   /** Sensitive method, call only after signature has been verified. */
@@ -47,77 +76,6 @@ export class UserService {
 
   async create(details: Prisma.UserCreateInput): Promise<User> {
     return this.userRepo.create(details);
-  }
-
-  async verifyGithubOfAddress(
-    signature: string,
-    github_username: string
-  ): Promise<{ address: string }> {
-    const getMessage = (github_username: string): string => {
-      return `Associate the github account "${github_username}" with this ethereum address`;
-    };
-
-    const address = verifyMessage(getMessage(github_username), signature);
-    const exist = await this.exist(address);
-
-    if (!exist)
-      throw new Error(
-        `trying to verify the github of address ${address}, but there is no user with this address`
-      );
-
-    await this.userRepo.setSignedGithub(address, github_username);
-
-    return { address };
-  }
-
-  async verifyAddressOfGithub(
-    gihub_username: string
-  ): Promise<{ address: string }> {
-    const { data: gists } = await this.octokit.rest.gists.listForUser({
-      username: gihub_username,
-      per_page: 3,
-    });
-
-    const ethAddressRegex = new RegExp('0x[a-fA-F0-9]{40}');
-    let readAddress: string | undefined = undefined;
-
-    /** check gist contents */
-    for await (const gist of gists) {
-      const { data: gistFull } = await this.octokit.rest.gists.get({
-        gist_id: gist.id,
-      });
-
-      Object.values(gistFull.files).forEach((file) => {
-        const found = ethAddressRegex.exec(file.content);
-        if (found.length > 0) {
-          readAddress = found[0].toString();
-        }
-      });
-
-      /** must be verified by the logged user */
-      if (readAddress !== undefined) {
-        break;
-      }
-    }
-
-    const valid = readAddress !== undefined;
-
-    if (valid) {
-      /** only set verified github if signedGithub is already set and the same */
-      const user = await this.get(readAddress);
-      if (user.signedGithub !== gihub_username) {
-        throw new Error(
-          `Trying to verify github ${gihub_username} for address ${readAddress}, 
-          but that address current signed github account is ${user.signedGithub}`
-        );
-      }
-
-      /** delete this verifiedGithub of any previously existing address*/
-      await this.userRepo.clearVerifiedGithub(gihub_username);
-      await this.userRepo.setVerifiedGithub(readAddress, gihub_username);
-    }
-
-    return { address: readAddress };
   }
 
   deleteAll(): Promise<void> {

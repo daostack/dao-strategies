@@ -14,6 +14,7 @@ import {
 } from '@dao-strategies/core';
 import { Campaign, Share } from '@prisma/client';
 import { BigNumber, ethers, providers } from 'ethers';
+import { awaitWithTimeout } from '../utils/utils';
 
 import { CampaignService } from './CampaignService';
 import { PriceService } from './PriceService';
@@ -53,7 +54,7 @@ export class CampaignOnChainService {
 
     const tokens = await Promise.all(
       assets.map(async (asset): Promise<TokenBalance> => {
-        let getBalance;
+        let getBalance: Promise<BigNumber>;
 
         if (!ChainsDetails.isNative(asset)) {
           const token = erc20Provider(asset.address, this.provider);
@@ -62,7 +63,11 @@ export class CampaignOnChainService {
           getBalance = this.provider.getBalance(campaign.address);
         }
         /* eslint-disable */
-        const balance = (await getBalance) as BigNumber;
+        const balance = await awaitWithTimeout<BigNumber>(
+          getBalance,
+          2000,
+          new Error('Timeout getting balance')
+        );
         const price = await this.priceOf(campaign.chainId, asset.address);
         /* eslint-enable */
         return {
@@ -171,7 +176,6 @@ export class CampaignOnChainService {
     uri: string,
     root: string,
     address: string,
-    share: Share,
     campaignContract: Typechain.Campaign,
     chainId: number,
     customAssets: string[],
@@ -183,17 +187,6 @@ export class CampaignOnChainService {
 
     /** is this an error? */
     if (leaf == null) return undefined;
-
-    /** protection: the shares in the root should not be other than the shares computed for this address */
-    if (
-      !ethers.BigNumber.from(share.amount.toString()).eq(
-        ethers.BigNumber.from(leaf.balance)
-      )
-    ) {
-      throw new Error(
-        `Unexpected shares for account ${address}. Share was ${share.amount} but leaf is ${leaf.balance}`
-      );
-    }
 
     /** protection: check that the proof is valid */
     if (verify) {
@@ -241,21 +234,6 @@ export class CampaignOnChainService {
   ): Promise<CampaignClaimInfo | undefined> {
     const campaign = await this.campaignService.getFromAddress(campaignAddress);
 
-    /** get the shares of the address () */
-    const shares = await this.campaignService.getSharesOfAddress(
-      campaign.uri,
-      address
-    );
-
-    /** if there is not shares, then there should not be any entry in the root */
-    if (shares == null) return undefined;
-
-    /**
-     * if there are shares to this address is because it is already a verified
-     * address of a social account. Accordingly this address should be in the
-     * merkle root of that campaign
-     */
-
     /** read the root details (including the tree) of the current campaign root (use the root
      * from the contract since maybe there is a recent one in the DB that has not been published) */
     const campaignContract = campaignProvider(campaign.address, this.provider);
@@ -266,7 +244,6 @@ export class CampaignOnChainService {
       campaign.uri,
       currentRoot,
       address,
-      shares,
       campaignContract,
       campaign.chainId,
       campaign.customAssets,
@@ -284,7 +261,6 @@ export class CampaignOnChainService {
           campaign.uri,
           pendingRoot,
           address,
-          shares,
           campaignContract,
           campaign.chainId,
           campaign.customAssets

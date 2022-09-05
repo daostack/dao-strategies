@@ -22,7 +22,10 @@ export const ErrorContext: FC<ErrorContextProps> = (props) => {
 
   const errorWindow = hasError ? (
     <Layer>
-      <Box pad="medium">{error}</Box>
+      <Box pad="medium">
+        {error}
+        <a href="/">reload</a>
+      </Box>
     </Layer>
   ) : (
     <></>

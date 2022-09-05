@@ -1,3 +1,4 @@
+import { GithubProfile } from '@dao-strategies/core';
 import { Octokit } from 'octokit';
 
 export class SocialApiService {
@@ -30,6 +31,19 @@ export class SocialApiService {
         });
         return users.data.items.map((item) => item.login);
     }
+  }
+
+  async getGithubProfile(handle: string): Promise<GithubProfile | undefined> {
+    const user = await this.octokit.rest.users.getByUsername({
+      username: handle,
+    });
+    return {
+      handle: user.data.login,
+      name: user.data.name,
+      bio: user.data.bio,
+      avatar_url: user.data.avatar_url,
+      url: user.data.html_url,
+    };
   }
 
   async repoIsValid(fullName: string): Promise<boolean> {

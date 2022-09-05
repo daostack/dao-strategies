@@ -1,8 +1,9 @@
-import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react';
-import { CampaignOnchainDetails, CampaignReadDetails, SharesRead } from '@dao-strategies/core';
+import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { CampaignClaimInfo, CampaignOnchainDetails, CampaignReadDetails, SharesRead } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { Page } from '@dao-strategies/core';
+import { useLoggedUser } from './useLoggedUser';
 
 export type CampaignContextType = {
   isLoading: boolean;
@@ -11,6 +12,8 @@ export type CampaignContextType = {
   shares: SharesRead | undefined;
   getOtherDetails: () => void;
   otherDetails: CampaignOnchainDetails | undefined;
+  checkClaimInfo: () => void;
+  claimInfo: CampaignClaimInfo | undefined;
 };
 
 const CampaignContextValue = createContext<CampaignContextType | undefined>(undefined);
@@ -23,30 +26,51 @@ export interface CampaignContextProps {
 export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContextProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [campaign, setCampaign] = useState<CampaignReadDetails>();
+  const { user } = useLoggedUser();
+
   const [shares, setShares] = useState<SharesRead>();
   const [otherDetails, setOtherDetails] = useState<CampaignOnchainDetails>();
+  const [claimInfo, setClaimInfo] = useState<CampaignClaimInfo>();
 
-  const getShares = async (page: Page): Promise<void> => {
-    if (campaign === undefined) return undefined;
+  const getShares = useCallback(
+    async (page: Page): Promise<void> => {
+      if (campaign === undefined) return undefined;
 
-    const response = await fetch(ORACLE_NODE_URL + `/campaign/sharesFromUri/${campaign.uri}`, {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ page }),
-      credentials: 'include',
-    });
+      const response = await fetch(ORACLE_NODE_URL + `/campaign/sharesFromUri/${campaign.uri}`, {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page }),
+        credentials: 'include',
+      });
 
-    const rewards = await response.json();
-    setShares(rewards);
-  };
+      const rewards = await response.json();
+      setShares(rewards);
+    },
+    [campaign]
+  );
 
-  const getOtherDetails = async (): Promise<void> => {
+  const getOtherDetails = useCallback(async (): Promise<void> => {
     fetch(ORACLE_NODE_URL + `/campaign/${props.address}/otherDetails`, {}).then((response) => {
       response.json().then((_details) => {
         setOtherDetails(_details);
       });
     });
-  };
+  }, [props.address]);
+
+  const checkClaimInfo = useCallback(async (): Promise<void> => {
+    console.log('checking claim info');
+
+    if (!campaign) return;
+    if (!user) return;
+
+    const response = await fetch(ORACLE_NODE_URL + `/campaign/claimInfo/${campaign.address}/${user.address}`, {
+      method: 'get',
+      credentials: 'include',
+    });
+
+    const claimInfo = await response.json();
+    setClaimInfo(Object.keys(claimInfo).length > 0 ? claimInfo : undefined);
+  }, [campaign, user]);
 
   useEffect(() => {
     if (props.address !== undefined) {
@@ -59,6 +83,10 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
     }
   }, [props.address]);
 
+  useEffect(() => {
+    checkClaimInfo();
+  }, [user]);
+
   return (
     <CampaignContextValue.Provider
       value={{
@@ -68,6 +96,8 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
         shares,
         getOtherDetails,
         otherDetails,
+        checkClaimInfo,
+        claimInfo,
       }}>
       {props.children}
     </CampaignContextValue.Provider>

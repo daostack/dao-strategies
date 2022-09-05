@@ -1,184 +1,195 @@
-import { TextInput } from 'grommet';
-import { FC, useState } from 'react';
-import { useSignMessage } from 'wagmi';
-import { AppButton } from './styles/BasicElements';
+import { GithubProfile, VerificationIntent, getGithubGistContent, Verification } from '@dao-strategies/core';
+import { Box, Heading, Spinner, Text, TextArea } from 'grommet';
+import { FC, useCallback, useEffect, useState } from 'react';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 
-export interface IUserProfileProps {
-  dum?: string;
+import { AppButton, AppInput, IElement, NumberedRow } from './styles/BasicElements';
+import { useDebounce } from 'use-debounce';
+import { GithubProfileCard } from './GithubProfileCard';
+import { Copy } from 'grommet-icons';
+
+export interface IVerificationProps extends IElement {
+  onClose: () => void;
 }
 
-const getMessage = (github_username: string) => {
-  return `Associate the github account "${github_username}" with this ethereum address`;
-};
+enum VerificationStatus {
+  empty = 0,
+  handleFound = 1,
+  gistSearching = 2,
+}
 
-export const GithubVerification: FC<IUserProfileProps> = () => {
+export const GithubVerification: FC<IVerificationProps> = (props: IVerificationProps) => {
   const { user, refresh } = useLoggedUser();
-  const [handle, setHandle] = useState<string>('pepoospina');
-  const [handleWasSet, setHandleWasSet] = useState<boolean>(false);
+  const [handle, setHandle] = useState<string>('');
 
-  const [addressCopied, setAddressCopied] = useState<boolean>(false);
+  const [debouncedHandle] = useDebounce(handle, 1200);
+  const [checkingHandle, setCheckingHandle] = useState<boolean>(true);
+  const [githubProfile, setGithubProfile] = useState<GithubProfile>();
 
-  const [verifyingSig, setVerifyinfSig] = useState<boolean>(false);
-  const [verifiedSig, setVerifidSig] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
+  const [gistClicked, setGistClicked] = useState<boolean>(false);
 
-  const [verifying, setVerifying] = useState<boolean>(false);
-  const [verifyingError, setVerifyingError] = useState<boolean>(false);
-  const [verified, setVerified] = useState<boolean>(false);
+  const [readingGists, setReadingGists] = useState<boolean>(false);
+  const [verification, setVerification] = useState<Verification>();
 
-  const { signMessage } = useSignMessage({
-    onSuccess(data) {
-      // Verify signature when sign message succeeds
-      verifyGithubOfAddress(data);
-    },
-  });
+  const verified = verification !== undefined;
 
-  const isVerified = () => {
-    return false; //user !== undefined && user.verified.github != null && user.verified.github.trim() !== '';
+  const checkHandle = () => {
+    setCheckingHandle(true);
+
+    if (debouncedHandle !== '') {
+      fetch(ORACLE_NODE_URL + `/social/github/profile/${debouncedHandle}`, {
+        method: 'get',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      }).then((response) => {
+        response.json().then((data) => {
+          setCheckingHandle(false);
+          setGithubProfile(data);
+        });
+      });
+    } else {
+      // setCheckingHandle(false);
+      setGithubProfile(undefined);
+    }
   };
 
-  const isLogged = () => {
-    return user !== undefined;
-  };
+  const checkGist = useCallback(() => {
+    if (githubProfile) {
+      setReadingGists(true);
+      fetch(ORACLE_NODE_URL + `/user/checkVerification`, {
+        method: 'post',
+        body: JSON.stringify({ handle: githubProfile.handle }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      }).then((response) => {
+        response.json().then((data) => {
+          setReadingGists(false);
+          setVerification(data);
+          refresh();
+        });
+      });
+    }
+  }, [githubProfile]);
 
-  const copyAddress = async () => {
-    if (user === undefined) throw new Error();
-    await navigator.clipboard.writeText(user.address);
-    setAddressCopied(true);
-  };
+  useEffect(() => {
+    checkHandle();
+  }, [debouncedHandle]);
 
-  const sign = async () => {
-    setVerifyinfSig(true);
-    signMessage({
-      message: getMessage(handle),
-    });
-  };
+  const status: VerificationStatus =
+    githubProfile === undefined
+      ? VerificationStatus.empty
+      : !gistClicked
+      ? VerificationStatus.handleFound
+      : VerificationStatus.gistSearching;
 
   const goToGithub = async () => {
+    setGistClicked(true);
     window.open('https://gist.github.com/', '_blank');
-  };
-
-  const handleSet = () => {
-    setHandleWasSet(true);
-  };
-
-  const handleClear = () => {
-    setHandleWasSet(false);
-    setHandle('');
   };
 
   const handleChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHandle(e.target.value);
   };
 
-  const verifyGithubOfAddress = (data: string) => {
-    fetch(ORACLE_NODE_URL + '/user/verifyGithubOfAddress', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ signature: data, github_username: handle }),
-    }).then((response) => {
-      response.json().then((res: { address: string }) => {
-        setVerifyinfSig(false);
-        setVerifidSig(res.address.toLowerCase() === user?.address.toLowerCase());
-      });
-    });
-  };
+  const text = getGithubGistContent('all', user ? user.address : '', VerificationIntent.SEND_REWARDS);
 
-  const verifyAddressOfGithub = () => {
-    setVerifying(true);
-    fetch(ORACLE_NODE_URL + '/user/verifyAddressOfGithub', {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ handle }),
-    }).then((response) => {
-      response.json().then((res: { address: string }) => {
-        if (res.address.toLowerCase() === user?.address.toLowerCase()) {
-          setVerifying(false);
-          setVerified(true);
-          refresh();
-        } else {
-          setVerifyingError(true);
-        }
-      });
+  const copyText = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const close = async () => {
+    props.onClose();
   };
 
   return (
     <>
-      {JSON.stringify(user)}
-      {isLogged() ? (
-        !isVerified() ? (
-          <>
-            <div>
-              <div className="gutter-row">
-                {!handleWasSet ? (
-                  <TextInput value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></TextInput>
-                ) : (
-                  <>{handle}</>
-                )}
-              </div>
-              <div className="gutter-row">
-                {!handleWasSet ? (
-                  <AppButton primary onClick={handleSet}>
-                    Set
-                  </AppButton>
-                ) : (
-                  <AppButton primary onClick={handleClear}>
-                    Clear
-                  </AppButton>
-                )}
-              </div>
-            </div>
-            <br></br>
-            <div>
-              <div className="gutter-row">
-                <>{user?.address}</>
-              </div>
-              <div className="gutter-row">
-                {!verifiedSig ? (
-                  <AppButton primary onClick={sign}>
-                    {!verifyingSig ? <>Sign</> : <>Signing...</>}
-                  </AppButton>
-                ) : (
-                  <>verified</>
-                )}
-              </div>
-            </div>
-            <br></br>
-            <div>
-              <div className="gutter-row">
-                Please create a <b>public</b> gist on github pasting your Ethereum address in it's body.
-              </div>
-              <div className="gutter-row">
-                <AppButton primary onClick={goToGithub}>
-                  Open Github
-                </AppButton>
-              </div>
-            </div>
-            <br></br>
-            <div>
-              <div className="gutter-row">Once you have created the gist, click below to verify it.</div>
-              <div className="gutter-row">
-                <AppButton primary onClick={verifyAddressOfGithub}>
-                  {!verifying ? <>Verify</> : <>Verifying...</>}
-                </AppButton>
-              </div>
-            </div>
+      <Box pad="large">
+        <Box style={{ paddingBottom: '40px' }}>
+          <Heading size="small">Set the payment address for a Github account</Heading>
+          <Text style={{ padding: '0px 12px' }}>
+            This step is done from Github to prove that it's done by the legitimate owner of that Github account.
+          </Text>
+        </Box>
+        <NumberedRow disabled={status < 0} number={1} text={<>Enter the github handle below.</>}>
+          <Box>
+            <AppInput value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></AppInput>
+          </Box>
+        </NumberedRow>
+        <NumberedRow
+          disabled={status < 1}
+          number={2}
+          text={
+            <>
+              Create a <b>public</b> gist on Github with the following content.
+            </>
+          }>
+          <Box>
+            <Box style={{ position: 'relative' }}>
+              <TextArea
+                disabled
+                resize={false}
+                style={{ height: '120px', fontSize: '14px', fontFamily: 'monospace' }}
+                value={text}></TextArea>
+              <Box
+                onClick={() => copyText()}
+                justify="center"
+                align="center"
+                style={{
+                  width: '60px',
+                  height: '36px',
+                  position: 'absolute',
+                  bottom: '10px',
+                  right: '10px',
+                  cursor: 'pointer',
+                  borderRadius: '6px',
+                  backgroundColor: '#cccccc53',
+                }}>
+                {!copied ? <Copy></Copy> : <Text style={{ fontSize: '12px' }}>copied!</Text>}
+              </Box>
+            </Box>
+            <AppButton onClick={goToGithub} style={{ marginTop: '10px' }} primary>
+              Open Github in a new tab
+            </AppButton>
+          </Box>
+        </NumberedRow>
 
-            <br></br>
-            {verifyingError ? <>Error verifying</> : <></>}
-            {verified ? <>Verified</> : <></>}
-
-            <br></br>
-          </>
-        ) : (
-          <>Github Verified</>
-        )
-      ) : (
-        <>User not Logged</>
-      )}
+        <Box>
+          <GithubProfileCard style={{ marginTop: '16px' }} profile={githubProfile}></GithubProfileCard>
+          {status >= 1 ? (
+            <Box style={{ margin: '12px 0px' }}>
+              {verification === undefined ? (
+                <>
+                  Please click below once the gist has been created
+                  <AppButton onClick={() => checkGist()} primary>
+                    Check gist {readingGists ? <Spinner></Spinner> : <></>}
+                  </AppButton>
+                </>
+              ) : (
+                <>
+                  Gist found! rewards received by this user will be sent to:
+                  <AppInput style={{ marginBottom: '12px' }} value={verification ? verification.to : ''}></AppInput>
+                  <AppButton onClick={() => close()} primary>
+                    Close
+                  </AppButton>
+                </>
+              )}
+            </Box>
+          ) : (
+            <></>
+          )}
+        </Box>
+      </Box>
     </>
   );
 };

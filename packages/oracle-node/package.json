@@ -11,6 +11,7 @@
     "test": "jest test/main.test.ts",
     "reboot": "yarn prisma-reset && yarn start",
     "start": "nodemon src/server.ts",
+    "start-debug": "ts-node --inspect src/server.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
   },

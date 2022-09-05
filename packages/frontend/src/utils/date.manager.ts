@@ -22,6 +22,9 @@ export class DateManager {
       .then((res) => {
         return res.json();
       })
+      .catch((e) => {
+        throw new Error(`Error getting oracle time`);
+      })
       .then((time): TimeDetails => time);
 
     this.bias = time.now - this.getTime();
