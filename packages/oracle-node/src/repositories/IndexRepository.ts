@@ -26,6 +26,21 @@ export class IndexRepository {
     });
   }
 
+  async addIndexMark(uri: string, blockNumber: number): Promise<void> {
+    await this.client.campaignIndex.upsert({
+      create: {
+        blockNumber,
+        campaignId: uri,
+      },
+      where: {
+        campaignId: uri,
+      },
+      update: {
+        blockNumber,
+      },
+    });
+  }
+
   async getFunders(uri: string, page: Page): Promise<CampaignFundersRead> {
     const [funders, total] = await this.client.$transaction([
       this.client.campaignFunder.findMany({

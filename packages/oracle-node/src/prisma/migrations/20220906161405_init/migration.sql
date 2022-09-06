@@ -92,14 +92,13 @@ CREATE TABLE "AssetPrice" (
 
 -- CreateTable
 CREATE TABLE "CampaignFunder" (
-    "id" SERIAL NOT NULL,
+    "hash" TEXT NOT NULL,
     "campaignId" TEXT NOT NULL,
     "funder" TEXT NOT NULL,
     "amount" TEXT NOT NULL,
     "blockNumber" BIGINT NOT NULL,
-    "hash" TEXT NOT NULL,
 
-    CONSTRAINT "CampaignFunder_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "CampaignFunder_pkey" PRIMARY KEY ("hash")
 );
 
 -- CreateTable

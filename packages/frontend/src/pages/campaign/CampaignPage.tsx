@@ -38,7 +38,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
   const [showGuardianControl, setShowGuardianControl] = useState<boolean>(false);
 
-  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, checkClaimInfo, getFunders } =
+  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, checkClaimInfo, funders, getFunders } =
     useCampaignContext();
 
   const { user } = useLoggedUser();
@@ -190,18 +190,13 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     </>
   );
 
-  const funders = (
+  const fundersTable = (
     <AppCard style={{ marginTop: '130px' }}>
       {shares !== undefined ? (
         <>
-          <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Contributors</Heading>
+          <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Funders</Heading>
           <AppCard>
-            <FundersTable
-              shares={shares}
-              showReward
-              raised={otherDetails?.raised}
-              style={{ marginBottom: '36px' }}
-              updatePage={updatePage}></FundersTable>
+            <FundersTable funders={funders} updatePage={updatePage}></FundersTable>
           </AppCard>
         </>
       ) : (
@@ -262,7 +257,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       {details}
       {info}
       {contributors_table}
-      {funders}
+      {fundersTable}
     </>
   );
 

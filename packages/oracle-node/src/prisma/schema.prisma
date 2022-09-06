@@ -99,13 +99,12 @@ model AssetPrice {
 }
 
 model CampaignFunder {
-  id              Int           @id @default(autoincrement())
+  hash            String        @id
   campaign        Campaign      @relation(fields: [campaignId], references: [uri])
   campaignId      String
   funder          String
   amount          String
   blockNumber     BigInt
-  hash            String
 }
 
 // For each campaign, it stores which was the latest block it was indexed

@@ -1,7 +1,4 @@
-import {
-  StrategyComputation,
-  IStrategyComputation,
-} from '@dao-strategies/core';
+import { IStrategyComputation } from '@dao-strategies/core';
 import { PrismaClient } from '@prisma/client';
 import { Signer, providers } from 'ethers';
 

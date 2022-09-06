@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@dao-strategies/core": "^0.0.0",
-    "ethers": "^5.5.4",
+    "ethers": "^5.7.0",
     "rollup": "^2.70.1",
     "temp-dir": "^2.0.0"
   },
