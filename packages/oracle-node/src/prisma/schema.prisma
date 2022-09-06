@@ -37,7 +37,7 @@ model Campaign {
   shares          Share[] 
   roots           CampaignRoot[] 
   funders         CampaignFunder[]
-  indexing        CampaignIndexed[]
+  indexing        CampaignIndex[]
 }
 
 enum CampaignState {
@@ -101,10 +101,11 @@ model AssetPrice {
 model CampaignFunder {
   id              Int           @id @default(autoincrement())
   campaign        Campaign      @relation(fields: [campaignId], references: [uri])
-  blockNumber     BigInt
   campaignId      String
   funder          String
   amount          String
+  blockNumber     BigInt
+  hash            String
 }
 
 // For each campaign, it stores which was the latest block it was indexed

@@ -25,10 +25,9 @@ import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
 
-import { ReadDataService } from './onchain/ReadDataService';
 import { campaignToUriDetails } from './CampaignUri';
+import { ReadDataService } from './onchain/ReadDataService';
 import {
-  OnChainService,
   SendTransactionService,
   ZERO_BYTES32,
 } from './onchain/SendTransactionsService';
@@ -238,7 +237,7 @@ export class CampaignService {
      */
     const rootDetails = await this.computeRoot(campaign);
 
-    const publishInfo = await this.campaignOnChain.getPublishInfo(
+    const publishInfo = await this.readDataService.getPublishInfo(
       campaign.address
     );
 

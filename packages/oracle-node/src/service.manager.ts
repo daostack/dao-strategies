@@ -3,6 +3,8 @@ import {
   IStrategyComputation,
 } from '@dao-strategies/core';
 import { PrismaClient } from '@prisma/client';
+import { Signer, providers } from 'ethers';
+
 import { StrategyComputationMock } from '../test/mocks/strategy.computation';
 
 import { PRICE_UPDATE_PERIOD } from './config';
@@ -10,7 +12,6 @@ import { CampaignRepository } from './repositories/CampaignRepository';
 import { UserRepository } from './repositories/UserRepository';
 import { CampaignService } from './services/CampaignService';
 import { ReadDataService } from './services/onchain/ReadDataService';
-import { ExecuteService, ExecutionConfig } from './services/ExecutionService';
 import { SendTransactionService } from './services/onchain/SendTransactionsService';
 import { PriceService } from './services/PriceService';
 import { SocialApiService } from './services/SocialApiService';
@@ -18,13 +19,20 @@ import { TimeService } from './services/TimeService';
 import { UserService } from './services/UserService';
 import { Services } from './types';
 
+import { ExecuteService, ExecutionConfig } from './services/ExecutionService';
+import { IndexingService } from './services/onchain/IndexService';
+import { IndexRepository } from './repositories/IndexRepository';
+import { Wallet } from 'ethers/lib/ethers';
+
 // const LOG = ['query', 'info', 'warn', 'error'];
 const LOG = ['warn', 'error'];
 
 export class ServiceManager {
   public client: PrismaClient;
+
   public campaignRepo: CampaignRepository;
   public userRepo: UserRepository;
+  public indexRepo: IndexRepository;
 
   public strategyComputation: IStrategyComputation;
 
@@ -32,8 +40,12 @@ export class ServiceManager {
   private sendTransactionService: SendTransactionService;
   private readDataService: ReadDataService;
   private socialApi: SocialApiService;
+  private indexingService: IndexingService;
   private campaignService: CampaignService;
   private priceService: PriceService;
+
+  private provider: providers.Provider;
+  private signer: Signer;
 
   public services: Services;
   public execution: ExecuteService;
@@ -42,14 +54,22 @@ export class ServiceManager {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.client = new PrismaClient({ log: LOG as any });
 
+    this.provider = new providers.JsonRpcProvider(process.env.JSON_RPC_URL);
+    this.signer = new Wallet(process.env.ORACLE_PRIVATE_KEY);
+    this.signer = this.signer.connect(this.provider);
+
     this.campaignRepo = new CampaignRepository(this.client);
     this.userRepo = new UserRepository(this.client);
+    this.indexRepo = new IndexRepository(this.client);
 
     this.strategyComputation = new StrategyComputationMock();
     // this.strategyComputation = new StrategyComputation();
 
     this.timeService = new TimeService();
-    this.sendTransactionService = new SendTransactionService();
+    this.sendTransactionService = new SendTransactionService(
+      this.signer,
+      this.provider
+    );
 
     this.socialApi = new SocialApiService(config.world.GITHUB_TOKEN);
 
@@ -61,14 +81,23 @@ export class ServiceManager {
       { republishTimeMargin: config.republishTimeMargin }
     );
 
+    this.indexingService = new IndexingService(
+      this.indexRepo,
+      this.campaignService,
+      this.provider
+    );
+
     this.priceService = new PriceService(
       this.client,
       this.timeService,
       PRICE_UPDATE_PERIOD
     );
+
     this.readDataService = new ReadDataService(
       this.campaignService,
-      this.priceService
+      this.indexingService,
+      this.priceService,
+      this.provider
     );
 
     this.campaignService.setOnChainRead(this.readDataService);

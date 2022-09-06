@@ -19,17 +19,12 @@ const CampaignFactoryJson =
 /* eslint-enable */
 
 export class SendTransactionService {
-  readonly signer: Signer;
-  readonly provider: providers.JsonRpcProvider;
   readonly campaignFactory: Typechain.CampaignFactory;
 
-  constructor(_signer?: Signer, _provider?: providers.JsonRpcProvider) {
-    const signer = _signer || new Wallet(process.env.ORACLE_PRIVATE_KEY);
-    this.provider =
-      _provider || new providers.JsonRpcProvider(process.env.JSON_RPC_URL);
-
-    this.signer = signer.connect(this.provider);
-
+  constructor(
+    protected signer: Signer,
+    protected provider: providers.Provider
+  ) {
     /* eslint-disable */
 
     this.campaignFactory = new Contract(

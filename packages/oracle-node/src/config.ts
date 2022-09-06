@@ -27,6 +27,7 @@ export const config: ExecutionConfig = {
   executionWatcher: { enabled: true, period: 10 },
   republishWatcher: { enabled: true, period: 10 },
   republishTimeMargin: 5,
+  updatePeriod: 10,
 };
 
 export const DISABLE_VERIFICATION =

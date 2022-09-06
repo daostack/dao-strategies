@@ -1,4 +1,4 @@
-import { Asset, ChainsDetails, ContractsJson } from '@dao-strategies/core';
+import { Asset, campaignInstance, ChainsDetails, ContractsJson } from '@dao-strategies/core';
 import { Contract, ethers } from 'ethers';
 import { Select, Box, Header, FormField, TextInput, Spinner, Heading } from 'grommet';
 import { FC, useEffect, useState } from 'react';
@@ -61,11 +61,10 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     if (signer == null) throw new Error('Signer null');
 
     let tx;
+    const campaign = campaignInstance(props.address, signer);
+
     if (ChainsDetails.isNative(selectedAsset)) {
-      tx = await signer.sendTransaction({
-        value: ethers.utils.parseEther(formValues.amount),
-        to: props.address,
-      });
+      tx = campaign.fund(ethers.constants.AddressZero, 0, { value: ethers.utils.parseEther(formValues.amount) });
     } else {
       const token = new Contract(selectedAsset.address, ContractsJson.jsonOfChain().contracts.TestErc20.abi, signer);
       tx = await token.transfer(props.address, ethers.utils.parseEther(formValues.amount));

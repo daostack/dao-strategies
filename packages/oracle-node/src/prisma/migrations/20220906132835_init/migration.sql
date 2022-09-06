@@ -90,6 +90,26 @@ CREATE TABLE "AssetPrice" (
     CONSTRAINT "AssetPrice_pkey" PRIMARY KEY ("chainId","address")
 );
 
+-- CreateTable
+CREATE TABLE "CampaignFunder" (
+    "id" SERIAL NOT NULL,
+    "campaignId" TEXT NOT NULL,
+    "funder" TEXT NOT NULL,
+    "amount" TEXT NOT NULL,
+    "blockNumber" BIGINT NOT NULL,
+    "hash" TEXT NOT NULL,
+
+    CONSTRAINT "CampaignFunder_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CampaignIndex" (
+    "campaignId" TEXT NOT NULL,
+    "blockNumber" BIGINT NOT NULL,
+
+    CONSTRAINT "CampaignIndex_pkey" PRIMARY KEY ("campaignId")
+);
+
 -- AddForeignKey
 ALTER TABLE "Campaign" ADD CONSTRAINT "Campaign_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "User"("address") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -101,3 +121,9 @@ ALTER TABLE "CampaignRoot" ADD CONSTRAINT "CampaignRoot_campaignId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "BalanceLeaf" ADD CONSTRAINT "BalanceLeaf_campaignId_order_fkey" FOREIGN KEY ("campaignId", "order") REFERENCES "CampaignRoot"("campaignId", "order") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CampaignFunder" ADD CONSTRAINT "CampaignFunder_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CampaignIndex" ADD CONSTRAINT "CampaignIndex_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;

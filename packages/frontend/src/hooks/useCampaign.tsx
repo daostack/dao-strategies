@@ -1,19 +1,27 @@
 import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { CampaignClaimInfo, CampaignOnchainDetails, CampaignReadDetails, SharesRead } from '@dao-strategies/core';
+import {
+  CampaignClaimInfo,
+  CampaignOnchainDetails,
+  CampaignReadDetails,
+  SharesRead,
+  CampaignFundersRead,
+  Page,
+} from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
-import { Page } from '@dao-strategies/core';
 import { useLoggedUser } from './useLoggedUser';
 
 export type CampaignContextType = {
   isLoading: boolean;
   campaign: CampaignReadDetails | undefined;
-  getShares: (page: Page) => void;
+  getShares: (page: Page) => Promise<void>;
   shares: SharesRead | undefined;
-  getOtherDetails: () => void;
+  getOtherDetails: () => Promise<void>;
   otherDetails: CampaignOnchainDetails | undefined;
-  checkClaimInfo: () => void;
+  checkClaimInfo: () => Promise<void>;
   claimInfo: CampaignClaimInfo | undefined;
+  getFunders: (page: Page) => Promise<void>;
+  funders: CampaignFundersRead | undefined;
 };
 
 const CampaignContextValue = createContext<CampaignContextType | undefined>(undefined);
@@ -29,6 +37,7 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
   const { user } = useLoggedUser();
 
   const [shares, setShares] = useState<SharesRead>();
+  const [funders, setFunders] = useState<CampaignFundersRead>();
   const [otherDetails, setOtherDetails] = useState<CampaignOnchainDetails>();
   const [claimInfo, setClaimInfo] = useState<CampaignClaimInfo>();
 
@@ -72,6 +81,25 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
     setClaimInfo(Object.keys(claimInfo).length > 0 ? claimInfo : undefined);
   }, [campaign, user]);
 
+  const getFunders = useCallback(
+    async (page: Page): Promise<void> => {
+      console.log('checking funders');
+
+      if (!campaign) return;
+
+      const response = await fetch(ORACLE_NODE_URL + `/campaign/funders/${campaign.uri}`, {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page }),
+        credentials: 'include',
+      });
+
+      const funders = await response.json();
+      setFunders(Object.keys(funders).length > 0 ? funders : undefined);
+    },
+    [campaign]
+  );
+
   useEffect(() => {
     if (props.address !== undefined) {
       fetch(ORACLE_NODE_URL + `/campaign/${props.address}`, {}).then((response) => {
@@ -98,6 +126,8 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
         otherDetails,
         checkClaimInfo,
         claimInfo,
+        getFunders,
+        funders,
       }}>
       {props.children}
     </CampaignContextValue.Provider>

@@ -28,6 +28,7 @@ import { styleConstants } from '../../components/styles/themes';
 import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { Link } from 'react-router-dom';
+import { FundersTable } from '../../components/FundersTable';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -37,7 +38,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
   const [showGuardianControl, setShowGuardianControl] = useState<boolean>(false);
 
-  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, checkClaimInfo } =
+  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, checkClaimInfo, getFunders } =
     useCampaignContext();
 
   const { user } = useLoggedUser();
@@ -47,9 +48,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   };
 
   useEffect(() => {
-    getShares({ number: 0, perPage: 10 });
+    getShares({ number: 0, perPage: 6 });
     getOtherDetails();
     checkClaimInfo();
+    getFunders({ number: 0, perPage: 6 });
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
@@ -188,7 +190,25 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     </>
   );
 
-  const funders = <AppCard style={{ marginTop: '130px' }}>Funders table</AppCard>;
+  const funders = (
+    <AppCard style={{ marginTop: '130px' }}>
+      {shares !== undefined ? (
+        <>
+          <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Contributors</Heading>
+          <AppCard>
+            <FundersTable
+              shares={shares}
+              showReward
+              raised={otherDetails?.raised}
+              style={{ marginBottom: '36px' }}
+              updatePage={updatePage}></FundersTable>
+          </AppCard>
+        </>
+      ) : (
+        <Spinner></Spinner>
+      )}
+    </AppCard>
+  );
 
   const funds = (
     <>
