@@ -51,7 +51,7 @@ export class IndexRepository {
     ]);
 
     page.total = total;
-    page.totalPages = Math.floor(total / page.perPage);
+    page.totalPages = Math.ceil(total / page.perPage);
 
     return {
       uri,

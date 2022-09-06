@@ -143,7 +143,7 @@ export class CampaignRepository {
     });
 
     page.total = total;
-    page.totalPages = Math.floor(total / page.perPage);
+    page.totalPages = Math.ceil(total / page.perPage);
 
     return {
       uri,

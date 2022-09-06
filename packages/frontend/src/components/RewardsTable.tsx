@@ -1,13 +1,12 @@
 import { Page } from '@dao-strategies/core';
 import { SharesRead, TokenBalance } from '@dao-strategies/core';
 import { ethers } from 'ethers';
-import { Box, BoxExtendedProps, Spinner } from 'grommet';
-import { FormNext, FormPrevious, StatusGood } from 'grommet-icons';
+import { Box, Spinner } from 'grommet';
+import { StatusGood } from 'grommet-icons';
 import { FC } from 'react';
 import { valueToString } from '../utils/general';
-import { PagedTable, PageNumber, TableColumn } from './PagedTable';
+import { PagedTable, TableColumn } from './PagedTable';
 import { IElement } from './styles/BasicElements';
-import { styleConstants } from './styles/themes';
 
 interface Data {
   user: string;
@@ -78,6 +77,9 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
   ];
 
   const row = (rowIx: number, colIx: number) => {
+    if (rowIx >= data.length) {
+      return <></>;
+    }
     const datum = {
       user: data[rowIx][0],
       percentage: data[rowIx][1],
