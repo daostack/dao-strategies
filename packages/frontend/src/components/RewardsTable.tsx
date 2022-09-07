@@ -8,14 +8,6 @@ import { valueToString } from '../utils/general';
 import { PagedTable, TableColumn } from './PagedTable';
 import { IElement } from './styles/BasicElements';
 
-interface Data {
-  user: string;
-  badge: boolean;
-  info: string;
-  reward?: string;
-  percentage: string;
-}
-
 export interface RewardsTableI extends IElement {
   shares: SharesRead;
   showReward?: boolean;
@@ -60,14 +52,14 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
           if (raised > 0) {
             hasCustom = true;
           }
-          return `${valueToString(raised * ratio)} ${token.name}`;
+          return `${valueToString(raised * ratio, 2)} ${token.name}`;
         })
         .reduce((total, reward) => total.concat(' ' + reward));
 
-      reward = `${rewardUSD > 0 ? `~$${valueToString(rewardUSD)}` : '-'}${hasCustom ? ` + ${customStr}` : ''}`;
+      reward = `${rewardUSD > 0 ? `~$${valueToString(rewardUSD, 2)}` : '-'}${hasCustom ? ` + ${customStr}` : ''}`;
     }
 
-    return [address, valueToString(ratio * 100), reward, true, ''];
+    return [address, valueToString(ratio * 100, 1), reward, true, ''];
   });
 
   const columns: TableColumn[] = [

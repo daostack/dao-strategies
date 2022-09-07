@@ -43,6 +43,8 @@ const getMnemonic = (): string => {
   return '';
 };
 
+export const LOCAL_CHAIN_ID = 1337;
+
 const config: HardhatUserConfig = {
   //defaultNetwork: process.env.HARDHAT_TARGET_NETWORK,
   namedAccounts: {
@@ -56,6 +58,7 @@ const config: HardhatUserConfig = {
         auto: false,
         interval: 5000,
       },
+      chainId: LOCAL_CHAIN_ID,
     },
     rinkeby: {
       url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_RINKEBY_KEY}`,

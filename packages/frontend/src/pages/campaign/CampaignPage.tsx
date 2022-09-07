@@ -195,8 +195,12 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     <AppCard style={{ marginTop: '130px' }}>
       {funders !== undefined ? (
         <>
-          <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Funders</Heading>
-          <Refresh onClick={() => getFunders(funders.page)}></Refresh>
+          <Box direction="row" justify="between" align="center">
+            <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Funders</Heading>
+            <Box style={{ height: '20px', width: '20px' }} onClick={() => getFunders(funders.page)}>
+              <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+            </Box>
+          </Box>
           <AppCard>
             <FundersTable funders={funders} updatePage={updatePage}></FundersTable>
           </AppCard>

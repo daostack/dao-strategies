@@ -4,6 +4,7 @@ import { Box, Spinner } from 'grommet';
 import { StatusGood } from 'grommet-icons';
 import { FC } from 'react';
 import { useCampaignContext } from '../hooks/useCampaign';
+import { valueToString } from '../utils/general';
 import { Address } from './Address';
 import { PagedTable, TableColumn } from './PagedTable';
 import { IElement } from './styles/BasicElements';
@@ -31,7 +32,7 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
   });
 
   const columns: TableColumn[] = [
-    { title: 'amount', width: widths[0], align: 'start' },
+    { title: 'amount (usd)', width: widths[0], align: 'start' },
     { title: 'address', width: widths[1], align: 'start' },
   ];
 
@@ -44,13 +45,13 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
       return <></>;
     }
     const datum = {
-      amount: data[rowIx][0],
+      amount: valueToString(data[rowIx][0], 2),
       address: data[rowIx][1],
     };
 
     switch (colIx) {
       case 0:
-        return <>{datum.amount}</>;
+        return <>~${datum.amount}</>;
 
       case 1:
         return <Address chainId={campaign.chainId} address={datum.address}></Address>;

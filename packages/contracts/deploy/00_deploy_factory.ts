@@ -1,6 +1,7 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
+import { LOCAL_CHAIN_ID } from './../hardhat.config';
 import { TestErc20 } from './../typechain';
 
 const erc20Abi = [
@@ -34,7 +35,7 @@ const deploy: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   });
 
   // hardhat or localhost
-  if (chainId == '31337') {
+  if (chainId == LOCAL_CHAIN_ID) {
     await deploy('Multicall', {
       from: deployer.address,
       args: [],
