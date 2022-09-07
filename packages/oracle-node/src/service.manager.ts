@@ -78,16 +78,17 @@ export class ServiceManager {
       { republishTimeMargin: config.republishTimeMargin }
     );
 
-    this.indexingService = new IndexingService(
-      this.indexRepo,
-      this.campaignService,
-      this.provider
-    );
-
     this.priceService = new PriceService(
       this.client,
       this.timeService,
       PRICE_UPDATE_PERIOD
+    );
+
+    this.indexingService = new IndexingService(
+      this.indexRepo,
+      this.campaignService,
+      this.priceService,
+      this.provider
     );
 
     this.readDataService = new ReadDataService(

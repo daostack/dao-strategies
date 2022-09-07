@@ -36,6 +36,7 @@ model Campaign {
   address         String?   // cannot be @unique since it is null for simulated campaigns - Smart contract address
   shares          Share[] 
   roots           CampaignRoot[] 
+  fundEvents      FundEvent[]
   funders         CampaignFunder[]
   indexing        CampaignIndex[]
 }
@@ -98,11 +99,13 @@ model AssetPrice {
   lastUpdated     BigInt
 }
 
-model CampaignFunder {
-  hash            String        @id
-  campaign        Campaign      @relation(fields: [campaignId], references: [uri])
+model FundEvent {
+  hash            String          @id
+  campaign        Campaign        @relation(fields: [campaignId], references: [uri])
   campaignId      String
-  funder          String
+  funder          CampaignFunder? @relation(fields: [campaignId, funderAddress], references: [campaignId, address])
+  funderAddress   String
+  asset           String
   amount          String
   blockNumber     BigInt
 }
@@ -113,4 +116,13 @@ model CampaignIndex {
   campaign        Campaign      @relation(fields: [campaignId], references: [uri])
   campaignId      String
   blockNumber     BigInt
+}
+
+model CampaignFunder {
+  @@id([campaignId, address])
+  campaign        Campaign      @relation(fields: [campaignId], references: [uri])
+  campaignId      String
+  address         String
+  value           Float         // estimated dolar value of the funder contributions.
+  events          FundEvent[]
 }

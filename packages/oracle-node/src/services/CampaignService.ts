@@ -89,6 +89,10 @@ export class CampaignService {
     return this.campaignRepo.getFromAddress(address);
   }
 
+  async getChainId(uri: string): Promise<number> {
+    return this.campaignRepo.getChainId(uri);
+  }
+
   async exist(uri: string): Promise<boolean> {
     return this.campaignRepo.exist(uri);
   }

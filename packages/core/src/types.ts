@@ -206,12 +206,20 @@ export interface LoggedUserDetails {
   verifications: Verification[];
 }
 
-export interface CampaignFunder {
-  campaignAddress: string;
+export interface FundEventRead {
+  uri: string;
   funder: string;
+  asset: string;
   amount: string;
   blockNumber: number;
   txHash: string;
+}
+
+export interface CampaignFunder {
+  uri: string;
+  funder: string;
+  value: number;
+  fundEvents: FundEventRead[];
 }
 
 export interface CampaignFundersRead {

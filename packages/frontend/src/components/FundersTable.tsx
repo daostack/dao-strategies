@@ -27,7 +27,7 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
   }
 
   const data: any[] = funders.funders.map((funder) => {
-    return [funder.amount, funder.funder];
+    return [funder.value, funder.funder];
   });
 
   const columns: TableColumn[] = [
