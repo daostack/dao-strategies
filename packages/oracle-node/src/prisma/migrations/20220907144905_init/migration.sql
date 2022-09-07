@@ -90,6 +90,35 @@ CREATE TABLE "AssetPrice" (
     CONSTRAINT "AssetPrice_pkey" PRIMARY KEY ("chainId","address")
 );
 
+-- CreateTable
+CREATE TABLE "FundEvent" (
+    "hash" TEXT NOT NULL,
+    "campaignId" TEXT NOT NULL,
+    "funderAddress" TEXT NOT NULL,
+    "asset" TEXT NOT NULL,
+    "amount" TEXT NOT NULL,
+    "blockNumber" BIGINT NOT NULL,
+
+    CONSTRAINT "FundEvent_pkey" PRIMARY KEY ("hash")
+);
+
+-- CreateTable
+CREATE TABLE "CampaignIndex" (
+    "campaignId" TEXT NOT NULL,
+    "blockNumber" BIGINT NOT NULL,
+
+    CONSTRAINT "CampaignIndex_pkey" PRIMARY KEY ("campaignId")
+);
+
+-- CreateTable
+CREATE TABLE "CampaignFunder" (
+    "campaignId" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "value" DOUBLE PRECISION NOT NULL,
+
+    CONSTRAINT "CampaignFunder_pkey" PRIMARY KEY ("campaignId","address")
+);
+
 -- AddForeignKey
 ALTER TABLE "Campaign" ADD CONSTRAINT "Campaign_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "User"("address") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -101,3 +130,15 @@ ALTER TABLE "CampaignRoot" ADD CONSTRAINT "CampaignRoot_campaignId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "BalanceLeaf" ADD CONSTRAINT "BalanceLeaf_campaignId_order_fkey" FOREIGN KEY ("campaignId", "order") REFERENCES "CampaignRoot"("campaignId", "order") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FundEvent" ADD CONSTRAINT "FundEvent_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FundEvent" ADD CONSTRAINT "FundEvent_campaignId_funderAddress_fkey" FOREIGN KEY ("campaignId", "funderAddress") REFERENCES "CampaignFunder"("campaignId", "address") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CampaignIndex" ADD CONSTRAINT "CampaignIndex_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CampaignFunder" ADD CONSTRAINT "CampaignFunder_campaignId_fkey" FOREIGN KEY ("campaignId") REFERENCES "Campaign"("uri") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -11,28 +11,27 @@ import {
   bigNumberToNumber,
   erc20Provider,
   Asset,
+  CampaignFundersRead,
+  Page,
 } from '@dao-strategies/core';
-import { Campaign, Share } from '@prisma/client';
-import { BigNumber, ethers, providers } from 'ethers';
-import { awaitWithTimeout } from '../utils/utils';
+import { Campaign } from '@prisma/client';
+import { BigNumber, providers } from 'ethers';
 
-import { CampaignService } from './CampaignService';
-import { PriceService } from './PriceService';
+import { awaitWithTimeout } from '../../utils/utils';
+import { CampaignService } from '../CampaignService';
+import { PriceService } from '../PriceService';
+import { IndexingService } from './IndexService';
 
 const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-export class CampaignOnChainService {
-  readonly provider: providers.JsonRpcProvider;
-
+export class ReadDataService {
   constructor(
     protected campaignService: CampaignService,
+    protected indexService: IndexingService,
     protected price: PriceService,
-    _provider?: providers.JsonRpcProvider
-  ) {
-    this.provider =
-      _provider || new providers.JsonRpcProvider(process.env.JSON_RPC_URL);
-  }
+    protected provider: providers.Provider
+  ) {}
 
   async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
     const campaign = await this.campaignService.getFromAddress(address);
@@ -283,5 +282,9 @@ export class CampaignOnChainService {
 
   async getPublishInfo(address: string): Promise<PublishInfo> {
     return getCampaignPublishInfo(this.provider, address);
+  }
+
+  async getFunders(uri: string, page: Page): Promise<CampaignFundersRead> {
+    return this.indexService.getCampaignFunders(uri, page);
   }
 }

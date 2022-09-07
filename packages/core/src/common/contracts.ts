@@ -1,6 +1,5 @@
-import { Provider } from '@wagmi/core';
 import { Multicall, ContractCallContext } from 'ethereum-multicall';
-import { BigNumber, Contract, Signer } from 'ethers';
+import { BigNumber, Contract, providers, Signer } from 'ethers';
 
 import { Campaign, TestErc20 } from '../generated/typechain';
 import { bigNumberToNumber } from '../support';
@@ -21,7 +20,7 @@ export const campaignInstance = (address: string, signer: Signer): Campaign => {
 
 export const campaignProvider = (
   address: string,
-  provider: Provider
+  provider: providers.Provider
 ): Campaign => {
   const contract = new Contract(
     address,
@@ -35,7 +34,7 @@ export const campaignProvider = (
 
 export const erc20Provider = (
   address: string,
-  provider: Provider
+  provider: providers.Provider
 ): TestErc20 => {
   const contract = new Contract(
     address,
@@ -47,8 +46,19 @@ export const erc20Provider = (
   return contract as TestErc20;
 };
 
+export const erc20Instance = (address: string, signer: Signer): TestErc20 => {
+  const contract = new Contract(
+    address,
+    /* eslint-disable */
+    ContractsJson.jsonOfChain().contracts.TestErc20.abi,
+    /* eslint-enable */
+    signer
+  );
+  return contract as TestErc20;
+};
+
 export const getCampaignPublishInfo = async (
-  provider: Provider,
+  provider: providers.Provider,
   address: string
 ): Promise<PublishInfo> => {
   const multicall = new Multicall({

@@ -57,6 +57,15 @@ export class CampaignRepository {
     return res;
   }
 
+  async getChainId(uri: string): Promise<number> {
+    const result = await this.client.campaign.findUnique({
+      where: { uri },
+      select: { chainId: true },
+    });
+
+    return result.chainId;
+  }
+
   async exist(uri: string): Promise<boolean> {
     return this.client.campaign
       .findFirst({ where: { uri: uri } })
@@ -143,7 +152,7 @@ export class CampaignRepository {
     });
 
     page.total = total;
-    page.totalPages = Math.floor(total / page.perPage);
+    page.totalPages = Math.ceil(total / page.perPage);
 
     return {
       uri,

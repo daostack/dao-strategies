@@ -14,6 +14,7 @@ export interface ExecutionConfig {
     period: number;
   };
   republishTimeMargin: number;
+  updatePeriod: number;
 }
 
 /**

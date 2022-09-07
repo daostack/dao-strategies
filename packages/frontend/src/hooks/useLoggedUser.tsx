@@ -4,6 +4,7 @@ import { Signer } from 'ethers';
 import { ReactNode, createContext, useContext, FC, useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { checkLoggedUser, logout, signInWithEthereum } from '../utils/loggedUser';
+import { useUserError } from './useErrorContext';
 
 export type LoggedUserContextType = {
   account: string | undefined;
@@ -30,6 +31,8 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
 
   const { address, isConnecting } = useAccount();
   const [user, setUser] = useState<LoggedUserDetails | undefined>(undefined);
+
+  const { showError } = useUserError();
 
   const checkAndLogin = async (signer: Signer) => {
     let userRead = await checkLoggedUser();
@@ -79,6 +82,7 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
       }
     } catch (e) {
       disconnect();
+      showError(`Error connecting wallet: ${e}`);
     }
   };
 

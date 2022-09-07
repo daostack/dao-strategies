@@ -7,6 +7,7 @@ import {
   TimeDetails,
   SharesRead,
   Page,
+  CampaignFundersRead,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
 
@@ -159,7 +160,7 @@ export class CampaignController extends Controller {
     loggedUser: string | undefined
   ): Promise<CampaignOnchainDetails> {
     /* eslint-disable */
-    return this.manager.services.campaignOnChain.getCampaignDetails(
+    return this.manager.services.readDataService.getCampaignDetails(
       request.params.address.toLowerCase() as string
     );
     /* eslint-enable */
@@ -172,9 +173,23 @@ export class CampaignController extends Controller {
     loggedUser: string | undefined
   ): Promise<CampaignClaimInfo | undefined> {
     /* eslint-disable */
-    return this.manager.services.campaignOnChain.getClaimInfo(
+    return this.manager.services.readDataService.getClaimInfo(
       request.params.address.toLowerCase() as string,
       request.params.account.toLowerCase() as string
+    );
+    /* eslint-enable */
+  }
+
+  getFunders(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<CampaignFundersRead> {
+    /* eslint-disable */
+    return this.manager.services.readDataService.getFunders(
+      request.params.uri as string,
+      request.body.page as Page
     );
     /* eslint-enable */
   }

@@ -25,9 +25,12 @@ import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
 
-import { CampaignOnChainService } from './CampaignOnChainService';
 import { campaignToUriDetails } from './CampaignUri';
-import { OnChainService, ZERO_BYTES32 } from './OnChainService';
+import { ReadDataService } from './onchain/ReadDataService';
+import {
+  SendTransactionService,
+  ZERO_BYTES32,
+} from './onchain/SendTransactionsService';
 import { TimeService } from './TimeService';
 
 export interface RootComputation {
@@ -64,18 +67,18 @@ export class CampaignService {
   running: Map<string, Promise<SharesRead>> = new Map();
 
   /** Co-dependency between CampaignService and CampaignOnChainService :( */
-  protected campaignOnChain: CampaignOnChainService;
+  protected readDataService: ReadDataService;
 
   constructor(
     protected campaignRepo: CampaignRepository,
     protected timeService: TimeService,
     protected strategyComputation: IStrategyComputation,
-    protected onChainService: OnChainService,
+    protected sendTransactionService: SendTransactionService,
     protected config: CampaigServiceConfig
   ) {}
 
-  setOnChainRead(_campaignOnChain: CampaignOnChainService): void {
-    this.campaignOnChain = _campaignOnChain;
+  setOnChainRead(_readData: ReadDataService): void {
+    this.readDataService = _readData;
   }
 
   async get(uri: string): Promise<Campaign | undefined> {
@@ -84,6 +87,10 @@ export class CampaignService {
 
   async getFromAddress(address: string): Promise<Campaign | undefined> {
     return this.campaignRepo.getFromAddress(address);
+  }
+
+  async getChainId(uri: string): Promise<number> {
+    return this.campaignRepo.getChainId(uri);
   }
 
   async exist(uri: string): Promise<boolean> {
@@ -234,7 +241,7 @@ export class CampaignService {
      */
     const rootDetails = await this.computeRoot(campaign);
 
-    const publishInfo = await this.campaignOnChain.getPublishInfo(
+    const publishInfo = await this.readDataService.getPublishInfo(
       campaign.address
     );
 
@@ -250,7 +257,7 @@ export class CampaignService {
       publishInfo.status.isProposeWindowActive
     ) {
       appLogger.debug(`publishCampaign - root: ${rootDetails.root}`);
-      await this.onChainService.publishShares(
+      await this.sendTransactionService.publishShares(
         campaign.address,
         rootDetails.root
       );

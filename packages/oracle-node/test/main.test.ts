@@ -19,7 +19,7 @@ import {
 import { months } from './utils';
 
 /* eslint-disable */
-const CampaignJson: any = (hardhatContractsJson as any)['31337']['localhost'][
+const CampaignJson: any = (hardhatContractsJson as any)['1337']['localhost'][
   'contracts'
 ]['Campaign'];
 /* eslint-enable */
