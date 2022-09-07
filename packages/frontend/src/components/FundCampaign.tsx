@@ -1,4 +1,4 @@
-import { Asset, campaignInstance, ChainsDetails, ContractsJson } from '@dao-strategies/core';
+import { Asset, campaignInstance, ChainsDetails, erc20Instance } from '@dao-strategies/core';
 import { Contract, ethers } from 'ethers';
 import { Select, Box, Header, FormField, TextInput, Spinner, Heading } from 'grommet';
 import { FC, useEffect, useState } from 'react';
@@ -62,12 +62,20 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
 
     let tx;
     const campaign = campaignInstance(props.address, signer);
-
     if (ChainsDetails.isNative(selectedAsset)) {
-      tx = campaign.fund(ethers.constants.AddressZero, 0, { value: ethers.utils.parseEther(formValues.amount) });
+      tx = await campaign.fund(ethers.constants.AddressZero, 0, { value: ethers.utils.parseEther(formValues.amount) });
     } else {
-      const token = new Contract(selectedAsset.address, ContractsJson.jsonOfChain().contracts.TestErc20.abi, signer);
-      tx = await token.transfer(props.address, ethers.utils.parseEther(formValues.amount));
+      const token = erc20Instance(selectedAsset.address, signer);
+      const approved = await token.allowance(account, props.address);
+
+      const value = ethers.utils.parseUnits(formValues.amount, selectedAsset.decimals);
+
+      if (approved.sub(value).lt(0)) {
+        const tx = await token.approve(props.address, value.sub(approved));
+        await tx.wait();
+      }
+
+      tx = await campaign.fund(selectedAsset.address, value);
     }
 
     setFunding(true);

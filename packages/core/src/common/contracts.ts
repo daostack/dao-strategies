@@ -46,6 +46,17 @@ export const erc20Provider = (
   return contract as TestErc20;
 };
 
+export const erc20Instance = (address: string, signer: Signer): TestErc20 => {
+  const contract = new Contract(
+    address,
+    /* eslint-disable */
+    ContractsJson.jsonOfChain().contracts.TestErc20.abi,
+    /* eslint-enable */
+    signer
+  );
+  return contract as TestErc20;
+};
+
 export const getCampaignPublishInfo = async (
   provider: providers.Provider,
   address: string
@@ -175,5 +186,3 @@ export const getCampaignPublishInfo = async (
 
   return info;
 };
-
-const getCampaignFunders = async (provider: Provider, address: string) => {};

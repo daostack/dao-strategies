@@ -44,6 +44,9 @@ const extension: ThemeType = {
     },
   },
   formField: {
+    checkBox: {
+      pad: 'small',
+    },
     label: {
       weight: 700,
     },

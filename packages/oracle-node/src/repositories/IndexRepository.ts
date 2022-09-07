@@ -4,6 +4,9 @@ import {
   Page,
 } from '@dao-strategies/core';
 import { CampaignFunder, Prisma, PrismaClient } from '@prisma/client';
+import { appLogger } from '../logger';
+
+const DEBUG = true;
 
 export class IndexRepository {
   constructor(protected client: PrismaClient) {}
@@ -27,6 +30,10 @@ export class IndexRepository {
   }
 
   async addIndexMark(uri: string, blockNumber: number): Promise<void> {
+    if (DEBUG)
+      appLogger.debug(
+        `IndexRepository - addIndexMark uri: ${uri}, blockNumber: ${blockNumber}`
+      );
     await this.client.campaignIndex.upsert({
       create: {
         blockNumber,

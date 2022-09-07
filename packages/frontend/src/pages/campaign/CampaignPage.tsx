@@ -29,6 +29,7 @@ import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { Link } from 'react-router-dom';
 import { FundersTable } from '../../components/FundersTable';
+import { Refresh } from 'grommet-icons';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -192,9 +193,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const fundersTable = (
     <AppCard style={{ marginTop: '130px' }}>
-      {shares !== undefined ? (
+      {funders !== undefined ? (
         <>
           <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Funders</Heading>
+          <Refresh onClick={() => getFunders(funders.page)}></Refresh>
           <AppCard>
             <FundersTable funders={funders} updatePage={updatePage}></FundersTable>
           </AppCard>
