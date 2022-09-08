@@ -1,9 +1,27 @@
 import { Box, BoxExtendedProps } from 'grommet';
-import { Asset, TokenBalance } from '@dao-strategies/core';
-import { IElement } from './styles/BasicElements';
+import { Asset, ChainAndAssets, TokenBalance } from '@dao-strategies/core';
+import { AppTag, IElement } from './styles/BasicElements';
 import { FC } from 'react';
 import { assetValue, formatEther } from '../utils/ethers';
 import { styleConstants } from './styles/themes';
+
+export interface ChainTagI extends BoxExtendedProps {
+  chain?: ChainAndAssets;
+}
+
+export const ChainTag: FC<ChainTagI> = (props: ChainTagI) => {
+  if (!props.chain) return <></>;
+
+  const chain = props.chain;
+  return (
+    <AppTag style={{ textTransform: 'uppercase', fontSize: '14px', ...props.style }}>
+      <Box style={{ height: '20px', width: '20px', marginRight: '6px' }}>
+        <img style={{ height: '20px', width: '20px' }} src={chain.chainIcon} alt={chain.chain.name} />
+      </Box>
+      <Box>{chain.chain.name}</Box>
+    </AppTag>
+  );
+};
 
 interface IAsset extends IElement {
   asset?: Asset;

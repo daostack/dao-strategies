@@ -23,11 +23,21 @@ export interface IElement {
   children?: JSX.Element | React.ReactNode | Array<React.ReactNode> | Array<JSX.Element> | string;
 }
 
-export const AppTag = styled(Box)`
-  border-radius: 30px;
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 6.5px 16px;
-`;
+export const AppTag: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <Box
+      direction="row"
+      align="center"
+      style={{
+        borderRadius: '30px',
+        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+        padding: '6.5px 16px',
+        ...props.style,
+      }}>
+      {props.children}
+    </Box>
+  );
+};
 
 export interface IValueElement extends IElement {
   value?: string;

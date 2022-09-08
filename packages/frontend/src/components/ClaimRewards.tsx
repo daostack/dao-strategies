@@ -10,8 +10,8 @@ import { useNow } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { truncate } from '../utils/ethers';
 
-import { AppButton, AppInput, AppModal, IElement } from './styles/BasicElements';
-import { AssetBalance } from './Assets';
+import { AppButton, AppInput, AppModal, AppTag, IElement } from './styles/BasicElements';
+import { AssetBalance, ChainTag } from './Assets';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
 import { styleConstants } from './styles/themes';
 
@@ -87,6 +87,8 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         : '0';
   }
 
+  const chain = ChainsDetails.chainOfId(campaign.chainId);
+
   return (
     <>
       {status.canClaim && showClaim ? (
@@ -156,6 +158,7 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
       <BalanceCard
         style={{ padding: '24px', ...props.style }}
         title="My Rewards"
+        subtitle={<ChainTag style={{ margin: '18px 0px' }} chain={chain}></ChainTag>}
         value={claimValue}
         symbol="$"
         action={

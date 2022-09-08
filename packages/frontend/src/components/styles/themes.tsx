@@ -99,6 +99,11 @@ const extension: ThemeType = {
       `,
     },
   },
+  tip: {
+    content: {
+      background: '#FFFFFF',
+    },
+  },
 };
 
 export const lightTheme = deepMerge(grommet, extension);
