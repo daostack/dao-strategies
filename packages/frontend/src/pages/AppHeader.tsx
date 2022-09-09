@@ -33,7 +33,7 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
 
   return (
     <Box
-      style={{ position: 'absolute', width: '100vw', height: `${HEADER_HEIGHT}px`, padding: '0px 32px' }}
+      style={{ position: 'fixed', zIndex: '100', width: '100vw', height: `${HEADER_HEIGHT}px`, padding: '0px 32px' }}
       direction="row"
       justify="between"
       align="center">

@@ -297,7 +297,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const leftText = () => {
-    if (pageIx === 0) return 'Home';
+    if (pageIx === 0) return 'Cancel';
     return 'Back';
   };
 
@@ -309,13 +309,31 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       : '';
 
   const pages: React.ReactNode[] = [
-    <TwoColumns>
+    <Box>
       <>
-        <FormField name="title" label="Campaign Name" style={{ borderStyle: 'none' }}>
-          <AppInput name="title"></AppInput>
+        <FormField name="title" label="Give this Campaign a name" style={{ borderStyle: 'none' }}>
+          <AppInput
+            name="title"
+            style={{ border: '1px solid #F0EDED', width: '50vw', borderRadius: '20px' }}></AppInput>
         </FormField>
+        <FormField name="description" label="Describe what it is about">
+          <AppTextArea
+            placeholder="Make it something epic!"
+            name="description"
+            style={{
+              border: '1px solid #F0EDED',
+              borderRadius: '20px',
+              minWidth: '50vw',
+              maxWidth: '50vw',
+              overflow: 'hidden',
+            }}></AppTextArea>
+        </FormField>
+        <FormField label="Logo" name="file" component={AppFileInput} style={{ width: '16rem' }} />
         <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
-          <AppInput name="guardian" placeholder="0x...."></AppInput>
+          <AppInput
+            name="guardian"
+            placeholder="0x...."
+            style={{ border: '1px solid #F0EDED', borderRadius: '20px' }}></AppInput>
         </FormField>
         <FormField name="chainName" label="Chain" style={{ border: '0px none' }}>
           <AppSelect name="chainName" style={{ border: '0px none' }} options={chainOptions}></AppSelect>
@@ -325,20 +343,16 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </FormField>
         {formValues.hasCustomAsset ? (
           <FormField name="customAssetAddress" label="ERC-20 token address" style={{ borderStyle: 'none' }}>
-            <AppInput name="customAssetAddress" placeholder="0x0..."></AppInput>
+            <AppInput
+              name="customAssetAddress"
+              placeholder="0x0..."
+              style={{ border: '1px solid #F0EDED', borderRadius: '20px' }}></AppInput>
           </FormField>
         ) : (
           <></>
         )}
       </>
-      <>
-        <FormField label="File" name="file" component={AppFileInput} />
-
-        <FormField name="description" label="Description">
-          <AppTextArea name="description"></AppTextArea>
-        </FormField>
-      </>
-    </TwoColumns>,
+    </Box>,
 
     <TwoColumns>
       <>
@@ -447,9 +461,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   ];
 
   return (
-    <Box style={{ height: '100vh', padding: '45px 0px' }} justify="center" align="center">
-      <Box style={{ height: '100%', minWidth: '600px', maxWidth: '900px' }}>
-        <Box style={{ height: '80px', flexShrink: 0 }} direction="row" justify="center">
+    <Box style={{ height: '100vh' }} direction="row" justify="start" align="center">
+      <Box style={{ height: '100%', margin: '16% 0 5% 16%' }} justify="start">
+        <Box style={{ height: '80px', flexShrink: 0 }} direction="row" justify="start">
           <FormProgress
             stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
             position={0}
@@ -457,19 +471,24 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           />
         </Box>
 
-        <Box style={{ height: '80px', flexShrink: 0, width: '100%' }}>
-          <div style={{ margin: '30px 0px 20px 0px', fontSize: '24px', fontWeight: '700', textAlign: 'center' }}>
-            Create New Campaign <span style={{ fontSize: '18px', fontWeight: 'normal' }}>(Github)</span>
-          </div>
-          <hr style={{ width: '100%', marginBottom: '24px' }}></hr>
+        <Box style={{ height: '80px', flexShrink: 0, width: '100%', margin: '1rem 0px 1rem 0px' }}>
+          <h2
+            style={{
+              fontSize: '24px',
+              fontWeight: '700',
+              textAlign: 'left',
+              color: '#0E0F19',
+            }}>
+            Create New Campaign
+          </h2>
+          <div style={{ width: '100%', border: '1px solid #f2f2f2' }}></div>
         </Box>
 
         <AppForm
           style={{
             flex: '1 1 auto',
-            overflowY: 'auto',
-            margin: '25px 0px',
-            width: '700px',
+            margin: '16px 0px',
+            width: '50vw',
           }}
           value={formValues}
           onChange={onValuesUpdated as any}>
@@ -478,7 +497,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               width: '100%',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
+              alignItems: 'flex-start',
             }}>
             {status.isDeploying ? (
               <Layer>

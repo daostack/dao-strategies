@@ -24,7 +24,7 @@ const extension: ThemeType = {
     colors: {
       brand: theme.primary,
       brandLight: theme.primaryLight,
-      background: '#F3F2EF',
+      background: '#FFFFFF',
     },
     font: {
       size: styleConstants.textFontSizes[0],
