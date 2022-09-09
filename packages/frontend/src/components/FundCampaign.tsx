@@ -40,7 +40,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
         asset: props.assets[0].id,
       });
     }
-  }, [props]);
+  }, [props.assets]);
 
   const isLogged = account !== undefined;
   const assets = props.assets;

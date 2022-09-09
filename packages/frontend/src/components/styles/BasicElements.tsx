@@ -48,7 +48,7 @@ export interface IButton extends ButtonExtendedProps {}
 export const AppButton = (props: IButton) => {
   return (
     <>
-      <Button primary={props.primary} style={props.style} onClick={props.onClick}>
+      <Button primary={props.primary} style={props.style} disabled={props.disabled} onClick={props.onClick}>
         <Box pad={{ vertical: 'small', horizontal: 'medium' }}>
           <Text textAlign="center" weight="bold">
             {props.children as React.ReactNode[]}

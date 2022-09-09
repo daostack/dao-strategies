@@ -1,6 +1,7 @@
 import { TokenBalance } from '@dao-strategies/core';
 import { Box, BoxExtendedProps, Tip } from 'grommet';
-import { FC, ReactElement, useEffect, useRef, useState } from 'react';
+import { FC, ReactElement } from 'react';
+import { AssetBalance, AssetsTable } from '../../components/Assets';
 import { AppCard } from '../../components/styles/BasicElements';
 import { styleConstants } from '../../components/styles/themes';
 
@@ -14,13 +15,7 @@ interface BalanceCardProps extends BoxExtendedProps {
   action?: ReactElement;
 }
 
-type Timeout = ReturnType<typeof setTimeout>;
-
 export const BalanceCard: FC<BalanceCardProps> = (props: BalanceCardProps) => {
-  const [show, setShow] = useState<boolean>(false);
-
-  WIP;
-
   return (
     <AppCard align="center" style={{ ...props.style }}>
       <Box
@@ -32,7 +27,22 @@ export const BalanceCard: FC<BalanceCardProps> = (props: BalanceCardProps) => {
         {props.title}
       </Box>
       {props.subtitle ? props.subtitle : <></>}
-      <Tip content={<Box>Assets: {props.assets?.map((asset) => asset.name)}</Box>}>
+      <Tip
+        content={
+          <Box style={{ width: '300px', padding: '16px 16px 0px 16px' }}>
+            {props.assets ? (
+              props.assets.map((asset) => {
+                return asset.balance !== '0' ? (
+                  <AssetBalance style={{ marginBottom: '16px' }} asset={asset}></AssetBalance>
+                ) : (
+                  <></>
+                );
+              })
+            ) : (
+              <></>
+            )}
+          </Box>
+        }>
         <Box
           style={{
             margin: '16px 0px 24px 0px',
@@ -50,7 +60,6 @@ export const BalanceCard: FC<BalanceCardProps> = (props: BalanceCardProps) => {
           )}
         </Box>
       </Tip>
-      {props.assets !== undefined ? props.assets.map((asset) => <img src={asset.icon} alt={asset.name} />) : <></>}
       {props.action !== undefined ? props.action : <></>}
     </AppCard>
   );

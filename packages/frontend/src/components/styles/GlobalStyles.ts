@@ -18,6 +18,6 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   h1 {
-    margin: 12px;
+    margin: 12px 0px;
   }
 `;
