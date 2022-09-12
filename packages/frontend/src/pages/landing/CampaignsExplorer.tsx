@@ -1,6 +1,7 @@
 import { Box, Text } from 'grommet';
 import { FC } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { createImportSpecifier } from 'typescript';
 import { CampaignCard } from '../../components/CampaignCard';
 import { AppInput } from '../../components/styles/BasicElements';
 import { ResponsiveGrid } from '../../components/styles/LayoutComponents.styled';
@@ -13,12 +14,13 @@ export interface ICampaignsExplorerProps {
 
 export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaignsExplorerProps) => {
   const { campaigns } = useCampaigns();
+  const navigate = useNavigate();
 
   const columns = {
-    small: ['auto'],
-    medium: ['auto', 'auto'],
-    large: ['auto', 'auto', 'auto'],
-    xlarge: ['auto', 'auto', 'auto'],
+    small: ['1fr'],
+    medium: ['1fr', '1fr'],
+    large: ['1fr', '1fr', '1fr'],
+    xlarge: ['1fr', '1fr', '1fr'],
   };
 
   const rows = {
@@ -28,20 +30,27 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
     xlarge: ['auto'],
   };
 
+  const campaignClicked = (address: string) => {
+    console.log('clicked', { address });
+    navigate(`/campaign/${address}`);
+  };
+
   return (
     <Box style={{ padding: '16px 32px' }}>
-      <Box direction="row" style={{ maxWidth: '600px' }}>
-        <Text size="xlarge">Explore Campaigns</Text>
-        <AppInput placeholder="search"></AppInput>
+      <Box direction="row">
+        <Box>Explore Campaigns</Box>
+        <AppInput style={{ maxWidth: '350px' }} placeholder="search"></AppInput>
       </Box>
 
       <ResponsiveGrid columnsAt={columns} rowsAt={rows} gap="small" pad={{ vertical: '30px' }}>
         {campaigns ? (
           campaigns.map((campaign) => {
+            console.log({ campaignClicked });
             return (
-              <Link key={campaign.address} to={`/campaign/${campaign.address}`}>
-                <CampaignCard campaign={campaign}></CampaignCard>
-              </Link>
+              <CampaignCard
+                onClick={() => campaignClicked(campaign.address)}
+                key={campaign.address}
+                campaign={campaign}></CampaignCard>
             );
           })
         ) : (

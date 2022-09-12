@@ -14,7 +14,8 @@ export interface ExecutionConfig {
     period: number;
   };
   republishTimeMargin: number;
-  updatePeriod: number;
+  fundersUpdatePeriod: number;
+  tvlUpdatePeriod: number;
 }
 
 /**

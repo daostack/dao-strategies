@@ -13,7 +13,7 @@ import {
   Heading,
 } from 'grommet';
 import { Close, FormDown, FormUp } from 'grommet-icons';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { styleConstants, theme } from './themes';
 
@@ -234,6 +234,38 @@ export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
           </Box>
         )}
       </Box>
+    </Box>
+  );
+};
+
+export interface IFixedHeightPar extends BoxExtendedProps {
+  content: ReactElement;
+}
+
+export const FixedHeightPar: FC<IFixedHeightPar> = (props: IFixedHeightPar) => {
+  const [showGradient, setShowGradient] = useState<boolean>(true);
+
+  return (
+    <Box style={{ height: '50px', overflow: 'hidden', position: 'relative', ...props.style }}>
+      {props.content}
+      {showGradient ? (
+        <Box
+          direction="row"
+          justify="end"
+          style={{
+            height: '24px',
+            width: '120px',
+            background:
+              'linear-gradient(to right, rgb(255, 255, 255, 0), rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))',
+            position: 'absolute',
+            bottom: '0px',
+            right: '0px',
+          }}>
+          <Box style={{ marginRight: '24px' }}>. . .</Box>
+        </Box>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 };

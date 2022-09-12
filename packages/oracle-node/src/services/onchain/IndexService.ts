@@ -26,7 +26,7 @@ export class IndexingService {
     protected provider: providers.Provider
   ) {}
 
-  async updateCampaignIndex(
+  async updateFundersIndex(
     uri: string,
     address: string,
     fromBlock: number,
@@ -157,11 +157,16 @@ export class IndexingService {
     });
   }
 
+  async updateTvlIndex(): Promise<void> {
+    const balances = await this.
+  }
+
   async checkUpdate(uri: string): Promise<void> {
     if (DEBUG) appLogger.debug(`IndexingService - checkUpdate() ${uri}`);
     const campaign = await this.campaign.get(uri);
 
-    const indexedBlock = await this.indexRepo.getBlockOf(uri);
+    const fundersBlock = await this.indexRepo.getBlockOfFunders(uri);
+    const tvlBlock = await this.indexRepo.getBlockOfFunders(uri);
 
     /**
      * Ups! this.provider <providers.Provider> is not inline with ethers.providers.JsonRpcProvider
@@ -177,13 +182,28 @@ export class IndexingService {
 
     if (DEBUG)
       appLogger.debug(
-        `IndexingService - indexedBlock: ${indexedBlock}, latestBlock: ${latestBlock}`
+        `IndexingService - fundersBlock: ${fundersBlock}, latestBlock: ${latestBlock}`
       );
-    if (latestBlock - indexedBlock >= config.updatePeriod) {
-      await this.updateCampaignIndex(
+
+    if (latestBlock - fundersBlock >= config.fundersUpdatePeriod) {
+      await this.updateFundersIndex(
         campaign.uri,
         campaign.address,
-        indexedBlock,
+        fundersBlock,
+        latestBlock
+      );
+    }
+
+    if (DEBUG)
+      appLogger.debug(
+        `IndexingService - fundersBlock: ${tvlBlock}, latestBlock: ${latestBlock}`
+      );
+
+    if (latestBlock - tvlBlock >= config.fundersUpdatePeriod) {
+      await this.updateTvlIndex(
+        campaign.uri,
+        campaign.address,
+        tvlBlock,
         latestBlock
       );
     }

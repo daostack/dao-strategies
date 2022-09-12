@@ -40,6 +40,7 @@ export class ReadDataService {
     const balances = await this.getCampaignBalances(campaign);
     const raised = await this.getCampaignRaised(campaign, campaignContract);
     const publishInfo = await this.getPublishInfo(campaign.address);
+
     const root =
       publishInfo.status.validRoot !== ZERO_BYTES32
         ? await this.campaignService.getRoot(publishInfo.status.validRoot)

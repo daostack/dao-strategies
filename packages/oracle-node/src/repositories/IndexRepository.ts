@@ -12,14 +12,30 @@ const DEBUG = true;
 export class IndexRepository {
   constructor(protected client: PrismaClient) {}
 
-  async getBlockOf(uri: string): Promise<number> {
+  async getBlockOfFunders(uri: string): Promise<number> {
     const index = await this.client.campaignIndex.findUnique({
       where: {
         campaignId: uri,
       },
+      select: {
+        fundersBN: true,
+      },
     });
 
-    return index !== null ? bigIntToNumber(index.blockNumber) : 0;
+    return index !== null ? bigIntToNumber(index.fundersBN) : 0;
+  }
+
+  async getBlockOfTvl(uri: string): Promise<number> {
+    const index = await this.client.campaignIndex.findUnique({
+      where: {
+        campaignId: uri,
+      },
+      select: {
+        tvlBN: true,
+      },
+    });
+
+    return index !== null ? bigIntToNumber(index.tvlBN) : 0;
   }
 
   async addFundEvent(event: Prisma.FundEventCreateInput): Promise<void> {

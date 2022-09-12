@@ -39,6 +39,7 @@ model Campaign {
   fundEvents      FundEvent[]
   funders         CampaignFunder[]
   indexing        CampaignIndex[]
+  valueLocked     Float?
 }
 
 enum CampaignState {
@@ -110,12 +111,13 @@ model FundEvent {
   blockNumber     BigInt
 }
 
-// For each campaign, it stores which was the latest block it was indexed
+// For each campaign, it stores which was the latest block it indexed a given property of the campaign
 model CampaignIndex {
   @@id([campaignId])
   campaign        Campaign      @relation(fields: [campaignId], references: [uri])
   campaignId      String
-  blockNumber     BigInt
+  fundersBN       BigInt
+  tvlBN           BigInt
 }
 
 model CampaignFunder {

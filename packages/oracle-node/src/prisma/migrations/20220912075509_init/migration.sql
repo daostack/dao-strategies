@@ -28,6 +28,7 @@ CREATE TABLE "Campaign" (
     "executed" BOOLEAN,
     "published" BOOLEAN,
     "address" TEXT,
+    "valueLocked" DOUBLE PRECISION,
 
     CONSTRAINT "Campaign_pkey" PRIMARY KEY ("uri")
 );
