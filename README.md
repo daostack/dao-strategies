@@ -25,6 +25,8 @@ In the **root** folder `/` run
 yarn install
 ```
 
+asd
+
 ### Build core package
 
 Now, we need to build the `@dao-strategies/core` library so that it can be used in the tests and in the frontend:
