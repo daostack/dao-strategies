@@ -1,3 +1,4 @@
+import { Wallet } from 'ethers/lib/ethers';
 import { IStrategyComputation } from '@dao-strategies/core';
 import { PrismaClient } from '@prisma/client';
 import { Signer, providers } from 'ethers';
@@ -15,11 +16,9 @@ import { SocialApiService } from './services/SocialApiService';
 import { TimeService } from './services/TimeService';
 import { UserService } from './services/UserService';
 import { Services } from './types';
-
 import { ExecuteService, ExecutionConfig } from './services/ExecutionService';
 import { IndexingService } from './services/onchain/IndexService';
 import { IndexRepository } from './repositories/IndexRepository';
-import { Wallet } from 'ethers/lib/ethers';
 
 // const LOG = ['query', 'info', 'warn', 'error'];
 const LOG = ['warn', 'error'];
@@ -84,21 +83,23 @@ export class ServiceManager {
       PRICE_UPDATE_PERIOD
     );
 
-    this.indexingService = new IndexingService(
-      this.indexRepo,
+    this.readDataService = new ReadDataService(
       this.campaignService,
       this.priceService,
       this.provider
     );
 
-    this.readDataService = new ReadDataService(
+    this.indexingService = new IndexingService(
+      this.indexRepo,
+      this.campaignRepo,
       this.campaignService,
-      this.indexingService,
+      this.readDataService,
       this.priceService,
       this.provider
     );
 
     this.campaignService.setOnChainRead(this.readDataService);
+    this.campaignService.setIndexing(this.indexingService);
 
     this.services = {
       campaign: this.campaignService,
@@ -107,6 +108,7 @@ export class ServiceManager {
       sendTransaction: this.sendTransactionService,
       socialApi: this.socialApi,
       readDataService: this.readDataService,
+      indexingService: this.indexingService,
     };
 
     this.execution = new ExecuteService(this.services, config);

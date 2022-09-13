@@ -10,8 +10,8 @@ import { useNow } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { truncate } from '../utils/ethers';
 
-import { AppButton, AppInput, AppModal, IElement } from './styles/BasicElements';
-import { AssetBalance } from './Assets';
+import { AppButton, AppInput, AppModal, AppTag, IElement } from './styles/BasicElements';
+import { AssetBalance, AssetsTable, ChainTag } from './Assets';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
 import { styleConstants } from './styles/themes';
 
@@ -87,56 +87,14 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         : '0';
   }
 
+  const chain = ChainsDetails.chainOfId(campaign.chainId);
+
   return (
     <>
       {status.canClaim && showClaim ? (
         <AppModal heading="Claim Reward" onClosed={() => setShowClaim(false)}>
           <Box>
-            <Box
-              direction="row"
-              justify="between"
-              style={{
-                textTransform: 'uppercase',
-                fontSize: '14px',
-                color: styleConstants.colors.ligthGrayText,
-              }}>
-              <Text>Your share</Text>
-              <Text>Value (USD)</Text>
-            </Box>
-            {status.claim && status.claim.assets !== undefined ? (
-              <Box
-                style={{
-                  marginTop: '16px',
-                  border: '1px solid',
-                  borderRadius: '8px',
-                  borderColor: styleConstants.colors.lightGrayBorder,
-                  padding: '25px 24px',
-                }}>
-                {status.claim.assets.map((asset) => {
-                  return asset.balance !== '0' ? (
-                    <AssetBalance style={{ marginBottom: '24px' }} asset={asset}></AssetBalance>
-                  ) : (
-                    <></>
-                  );
-                })}
-
-                <hr
-                  style={{
-                    width: '100%',
-                    margin: '24px 0px',
-                    border: 'none',
-                    borderTop: 'solid 1px',
-                    borderColor: styleConstants.colors.lightGrayBorder,
-                  }}></hr>
-
-                <Box direction="row" justify="between">
-                  <Box>Total Claim</Box>
-                  <Box style={{ fontSize: styleConstants.headingFontSizes[1], fontWeight: '700' }}>~{claimValue}</Box>
-                </Box>
-              </Box>
-            ) : (
-              <></>
-            )}
+            {status.claim ? <AssetsTable showSummary assets={status.claim.assets}></AssetsTable> : <></>}
 
             <Box style={{ marginTop: '32px' }} direction="row" align="center">
               <Box style={{ marginRight: '16px' }}>Claim to custom address</Box>
@@ -156,13 +114,30 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
       <BalanceCard
         style={{ padding: '24px', ...props.style }}
         title="My Rewards"
+        subtitle={
+          <>
+            <ChainTag style={{ margin: '18px 0px' }} chain={chain}></ChainTag>
+          </>
+        }
         value={claimValue}
         symbol="$"
+        assets={status.claim?.assets}
         action={
           canClaim ? (
-            <AppButton style={{ width: '100%' }} primary onClick={() => setShowClaim(true)}>
-              Claim
-            </AppButton>
+            <>
+              {status.willCanClaim && claimInfo && claimInfo.activationTime && now ? (
+                <Box>Claiming will be enabled in {claimInfo.activationTime - now.getTime()}</Box>
+              ) : (
+                <></>
+              )}
+              <AppButton
+                disabled={status.willCanClaim}
+                style={{ width: '100%' }}
+                primary
+                onClick={() => setShowClaim(true)}>
+                Claim
+              </AppButton>
+            </>
           ) : (
             <>No rewards found</>
           )

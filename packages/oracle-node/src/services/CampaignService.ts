@@ -26,6 +26,7 @@ import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
 
 import { campaignToUriDetails } from './CampaignUri';
+import { IndexingService } from './onchain/IndexService';
 import { ReadDataService } from './onchain/ReadDataService';
 import {
   SendTransactionService,
@@ -69,6 +70,9 @@ export class CampaignService {
   /** Co-dependency between CampaignService and CampaignOnChainService :( */
   protected readDataService: ReadDataService;
 
+  /** Co-dependency between CampaignService and Indexing :( */
+  protected indexingService: IndexingService;
+
   constructor(
     protected campaignRepo: CampaignRepository,
     protected timeService: TimeService,
@@ -79,6 +83,10 @@ export class CampaignService {
 
   setOnChainRead(_readData: ReadDataService): void {
     this.readDataService = _readData;
+  }
+
+  setIndexing(_indexing: IndexingService): void {
+    this.indexingService = _indexing;
   }
 
   async get(uri: string): Promise<Campaign | undefined> {

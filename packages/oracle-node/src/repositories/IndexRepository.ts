@@ -12,14 +12,34 @@ const DEBUG = true;
 export class IndexRepository {
   constructor(protected client: PrismaClient) {}
 
-  async getBlockOf(uri: string): Promise<number> {
+  async getBlockOfFunders(uri: string): Promise<number> {
     const index = await this.client.campaignIndex.findUnique({
       where: {
         campaignId: uri,
       },
+      select: {
+        fundersBN: true,
+      },
     });
 
-    return index !== null ? bigIntToNumber(index.blockNumber) : 0;
+    return index !== null && index.fundersBN !== null
+      ? bigIntToNumber(index.fundersBN)
+      : 0;
+  }
+
+  async getBlockOfTvl(uri: string): Promise<number> {
+    const index = await this.client.campaignIndex.findUnique({
+      where: {
+        campaignId: uri,
+      },
+      select: {
+        tvlBN: true,
+      },
+    });
+
+    return index !== null && index.tvlBN !== null
+      ? bigIntToNumber(index.tvlBN)
+      : 0;
   }
 
   async addFundEvent(event: Prisma.FundEventCreateInput): Promise<void> {
@@ -33,21 +53,40 @@ export class IndexRepository {
     });
   }
 
-  async addIndexMark(uri: string, blockNumber: number): Promise<void> {
+  async setFundersBlock(uri: string, fundersBN: number): Promise<void> {
     if (DEBUG)
       appLogger.debug(
-        `IndexRepository - addIndexMark uri: ${uri}, blockNumber: ${blockNumber}`
+        `IndexRepository - setTvlBlock uri: ${uri}, blockNumber: ${fundersBN}`
       );
     await this.client.campaignIndex.upsert({
       create: {
-        blockNumber,
+        fundersBN,
         campaignId: uri,
       },
       where: {
         campaignId: uri,
       },
       update: {
-        blockNumber,
+        fundersBN,
+      },
+    });
+  }
+
+  async setTvlBlock(uri: string, tvlBN: number): Promise<void> {
+    if (DEBUG)
+      appLogger.debug(
+        `IndexRepository - setTvlBlock uri: ${uri}, blockNumber: ${tvlBN}`
+      );
+    await this.client.campaignIndex.upsert({
+      create: {
+        tvlBN,
+        campaignId: uri,
+      },
+      where: {
+        campaignId: uri,
+      },
+      update: {
+        tvlBN,
       },
     });
   }

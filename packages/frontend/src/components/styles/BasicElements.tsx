@@ -13,7 +13,7 @@ import {
   Heading,
 } from 'grommet';
 import { Close, FormDown, FormUp } from 'grommet-icons';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { styleConstants, theme } from './themes';
 
@@ -23,11 +23,21 @@ export interface IElement {
   children?: JSX.Element | React.ReactNode | Array<React.ReactNode> | Array<JSX.Element> | string;
 }
 
-export const AppTag = styled(Box)`
-  border-radius: 30px;
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 6.5px 16px;
-`;
+export const AppTag: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <Box
+      direction="row"
+      align="center"
+      style={{
+        borderRadius: '30px',
+        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+        padding: '6.5px 16px',
+        ...props.style,
+      }}>
+      {props.children}
+    </Box>
+  );
+};
 
 export interface IValueElement extends IElement {
   value?: string;
@@ -38,7 +48,7 @@ export interface IButton extends ButtonExtendedProps {}
 export const AppButton = (props: IButton) => {
   return (
     <>
-      <Button primary={props.primary} style={props.style} onClick={props.onClick}>
+      <Button primary={props.primary} style={props.style} disabled={props.disabled} onClick={props.onClick}>
         <Box pad={{ vertical: 'small', horizontal: 'medium' }}>
           <Text textAlign="center" weight="bold">
             {props.children as React.ReactNode[]}
@@ -224,6 +234,38 @@ export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
           </Box>
         )}
       </Box>
+    </Box>
+  );
+};
+
+export interface IFixedHeightPar extends BoxExtendedProps {
+  content: ReactElement;
+}
+
+export const FixedHeightPar: FC<IFixedHeightPar> = (props: IFixedHeightPar) => {
+  const [showGradient, setShowGradient] = useState<boolean>(true);
+
+  return (
+    <Box style={{ height: '50px', overflow: 'hidden', position: 'relative', ...props.style }}>
+      {props.content}
+      {showGradient ? (
+        <Box
+          direction="row"
+          justify="end"
+          style={{
+            height: '24px',
+            width: '120px',
+            background:
+              'linear-gradient(to right, rgb(255, 255, 255, 0), rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))',
+            position: 'absolute',
+            bottom: '0px',
+            right: '0px',
+          }}>
+          <Box style={{ marginRight: '24px' }}>. . .</Box>
+        </Box>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 };

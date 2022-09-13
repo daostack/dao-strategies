@@ -229,6 +229,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       <BalanceCard
         style={{ padding: '24px' }}
         title="Rewards Raised"
+        assets={otherDetails?.balances}
         value={valueLocked}
         symbol="$"
         action={

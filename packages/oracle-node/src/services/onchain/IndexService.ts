@@ -10,9 +10,11 @@ import { providers } from 'ethers';
 
 import { config } from '../../config';
 import { appLogger } from '../../logger';
+import { CampaignRepository } from '../../repositories/CampaignRepository';
 import { IndexRepository } from '../../repositories/IndexRepository';
 import { CampaignService } from '../CampaignService';
 import { PriceService } from '../PriceService';
+import { ReadDataService } from './ReadDataService';
 
 const DEBUG = true;
 
@@ -21,12 +23,14 @@ export class IndexingService {
 
   constructor(
     protected indexRepo: IndexRepository,
+    protected campaignRepo: CampaignRepository,
     protected campaign: CampaignService,
+    protected readDataService: ReadDataService,
     protected price: PriceService,
     protected provider: providers.Provider
   ) {}
 
-  async updateCampaignIndex(
+  async updateFundersIndex(
     uri: string,
     address: string,
     fromBlock: number,
@@ -96,7 +100,7 @@ export class IndexingService {
               hash: hash,
             });
           })
-          .concat(this.indexRepo.addIndexMark(uri, toBlock))
+          .concat(this.indexRepo.setFundersBlock(uri, toBlock))
       );
 
       /** unique funders */
@@ -157,35 +161,54 @@ export class IndexingService {
     });
   }
 
-  async checkUpdate(uri: string): Promise<void> {
+  async updateTvlIndex(uri: string, atBlock: number): Promise<void> {
+    // TODO, use multicall to read balances at a given block number, right now it's not consistent.
+    const campaign = await this.campaign.get(uri);
+    const balances = await this.readDataService.getCampaignBalances(campaign);
+    const value = ChainsDetails.valueOfAssets(balances.balances);
+
+    await Promise.all([
+      this.campaignRepo.setCampaignValueLocked(uri, value),
+      this.indexRepo.setFundersBlock(uri, balances.blockNumber),
+    ]);
+  }
+
+  async checkFundersUpdate(uri: string): Promise<void> {
     if (DEBUG) appLogger.debug(`IndexingService - checkUpdate() ${uri}`);
     const campaign = await this.campaign.get(uri);
 
-    const indexedBlock = await this.indexRepo.getBlockOf(uri);
-
-    /**
-     * Ups! this.provider <providers.Provider> is not inline with ethers.providers.JsonRpcProvider
-     * Manually check for property existence...
-     */
-    /* eslint-disable */
-    const anyProvider = this.provider as any;
-    const latestBlock =
-      anyProvider.blockNumber !== undefined
-        ? (anyProvider.blockNumber as number)
-        : await this.provider.getBlockNumber();
-    /* eslint-enable */
+    const fundersBlock = await this.indexRepo.getBlockOfFunders(uri);
+    const latestBlock = await this.readDataService.getBlockNumber();
 
     if (DEBUG)
       appLogger.debug(
-        `IndexingService - indexedBlock: ${indexedBlock}, latestBlock: ${latestBlock}`
+        `IndexingService - fundersBlock: ${fundersBlock}, latestBlock: ${latestBlock}`
       );
-    if (latestBlock - indexedBlock >= config.updatePeriod) {
-      await this.updateCampaignIndex(
+
+    if (latestBlock - fundersBlock >= config.fundersUpdatePeriod) {
+      await this.updateFundersIndex(
         campaign.uri,
         campaign.address,
-        indexedBlock,
+        fundersBlock,
         latestBlock
       );
+    }
+  }
+
+  async checkTvlUpdate(address: string): Promise<void> {
+    if (DEBUG) appLogger.debug(`IndexingService - checkUpdate() ${address}`);
+    const campaign = await this.campaign.getFromAddress(address);
+
+    const tvlBlock = await this.indexRepo.getBlockOfFunders(campaign.uri);
+    const latestBlock = await this.readDataService.getBlockNumber();
+
+    if (DEBUG)
+      appLogger.debug(
+        `IndexingService - tvlBlock: ${tvlBlock}, latestBlock: ${latestBlock}`
+      );
+
+    if (latestBlock - tvlBlock >= config.fundersUpdatePeriod) {
+      await this.updateTvlIndex(campaign.uri, tvlBlock);
     }
   }
 
@@ -194,7 +217,7 @@ export class IndexingService {
     page: Page = { number: 0, perPage: 10 }
   ): Promise<CampaignFundersRead> {
     /** check update index everytime someone ask for the funders */
-    await this.checkUpdate(uri);
+    await this.checkFundersUpdate(uri);
 
     if (DEBUG) appLogger.debug(`IndexingService - getCampaignFunders() ${uri}`);
     const funders = await this.indexRepo.getFunders(uri, page);

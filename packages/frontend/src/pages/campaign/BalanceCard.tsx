@@ -1,11 +1,13 @@
 import { TokenBalance } from '@dao-strategies/core';
-import { Box, BoxExtendedProps } from 'grommet';
+import { Box, BoxExtendedProps, Tip } from 'grommet';
 import { FC, ReactElement } from 'react';
+import { AssetBalance, AssetsTable } from '../../components/Assets';
 import { AppCard } from '../../components/styles/BasicElements';
 import { styleConstants } from '../../components/styles/themes';
 
 interface BalanceCardProps extends BoxExtendedProps {
   title: string;
+  subtitle?: ReactElement;
   value: string;
   symbol?: string;
   coin?: string;
@@ -24,16 +26,40 @@ export const BalanceCard: FC<BalanceCardProps> = (props: BalanceCardProps) => {
         }}>
         {props.title}
       </Box>
-      <Box style={{ margin: '16px 0px 24px 0px', fontSize: '32px' }}>
-        {props.value !== '0' ? (
-          <>
-            {props.symbol} {props.value} {props.coin}
-          </>
-        ) : (
-          '--'
-        )}
-      </Box>
-      {props.assets !== undefined ? props.assets.map((asset) => <img src={asset.icon} alt={asset.name} />) : <></>}
+      {props.subtitle ? props.subtitle : <></>}
+      <Tip
+        content={
+          <Box style={{ width: '300px', padding: '16px 16px 0px 16px' }}>
+            {props.assets ? (
+              props.assets.map((asset) => {
+                return asset.balance !== '0' ? (
+                  <AssetBalance style={{ marginBottom: '16px' }} asset={asset}></AssetBalance>
+                ) : (
+                  <></>
+                );
+              })
+            ) : (
+              <></>
+            )}
+          </Box>
+        }>
+        <Box
+          style={{
+            margin: '16px 0px 24px 0px',
+            fontSize: '32px',
+            borderBottom: '2px dashed',
+            borderColor: styleConstants.colors.lightGrayBorder,
+            paddingBottom: '4px',
+          }}>
+          {props.value !== '0' ? (
+            <>
+              {props.symbol} {props.value} {props.coin}
+            </>
+          ) : (
+            '--'
+          )}
+        </Box>
+      </Tip>
       {props.action !== undefined ? props.action : <></>}
     </AppCard>
   );

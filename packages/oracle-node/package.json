@@ -7,7 +7,7 @@
     "prod": "ts-node src/server.ts",
     "prisma-migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
     "prisma-reset": "rm -rf ./src/prisma/migrations && cd ./src &&  npx prisma migrate reset --force --preview-feature && npx prisma migrate dev --name init && cd ..",
-    "prisma-generate": "cd ./src && npx prisma generate && cd ..",
+    "prisma-generate": "npx prisma generate --schema=./src/prisma/schema.prisma",
     "test": "jest test/main.test.ts",
     "reboot": "yarn prisma-reset && yarn start",
     "start": "nodemon src/server.ts",

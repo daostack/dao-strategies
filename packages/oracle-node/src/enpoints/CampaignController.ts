@@ -8,6 +8,7 @@ import {
   SharesRead,
   Page,
   CampaignFundersRead,
+  CampaignReadDetails,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
 
@@ -130,10 +131,14 @@ export class CampaignController extends Controller {
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
-  ): Promise<any> {
+  ): Promise<CampaignReadDetails> {
     /* eslint-disable */
+    const address = request.params.address.toLowerCase() as string;
+    /** update TVL everytime a user request the campaign object */
+    await this.manager.services.indexingService.checkTvlUpdate(address);
+
     const campaign = await (this.manager.services.campaign.getFromAddress(
-      request.params.address.toLowerCase() as string
+      address
     ) as any);
 
     return toCampaignExternal(campaign);
@@ -187,7 +192,7 @@ export class CampaignController extends Controller {
     loggedUser: string | undefined
   ): Promise<CampaignFundersRead> {
     /* eslint-disable */
-    return this.manager.services.readDataService.getFunders(
+    return this.manager.services.indexingService.getCampaignFunders(
       request.params.uri as string,
       request.body.page as Page
     );

@@ -4,6 +4,7 @@ import { SendTransactionService } from './services/onchain/SendTransactionsServi
 import { SocialApiService } from './services/SocialApiService';
 import { TimeService } from './services/TimeService';
 import { UserService } from './services/UserService';
+import { IndexingService } from './services/onchain/IndexService';
 
 export interface Services {
   campaign: CampaignService;
@@ -11,5 +12,6 @@ export interface Services {
   user: UserService;
   socialApi: SocialApiService;
   readDataService: ReadDataService;
+  indexingService: IndexingService;
   sendTransaction: SendTransactionService;
 }
