@@ -102,6 +102,13 @@ export class CampaignRepository {
     });
   }
 
+  async setCampaignValueLocked(uri: string, value: number): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { valueLocked: value },
+    });
+  }
+
   async setExecuted(uri: string, value: boolean): Promise<void> {
     await this.client.campaign.update({
       where: { uri: uri },
@@ -473,6 +480,7 @@ export class CampaignRepository {
   async list(user?: string): Promise<Campaign[]> {
     const res = await this.client.campaign.findMany({
       where: { registered: true },
+      orderBy: { valueLocked: 'desc' },
       take: 10,
     });
     return res;

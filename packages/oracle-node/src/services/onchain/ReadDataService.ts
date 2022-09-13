@@ -11,8 +11,6 @@ import {
   bigNumberToNumber,
   erc20Provider,
   Asset,
-  CampaignFundersRead,
-  Page,
 } from '@dao-strategies/core';
 import { Campaign } from '@prisma/client';
 import { BigNumber, providers } from 'ethers';
@@ -20,7 +18,6 @@ import { BigNumber, providers } from 'ethers';
 import { awaitWithTimeout } from '../../utils/utils';
 import { CampaignService } from '../CampaignService';
 import { PriceService } from '../PriceService';
-import { IndexingService } from './IndexService';
 
 const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -28,16 +25,26 @@ const ZERO_BYTES32 =
 export class ReadDataService {
   constructor(
     protected campaignService: CampaignService,
-    protected indexService: IndexingService,
     protected price: PriceService,
     protected provider: providers.Provider
   ) {}
+
+  async getBlockNumber(): Promise<number> {
+    /* eslint-disable */
+    const anyProvider = this.provider as any;
+    const blockNumber =
+      anyProvider.blockNumber !== undefined
+        ? (anyProvider.blockNumber as number)
+        : await this.provider.getBlockNumber();
+    /* eslint-enable */
+    return blockNumber;
+  }
 
   async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
     const campaign = await this.campaignService.getFromAddress(address);
     const campaignContract = campaignProvider(campaign.address, this.provider);
 
-    const balances = await this.getCampaignBalances(campaign);
+    const { balances } = await this.getCampaignBalances(campaign);
     const raised = await this.getCampaignRaised(campaign, campaignContract);
     const publishInfo = await this.getPublishInfo(campaign.address);
 
@@ -49,7 +56,9 @@ export class ReadDataService {
     return { balances, raised, publishInfo, root };
   }
 
-  async getCampaignBalances(campaign: Campaign): Promise<TokenBalance[]> {
+  async getCampaignBalances(
+    campaign: Campaign
+  ): Promise<{ balances: TokenBalance[]; blockNumber: number }> {
     const assets = ChainsDetails.chainAssets(campaign.chainId);
 
     const tokens = await Promise.all(
@@ -83,7 +92,9 @@ export class ReadDataService {
       campaign.address
     );
 
-    return tokens.concat(custom);
+    const blockNumber = await this.getBlockNumber();
+
+    return { balances: tokens.concat(custom), blockNumber };
   }
 
   async getCampaignRaised(
@@ -283,9 +294,5 @@ export class ReadDataService {
 
   async getPublishInfo(address: string): Promise<PublishInfo> {
     return getCampaignPublishInfo(this.provider, address);
-  }
-
-  async getFunders(uri: string, page: Page): Promise<CampaignFundersRead> {
-    return this.indexService.getCampaignFunders(uri, page);
   }
 }

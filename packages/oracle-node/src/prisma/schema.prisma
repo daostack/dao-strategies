@@ -116,8 +116,8 @@ model CampaignIndex {
   @@id([campaignId])
   campaign        Campaign      @relation(fields: [campaignId], references: [uri])
   campaignId      String
-  fundersBN       BigInt
-  tvlBN           BigInt
+  fundersBN       BigInt?
+  tvlBN           BigInt?
 }
 
 model CampaignFunder {

@@ -44,7 +44,7 @@ export const CampaignCard: FC<ICampaignCard> = (props: ICampaignCard) => {
 
       <Box style={{ marginTop: '12px' }} direction="row">
         <FixedHeightPar style={{ margin: '0px 16px 0px 0px' }} content={<>{campaign.description}</>}></FixedHeightPar>
-        <AppTag style={{ flexShrink: 0 }}>2000 DAI</AppTag>
+        <AppTag style={{ flexShrink: 0 }}>~{campaign.valueLocked} USD</AppTag>
       </Box>
     </AppCard>
   );

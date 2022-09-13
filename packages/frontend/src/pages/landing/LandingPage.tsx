@@ -47,7 +47,7 @@ export const LandingPage: FC<ILandingPageProps> = (props: ILandingPageProps) => 
           )}
         </ViewportContainer>
 
-        <CampaignsExplorer />
+        <CampaignsExplorer style={{ maxWidth: '1600px', margin: '0 auto' }} />
       </Box>
     </>
   );

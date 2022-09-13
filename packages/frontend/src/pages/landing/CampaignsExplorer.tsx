@@ -1,4 +1,4 @@
-import { Box, Text } from 'grommet';
+import { Box, BoxExtendedProps, Text } from 'grommet';
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createImportSpecifier } from 'typescript';
@@ -8,7 +8,7 @@ import { ResponsiveGrid } from '../../components/styles/LayoutComponents.styled'
 
 import { useCampaigns } from '../../hooks/useCampaigns';
 
-export interface ICampaignsExplorerProps {
+export interface ICampaignsExplorerProps extends BoxExtendedProps {
   dum?: any;
 }
 
@@ -36,7 +36,7 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
   };
 
   return (
-    <Box style={{ padding: '16px 32px' }}>
+    <Box style={{ padding: '16px 32px', ...props.style }}>
       <Box direction="row">
         <Box>Explore Campaigns</Box>
         <AppInput style={{ maxWidth: '350px' }} placeholder="search"></AppInput>

@@ -22,7 +22,9 @@ export class IndexRepository {
       },
     });
 
-    return index !== null ? bigIntToNumber(index.fundersBN) : 0;
+    return index !== null && index.fundersBN !== null
+      ? bigIntToNumber(index.fundersBN)
+      : 0;
   }
 
   async getBlockOfTvl(uri: string): Promise<number> {
@@ -35,7 +37,9 @@ export class IndexRepository {
       },
     });
 
-    return index !== null ? bigIntToNumber(index.tvlBN) : 0;
+    return index !== null && index.tvlBN !== null
+      ? bigIntToNumber(index.tvlBN)
+      : 0;
   }
 
   async addFundEvent(event: Prisma.FundEventCreateInput): Promise<void> {
@@ -49,21 +53,40 @@ export class IndexRepository {
     });
   }
 
-  async addIndexMark(uri: string, blockNumber: number): Promise<void> {
+  async setFundersBlock(uri: string, fundersBN: number): Promise<void> {
     if (DEBUG)
       appLogger.debug(
-        `IndexRepository - addIndexMark uri: ${uri}, blockNumber: ${blockNumber}`
+        `IndexRepository - setTvlBlock uri: ${uri}, blockNumber: ${fundersBN}`
       );
     await this.client.campaignIndex.upsert({
       create: {
-        blockNumber,
+        fundersBN,
         campaignId: uri,
       },
       where: {
         campaignId: uri,
       },
       update: {
-        blockNumber,
+        fundersBN,
+      },
+    });
+  }
+
+  async setTvlBlock(uri: string, tvlBN: number): Promise<void> {
+    if (DEBUG)
+      appLogger.debug(
+        `IndexRepository - setTvlBlock uri: ${uri}, blockNumber: ${tvlBN}`
+      );
+    await this.client.campaignIndex.upsert({
+      create: {
+        tvlBN,
+        campaignId: uri,
+      },
+      where: {
+        campaignId: uri,
+      },
+      update: {
+        tvlBN,
       },
     });
   }

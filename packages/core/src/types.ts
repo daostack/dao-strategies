@@ -56,6 +56,7 @@ export interface CampaignReadDetails
   executed: boolean;
   published: boolean;
   creatorId: string | null;
+  valueLocked: number;
 }
 
 export interface BalancesObject {

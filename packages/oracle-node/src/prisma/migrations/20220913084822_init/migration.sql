@@ -106,7 +106,8 @@ CREATE TABLE "FundEvent" (
 -- CreateTable
 CREATE TABLE "CampaignIndex" (
     "campaignId" TEXT NOT NULL,
-    "blockNumber" BIGINT NOT NULL,
+    "fundersBN" BIGINT,
+    "tvlBN" BIGINT,
 
     CONSTRAINT "CampaignIndex_pkey" PRIMARY KEY ("campaignId")
 );
