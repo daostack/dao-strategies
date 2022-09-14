@@ -46,7 +46,7 @@ export class ReadDataService {
      * is not found and runtime. While the blocknumber is there
      * to be directly read
      */
-    const anyProvider = this.providers.get(chainId) as any;
+    const anyProvider = this.providers.get(chainId).provider as any;
     const blockNumber =
       anyProvider.blockNumber !== undefined
         ? (anyProvider.blockNumber as number)

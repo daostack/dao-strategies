@@ -1,14 +1,12 @@
 import { Multicall, ContractCallContext } from 'ethereum-multicall';
 import { BigNumber, Contract, providers, Signer } from 'ethers';
-import { chainConstants, LOCAL_CHAINID } from '../chain.constants';
+import { chainConstants } from '../chain.constants';
 
 import { Campaign, TestErc20 } from '../generated/typechain';
 import { bigNumberToNumber } from '../support';
 import { PublishInfo } from '../types';
 
 import { ContractsJson } from './contracts.json';
-
-const MulticallAddresses = new Map<number, string>();
 
 export const campaignFactoryInstance = (
   address: string,

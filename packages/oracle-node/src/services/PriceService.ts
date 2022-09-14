@@ -118,18 +118,30 @@ export class PriceService {
           headers: { 'Content-Type': 'application/json' },
         }
       ).then((response) => {
-        response.json().then((result) => {
-          if (result.status && result.status.error_code) {
+        response
+          .json()
+          .then((result) => {
+            if (result.status && result.status.error_code) {
+              this.getting.delete(unique);
+              reject(new Error(result.status.error_message));
+            }
+
+            const price =
+              result[assetId] === undefined || result[assetId][vs] === undefined
+                ? 0
+                : result[assetId][vs];
+
+            resolve({
+              address,
+              chainId,
+              lastUpdated: BigInt(now),
+              price,
+            });
+          })
+          .catch((e) => {
             this.getting.delete(unique);
-            reject(new Error(result.status.error_message));
-          }
-          resolve({
-            address,
-            chainId,
-            lastUpdated: BigInt(now),
-            price: result[assetId][vs],
+            reject(e);
           });
-        });
         /* eslint-enable */
       });
     });
@@ -140,27 +152,44 @@ export class PriceService {
     appLogger.info(
       `Getting asset price from coingecko - chainId:${chainId}, address:${address}`
     );
-    const assetPrice = await get;
+
+    let assetPrice = {
+      address,
+      chainId,
+      lastUpdated: BigInt(now),
+      price: 0,
+    };
+
+    try {
+      assetPrice = await get;
+    } catch (e) {
+      this.getting.delete(unique);
+    }
 
     if (DEBUG)
       appLogger.debug(
         `setting price on DB ${JSON.stringify(assetPrice)} ${unique}`
       );
-    await this.client.assetPrice.upsert({
-      where: {
-        chainId_address: {
-          address,
-          chainId,
+
+    try {
+      await this.client.assetPrice.upsert({
+        where: {
+          chainId_address: {
+            address,
+            chainId,
+          },
         },
-      },
-      create: {
-        ...assetPrice,
-      },
-      update: {
-        price: assetPrice.price,
-        lastUpdated: assetPrice.lastUpdated,
-      },
-    });
+        create: {
+          ...assetPrice,
+        },
+        update: {
+          price: assetPrice.price,
+          lastUpdated: assetPrice.lastUpdated,
+        },
+      });
+    } catch (e) {
+      this.getting.delete(unique);
+    }
 
     this.getting.delete(unique);
     if (DEBUG) appLogger.debug(`returning price from CG ${unique}`);

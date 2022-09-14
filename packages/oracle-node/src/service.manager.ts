@@ -1,11 +1,12 @@
 import { ContractsJson, IStrategyComputation } from '@dao-strategies/core';
 import { PrismaClient } from '@prisma/client';
-import { providers } from 'ethers';
+import { ethers, providers } from 'ethers';
 import { Wallet } from 'ethers/lib/ethers';
 
 import { StrategyComputationMock } from '../test/mocks/strategy.computation';
 
 import { chainConfig, PRICE_UPDATE_PERIOD } from './config';
+import { appLogger } from './logger';
 import { CampaignRepository } from './repositories/CampaignRepository';
 import { IndexRepository } from './repositories/IndexRepository';
 import { UserRepository } from './repositories/UserRepository';
@@ -57,7 +58,11 @@ export class ServiceManager {
         ? new providers.AlchemyProvider(config.chainName, config.alchemyKey)
         : new providers.JsonRpcProvider(config.url);
 
-      let signer = new Wallet(config.privateKey);
+      let signer = Wallet.fromMnemonic(config.mnemonic, config.path);
+      appLogger.info(
+        `signer for chainId: ${chainId} - publicKey: ${signer.address}`
+      );
+
       signer = signer.connect(provider);
 
       this.providers.set(chainId, { provider, signer });
