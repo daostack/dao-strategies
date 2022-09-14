@@ -460,7 +460,7 @@
      }
     ],
     "UserData": {
-     "Fn::Base64": "#!/bin/bash\n# Install Node and Git\nyum update -y\ncurl -sL https://rpm.nodesource.com/setup_14.x | bash -\nyum install -y nodejs git\n\n\n# Make a directory to clone the oracle node code \nmkdir -p /home/ec2-user/oracle-node && cd /home/ec2-user/oracle-node\ngit clone https://GITHUB_TOKEN0@github.com/XamHans/dao-strategies.git  .\n\n# Install Dependencies\nsudo npm install"
+     "Fn::Base64": "#!/bin/bash\n# Install Node and Git\nyum update -y\ncurl -sL https://rpm.nodesource.com/setup_14.x | bash -\nyum install -y nodejs git\n\n\n# Make a directory to clone the strapilication code to\nmkdir -p /home/ec2-user/strapi && cd /home/ec2-user/strapi\ngit clone https://github.com/XamHans/dao-strategies .\n\n# Install Dependencies\nsudo npm install"
     }
    },
    "DependsOn": [
