@@ -1,0 +1,864 @@
+{
+ "Resources": {
+  "devcommonvaluevpcF1EBF7BC": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/Resource"
+   }
+  },
+  "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1SubnetEC00F94B": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    },
+    "AvailabilityZone": {
+     "Fn::Select": [
+      0,
+      {
+       "Fn::GetAZs": ""
+      }
+     ]
+    },
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "dev-commonvalue-public-subnet-1"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/Subnet"
+   }
+  },
+  "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTable0A97F679": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/RouteTable"
+   }
+  },
+  "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTableAssociationB6C74E23": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTable0A97F679"
+    },
+    "SubnetId": {
+     "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1SubnetEC00F94B"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/RouteTableAssociation"
+   }
+  },
+  "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1DefaultRoute85BAC4AB": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTable0A97F679"
+    },
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "devcommonvaluevpcIGW13255995"
+    }
+   },
+   "DependsOn": [
+    "devcommonvaluevpcVPCGWC0D6E8B6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/DefaultRoute"
+   }
+  },
+  "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2SubnetD65522EC": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    },
+    "AvailabilityZone": {
+     "Fn::Select": [
+      1,
+      {
+       "Fn::GetAZs": ""
+      }
+     ]
+    },
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "dev-commonvalue-public-subnet-1"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/Subnet"
+   }
+  },
+  "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTable70C68B04": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/RouteTable"
+   }
+  },
+  "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTableAssociationB09DF546": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTable70C68B04"
+    },
+    "SubnetId": {
+     "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2SubnetD65522EC"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/RouteTableAssociation"
+   }
+  },
+  "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2DefaultRouteC7627C08": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTable70C68B04"
+    },
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "devcommonvaluevpcIGW13255995"
+    }
+   },
+   "DependsOn": [
+    "devcommonvaluevpcVPCGWC0D6E8B6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/DefaultRoute"
+   }
+  },
+  "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1SubnetA5A8D151": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    },
+    "AvailabilityZone": {
+     "Fn::Select": [
+      0,
+      {
+       "Fn::GetAZs": ""
+      }
+     ]
+    },
+    "CidrBlock": "10.0.2.0/28",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "dev-commonvalue-isolated-subnet-1"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/Subnet"
+   }
+  },
+  "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1RouteTable0BBE8B94": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/RouteTable"
+   }
+  },
+  "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1RouteTableAssociation61F4B345": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1RouteTable0BBE8B94"
+    },
+    "SubnetId": {
+     "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1SubnetA5A8D151"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/RouteTableAssociation"
+   }
+  },
+  "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2Subnet1D993BE0": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    },
+    "AvailabilityZone": {
+     "Fn::Select": [
+      1,
+      {
+       "Fn::GetAZs": ""
+      }
+     ]
+    },
+    "CidrBlock": "10.0.2.16/28",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "dev-commonvalue-isolated-subnet-1"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/Subnet"
+   }
+  },
+  "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2RouteTable6EE71FA9": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/RouteTable"
+   }
+  },
+  "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2RouteTableAssociation5AC0233E": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2RouteTable6EE71FA9"
+    },
+    "SubnetId": {
+     "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2Subnet1D993BE0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/RouteTableAssociation"
+   }
+  },
+  "devcommonvaluevpcIGW13255995": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-vpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/IGW"
+   }
+  },
+  "devcommonvaluevpcVPCGWC0D6E8B6": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    },
+    "InternetGatewayId": {
+     "Ref": "devcommonvaluevpcIGW13255995"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-vpc/VPCGW"
+   }
+  },
+  "ec2instancesgCC5C402A": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "InfrastructureStack/ec2-instance-sg",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "allow SSH connections from anywhere",
+      "FromPort": 22,
+      "IpProtocol": "tcp",
+      "ToPort": 22
+     }
+    ],
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/ec2-instance-sg/Resource"
+   }
+  },
+  "devcommonvalueec2oracleInstanceRole7CEBBC6C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": {
+         "Fn::Join": [
+          "",
+          [
+           "ec2.",
+           {
+            "Ref": "AWS::URLSuffix"
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-ec2-oracle"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-ec2-oracle/InstanceRole/Resource"
+   }
+  },
+  "devcommonvalueec2oracleInstanceProfile1D462BDD": {
+   "Type": "AWS::IAM::InstanceProfile",
+   "Properties": {
+    "Roles": [
+     {
+      "Ref": "devcommonvalueec2oracleInstanceRole7CEBBC6C"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-ec2-oracle/InstanceProfile"
+   }
+  },
+  "devcommonvalueec2oracle51BA4666": {
+   "Type": "AWS::EC2::Instance",
+   "Properties": {
+    "AvailabilityZone": {
+     "Fn::Select": [
+      0,
+      {
+       "Fn::GetAZs": ""
+      }
+     ]
+    },
+    "IamInstanceProfile": {
+     "Ref": "devcommonvalueec2oracleInstanceProfile1D462BDD"
+    },
+    "ImageId": {
+     "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
+    },
+    "InstanceType": "t2.small",
+    "KeyName": "oracle-ec2-key-pair",
+    "SecurityGroupIds": [
+     {
+      "Fn::GetAtt": [
+       "ec2instancesgCC5C402A",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetId": {
+     "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1SubnetEC00F94B"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-commonvalue-ec2-oracle"
+     }
+    ],
+    "UserData": {
+     "Fn::Base64": "#!/bin/bash\n# Install Node and Git\nyum update -y\ncurl -sL https://rpm.nodesource.com/setup_14.x | bash -\nyum install -y nodejs git\n\n\n# Make a directory to clone the oracle node code \nmkdir -p /home/ec2-user/oracle-node && cd /home/ec2-user/oracle-node\ngit clone https://GITHUB_TOKEN0@github.com/XamHans/dao-strategies.git  .\n\n# Install Dependencies\nsudo npm install"
+    }
+   },
+   "DependsOn": [
+    "devcommonvalueec2oracleInstanceRole7CEBBC6C"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-ec2-oracle/Resource"
+   }
+  },
+  "devcommonvaluepostgresdbSubnetGroupF7095154": {
+   "Type": "AWS::RDS::DBSubnetGroup",
+   "Properties": {
+    "DBSubnetGroupDescription": "Subnet group for dev-commonvalue-postgres-db database",
+    "SubnetIds": [
+     {
+      "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1SubnetA5A8D151"
+     },
+     {
+      "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2Subnet1D993BE0"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-postgres-db/SubnetGroup/Default"
+   }
+  },
+  "devcommonvaluepostgresdbSecurityGroup8107555A": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Security group for dev-commonvalue-postgres-db database",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "devcommonvaluevpcF1EBF7BC"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-postgres-db/SecurityGroup/Resource"
+   }
+  },
+  "devcommonvaluepostgresdbSecurityGroupfromInfrastructureStackec2instancesgC8E77CC054322121D7F8": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "IpProtocol": "tcp",
+    "Description": "from InfrastructureStackec2instancesgC8E77CC0:5432",
+    "FromPort": 5432,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "devcommonvaluepostgresdbSecurityGroup8107555A",
+      "GroupId"
+     ]
+    },
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ec2instancesgCC5C402A",
+      "GroupId"
+     ]
+    },
+    "ToPort": 5432
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-postgres-db/SecurityGroup/from InfrastructureStackec2instancesgC8E77CC0:5432"
+   }
+  },
+  "InfrastructureStackdevcommonvaluepostgresdbSecret0C46251C3fdaad7efa858a3daf9490cf0a702aeb": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Generated by the CDK for stack: ",
+       {
+        "Ref": "AWS::StackName"
+       }
+      ]
+     ]
+    },
+    "GenerateSecretString": {
+     "ExcludeCharacters": " %+~`#$&*()|[]{}:;<>?!'/@\"\\",
+     "GenerateStringKey": "password",
+     "PasswordLength": 30,
+     "SecretStringTemplate": "{\"username\":\"postgres\"}"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-postgres-db/Secret/Resource"
+   }
+  },
+  "devcommonvaluepostgresdbSecretAttachment725544C7": {
+   "Type": "AWS::SecretsManager::SecretTargetAttachment",
+   "Properties": {
+    "SecretId": {
+     "Ref": "InfrastructureStackdevcommonvaluepostgresdbSecret0C46251C3fdaad7efa858a3daf9490cf0a702aeb"
+    },
+    "TargetId": {
+     "Ref": "devcommonvaluepostgresdbF7944B38"
+    },
+    "TargetType": "AWS::RDS::DBInstance"
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-postgres-db/Secret/Attachment/Resource"
+   }
+  },
+  "devcommonvaluepostgresdbF7944B38": {
+   "Type": "AWS::RDS::DBInstance",
+   "Properties": {
+    "DBInstanceClass": "db.t3.micro",
+    "AllocatedStorage": "100",
+    "BackupRetentionPeriod": 0,
+    "CopyTagsToSnapshot": true,
+    "DBName": "oracle-pg-database",
+    "DBSubnetGroupName": {
+     "Ref": "devcommonvaluepostgresdbSubnetGroupF7095154"
+    },
+    "DeleteAutomatedBackups": true,
+    "DeletionProtection": false,
+    "Engine": "postgres",
+    "EngineVersion": "14.2",
+    "MasterUsername": "postgres",
+    "MasterUserPassword": {
+     "Fn::Join": [
+      "",
+      [
+       "{{resolve:secretsmanager:",
+       {
+        "Ref": "InfrastructureStackdevcommonvaluepostgresdbSecret0C46251C3fdaad7efa858a3daf9490cf0a702aeb"
+       },
+       ":SecretString:password::}}"
+      ]
+     ]
+    },
+    "MultiAZ": false,
+    "PubliclyAccessible": false,
+    "StorageType": "gp2",
+    "VPCSecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "devcommonvaluepostgresdbSecurityGroup8107555A",
+       "GroupId"
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-commonvalue-postgres-db/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11RTW/CMAz9LbuHbANtdz4kxK0qiOvkpoYF2gTZDghV/e8LhLawk53nZ/u9eKwnX/rjDS48MuVxVNlCN2sBc1QR+mnQjHWzPRk137ltNldZKCpr1qFwKDdsyHIfBDdQVDjgAzZl9saCWO96ssrInkFwmLFyghTzZUQvcH0sfbymEmX91uhErdEEsnJdkg+n+7oXYOVYwBlMI4f8hbVye0LmVlmodZP7pLuLXVtGfmcrbBWVrJsFCBTA2A9N0nsZi9kz0LHjWkr+FrOus1V8R7kGB3sk3SR9N2IKG6A9ypPpnvC/0rYqR/aBkssMCGqMH3n381SYe1fa2wVa5XyJ+sDv589v/TmJ9z+wtSMKTmyNOk/xD5GIUskbAgAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Parameters": {
+  "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter": {
+   "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+   "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+  },
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Conditions": {
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-2"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

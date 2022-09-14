@@ -1,0 +1,238 @@
+{
+  "version": "20.0.0",
+  "artifacts": {
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    },
+    "InfrastructureStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "InfrastructureStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "InfrastructureStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/unknown-region",
+      "properties": {
+        "templateFile": "InfrastructureStack.template.json",
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/34c73e871eaf156f6a342b076a91d1a3a1c708be3c154decd9ccc639b6ccbe29.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "InfrastructureStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-${AWS::Region}",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "InfrastructureStack.assets"
+      ],
+      "metadata": {
+        "/InfrastructureStack/dev-commonvalue-vpc/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcF1EBF7BC"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1SubnetEC00F94B"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTable0A97F679"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTableAssociationB6C74E23"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1DefaultRoute85BAC4AB"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2SubnetD65522EC"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTable70C68B04"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTableAssociationB09DF546"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2DefaultRouteC7627C08"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1SubnetA5A8D151"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1RouteTable0BBE8B94"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1RouteTableAssociation61F4B345"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2Subnet1D993BE0"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2RouteTable6EE71FA9"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2RouteTableAssociation5AC0233E"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/IGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcIGW13255995"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-vpc/VPCGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluevpcVPCGWC0D6E8B6"
+          }
+        ],
+        "/InfrastructureStack/ec2-instance-sg/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ec2instancesgCC5C402A"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-ec2-oracle/InstanceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvalueec2oracleInstanceRole7CEBBC6C"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-ec2-oracle/InstanceProfile": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvalueec2oracleInstanceProfile1D462BDD"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-ec2-oracle/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvalueec2oracle51BA4666"
+          }
+        ],
+        "/InfrastructureStack/SsmParameterValue:--aws--service--ami-amazon-linux-latest--amzn2-ami-hvm-x86_64-gp2:C96584B6-F00A-464E-AD19-53AFF4B05118.Parameter": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-postgres-db/SubnetGroup/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluepostgresdbSubnetGroupF7095154"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-postgres-db/SecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluepostgresdbSecurityGroup8107555A"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-postgres-db/SecurityGroup/from InfrastructureStackec2instancesgC8E77CC0:5432": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluepostgresdbSecurityGroupfromInfrastructureStackec2instancesgC8E77CC054322121D7F8"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-postgres-db/Secret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "InfrastructureStackdevcommonvaluepostgresdbSecret0C46251C3fdaad7efa858a3daf9490cf0a702aeb"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-postgres-db/Secret/Attachment/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluepostgresdbSecretAttachment725544C7"
+          }
+        ],
+        "/InfrastructureStack/dev-commonvalue-postgres-db/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "devcommonvaluepostgresdbF7944B38"
+          }
+        ],
+        "/InfrastructureStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/InfrastructureStack/CDKMetadata/Condition": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadataAvailable"
+          }
+        ],
+        "/InfrastructureStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/InfrastructureStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "InfrastructureStack"
+    }
+  }
+}
