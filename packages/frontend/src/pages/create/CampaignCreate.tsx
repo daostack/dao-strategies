@@ -101,7 +101,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const [simulating, setSimulating] = useState<boolean>(false);
   const [deploying, setDeploying] = useState<boolean>(false);
 
-  const campaignFactory = useCampaignFactory();
+  const chainId = ChainsDetails.chainOfName(formValues.chainName)?.chain.id;
+  const campaignFactory = useCampaignFactory(chainId);
   const navigate = useNavigate();
 
   /** details is a derived value */
@@ -122,7 +123,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     const finalDetails = shares !== undefined ? shares.details : details;
     if (finalDetails === undefined) throw new Error();
 
-    const chainId = ChainsDetails.chainOfName(formValues.chainName)?.chain.id;
     if (chainId === undefined) {
       throw new Error(`chain ${formValues.chainName} not found`);
     }

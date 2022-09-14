@@ -15,3 +15,4 @@ export const ORACLE_ADDRESS = '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc';
 export const CHALLENGE_PERIOD = 30; // 1 * DAYS;
 export const ACTIVE_DURATION = 30; // 1 * DAYS;
 export const ACTIVATION_PERIOD = 90; // 7 * DAYS;
+export const ALCHEMY_GOERLI_KEY = 'aQapGNEneTscr5ixwb05r-J-OWEEwQvF';

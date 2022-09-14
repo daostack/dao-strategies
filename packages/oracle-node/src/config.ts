@@ -34,3 +34,21 @@ export const config: ExecutionConfig = {
 export const DISABLE_VERIFICATION =
   process.env.DISABLE_VERIFICATION !== undefined &&
   process.env.DISABLE_VERIFICATION.toLocaleLowerCase() === 'true';
+
+const chainConfig = new Map<
+  number,
+  { privateKey: string; url?: string; chainName?: string; alchemyKey?: string }
+>();
+
+chainConfig.set(1337, {
+  privateKey: process.env.ORACLE_PRIVATE_KEY,
+  url: process.env.JSON_RPC_URL_LOCAL,
+});
+
+chainConfig.set(5, {
+  privateKey: process.env.ORACLE_PRIVATE_KEY,
+  alchemyKey: process.env.ALCHEMY_KEY_GOERLI,
+  chainName: 'goerli',
+});
+
+export { chainConfig };

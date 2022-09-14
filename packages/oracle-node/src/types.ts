@@ -5,6 +5,7 @@ import { SocialApiService } from './services/SocialApiService';
 import { TimeService } from './services/TimeService';
 import { UserService } from './services/UserService';
 import { IndexingService } from './services/onchain/IndexService';
+import { providers, Signer } from 'ethers';
 
 export interface Services {
   campaign: CampaignService;
@@ -15,3 +16,8 @@ export interface Services {
   indexingService: IndexingService;
   sendTransaction: SendTransactionService;
 }
+export interface ChainProvider {
+  signer: Signer;
+  provider: providers.Provider;
+}
+export type ChainProviders = Map<number, ChainProvider>;
