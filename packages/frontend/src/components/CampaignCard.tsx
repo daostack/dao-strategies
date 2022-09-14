@@ -1,7 +1,8 @@
-import { CampaignReadDetails } from '@dao-strategies/core';
+import { CampaignReadDetails, ChainsDetails } from '@dao-strategies/core';
 import { Box, BoxExtendedProps, Spinner } from 'grommet';
 import { FC } from 'react';
 import { Address } from './Address';
+import { ChainTag } from './Assets';
 import { AppCard, AppTag, FixedHeightPar, IElement } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
 
@@ -20,6 +21,8 @@ export const CampaignCard: FC<ICampaignCard> = (props: ICampaignCard) => {
     );
   }
 
+  const chain = ChainsDetails.chainOfId(campaign.chainId);
+
   return (
     <AppCard {...props} style={{ ...props.style }}>
       <Box direction="row" align="center" justify="between">
@@ -27,7 +30,8 @@ export const CampaignCard: FC<ICampaignCard> = (props: ICampaignCard) => {
           {campaign.title}
         </Box>{' '}
         <Box direction="row" align="center">
-          Address: <Address address={campaign.address} chainId={campaign.chainId}></Address>
+          <ChainTag style={{ marginRight: '12px' }} chain={chain}></ChainTag>{' '}
+          <Address address={campaign.address} chainId={campaign.chainId}></Address>
         </Box>
       </Box>
 

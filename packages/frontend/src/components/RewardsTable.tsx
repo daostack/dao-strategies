@@ -54,7 +54,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
           }
           return `${valueToString(raised * ratio, 2)} ${token.name}`;
         })
-        .reduce((total, reward) => total.concat(' ' + reward));
+        .reduce((total, reward) => total.concat(' ' + reward), '');
 
       reward = `${rewardUSD > 0 ? `~$${valueToString(rewardUSD, 2)}` : '-'}${hasCustom ? ` + ${customStr}` : ''}`;
     }

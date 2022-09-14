@@ -480,7 +480,7 @@ export class CampaignRepository {
   async list(user?: string): Promise<Campaign[]> {
     const res = await this.client.campaign.findMany({
       where: { registered: true },
-      orderBy: { valueLocked: 'desc' },
+      orderBy: { chainId: { sort: 'desc', nulls: 'last' } },
       take: 10,
     });
     return res;
