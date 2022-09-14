@@ -15,7 +15,7 @@ export class InfrastructureStack extends Stack {
     super(scope, id, props);
 
     const { deploymentEnvironment } = props;
-    const prefix = `${deploymentEnvironment}-commonvalue`;
+    const prefix = `${deploymentEnvironment}`;
     // --------------- VPC SECTION
     // 👇 create the VPC
     const vpc = new Vpc(this, `${prefix}-vpc`, {
@@ -32,12 +32,12 @@ export class InfrastructureStack extends Stack {
       maxAzs: 3,
       subnetConfiguration: [
         {
-          name: `${prefix}-public-subnet-1`,
+          name: `public-subnet-1`,
           subnetType: SubnetType.PUBLIC,
           cidrMask: 24,
         },
         {
-          name: `${prefix}-isolated-subnet-1`,
+          name: `isolated-subnet-1`,
           subnetType: SubnetType.PRIVATE_ISOLATED,
           cidrMask: 28,
         },
@@ -50,7 +50,7 @@ export class InfrastructureStack extends Stack {
     });
     ec2InstanceSG.addIngressRule(Peer.anyIpv4(), Port.tcp(22), 'allow SSH connections from anywhere');
     // 👇 create the EC2 instance
-    const ec2Instance = new Instance(this, `${prefix}-ec2-oracle`, {
+    const ec2Instance = new Instance(this, `ec2-oracle`, {
       vpc,
       vpcSubnets: {
         subnetType: SubnetType.PUBLIC,
@@ -61,7 +61,7 @@ export class InfrastructureStack extends Stack {
         generation: AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
       //keypair needs to be created by hand first (over the web console for example)
-      keyName: 'oracle-ec2-key-pair',
+      keyName: `${deploymentEnvironment}-ec2-backend-key-pair`,
     });
     // 👇 load user data script aka startup script that will be executed on the very first boot
     const userDataScript = readFileSync(path.resolve(__dirname, `./scripts/oracle-start.sh`), 'utf-8'); 
@@ -70,7 +70,7 @@ export class InfrastructureStack extends Stack {
     ec2Instance.addUserData(userDataScript);
     // --------------- DATABASE SECTION
     // 👇 create RDS instance
-    const dbInstance = new DatabaseInstance(this, `${prefix}-postgres-db`, {
+    const dbInstance = new DatabaseInstance(this, `${prefix}-db-backend`, {
       vpc,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_ISOLATED,
@@ -78,14 +78,19 @@ export class InfrastructureStack extends Stack {
       engine: DatabaseInstanceEngine.postgres({
         version: PostgresEngineVersion.VER_14_2,
       }),
-      instanceType: InstanceType.of(InstanceClass.BURSTABLE3, InstanceSize.MICRO),
+      instanceType: InstanceType.of(
+        InstanceClass.BURSTABLE3,
+        InstanceSize.MICRO,
+      ),
       credentials: Credentials.fromGeneratedSecret('postgres'),
       multiAz: false,
+      allowMajorVersionUpgrade: false,
+      autoMinorVersionUpgrade: true,
       backupRetention: Duration.days(0),
       deleteAutomatedBackups: true,
       removalPolicy: RemovalPolicy.DESTROY,
       deletionProtection: false,
-      databaseName: 'oracle-pg-database',
+      databaseName: 'backenddb',
       publiclyAccessible: false,
     });
     dbInstance.connections.allowFrom(ec2Instance, Port.tcp(5432));

@@ -23,7 +23,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/53313c86c2dc9703ac40a895896819b45cb127e78f56317820681d19607dba37.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/8c00cdedbfa41d4376f60b6c12446e74633d238c9a80e48b50e50e85de215e39.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -39,106 +39,106 @@
         "InfrastructureStack.assets"
       ],
       "metadata": {
-        "/InfrastructureStack/dev-commonvalue-vpc/Resource": [
+        "/InfrastructureStack/dev-vpc/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcF1EBF7BC"
+            "data": "devvpc91497180"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/Subnet": [
+        "/InfrastructureStack/dev-vpc/public-subnet-1Subnet1/Subnet": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1SubnetEC00F94B"
+            "data": "devvpcpublicsubnet1Subnet1Subnet8D6F5BBB"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/RouteTable": [
+        "/InfrastructureStack/dev-vpc/public-subnet-1Subnet1/RouteTable": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTable0A97F679"
+            "data": "devvpcpublicsubnet1Subnet1RouteTableBC8EB8B5"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/RouteTableAssociation": [
+        "/InfrastructureStack/dev-vpc/public-subnet-1Subnet1/RouteTableAssociation": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTableAssociationB6C74E23"
+            "data": "devvpcpublicsubnet1Subnet1RouteTableAssociation6F57E747"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/DefaultRoute": [
+        "/InfrastructureStack/dev-vpc/public-subnet-1Subnet1/DefaultRoute": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1DefaultRoute85BAC4AB"
+            "data": "devvpcpublicsubnet1Subnet1DefaultRoute2BBFDCEA"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/Subnet": [
+        "/InfrastructureStack/dev-vpc/public-subnet-1Subnet2/Subnet": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2SubnetD65522EC"
+            "data": "devvpcpublicsubnet1Subnet2Subnet0A3D525A"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/RouteTable": [
+        "/InfrastructureStack/dev-vpc/public-subnet-1Subnet2/RouteTable": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTable70C68B04"
+            "data": "devvpcpublicsubnet1Subnet2RouteTable1B656270"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/RouteTableAssociation": [
+        "/InfrastructureStack/dev-vpc/public-subnet-1Subnet2/RouteTableAssociation": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTableAssociationB09DF546"
+            "data": "devvpcpublicsubnet1Subnet2RouteTableAssociationEF93F2E5"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/DefaultRoute": [
+        "/InfrastructureStack/dev-vpc/public-subnet-1Subnet2/DefaultRoute": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2DefaultRouteC7627C08"
+            "data": "devvpcpublicsubnet1Subnet2DefaultRouteDE8AA81B"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/Subnet": [
+        "/InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1/Subnet": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1SubnetA5A8D151"
+            "data": "devvpcisolatedsubnet1Subnet1Subnet465D344F"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/RouteTable": [
+        "/InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1/RouteTable": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1RouteTable0BBE8B94"
+            "data": "devvpcisolatedsubnet1Subnet1RouteTableCA6E7DDB"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/RouteTableAssociation": [
+        "/InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1/RouteTableAssociation": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1RouteTableAssociation61F4B345"
+            "data": "devvpcisolatedsubnet1Subnet1RouteTableAssociationF3E463AA"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/Subnet": [
+        "/InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2/Subnet": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2Subnet1D993BE0"
+            "data": "devvpcisolatedsubnet1Subnet2Subnet41B0EFDF"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/RouteTable": [
+        "/InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2/RouteTable": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2RouteTable6EE71FA9"
+            "data": "devvpcisolatedsubnet1Subnet2RouteTableA346073E"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/RouteTableAssociation": [
+        "/InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2/RouteTableAssociation": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2RouteTableAssociation5AC0233E"
+            "data": "devvpcisolatedsubnet1Subnet2RouteTableAssociation7F5E1D0F"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/IGW": [
+        "/InfrastructureStack/dev-vpc/IGW": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcIGW13255995"
+            "data": "devvpcIGW7D664B58"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-vpc/VPCGW": [
+        "/InfrastructureStack/dev-vpc/VPCGW": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluevpcVPCGWC0D6E8B6"
+            "data": "devvpcVPCGW7C912A36"
           }
         ],
         "/InfrastructureStack/ec2-instance-sg/Resource": [
@@ -147,22 +147,22 @@
             "data": "ec2instancesgCC5C402A"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-ec2-oracle/InstanceRole/Resource": [
+        "/InfrastructureStack/ec2-oracle/InstanceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvalueec2oracleInstanceRole7CEBBC6C"
+            "data": "ec2oracleInstanceRole46CBA807"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-ec2-oracle/InstanceProfile": [
+        "/InfrastructureStack/ec2-oracle/InstanceProfile": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvalueec2oracleInstanceProfile1D462BDD"
+            "data": "ec2oracleInstanceProfile70211899"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-ec2-oracle/Resource": [
+        "/InfrastructureStack/ec2-oracle/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvalueec2oracle51BA4666"
+            "data": "ec2oracleA308F13E"
           }
         ],
         "/InfrastructureStack/SsmParameterValue:--aws--service--ami-amazon-linux-latest--amzn2-ami-hvm-x86_64-gp2:C96584B6-F00A-464E-AD19-53AFF4B05118.Parameter": [
@@ -171,40 +171,40 @@
             "data": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-postgres-db/SubnetGroup/Default": [
+        "/InfrastructureStack/dev-db-backend/SubnetGroup/Default": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluepostgresdbSubnetGroupF7095154"
+            "data": "devdbbackendSubnetGroupCB04A7CE"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-postgres-db/SecurityGroup/Resource": [
+        "/InfrastructureStack/dev-db-backend/SecurityGroup/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluepostgresdbSecurityGroup8107555A"
+            "data": "devdbbackendSecurityGroup97725991"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-postgres-db/SecurityGroup/from InfrastructureStackec2instancesgC8E77CC0:5432": [
+        "/InfrastructureStack/dev-db-backend/SecurityGroup/from InfrastructureStackec2instancesgC8E77CC0:5432": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluepostgresdbSecurityGroupfromInfrastructureStackec2instancesgC8E77CC054322121D7F8"
+            "data": "devdbbackendSecurityGroupfromInfrastructureStackec2instancesgC8E77CC05432BE68C975"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-postgres-db/Secret/Resource": [
+        "/InfrastructureStack/dev-db-backend/Secret/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "InfrastructureStackdevcommonvaluepostgresdbSecret0C46251C3fdaad7efa858a3daf9490cf0a702aeb"
+            "data": "InfrastructureStackdevdbbackendSecret3CCF09763fdaad7efa858a3daf9490cf0a702aeb"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-postgres-db/Secret/Attachment/Resource": [
+        "/InfrastructureStack/dev-db-backend/Secret/Attachment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluepostgresdbSecretAttachment725544C7"
+            "data": "devdbbackendSecretAttachmentF591D82D"
           }
         ],
-        "/InfrastructureStack/dev-commonvalue-postgres-db/Resource": [
+        "/InfrastructureStack/dev-db-backend/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devcommonvaluepostgresdbF7944B38"
+            "data": "devdbbackendA4C841EC"
           }
         ],
         "/InfrastructureStack/CDKMetadata/Default": [

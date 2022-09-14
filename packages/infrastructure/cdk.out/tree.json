@@ -16,13 +16,13 @@
         "id": "InfrastructureStack",
         "path": "InfrastructureStack",
         "children": {
-          "dev-commonvalue-vpc": {
-            "id": "dev-commonvalue-vpc",
-            "path": "InfrastructureStack/dev-commonvalue-vpc",
+          "dev-vpc": {
+            "id": "dev-vpc",
+            "path": "InfrastructureStack/dev-vpc",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "InfrastructureStack/dev-commonvalue-vpc/Resource",
+                "path": "InfrastructureStack/dev-vpc/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::EC2::VPC",
                   "aws:cdk:cloudformation:props": {
@@ -33,7 +33,7 @@
                     "tags": [
                       {
                         "key": "Name",
-                        "value": "InfrastructureStack/dev-commonvalue-vpc"
+                        "value": "InfrastructureStack/dev-vpc"
                       }
                     ]
                   }
@@ -43,18 +43,18 @@
                   "version": "2.35.0"
                 }
               },
-              "dev-commonvalue-public-subnet-1Subnet1": {
-                "id": "dev-commonvalue-public-subnet-1Subnet1",
-                "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1",
+              "public-subnet-1Subnet1": {
+                "id": "public-subnet-1Subnet1",
+                "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet1",
                 "children": {
                   "Subnet": {
                     "id": "Subnet",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/Subnet",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet1/Subnet",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
                       "aws:cdk:cloudformation:props": {
                         "vpcId": {
-                          "Ref": "devcommonvaluevpcF1EBF7BC"
+                          "Ref": "devvpc91497180"
                         },
                         "availabilityZone": {
                           "Fn::Select": [
@@ -69,7 +69,7 @@
                         "tags": [
                           {
                             "key": "aws-cdk:subnet-name",
-                            "value": "dev-commonvalue-public-subnet-1"
+                            "value": "public-subnet-1"
                           },
                           {
                             "key": "aws-cdk:subnet-type",
@@ -77,7 +77,7 @@
                           },
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1"
+                            "value": "InfrastructureStack/dev-vpc/public-subnet-1Subnet1"
                           }
                         ]
                       }
@@ -89,7 +89,7 @@
                   },
                   "Acl": {
                     "id": "Acl",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/Acl",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet1/Acl",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.35.0"
@@ -97,17 +97,17 @@
                   },
                   "RouteTable": {
                     "id": "RouteTable",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/RouteTable",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet1/RouteTable",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
                       "aws:cdk:cloudformation:props": {
                         "vpcId": {
-                          "Ref": "devcommonvaluevpcF1EBF7BC"
+                          "Ref": "devvpc91497180"
                         },
                         "tags": [
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1"
+                            "value": "InfrastructureStack/dev-vpc/public-subnet-1Subnet1"
                           }
                         ]
                       }
@@ -119,15 +119,15 @@
                   },
                   "RouteTableAssociation": {
                     "id": "RouteTableAssociation",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/RouteTableAssociation",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet1/RouteTableAssociation",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
                       "aws:cdk:cloudformation:props": {
                         "routeTableId": {
-                          "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTable0A97F679"
+                          "Ref": "devvpcpublicsubnet1Subnet1RouteTableBC8EB8B5"
                         },
                         "subnetId": {
-                          "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1SubnetEC00F94B"
+                          "Ref": "devvpcpublicsubnet1Subnet1Subnet8D6F5BBB"
                         }
                       }
                     },
@@ -138,16 +138,16 @@
                   },
                   "DefaultRoute": {
                     "id": "DefaultRoute",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet1/DefaultRoute",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet1/DefaultRoute",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Route",
                       "aws:cdk:cloudformation:props": {
                         "routeTableId": {
-                          "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1RouteTable0A97F679"
+                          "Ref": "devvpcpublicsubnet1Subnet1RouteTableBC8EB8B5"
                         },
                         "destinationCidrBlock": "0.0.0.0/0",
                         "gatewayId": {
-                          "Ref": "devcommonvaluevpcIGW13255995"
+                          "Ref": "devvpcIGW7D664B58"
                         }
                       }
                     },
@@ -162,18 +162,18 @@
                   "version": "2.35.0"
                 }
               },
-              "dev-commonvalue-public-subnet-1Subnet2": {
-                "id": "dev-commonvalue-public-subnet-1Subnet2",
-                "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2",
+              "public-subnet-1Subnet2": {
+                "id": "public-subnet-1Subnet2",
+                "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet2",
                 "children": {
                   "Subnet": {
                     "id": "Subnet",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/Subnet",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet2/Subnet",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
                       "aws:cdk:cloudformation:props": {
                         "vpcId": {
-                          "Ref": "devcommonvaluevpcF1EBF7BC"
+                          "Ref": "devvpc91497180"
                         },
                         "availabilityZone": {
                           "Fn::Select": [
@@ -188,7 +188,7 @@
                         "tags": [
                           {
                             "key": "aws-cdk:subnet-name",
-                            "value": "dev-commonvalue-public-subnet-1"
+                            "value": "public-subnet-1"
                           },
                           {
                             "key": "aws-cdk:subnet-type",
@@ -196,7 +196,7 @@
                           },
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2"
+                            "value": "InfrastructureStack/dev-vpc/public-subnet-1Subnet2"
                           }
                         ]
                       }
@@ -208,7 +208,7 @@
                   },
                   "Acl": {
                     "id": "Acl",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/Acl",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet2/Acl",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.35.0"
@@ -216,17 +216,17 @@
                   },
                   "RouteTable": {
                     "id": "RouteTable",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/RouteTable",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet2/RouteTable",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
                       "aws:cdk:cloudformation:props": {
                         "vpcId": {
-                          "Ref": "devcommonvaluevpcF1EBF7BC"
+                          "Ref": "devvpc91497180"
                         },
                         "tags": [
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2"
+                            "value": "InfrastructureStack/dev-vpc/public-subnet-1Subnet2"
                           }
                         ]
                       }
@@ -238,15 +238,15 @@
                   },
                   "RouteTableAssociation": {
                     "id": "RouteTableAssociation",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/RouteTableAssociation",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet2/RouteTableAssociation",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
                       "aws:cdk:cloudformation:props": {
                         "routeTableId": {
-                          "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTable70C68B04"
+                          "Ref": "devvpcpublicsubnet1Subnet2RouteTable1B656270"
                         },
                         "subnetId": {
-                          "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2SubnetD65522EC"
+                          "Ref": "devvpcpublicsubnet1Subnet2Subnet0A3D525A"
                         }
                       }
                     },
@@ -257,16 +257,16 @@
                   },
                   "DefaultRoute": {
                     "id": "DefaultRoute",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-public-subnet-1Subnet2/DefaultRoute",
+                    "path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet2/DefaultRoute",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Route",
                       "aws:cdk:cloudformation:props": {
                         "routeTableId": {
-                          "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet2RouteTable70C68B04"
+                          "Ref": "devvpcpublicsubnet1Subnet2RouteTable1B656270"
                         },
                         "destinationCidrBlock": "0.0.0.0/0",
                         "gatewayId": {
-                          "Ref": "devcommonvaluevpcIGW13255995"
+                          "Ref": "devvpcIGW7D664B58"
                         }
                       }
                     },
@@ -281,18 +281,18 @@
                   "version": "2.35.0"
                 }
               },
-              "dev-commonvalue-isolated-subnet-1Subnet1": {
-                "id": "dev-commonvalue-isolated-subnet-1Subnet1",
-                "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1",
+              "isolated-subnet-1Subnet1": {
+                "id": "isolated-subnet-1Subnet1",
+                "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1",
                 "children": {
                   "Subnet": {
                     "id": "Subnet",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/Subnet",
+                    "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1/Subnet",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
                       "aws:cdk:cloudformation:props": {
                         "vpcId": {
-                          "Ref": "devcommonvaluevpcF1EBF7BC"
+                          "Ref": "devvpc91497180"
                         },
                         "availabilityZone": {
                           "Fn::Select": [
@@ -307,7 +307,7 @@
                         "tags": [
                           {
                             "key": "aws-cdk:subnet-name",
-                            "value": "dev-commonvalue-isolated-subnet-1"
+                            "value": "isolated-subnet-1"
                           },
                           {
                             "key": "aws-cdk:subnet-type",
@@ -315,7 +315,7 @@
                           },
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1"
+                            "value": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1"
                           }
                         ]
                       }
@@ -327,7 +327,7 @@
                   },
                   "Acl": {
                     "id": "Acl",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/Acl",
+                    "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1/Acl",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.35.0"
@@ -335,17 +335,17 @@
                   },
                   "RouteTable": {
                     "id": "RouteTable",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/RouteTable",
+                    "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1/RouteTable",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
                       "aws:cdk:cloudformation:props": {
                         "vpcId": {
-                          "Ref": "devcommonvaluevpcF1EBF7BC"
+                          "Ref": "devvpc91497180"
                         },
                         "tags": [
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1"
+                            "value": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1"
                           }
                         ]
                       }
@@ -357,15 +357,15 @@
                   },
                   "RouteTableAssociation": {
                     "id": "RouteTableAssociation",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet1/RouteTableAssociation",
+                    "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet1/RouteTableAssociation",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
                       "aws:cdk:cloudformation:props": {
                         "routeTableId": {
-                          "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1RouteTable0BBE8B94"
+                          "Ref": "devvpcisolatedsubnet1Subnet1RouteTableCA6E7DDB"
                         },
                         "subnetId": {
-                          "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1SubnetA5A8D151"
+                          "Ref": "devvpcisolatedsubnet1Subnet1Subnet465D344F"
                         }
                       }
                     },
@@ -380,18 +380,18 @@
                   "version": "2.35.0"
                 }
               },
-              "dev-commonvalue-isolated-subnet-1Subnet2": {
-                "id": "dev-commonvalue-isolated-subnet-1Subnet2",
-                "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2",
+              "isolated-subnet-1Subnet2": {
+                "id": "isolated-subnet-1Subnet2",
+                "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2",
                 "children": {
                   "Subnet": {
                     "id": "Subnet",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/Subnet",
+                    "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2/Subnet",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
                       "aws:cdk:cloudformation:props": {
                         "vpcId": {
-                          "Ref": "devcommonvaluevpcF1EBF7BC"
+                          "Ref": "devvpc91497180"
                         },
                         "availabilityZone": {
                           "Fn::Select": [
@@ -406,7 +406,7 @@
                         "tags": [
                           {
                             "key": "aws-cdk:subnet-name",
-                            "value": "dev-commonvalue-isolated-subnet-1"
+                            "value": "isolated-subnet-1"
                           },
                           {
                             "key": "aws-cdk:subnet-type",
@@ -414,7 +414,7 @@
                           },
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2"
+                            "value": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2"
                           }
                         ]
                       }
@@ -426,7 +426,7 @@
                   },
                   "Acl": {
                     "id": "Acl",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/Acl",
+                    "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2/Acl",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.35.0"
@@ -434,17 +434,17 @@
                   },
                   "RouteTable": {
                     "id": "RouteTable",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/RouteTable",
+                    "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2/RouteTable",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::RouteTable",
                       "aws:cdk:cloudformation:props": {
                         "vpcId": {
-                          "Ref": "devcommonvaluevpcF1EBF7BC"
+                          "Ref": "devvpc91497180"
                         },
                         "tags": [
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2"
+                            "value": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2"
                           }
                         ]
                       }
@@ -456,15 +456,15 @@
                   },
                   "RouteTableAssociation": {
                     "id": "RouteTableAssociation",
-                    "path": "InfrastructureStack/dev-commonvalue-vpc/dev-commonvalue-isolated-subnet-1Subnet2/RouteTableAssociation",
+                    "path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2/RouteTableAssociation",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::SubnetRouteTableAssociation",
                       "aws:cdk:cloudformation:props": {
                         "routeTableId": {
-                          "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2RouteTable6EE71FA9"
+                          "Ref": "devvpcisolatedsubnet1Subnet2RouteTableA346073E"
                         },
                         "subnetId": {
-                          "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2Subnet1D993BE0"
+                          "Ref": "devvpcisolatedsubnet1Subnet2Subnet41B0EFDF"
                         }
                       }
                     },
@@ -481,14 +481,14 @@
               },
               "IGW": {
                 "id": "IGW",
-                "path": "InfrastructureStack/dev-commonvalue-vpc/IGW",
+                "path": "InfrastructureStack/dev-vpc/IGW",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::EC2::InternetGateway",
                   "aws:cdk:cloudformation:props": {
                     "tags": [
                       {
                         "key": "Name",
-                        "value": "InfrastructureStack/dev-commonvalue-vpc"
+                        "value": "InfrastructureStack/dev-vpc"
                       }
                     ]
                   }
@@ -500,15 +500,15 @@
               },
               "VPCGW": {
                 "id": "VPCGW",
-                "path": "InfrastructureStack/dev-commonvalue-vpc/VPCGW",
+                "path": "InfrastructureStack/dev-vpc/VPCGW",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::EC2::VPCGatewayAttachment",
                   "aws:cdk:cloudformation:props": {
                     "vpcId": {
-                      "Ref": "devcommonvaluevpcF1EBF7BC"
+                      "Ref": "devvpc91497180"
                     },
                     "internetGatewayId": {
-                      "Ref": "devcommonvaluevpcIGW13255995"
+                      "Ref": "devvpcIGW7D664B58"
                     }
                   }
                 },
@@ -551,7 +551,7 @@
                       }
                     ],
                     "vpcId": {
-                      "Ref": "devcommonvaluevpcF1EBF7BC"
+                      "Ref": "devvpc91497180"
                     }
                   }
                 },
@@ -566,17 +566,17 @@
               "version": "2.35.0"
             }
           },
-          "dev-commonvalue-ec2-oracle": {
-            "id": "dev-commonvalue-ec2-oracle",
-            "path": "InfrastructureStack/dev-commonvalue-ec2-oracle",
+          "ec2-oracle": {
+            "id": "ec2-oracle",
+            "path": "InfrastructureStack/ec2-oracle",
             "children": {
               "InstanceRole": {
                 "id": "InstanceRole",
-                "path": "InfrastructureStack/dev-commonvalue-ec2-oracle/InstanceRole",
+                "path": "InfrastructureStack/ec2-oracle/InstanceRole",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "InfrastructureStack/dev-commonvalue-ec2-oracle/InstanceRole/Resource",
+                    "path": "InfrastructureStack/ec2-oracle/InstanceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -605,7 +605,7 @@
                         "tags": [
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/dev-commonvalue-ec2-oracle"
+                            "value": "InfrastructureStack/ec2-oracle"
                           }
                         ]
                       }
@@ -623,13 +623,13 @@
               },
               "InstanceProfile": {
                 "id": "InstanceProfile",
-                "path": "InfrastructureStack/dev-commonvalue-ec2-oracle/InstanceProfile",
+                "path": "InfrastructureStack/ec2-oracle/InstanceProfile",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::IAM::InstanceProfile",
                   "aws:cdk:cloudformation:props": {
                     "roles": [
                       {
-                        "Ref": "devcommonvalueec2oracleInstanceRole7CEBBC6C"
+                        "Ref": "ec2oracleInstanceRole46CBA807"
                       }
                     ]
                   }
@@ -641,7 +641,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "InfrastructureStack/dev-commonvalue-ec2-oracle/Resource",
+                "path": "InfrastructureStack/ec2-oracle/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::EC2::Instance",
                   "aws:cdk:cloudformation:props": {
@@ -654,13 +654,13 @@
                       ]
                     },
                     "iamInstanceProfile": {
-                      "Ref": "devcommonvalueec2oracleInstanceProfile1D462BDD"
+                      "Ref": "ec2oracleInstanceProfile70211899"
                     },
                     "imageId": {
                       "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
                     },
                     "instanceType": "t2.small",
-                    "keyName": "oracle-ec2-key-pair",
+                    "keyName": "dev-ec2-backend-key-pair",
                     "securityGroupIds": [
                       {
                         "Fn::GetAtt": [
@@ -670,12 +670,12 @@
                       }
                     ],
                     "subnetId": {
-                      "Ref": "devcommonvaluevpcdevcommonvaluepublicsubnet1Subnet1SubnetEC00F94B"
+                      "Ref": "devvpcpublicsubnet1Subnet1Subnet8D6F5BBB"
                     },
                     "tags": [
                       {
                         "key": "Name",
-                        "value": "InfrastructureStack/dev-commonvalue-ec2-oracle"
+                        "value": "InfrastructureStack/ec2-oracle"
                       }
                     ],
                     "userData": {
@@ -710,27 +710,27 @@
               "version": "2.35.0"
             }
           },
-          "dev-commonvalue-postgres-db": {
-            "id": "dev-commonvalue-postgres-db",
-            "path": "InfrastructureStack/dev-commonvalue-postgres-db",
+          "dev-db-backend": {
+            "id": "dev-db-backend",
+            "path": "InfrastructureStack/dev-db-backend",
             "children": {
               "SubnetGroup": {
                 "id": "SubnetGroup",
-                "path": "InfrastructureStack/dev-commonvalue-postgres-db/SubnetGroup",
+                "path": "InfrastructureStack/dev-db-backend/SubnetGroup",
                 "children": {
                   "Default": {
                     "id": "Default",
-                    "path": "InfrastructureStack/dev-commonvalue-postgres-db/SubnetGroup/Default",
+                    "path": "InfrastructureStack/dev-db-backend/SubnetGroup/Default",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::RDS::DBSubnetGroup",
                       "aws:cdk:cloudformation:props": {
-                        "dbSubnetGroupDescription": "Subnet group for dev-commonvalue-postgres-db database",
+                        "dbSubnetGroupDescription": "Subnet group for dev-db-backend database",
                         "subnetIds": [
                           {
-                            "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet1SubnetA5A8D151"
+                            "Ref": "devvpcisolatedsubnet1Subnet1Subnet465D344F"
                           },
                           {
-                            "Ref": "devcommonvaluevpcdevcommonvalueisolatedsubnet1Subnet2Subnet1D993BE0"
+                            "Ref": "devvpcisolatedsubnet1Subnet2Subnet41B0EFDF"
                           }
                         ]
                       }
@@ -748,15 +748,15 @@
               },
               "SecurityGroup": {
                 "id": "SecurityGroup",
-                "path": "InfrastructureStack/dev-commonvalue-postgres-db/SecurityGroup",
+                "path": "InfrastructureStack/dev-db-backend/SecurityGroup",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "InfrastructureStack/dev-commonvalue-postgres-db/SecurityGroup/Resource",
+                    "path": "InfrastructureStack/dev-db-backend/SecurityGroup/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroup",
                       "aws:cdk:cloudformation:props": {
-                        "groupDescription": "Security group for dev-commonvalue-postgres-db database",
+                        "groupDescription": "Security group for dev-db-backend database",
                         "securityGroupEgress": [
                           {
                             "cidrIp": "0.0.0.0/0",
@@ -765,7 +765,7 @@
                           }
                         ],
                         "vpcId": {
-                          "Ref": "devcommonvaluevpcF1EBF7BC"
+                          "Ref": "devvpc91497180"
                         }
                       }
                     },
@@ -776,7 +776,7 @@
                   },
                   "from InfrastructureStackec2instancesgC8E77CC0:5432": {
                     "id": "from InfrastructureStackec2instancesgC8E77CC0:5432",
-                    "path": "InfrastructureStack/dev-commonvalue-postgres-db/SecurityGroup/from InfrastructureStackec2instancesgC8E77CC0:5432",
+                    "path": "InfrastructureStack/dev-db-backend/SecurityGroup/from InfrastructureStackec2instancesgC8E77CC0:5432",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroupIngress",
                       "aws:cdk:cloudformation:props": {
@@ -785,7 +785,7 @@
                         "fromPort": 5432,
                         "groupId": {
                           "Fn::GetAtt": [
-                            "devcommonvaluepostgresdbSecurityGroup8107555A",
+                            "devdbbackendSecurityGroup97725991",
                             "GroupId"
                           ]
                         },
@@ -811,11 +811,11 @@
               },
               "Secret": {
                 "id": "Secret",
-                "path": "InfrastructureStack/dev-commonvalue-postgres-db/Secret",
+                "path": "InfrastructureStack/dev-db-backend/Secret",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "InfrastructureStack/dev-commonvalue-postgres-db/Secret/Resource",
+                    "path": "InfrastructureStack/dev-db-backend/Secret/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::SecretsManager::Secret",
                       "aws:cdk:cloudformation:props": {
@@ -845,19 +845,19 @@
                   },
                   "Attachment": {
                     "id": "Attachment",
-                    "path": "InfrastructureStack/dev-commonvalue-postgres-db/Secret/Attachment",
+                    "path": "InfrastructureStack/dev-db-backend/Secret/Attachment",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "InfrastructureStack/dev-commonvalue-postgres-db/Secret/Attachment/Resource",
+                        "path": "InfrastructureStack/dev-db-backend/Secret/Attachment/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::SecretsManager::SecretTargetAttachment",
                           "aws:cdk:cloudformation:props": {
                             "secretId": {
-                              "Ref": "InfrastructureStackdevcommonvaluepostgresdbSecret0C46251C3fdaad7efa858a3daf9490cf0a702aeb"
+                              "Ref": "InfrastructureStackdevdbbackendSecret3CCF09763fdaad7efa858a3daf9490cf0a702aeb"
                             },
                             "targetId": {
-                              "Ref": "devcommonvaluepostgresdbF7944B38"
+                              "Ref": "devdbbackendA4C841EC"
                             },
                             "targetType": "AWS::RDS::DBInstance"
                           }
@@ -881,17 +881,19 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "InfrastructureStack/dev-commonvalue-postgres-db/Resource",
+                "path": "InfrastructureStack/dev-db-backend/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::RDS::DBInstance",
                   "aws:cdk:cloudformation:props": {
                     "dbInstanceClass": "db.t3.micro",
                     "allocatedStorage": "100",
+                    "allowMajorVersionUpgrade": false,
+                    "autoMinorVersionUpgrade": true,
                     "backupRetentionPeriod": 0,
                     "copyTagsToSnapshot": true,
-                    "dbName": "oracle-pg-database",
+                    "dbName": "backenddb",
                     "dbSubnetGroupName": {
-                      "Ref": "devcommonvaluepostgresdbSubnetGroupF7095154"
+                      "Ref": "devdbbackendSubnetGroupCB04A7CE"
                     },
                     "deleteAutomatedBackups": true,
                     "deletionProtection": false,
@@ -904,7 +906,7 @@
                         [
                           "{{resolve:secretsmanager:",
                           {
-                            "Ref": "InfrastructureStackdevcommonvaluepostgresdbSecret0C46251C3fdaad7efa858a3daf9490cf0a702aeb"
+                            "Ref": "InfrastructureStackdevdbbackendSecret3CCF09763fdaad7efa858a3daf9490cf0a702aeb"
                           },
                           ":SecretString:password::}}"
                         ]
@@ -916,7 +918,7 @@
                     "vpcSecurityGroups": [
                       {
                         "Fn::GetAtt": [
-                          "devcommonvaluepostgresdbSecurityGroup8107555A",
+                          "devdbbackendSecurityGroup97725991",
                           "GroupId"
                         ]
                       }

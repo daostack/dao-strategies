@@ -7,7 +7,7 @@ import * as path from 'path';
 import { BaseStackProps } from '../interfaces/BaseStackProps';
 
 const app = new cdk.App();
-const env = JSON.parse(readFileSync(path.resolve(__dirname, `../env-config/${process.env.ENV_MODE}.json`), 'utf-8')) as BaseStackProps;
+const env = JSON.parse(readFileSync(path.resolve(__dirname, `../env-config/${process.env.ENV_MODE ?? 'dev'}.json`), 'utf-8')) as BaseStackProps;
 
 new InfrastructureStack(app, 'InfrastructureStack', {
   deploymentEnvironment: env.deploymentEnvironment
