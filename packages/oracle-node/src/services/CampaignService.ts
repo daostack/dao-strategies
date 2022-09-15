@@ -250,7 +250,8 @@ export class CampaignService {
     const rootDetails = await this.computeRoot(campaign);
 
     const publishInfo = await this.readDataService.getPublishInfo(
-      campaign.address
+      campaign.address,
+      campaign.chainId
     );
 
     appLogger.debug(
@@ -267,6 +268,7 @@ export class CampaignService {
       appLogger.debug(`publishCampaign - root: ${rootDetails.root}`);
       await this.sendTransactionService.publishShares(
         campaign.address,
+        campaign.chainId,
         rootDetails.root
       );
 

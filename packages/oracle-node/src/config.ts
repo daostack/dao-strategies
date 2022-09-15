@@ -34,3 +34,29 @@ export const config: ExecutionConfig = {
 export const DISABLE_VERIFICATION =
   process.env.DISABLE_VERIFICATION !== undefined &&
   process.env.DISABLE_VERIFICATION.toLocaleLowerCase() === 'true';
+
+const chainConfig = new Map<
+  number,
+  {
+    mnemonic: string;
+    path: string;
+    url?: string;
+    chainName?: string;
+    alchemyKey?: string;
+  }
+>();
+
+chainConfig.set(1337, {
+  mnemonic: process.env.ORACLE_MNEMONIC,
+  path: "m/44'/60'/0'/0",
+  url: process.env.JSON_RPC_URL_LOCAL,
+});
+
+chainConfig.set(5, {
+  mnemonic: process.env.ORACLE_MNEMONIC,
+  path: "m/44'/60'/0'/0",
+  alchemyKey: process.env.ALCHEMY_KEY_GOERLI,
+  chainName: 'goerli',
+});
+
+export { chainConfig };
