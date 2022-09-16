@@ -76,8 +76,19 @@ export enum SupportedChains {
 }
 
 export class ChainsDetails {
-  static chains(): Chain[] {
-    return chainList.map((chainAndAsset) => chainAndAsset.chain);
+  static chainsAndAssets(includeIds?: number[]): ChainAndAssets[] {
+    return chainList
+      .map((chainAndAsset) => {
+        return includeIds === undefined ||
+          includeIds.includes(chainAndAsset.chain.id)
+          ? chainAndAsset
+          : undefined;
+      })
+      .filter((chain) => chain !== undefined) as ChainAndAssets[];
+  }
+
+  static chains(includeIds?: number[]): Chain[] {
+    return ChainsDetails.chainsAndAssets(includeIds).map((c) => c.chain);
   }
 
   static chainOfId(id: number): ChainAndAssets | undefined {

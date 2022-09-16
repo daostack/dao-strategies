@@ -63,13 +63,29 @@ export const AppForm = Form;
 
 export const AppInput = styled(TextInput)`
   & {
+    border: 1px solid;
+    border-radius: 20px;
     height: 40px;
+    border-color: ${styleConstants.colors.lightGrayBorder};
+    padding-left: 16px;
+    font-weight: normal;
   }
 `;
 
-export const AppTextArea = TextArea;
+export const AppTextArea = styled(TextArea)`
+  border: 1px solid;
+  border-radius: 20px;
+  padding-left: 16px;
+  border-color: ${styleConstants.colors.lightGrayBorder};
+  font-weight: normal;
+  resize: vertical;
+`;
 
-export const AppSelect = Select;
+export const AppSelect = styled(Select)`
+  border-color: ${styleConstants.colors.lightGrayBorder};
+  font-weight: normal;
+  padding: 8px 16px;
+`;
 
 export const AppFileInput: FC = (props: IElement) => (
   <Box fill justify="start">
@@ -84,6 +100,18 @@ export const AppFileInput: FC = (props: IElement) => (
     />
   </Box>
 );
+
+export const HorizontalLine: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <Box
+      style={{
+        width: '100%',
+        height: '1px',
+        backgroundColor: `${styleConstants.colors.lightGrayBorder}`,
+        ...props.style,
+      }}></Box>
+  );
+};
 
 export const AppCallout = styled(Box)`
   text-align: center;

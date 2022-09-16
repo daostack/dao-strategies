@@ -14,15 +14,23 @@ import {
   strategyDetails,
   sharesFromDetails,
 } from '../campaign.support';
-import { ACTIVATION_PERIOD, ACTIVE_DURATION, CHALLENGE_PERIOD, ORACLE_ADDRESS } from '../../config/appConfig';
+import {
+  ACTIVATION_PERIOD,
+  ACTIVE_DURATION,
+  CHALLENGE_PERIOD,
+  INCLUDED_CHAINS,
+  ORACLE_ADDRESS,
+} from '../../config/appConfig';
 import { RouteNames } from '../MainPage';
 import {
   AppButton,
+  AppCard,
   AppFileInput,
   AppForm,
   AppInput,
   AppSelect,
   AppTextArea,
+  HorizontalLine,
 } from '../../components/styles/BasicElements';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
@@ -34,6 +42,8 @@ import { FormStatus, getButtonActions } from './buttons.actions';
 import { useNow } from '../../hooks/useNow';
 import { useUserError } from '../../hooks/useErrorContext';
 import { ethers } from 'ethers';
+import { styleConstants } from '../../components/styles/themes';
+import { HEADER_HEIGHT } from '../AppHeader';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -110,7 +120,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const periodType = getPeriodType(details, now);
   const isLogged = account !== undefined;
 
-  const chainOptions = ChainsDetails.chains().map((chain) => chain.name);
+  const chainOptions = ChainsDetails.chains(INCLUDED_CHAINS).map((chain) => chain.name);
 
   if (DEBUG) console.log('CampaignCreate - render');
 
@@ -311,46 +321,41 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const pages: React.ReactNode[] = [
     <Box>
       <>
-        <FormField name="title" label="Give this Campaign a name" style={{ borderStyle: 'none' }}>
-          <AppInput
-            name="title"
-            style={{ border: '1px solid #F0EDED', width: '50vw', borderRadius: '20px' }}></AppInput>
+        <FormField name="title" label="Give this Campaign a name" style={{ marginBottom: '40px' }}>
+          <AppInput name="title" placeholder="Name"></AppInput>
         </FormField>
-        <FormField name="description" label="Describe what it is about">
-          <AppTextArea
-            placeholder="Make it something epic!"
-            name="description"
-            style={{
-              border: '1px solid #F0EDED',
-              borderRadius: '20px',
-              minWidth: '50vw',
-              maxWidth: '50vw',
-              overflow: 'hidden',
-            }}></AppTextArea>
+
+        <FormField name="description" label="Describe what it is about" style={{ marginBottom: '40px' }}>
+          <AppTextArea placeholder="Make it something epic!" name="description"></AppTextArea>
         </FormField>
-        <FormField label="Logo" name="file" component={AppFileInput} style={{ width: '16rem' }} />
-        <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
-          <AppInput
-            name="guardian"
-            placeholder="0x...."
-            style={{ border: '1px solid #F0EDED', borderRadius: '20px' }}></AppInput>
+
+        <FormField label="Logo" name="file" component={AppFileInput} style={{ marginBottom: '40px' }} />
+
+        <FormField name="chainName" label="Select Network" style={{ marginBottom: '40px' }}>
+          <AppSelect name="chainName" options={chainOptions}></AppSelect>
         </FormField>
-        <FormField name="chainName" label="Chain" style={{ border: '0px none' }}>
-          <AppSelect name="chainName" style={{ border: '0px none' }} options={chainOptions}></AppSelect>
-        </FormField>
-        <FormField name="hasCustomAsset" style={{ border: '0px none' }}>
+
+        <FormField
+          name="hasCustomAsset"
+          label="Reward Tokens"
+          style={{ marginBottom: formValues.hasCustomAsset ? '10px' : '40px' }}>
           <CheckBox name="hasCustomAsset" label="Use custom asset" />
         </FormField>
+
         {formValues.hasCustomAsset ? (
-          <FormField name="customAssetAddress" label="ERC-20 token address" style={{ borderStyle: 'none' }}>
+          <FormField name="customAssetAddress" label="Token address" style={{ marginBottom: '40px' }}>
             <AppInput
               name="customAssetAddress"
               placeholder="0x0..."
-              style={{ border: '1px solid #F0EDED', borderRadius: '20px' }}></AppInput>
+              style={{ border: '1px solid ', borderRadius: '20px' }}></AppInput>
           </FormField>
         ) : (
           <></>
         )}
+
+        <FormField name="guardian" label="Add the Admin address" style={{ marginBottom: '40px' }}>
+          <AppInput name="guardian" placeholder="0x...."></AppInput>
+        </FormField>
       </>
     </Box>,
 
@@ -461,79 +466,78 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   ];
 
   return (
-    <Box style={{ height: '100vh' }} direction="row" justify="start" align="center">
-      <Box style={{ height: '100%', margin: '16% 0 5% 16%' }} justify="start">
-        <Box style={{ height: '80px', flexShrink: 0 }} direction="row" justify="start">
-          <FormProgress
-            stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
-            position={0}
-            onSelected={(ix) => setPageIx(ix)}
-          />
-        </Box>
+    <Box justify="start" align="center">
+      <Box style={{ marginTop: HEADER_HEIGHT, paddingTop: '12px', fontSize: '14px' }}>
+        <AppCard style={{ padding: '48px 64px', borderRadius: '20px' }}>
+          {status.isDeploying ? (
+            <Layer>
+              <Box style={{ height: '50vh', width: '50vw' }} justify="center" align="center">
+                Deploying
+                <br></br>
+                <Spinner></Spinner>
+              </Box>
+            </Layer>
+          ) : (
+            <></>
+          )}
 
-        <Box style={{ height: '80px', flexShrink: 0, width: '100%', margin: '1rem 0px 1rem 0px' }}>
-          <h2
-            style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              textAlign: 'left',
-              color: '#0E0F19',
-            }}>
-            Create New Campaign
-          </h2>
-          <div style={{ width: '100%', border: '1px solid #f2f2f2' }}></div>
-        </Box>
+          <Box style={{ width: '100%' }} direction="row" justify="center">
+            <FormProgress
+              stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
+              position={pageIx}
+              onSelected={(ix) => setPageIx(ix)}
+            />
+          </Box>
 
-        <AppForm
-          style={{
-            flex: '1 1 auto',
-            margin: '16px 0px',
-            width: '50vw',
-          }}
-          value={formValues}
-          onChange={onValuesUpdated as any}>
-          <div
-            style={{
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-            }}>
-            {status.isDeploying ? (
-              <Layer>
-                <Box style={{ height: '50vh', width: '50vw' }} justify="center" align="center">
-                  Deploying
-                  <br></br>
-                  <Spinner></Spinner>
-                </Box>
-              </Layer>
-            ) : (
-              <></>
-            )}
-            {pages.map((page, ix) => {
-              return (
-                <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
-                  {page}
-                </div>
-              );
-            })}
-          </div>
-        </AppForm>
-
-        <Box>
-          {errors.map((error, ix) => (
-            <Box key={ix} pad="small">
-              {error}
+          <Box style={{ width: '100%', margin: '0px 0px 0px 0px' }}>
+            <Box
+              style={{
+                fontSize: styleConstants.headingFontSizes[1],
+                fontWeight: '700',
+                textAlign: 'left',
+                color: '#0E0F19',
+                margin: '40px 0px 0px 0px',
+              }}>
+              Create Campaign
             </Box>
-          ))}
-        </Box>
+            <HorizontalLine style={{ margin: '24px 0px' }}></HorizontalLine>
+          </Box>
 
-        <Box style={{ width: '100%', height: '50px', flexShrink: '0' }} direction="row" justify="between">
-          <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
-          <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
-            {rightText}
-          </AppButton>
-        </Box>
+          <AppForm value={formValues} onChange={onValuesUpdated as any}>
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+              }}>
+              {pages.map((page, ix) => {
+                return (
+                  <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
+                    {page}
+                  </div>
+                );
+              })}
+            </div>
+          </AppForm>
+
+          <Box>
+            {errors.map((error, ix) => (
+              <Box key={ix} pad="small">
+                {error}
+              </Box>
+            ))}
+          </Box>
+
+          <HorizontalLine style={{ margin: '0px 0px 32px 0px' }}></HorizontalLine>
+
+          <Box style={{ width: '100%', height: '50px', flexShrink: '0' }} direction="row" justify="between">
+            <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
+            <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
+              {rightText}
+            </AppButton>
+          </Box>
+        </AppCard>
       </Box>
     </Box>
   );
