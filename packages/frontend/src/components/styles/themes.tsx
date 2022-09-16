@@ -8,6 +8,7 @@ export const styleConstants = {
   colors: {
     ligthGrayText: '#989BA0',
     lightGrayBorder: '#F0EDED',
+    alertText: '#EF3E36',
   },
 };
 

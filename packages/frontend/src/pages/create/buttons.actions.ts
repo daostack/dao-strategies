@@ -15,6 +15,7 @@ export interface FormStatus {
   canCreate: boolean;
   isCreating: boolean;
   isDeploying: boolean;
+  hasErrors: boolean;
 }
 
 export interface Actions {
@@ -53,6 +54,7 @@ export const getButtonActions = (
         }
       }
     };
+    rightDisabled = status.hasErrors;
   }
 
   // on the review page

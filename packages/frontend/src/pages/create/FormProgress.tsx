@@ -26,12 +26,13 @@ export const FormProgress: FC<IFormProgress> = (props: IFormProgress) => {
     return <Box style={{ height: lineWidth, backgroundColor: color, flexGrow: '1' }}></Box>;
   };
 
-  const circles = (selected: boolean) => {
+  const circles = (selected: boolean, ix: number) => {
     const bg = selected ? theme.primary : styleConstants.colors.lightGrayBorder;
     return (
       <Box
         align="center"
         justify="center"
+        onClick={() => clicked(ix)}
         style={{
           flexGrow: '0',
           height: `${height}px`,
@@ -61,31 +62,35 @@ export const FormProgress: FC<IFormProgress> = (props: IFormProgress) => {
   };
 
   return (
-    <Box style={{ width: '100%', ...props.style }} direction="row" align="center">
-      {props.stations.map((station, ix) => {
-        const selected = ix <= props.position;
-        const color = selected ? theme.primary : styleConstants.colors.ligthGrayText;
-        return (
-          <>
-            <Box style={{ width: `${height}px`, position: 'relative', overflow: 'visible' }}>
-              {circles(ix <= props.position)}
-              <Box
-                style={{
-                  position: 'absolute',
-                  bottom: '-24px',
-                  minWidth: '100px',
-                  fontSize: '12px',
-                  color: color,
-                  userSelect: 'none',
-                }}
-                onClick={() => clicked(ix)}>
-                {station.description}
+    <Box style={{ width: '100%', ...props.style }}>
+      <Box style={{ width: '100%' }} direction="row" align="center">
+        {props.stations.map((station, ix) => {
+          const selected = ix <= props.position;
+          const color = selected ? theme.primary : styleConstants.colors.ligthGrayText;
+          return (
+            <>
+              <Box style={{ width: `${height}px`, position: 'relative', overflow: 'visible' }}>
+                {circles(selected, ix)}
+                <Box
+                  style={{
+                    position: 'absolute',
+                    bottom: '-24px',
+                    minWidth: '100px',
+                    fontSize: '12px',
+                    color: color,
+                    userSelect: 'none',
+                  }}
+                  onClick={() => clicked(ix)}>
+                  {station.description}
+                </Box>
               </Box>
-            </Box>
-            {ix < props.stations.length - 1 ? line(ix < props.position) : <></>}
-          </>
-        );
-      })}
+              {ix < props.stations.length - 1 ? line(ix < props.position) : <></>}
+            </>
+          );
+        })}
+      </Box>
+      {/* Empty space to cover the space from the absolute-positioned descriptions */}
+      <Box style={{ width: '100%', height: '24px' }}></Box>
     </Box>
   );
 };

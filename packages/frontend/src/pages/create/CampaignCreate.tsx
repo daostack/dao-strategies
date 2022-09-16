@@ -35,14 +35,14 @@ import {
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
 import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
-import { FormTrash } from 'grommet-icons';
+import { Add, AddCircle, FormTrash, StatusCritical } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
 import { useNow } from '../../hooks/useNow';
 import { useUserError } from '../../hooks/useErrorContext';
 import { ethers } from 'ethers';
-import { styleConstants } from '../../components/styles/themes';
+import { styleConstants, theme } from '../../components/styles/themes';
 import { HEADER_HEIGHT } from '../AppHeader';
 
 export interface ICampaignCreateProps {
@@ -83,7 +83,7 @@ const initialValues: CampaignFormValues = {
 
 const GITHUB_DOMAIN = 'https://www.github.com/';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
@@ -92,7 +92,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { now } = useNow();
   const [pageIx, setPageIx] = useState<number>(0);
 
-  const { isValid, checking, checkExist, isValidName } = useGithubSearch();
+  const { checking, checkExist, getValidName, validRepo, isValid } = useGithubSearch();
   const [repo, setRepo] = useState<string>('');
 
   const [validated, setValidated] = useState<boolean>(false);
@@ -120,6 +120,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const isLogged = account !== undefined;
 
   const chainOptions = ChainsDetails.chains(INCLUDED_CHAINS).map((chain) => chain.name);
+  const strategyOptions = ['Github Like-weighted Pull requests'];
 
   if (DEBUG) console.log('CampaignCreate - render');
 
@@ -250,16 +251,43 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   /** Repo selection */
   const repoNameChanged = (name: string) => {
+    if (DEBUG) console.log('repoNameChanged', name);
     setRepo(name);
     checkExist(name);
   };
 
-  const buttonAction = checking ? '...' : isValidName(repo) ? (isValid ? 'add' : 'not found') : '...';
-  const buttonDisabled = buttonAction !== 'add';
+  const existStatus = {
+    inputIsValid: getValidName(repo) !== undefined,
+    inputExists: !checking && repo === validRepo && isValid,
+    checking: checking || repo !== validRepo,
+    inputDontExist: !checking && getValidName(validRepo) !== undefined && !isValid,
+    repoIsNew:
+      getValidName(validRepo) !== undefined &&
+      !formValues.repositoryFullnames.includes(getValidName(validRepo) as string),
+  };
 
-  const addRepo = () => {
-    formValues.repositoryFullnames.push(repo);
+  const repoButton = ((status) => {
+    if (!status.inputIsValid) {
+      return <AddCircle color={theme.primaryLight}></AddCircle>;
+    }
+    // else
+    if (status.checking) {
+      return <Spinner></Spinner>;
+    }
+    // else
+    if (status.inputExists && status.repoIsNew) {
+      return <AddCircle onClick={() => addRepo(validRepo)} color={theme.primary}></AddCircle>;
+    }
+    // else
+    if (status.inputDontExist || !status.repoIsNew) {
+      return <StatusCritical color={styleConstants.colors.alertText}></StatusCritical>;
+    }
+  })(existStatus);
+
+  const addRepo = (repo: string) => {
+    formValues.repositoryFullnames.push(getValidName(repo) as string);
     setFormValues({ ...formValues });
+    repoNameChanged('');
   };
 
   const clearRepo = (repo: string) => {
@@ -283,6 +311,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       canCreate: isLogged,
       isCreating: creating,
       isDeploying: deploying,
+      hasErrors: errors.length > 0,
     };
   }, [creating, deploying, isLogged, pageIx, periodType, simulating, shares]);
 
@@ -316,6 +345,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       : periodType === PeriodType.ongoing
       ? `So far, the rewards for this campaign would be. Final rewards will be computed once the campaign ends.`
       : '';
+
+  const heading = ((_pageIx: number) => {
+    switch (_pageIx) {
+      case 0:
+        return 'Create Campaign';
+      case 1:
+        return 'Choose a rule-set and configure it';
+      case 2:
+        return 'Verify your data';
+    }
+  })(pageIx);
 
   const pages: React.ReactNode[] = [
     <Box>
@@ -359,56 +399,82 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </FormField>
       </>
     </Box>,
-
-    <TwoColumns>
-      <>
-        <FormField name="description" label="Add Github Repos">
-          <Paragraph>
-            <Text>format: user/repo</Text>
-          </Paragraph>
-          <Box direction="row" width="medium" gap="medium">
-            <TextInput value={repo} onChange={(e) => repoNameChanged(e.target.value)} reverse />
-            <Box>
-              <AppButton primary disabled={buttonDisabled} onClick={() => addRepo()}>
-                {buttonAction}
-              </AppButton>
-            </Box>
-          </Box>
+    <Box>
+      <Box>
+        <FormField name="stragy" label="Select a Rule-set">
+          <AppSelect name="stragy" options={strategyOptions}></AppSelect>
         </FormField>
+      </Box>
+
+      <TwoColumns>
+        <>
+          <FormField
+            name="description"
+            label={
+              <Box>
+                <Box style={{ marginBottom: '8px' }}>Add Github repository</Box>
+                <Box style={{ fontWeight: 'normal', fontSize: '13px' }}>
+                  Use the format 'user/repo' or paste the link to the repo.
+                </Box>
+              </Box>
+            }>
+            <Box direction="row" align="center" style={{ marginTop: '8px' }}>
+              <Box style={{ flexGrow: '1', marginRight: '8px' }}>
+                <AppInput
+                  placeholder="user/repo or https://github.com/..."
+                  value={repo}
+                  onChange={(e) => repoNameChanged(e.target.value)}
+                />
+              </Box>
+              <Box justify="center" style={{ height: '30px', width: '30px' }}>
+                {repoButton}
+              </Box>
+            </Box>
+          </FormField>
+
+          <>
+            {formValues.repositoryFullnames.map((repo) => {
+              return (
+                <Box style={{ width: '100%', marginTop: '25px' }} direction="row" justify="between" align="center">
+                  <a
+                    style={{ textDecoration: 'none', color: styleConstants.colors.ligthGrayText }}
+                    target="_blank"
+                    href={`${GITHUB_DOMAIN}${repo}`}
+                    rel="noreferrer">
+                    {repo}
+                  </a>
+                  <Box onClick={() => clearRepo(repo)} style={{ width: '28px', height: '28px' }}>
+                    <FormTrash
+                      style={{ width: '28px', height: '28px' }}
+                      color={styleConstants.colors.ligthGrayText}></FormTrash>
+                  </Box>
+                </Box>
+              );
+            })}
+          </>
+        </>
 
         <>
-          {formValues.repositoryFullnames.map((repo) => {
-            return (
-              <Box direction="row">
-                <a target="_blank" href={`${GITHUB_DOMAIN}${repo}`} rel="noreferrer">
-                  {repo}
-                </a>
-                <FormTrash onClick={() => clearRepo(repo)}></FormTrash>
-              </Box>
-            );
-          })}
+          <FormField name="livePeriodChoice" label="Live period">
+            <AppSelect name="livePeriodChoice" options={Array.from(periodOptions.values())}></AppSelect>
+          </FormField>
+
+          {formValuesProcessed().periodCustom ? (
+            <>
+              <FormField name="customPeriodChoiceFrom" label="From">
+                <DateInput name="customPeriodChoiceFrom" format="mm/dd/yyyy"></DateInput>
+              </FormField>
+              <FormField name="customPeriodChoiceTo" label="To">
+                <DateInput name="customPeriodChoiceTo" format="mm/dd/yyyy"></DateInput>
+              </FormField>
+            </>
+          ) : (
+            <></>
+          )}
         </>
-      </>
+      </TwoColumns>
+    </Box>,
 
-      <>
-        <FormField name="livePeriodChoice" label="Live period">
-          <AppSelect name="livePeriodChoice" options={Array.from(periodOptions.values())}></AppSelect>
-        </FormField>
-
-        {formValuesProcessed().periodCustom ? (
-          <>
-            <FormField name="customPeriodChoiceFrom" label="From">
-              <DateInput name="customPeriodChoiceFrom" format="mm/dd/yyyy"></DateInput>
-            </FormField>
-            <FormField name="customPeriodChoiceTo" label="To">
-              <DateInput name="customPeriodChoiceTo" format="mm/dd/yyyy"></DateInput>
-            </FormField>
-          </>
-        ) : (
-          <></>
-        )}
-      </>
-    </TwoColumns>,
     <Box>
       <TwoColumns style={{ overflowX: 'hidden' }}>
         <Box>
@@ -472,7 +538,14 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         justify="start"
         align="center"
         style={{ marginTop: HEADER_HEIGHT, padding: '2vw 3vw 70px 3vw', fontSize: '14px', width: '100%' }}>
-        <AppCard style={{ padding: '48px 64px 88px 64px', borderRadius: '20px', width: '100%', maxWidth: '800px' }}>
+        <AppCard
+          style={{
+            padding: '48px 64px 88px 64px',
+            borderRadius: '20px',
+            width: '100%',
+            maxWidth: '800px',
+            minHeight: 'calc()',
+          }}>
           {status.isDeploying ? (
             <Layer>
               <Box style={{ height: '50vh', width: '50vw' }} justify="center" align="center">
@@ -502,7 +575,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                 color: '#0E0F19',
                 margin: '40px 0px 0px 0px',
               }}>
-              Create Campaign
+              {heading}
             </Box>
             <HorizontalLine style={{ margin: '24px 0px' }}></HorizontalLine>
           </Box>
@@ -517,21 +590,25 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             })}
           </AppForm>
 
-          <Box>
-            {errors.map((error, ix) => (
-              <Box key={ix} pad="small">
-                {error}
-              </Box>
-            ))}
-          </Box>
-
           <HorizontalLine style={{ margin: '0px 0px 32px 0px' }}></HorizontalLine>
 
-          <Box style={{ width: '100%', height: '50px', flexShrink: '0' }} direction="row" justify="between">
-            <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
-            <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
-              {rightText}
-            </AppButton>
+          <Box style={{ width: '100%' }}>
+            <Box direction="row" justify="between" style={{ width: '100%' }}>
+              <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
+              <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
+                {rightText}
+              </AppButton>
+            </Box>
+
+            <Box direction="row" justify="end" style={{ width: '100%' }}>
+              <Box style={{ color: styleConstants.colors.alertText }}>
+                {errors.map((error, ix) => (
+                  <Box key={ix} pad="small">
+                    {error}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
           </Box>
         </AppCard>
       </Box>
