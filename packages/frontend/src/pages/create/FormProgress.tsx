@@ -63,9 +63,25 @@ export const FormProgress: FC<IFormProgress> = (props: IFormProgress) => {
   return (
     <Box style={{ width: '100%', ...props.style }} direction="row" align="center">
       {props.stations.map((station, ix) => {
+        const selected = ix <= props.position;
+        const color = selected ? theme.primary : styleConstants.colors.ligthGrayText;
         return (
           <>
-            {circles(ix <= props.position)}
+            <Box style={{ width: `${height}px`, position: 'relative', overflow: 'visible' }}>
+              {circles(ix <= props.position)}
+              <Box
+                style={{
+                  position: 'absolute',
+                  bottom: '-24px',
+                  minWidth: '100px',
+                  fontSize: '12px',
+                  color: color,
+                  userSelect: 'none',
+                }}
+                onClick={() => clicked(ix)}>
+                {station.description}
+              </Box>
+            </Box>
             {ix < props.stations.length - 1 ? line(ix < props.position) : <></>}
           </>
         );

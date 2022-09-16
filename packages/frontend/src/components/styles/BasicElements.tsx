@@ -11,6 +11,7 @@ import {
   BoxExtendedProps,
   Layer,
   Heading,
+  TextAreaProps,
 } from 'grommet';
 import { Close, FormDown, FormUp } from 'grommet-icons';
 import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
@@ -72,14 +73,50 @@ export const AppInput = styled(TextInput)`
   }
 `;
 
-export const AppTextArea = styled(TextArea)`
-  border: 1px solid;
-  border-radius: 20px;
-  padding-left: 16px;
-  border-color: ${styleConstants.colors.lightGrayBorder};
-  font-weight: normal;
-  resize: vertical;
-`;
+export const AppTextArea: FC<TextAreaProps> = (props: TextAreaProps) => {
+  const ref = useRef<HTMLTextAreaElement>();
+
+  const autosize = () => {
+    if (ref.current === undefined) {
+      return;
+    }
+
+    if (ref.current.value === '') {
+      ref.current.style.height = '0px';
+      return;
+    }
+
+    if (ref.current.scrollHeight > ref.current.clientHeight) {
+      console.log('ref');
+      ref.current.style.height = `${ref.current.scrollHeight + 20}px`;
+    }
+  };
+
+  const onchange = () => {
+    autosize();
+  };
+
+  if (ref === null || ref === undefined) {
+    return <></>;
+  }
+
+  return (
+    <TextArea
+      onChange={() => onchange()}
+      ref={ref as any}
+      {...props}
+      style={{
+        overflow: 'hidden',
+        border: '1px solid',
+        borderRadius: '20px',
+        paddingLeft: '16px',
+        borderColor: styleConstants.colors.lightGrayBorder,
+        fontWeight: 'normal',
+        resize: 'vertical',
+        minHeight: '100px',
+      }}></TextArea>
+  );
+};
 
 export const AppSelect = styled(Select)`
   border-color: ${styleConstants.colors.lightGrayBorder};

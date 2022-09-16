@@ -69,13 +69,12 @@ export interface ProcessedFormValues {
 const initChain = ChainsDetails.chains()[0];
 
 const initialValues: CampaignFormValues = {
-  title: 'My Campaign',
-  guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+  title: '',
+  guardian: '',
   chainName: initChain.name,
   customAssetAddress: '',
   hasCustomAsset: false,
-  description:
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam at imperdiet elit, ut vulputate ex. Quisque tincidunt varius magna nec convallis. Fusce eget pulvinar tellus. Pellentesque condimentum dui ut quam lobortis gravida. Sed suscipit iaculis ipsum, vel malesuada est commodo vitae. Cras faucibus massa quis est porta cursus. \n Integer quis bibendum neque. Integer eu sapien augue. Quisque congue vestibulum nibh, quis hendrerit erat gravida quis. Vivamus vulputate eleifend dignissim. Cras eu sapien bibendum est placerat fermentum. Vestibulum vitae ipsum quam. Aenean ornare odio id euismod elementum. Morbi in posuere neque, in euismod arcu. Vestibulum sed justo sapien. Etiam et ipsum dui. Pellentesque tempor posuere turpis, non elementum nisi mattis vel. Nulla eu arcu id dui dapibus porttitor id sit amet elit. Donec tempor quam diam, eu efficitur eros mattis vitae.',
+  description: '',
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
@@ -326,7 +325,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </FormField>
 
         <FormField name="description" label="Describe what it is about" style={{ marginBottom: '40px' }}>
-          <AppTextArea placeholder="Make it something epic!" name="description"></AppTextArea>
+          <AppTextArea
+            placeholder="e.g. Reward the contributors of the AwesomeOS project."
+            name="description"></AppTextArea>
         </FormField>
 
         <FormField label="Logo" name="file" component={AppFileInput} style={{ marginBottom: '40px' }} />
@@ -466,9 +467,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   ];
 
   return (
-    <Box justify="start" align="center">
-      <Box style={{ marginTop: HEADER_HEIGHT, paddingTop: '12px', fontSize: '14px' }}>
-        <AppCard style={{ padding: '48px 64px', borderRadius: '20px' }}>
+    <Box justify="start" align="center" style={{ width: '100%' }}>
+      <Box
+        justify="start"
+        align="center"
+        style={{ marginTop: HEADER_HEIGHT, padding: '2vw 3vw 70px 3vw', fontSize: '14px', width: '100%' }}>
+        <AppCard style={{ padding: '48px 64px 88px 64px', borderRadius: '20px', width: '100%', maxWidth: '800px' }}>
           {status.isDeploying ? (
             <Layer>
               <Box style={{ height: '50vh', width: '50vw' }} justify="center" align="center">
@@ -481,7 +485,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <></>
           )}
 
-          <Box style={{ width: '100%' }} direction="row" justify="center">
+          <Box style={{ width: '100%', maxWidth: '380px' }} direction="row" justify="center">
             <FormProgress
               stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
               position={pageIx}
@@ -503,22 +507,14 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <HorizontalLine style={{ margin: '24px 0px' }}></HorizontalLine>
           </Box>
 
-          <AppForm value={formValues} onChange={onValuesUpdated as any}>
-            <div
-              style={{
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-              }}>
-              {pages.map((page, ix) => {
-                return (
-                  <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
-                    {page}
-                  </div>
-                );
-              })}
-            </div>
+          <AppForm value={formValues} onChange={onValuesUpdated as any} style={{ maxWidth: '560px' }}>
+            {pages.map((page, ix) => {
+              return (
+                <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
+                  {page}
+                </div>
+              );
+            })}
           </AppForm>
 
           <Box>
