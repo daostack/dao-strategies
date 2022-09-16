@@ -296,6 +296,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setFormValues({ ...formValues });
   };
 
+  const gap = 80;
+
   const status = useMemo((): FormStatus => {
     return {
       page: {
@@ -400,14 +402,14 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       </>
     </Box>,
     <Box>
-      <Box>
+      <Box style={{ marginBottom: '64px' }}>
         <FormField name="stragy" label="Select a Rule-set">
           <AppSelect name="stragy" options={strategyOptions}></AppSelect>
         </FormField>
       </Box>
 
-      <TwoColumns>
-        <>
+      <Box direction="row" justify="between" align="stretch" style={{ marginBottom: '66px' }}>
+        <Box style={{ width: `calc(50% - ${gap / 2}px)` }}>
           <FormField
             name="description"
             label={
@@ -452,9 +454,16 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               );
             })}
           </>
-        </>
+        </Box>
 
-        <>
+        <Box
+          style={{
+            width: '2px',
+            margin: `0px ${(gap - 1) / 2}px`,
+            backgroundColor: styleConstants.colors.lightGrayBorder,
+          }}></Box>
+
+        <Box style={{ width: `calc(50% - ${gap / 2}px)` }}>
           <FormField name="livePeriodChoice" label="Live period">
             <AppSelect name="livePeriodChoice" options={Array.from(periodOptions.values())}></AppSelect>
           </FormField>
@@ -471,8 +480,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           ) : (
             <></>
           )}
-        </>
-      </TwoColumns>
+        </Box>
+      </Box>
     </Box>,
 
     <Box>
@@ -580,7 +589,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <HorizontalLine style={{ margin: '24px 0px' }}></HorizontalLine>
           </Box>
 
-          <AppForm value={formValues} onChange={onValuesUpdated as any} style={{ maxWidth: '560px' }}>
+          <AppForm value={formValues} onChange={onValuesUpdated as any} style={{ maxWidth: '800px' }}>
             {pages.map((page, ix) => {
               return (
                 <div key={ix} style={{ display: pageIx === ix ? 'block' : 'none' }}>
