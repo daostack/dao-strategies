@@ -102,7 +102,7 @@ const GITHUB_DOMAIN = 'https://www.github.com/';
 const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
-  const { account, chain, connect } = useLoggedUser();
+  const { account, chain, switchNetwork, connect } = useLoggedUser();
   const { showError } = useUserError();
 
   const { now } = useNow();
@@ -202,6 +202,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       navigate(RouteNames.Campaign(campaignAddress));
     } catch (e) {
       showError('Error creating campaign');
+      setCreating(false);
       console.log(e);
     }
 
@@ -347,6 +348,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setFormValues({ ...formValues });
   };
 
+  const switchNetworkCall = useCallback(() => {
+    if (switchNetwork) switchNetwork(chainId);
+  }, [chainId]);
+
   const status = useMemo((): FormStatus => {
     return {
       page: {
@@ -363,8 +368,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       isCreating: creating,
       isDeploying: deploying,
       hasErrors: errors.length > 0,
+      wrongNetwork: chain !== undefined && chain.id !== chainId,
     };
-  }, [creating, deploying, isLogged, pageIx, periodType, simulating, shares]);
+  }, [creating, deploying, isLogged, pageIx, periodType, simulating, shares, chainId, chain]);
 
   const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
     connect,
@@ -372,6 +378,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setPageIx,
     simulate: firstSimulate,
     validate,
+    switchNetwork: switchNetworkCall,
   });
 
   useEffect(() => {

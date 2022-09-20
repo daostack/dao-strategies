@@ -16,6 +16,7 @@ export interface FormStatus {
   isCreating: boolean;
   isDeploying: boolean;
   hasErrors: boolean;
+  wrongNetwork: boolean;
 }
 
 export interface Actions {
@@ -24,7 +25,10 @@ export interface Actions {
   simulate: () => void;
   create: () => void;
   connect: () => void;
+  switchNetwork: () => void;
 }
+
+const DEPLOY_CAMPAIGN_TEXT = 'Deploy Campaign';
 
 export const getButtonActions = (
   status: FormStatus,
@@ -63,7 +67,7 @@ export const getButtonActions = (
       /** should not simulate */
       if (status.canCreate) {
         /** Should not simulate and can create*/
-        rightText = `Deploy Campaign`;
+        rightText = DEPLOY_CAMPAIGN_TEXT;
         rightAction = () => actions.create();
       } else {
         /** Should not simulate and can't create*/
@@ -82,7 +86,7 @@ export const getButtonActions = (
             rightAction = () => actions.simulate();
           } else {
             /** should simulate, was not simulated, can simualte but does not must simulate */
-            rightText = 'Deploy Campaign';
+            rightText = DEPLOY_CAMPAIGN_TEXT;
             rightAction = () => actions.create();
           }
         } else {
@@ -94,7 +98,7 @@ export const getButtonActions = (
           } else {
             if (status.canCreate) {
               /** Should not simulate and can create*/
-              rightText = `Deploy Campaign`;
+              rightText = DEPLOY_CAMPAIGN_TEXT;
               rightAction = () => actions.create();
             } else {
               /** Should not simulate and can't create*/
@@ -107,7 +111,7 @@ export const getButtonActions = (
         /** was simulated */
         if (status.canCreate) {
           /** should simulate, was simulated, can create */
-          rightText = `Deploy Campaign`;
+          rightText = DEPLOY_CAMPAIGN_TEXT;
           rightAction = () => actions.create();
         } else {
           /** should simulate, was simulated, cannot create */
@@ -122,6 +126,13 @@ export const getButtonActions = (
   if (status.isSimulating) {
     rightText = `Computing shares`;
     rightAction = () => {};
+  }
+
+  if (rightText === DEPLOY_CAMPAIGN_TEXT) {
+    if (status.wrongNetwork) {
+      rightText = `Switch Network`;
+      rightAction = () => actions.switchNetwork();
+    }
   }
 
   return {

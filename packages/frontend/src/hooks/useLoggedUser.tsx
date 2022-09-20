@@ -2,13 +2,14 @@ import { LoggedUserDetails, VerificationIntent } from '@dao-strategies/core';
 import { InjectedConnector } from '@wagmi/core';
 import { Signer } from 'ethers';
 import { ReactNode, createContext, useContext, FC, useState, useEffect } from 'react';
-import { Chain, Connector, useAccount, useConnect, useDisconnect, useNetwork } from 'wagmi';
+import { Chain, Connector, useAccount, useConnect, useDisconnect, useNetwork, useSwitchNetwork } from 'wagmi';
 import { checkLoggedUser, logout, signInWithEthereum } from '../utils/loggedUser';
 import { useUserError } from './useErrorContext';
 
 export type LoggedUserContextType = {
   account: string | undefined;
   chain: Chain | undefined;
+  switchNetwork: ((chainId_?: number | undefined) => void) | undefined;
   user: LoggedUserDetails | undefined;
   githubAccount: string | undefined;
   checkAndLogin: (signer: Signer) => Promise<void>;
@@ -29,6 +30,7 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
   });
 
   const { chain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
 
   const { disconnect } = useDisconnect();
 
@@ -124,6 +126,7 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
       value={{
         account: accountAddress,
         chain,
+        switchNetwork,
         githubAccount: verification ? verification.from : undefined,
         checkAndLogin,
         user,
