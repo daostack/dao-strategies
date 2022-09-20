@@ -454,24 +454,57 @@
     "aws:cdk:path": "InfrastructureStack/dev-vpc/VPCGW"
    }
   },
-  "ec2instancesgCC5C402A": {
-   "Type": "AWS::EC2::SecurityGroup",
+  "backendalb4597C761": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
    "Properties": {
-    "GroupDescription": "InfrastructureStack/ec2-instance-sg",
-    "SecurityGroupEgress": [
+    "LoadBalancerAttributes": [
      {
-      "CidrIp": "0.0.0.0/0",
-      "Description": "Allow all outbound traffic by default",
-      "IpProtocol": "-1"
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
      }
     ],
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "backendalbSecurityGroup08BC7D37",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "devvpcpublicsubnet1Subnet1Subnet8D6F5BBB"
+     },
+     {
+      "Ref": "devvpcpublicsubnet1Subnet2Subnet0A3D525A"
+     },
+     {
+      "Ref": "devvpcpublicsubnet1Subnet3SubnetD5CB9658"
+     }
+    ],
+    "Type": "application"
+   },
+   "DependsOn": [
+    "devvpcpublicsubnet1Subnet1DefaultRoute2BBFDCEA",
+    "devvpcpublicsubnet1Subnet2DefaultRouteDE8AA81B",
+    "devvpcpublicsubnet1Subnet3DefaultRoute9C6AA917"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/backend-alb/Resource"
+   }
+  },
+  "backendalbSecurityGroup08BC7D37": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB InfrastructureStackbackendalbF8C89BDF",
     "SecurityGroupIngress": [
      {
       "CidrIp": "0.0.0.0/0",
-      "Description": "allow SSH connections from anywhere",
-      "FromPort": 22,
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
       "IpProtocol": "tcp",
-      "ToPort": 22
+      "ToPort": 80
      }
     ],
     "VpcId": {
@@ -479,10 +512,160 @@
     }
    },
    "Metadata": {
-    "aws:cdk:path": "InfrastructureStack/ec2-instance-sg/Resource"
+    "aws:cdk:path": "InfrastructureStack/backend-alb/SecurityGroup/Resource"
    }
   },
-  "ec2oracleInstanceRole46CBA807": {
+  "backendalbSecurityGrouptoInfrastructureStackbackendasgInstanceSecurityGroup15BAAAE080151792BF": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "GroupId": {
+     "Fn::GetAtt": [
+      "backendalbSecurityGroup08BC7D37",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "backendasgInstanceSecurityGroupE198AA5E",
+      "GroupId"
+     ]
+    },
+    "FromPort": 80,
+    "ToPort": 80
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/backend-alb/SecurityGroup/to InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:80"
+   }
+  },
+  "backendalbListenerB185AD49": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "backendalbListenerdefaulttargetGroupC99C6DBB"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "backendalb4597C761"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/backend-alb/Listener/Resource"
+   }
+  },
+  "backendalbListenerdefaulttargetGroupC99C6DBB": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckIntervalSeconds": 30,
+    "HealthCheckPath": "/",
+    "HealthyThresholdCount": 5,
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "instance",
+    "UnhealthyThresholdCount": 2,
+    "VpcId": {
+     "Ref": "devvpc91497180"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/backend-alb/Listener/default-targetGroup/Resource"
+   }
+  },
+  "backendalbListenertestRule5CEDD548": {
+   "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+   "Properties": {
+    "Actions": [
+     {
+      "FixedResponseConfig": {
+       "ContentType": "text/html",
+       "MessageBody": "<h1>Static ALB Response</h1>",
+       "StatusCode": "200"
+      },
+      "Type": "fixed-response"
+     }
+    ],
+    "Conditions": [
+     {
+      "Field": "path-pattern",
+      "PathPatternConfig": {
+       "Values": [
+        "/test"
+       ]
+      }
+     }
+    ],
+    "ListenerArn": {
+     "Ref": "backendalbListenerB185AD49"
+    },
+    "Priority": 5
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/backend-alb/Listener/--testRule/Resource"
+   }
+  },
+  "backendasgInstanceSecurityGroupE198AA5E": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "InfrastructureStack/backend-asg/InstanceSecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/backend-asg"
+     }
+    ],
+    "VpcId": {
+     "Ref": "devvpc91497180"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/backend-asg/InstanceSecurityGroup/Resource"
+   }
+  },
+  "backendasgInstanceSecurityGroupfromInfrastructureStackbackendalbSecurityGroupE56F38D18090FE2BFF": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "IpProtocol": "tcp",
+    "Description": "Load balancer to target",
+    "FromPort": 80,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "backendasgInstanceSecurityGroupE198AA5E",
+      "GroupId"
+     ]
+    },
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "backendalbSecurityGroup08BC7D37",
+      "GroupId"
+     ]
+    },
+    "ToPort": 80
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/backend-asg/InstanceSecurityGroup/from InfrastructureStackbackendalbSecurityGroupE56F38D1:80"
+   }
+  },
+  "backendasgInstanceRoleE85E2A98": {
    "Type": "AWS::IAM::Role",
    "Properties": {
     "AssumeRolePolicyDocument": {
@@ -500,65 +683,97 @@
     "Tags": [
      {
       "Key": "Name",
-      "Value": "InfrastructureStack/ec2-oracle"
+      "Value": "InfrastructureStack/backend-asg"
      }
     ]
    },
    "Metadata": {
-    "aws:cdk:path": "InfrastructureStack/ec2-oracle/InstanceRole/Resource"
+    "aws:cdk:path": "InfrastructureStack/backend-asg/InstanceRole/Resource"
    }
   },
-  "ec2oracleInstanceProfile70211899": {
+  "backendasgInstanceProfile624428D1": {
    "Type": "AWS::IAM::InstanceProfile",
    "Properties": {
     "Roles": [
      {
-      "Ref": "ec2oracleInstanceRole46CBA807"
+      "Ref": "backendasgInstanceRoleE85E2A98"
      }
     ]
    },
    "Metadata": {
-    "aws:cdk:path": "InfrastructureStack/ec2-oracle/InstanceProfile"
+    "aws:cdk:path": "InfrastructureStack/backend-asg/InstanceProfile"
    }
   },
-  "ec2oracleA308F13E": {
-   "Type": "AWS::EC2::Instance",
+  "backendasgLaunchConfigD115EED0": {
+   "Type": "AWS::AutoScaling::LaunchConfiguration",
    "Properties": {
-    "AvailabilityZone": "eu-west-1a",
-    "IamInstanceProfile": {
-     "Ref": "ec2oracleInstanceProfile70211899"
-    },
     "ImageId": {
      "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
     },
     "InstanceType": "t2.small",
+    "AssociatePublicIpAddress": true,
+    "IamInstanceProfile": {
+     "Ref": "backendasgInstanceProfile624428D1"
+    },
     "KeyName": "dev-ec2-backend-key-pair",
-    "SecurityGroupIds": [
+    "SecurityGroups": [
      {
       "Fn::GetAtt": [
-       "ec2instancesgCC5C402A",
+       "backendasgInstanceSecurityGroupE198AA5E",
        "GroupId"
       ]
      }
     ],
-    "SubnetId": {
-     "Ref": "devvpcpublicsubnet1Subnet1Subnet8D6F5BBB"
+    "UserData": {
+     "Fn::Base64": "#!/bin/bash\n# Install Node and Git\nyum update -y\ncurl -sL https://rpm.nodesource.com/setup_14.x | bash -\nyum install -y nodejs git\n\n\n# Make a directory to clone the strapilication code to\ngit clone https://github.com/XamHans/dao-strategies .\n\n#cd into dao-strategies\ncd dao-strategies\n\n# Install Dependencies\nsudo yarn install\n\n"
+    }
+   },
+   "DependsOn": [
+    "backendasgInstanceRoleE85E2A98"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/backend-asg/LaunchConfig"
+   }
+  },
+  "backendasgASG823D8A0D": {
+   "Type": "AWS::AutoScaling::AutoScalingGroup",
+   "Properties": {
+    "MaxSize": "1",
+    "MinSize": "1",
+    "LaunchConfigurationName": {
+     "Ref": "backendasgLaunchConfigD115EED0"
     },
     "Tags": [
      {
       "Key": "Name",
-      "Value": "InfrastructureStack/ec2-oracle"
+      "PropagateAtLaunch": true,
+      "Value": "InfrastructureStack/backend-asg"
      }
     ],
-    "UserData": {
-     "Fn::Base64": "#!/bin/bash\n# Install Node and Git\nyum update -y\ncurl -sL https://rpm.nodesource.com/setup_14.x | bash -\nyum install -y nodejs git\n\n\n# Make a directory to clone the strapilication code to\nmkdir -p /home/ec2-user/strapi && cd /home/ec2-user/strapi\ngit clone https://github.com/XamHans/dao-strategies .\n\n# Install Dependencies\nsudo npm install"
+    "TargetGroupARNs": [
+     {
+      "Ref": "backendalbListenerdefaulttargetGroupC99C6DBB"
+     }
+    ],
+    "VPCZoneIdentifier": [
+     {
+      "Ref": "devvpcpublicsubnet1Subnet1Subnet8D6F5BBB"
+     },
+     {
+      "Ref": "devvpcpublicsubnet1Subnet2Subnet0A3D525A"
+     },
+     {
+      "Ref": "devvpcpublicsubnet1Subnet3SubnetD5CB9658"
+     }
+    ]
+   },
+   "UpdatePolicy": {
+    "AutoScalingScheduledAction": {
+     "IgnoreUnmodifiedGroupSizeProperties": true
     }
    },
-   "DependsOn": [
-    "ec2oracleInstanceRole46CBA807"
-   ],
    "Metadata": {
-    "aws:cdk:path": "InfrastructureStack/ec2-oracle/Resource"
+    "aws:cdk:path": "InfrastructureStack/backend-asg/ASG"
    }
   },
   "devdbbackendSubnetGroupCB04A7CE": {
@@ -600,11 +815,11 @@
     "aws:cdk:path": "InfrastructureStack/dev-db-backend/SecurityGroup/Resource"
    }
   },
-  "devdbbackendSecurityGroupfromInfrastructureStackec2instancesgC8E77CC05432BE68C975": {
+  "devdbbackendSecurityGroupfromInfrastructureStackbackendasgInstanceSecurityGroup15BAAAE05432CA7FFEBD": {
    "Type": "AWS::EC2::SecurityGroupIngress",
    "Properties": {
     "IpProtocol": "tcp",
-    "Description": "from InfrastructureStackec2instancesgC8E77CC0:5432",
+    "Description": "from InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:5432",
     "FromPort": 5432,
     "GroupId": {
      "Fn::GetAtt": [
@@ -614,14 +829,14 @@
     },
     "SourceSecurityGroupId": {
      "Fn::GetAtt": [
-      "ec2instancesgCC5C402A",
+      "backendasgInstanceSecurityGroupE198AA5E",
       "GroupId"
      ]
     },
     "ToPort": 5432
    },
    "Metadata": {
-    "aws:cdk:path": "InfrastructureStack/dev-db-backend/SecurityGroup/from InfrastructureStackec2instancesgC8E77CC0:5432"
+    "aws:cdk:path": "InfrastructureStack/dev-db-backend/SecurityGroup/from InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:5432"
    }
   },
   "InfrastructureStackdevdbbackendSecret3CCF09763fdaad7efa858a3daf9490cf0a702aeb": {
@@ -717,7 +932,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/12RTW/CMAyGf8vuIRsgdudDQtyqgrhObjAs0CbIdkCo6n9fILSFnew8fmO/TkZ6PNFfH3DlgdmdBqUtdL0WMCcV0U+NZqTr7dmo+d5ts7nKQlFasw6FQ7mzPst9ENxAUWLPezZl9saCWO86scrIXkCw77FyghTzZaRXuD2HPk9TibZ+K3Si1mgCWbktyYfzY9wbWDkWcAZTyz5/U63cgZC5URYqXec++W5jey0jv7clNop2rOsFCBTA2DVN1jsbi9kraNVxLKX9FrP2ZqP4QbkCBwckXSd/d2EKG6ADysvSneB/pWlUjuwDpS0zIKgwPuRjn2ehUc7vUB/58zL81sNx/PIjWzug4MRWqPMU/wAWed1zDgIAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31STW/CMAz9LbuHbANtdz4mhIS0qkVcJzeYEmiTKnFAqOp/X9rQ0rFpJ9vPL/aznTGfvPGXJ7jYkdidRrlMeZUQiBPz0FeFYsyrbSnYfK+20ZxFLs2lSFyqkBrs7sXaEW4gzfGO37GptVpIIKlVT2aRkWcgvNdYKULj/aVHL3C9Nb1FU/KyDgUqYgkKZyRdl0a7sm33L/CRGbT2F7xSLV4zzMGSFLmGXQo5KCFVdvZzT8vSD9uKXvvcrM2haQr9iIc8aQnVjdP5g/wGTObn62QOwz+qxC5scxjXDBxpKyD3Kr1GHyQh6KuuwSlxmGu1l5kz/dIfqTWTUPAq1qFJZ1fKUjNXZPReNv3MzvJqAQQpWOyyLFyt77mYDYGO7fdtwmkXs+5lzWyL2gIUZGh4FQ7TEIMJWxncuyc8ZuqaxWi1M6KVHoGBAims/9NR6cLXvFFqpvQO+dE+n1/f+evE//ujlXJknCJZII+D/QYbIJueEwMAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "InfrastructureStack/CDKMetadata/Default"
@@ -733,6 +948,16 @@
    "Type": "AWS::SSM::Parameter::Value<String>",
    "Default": "/cdk-bootstrap/hnb659fds/version",
    "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Outputs": {
+  "albDNS": {
+   "Value": {
+    "Fn::GetAtt": [
+     "backendalb4597C761",
+     "DNSName"
+    ]
+   }
   }
  },
  "Rules": {

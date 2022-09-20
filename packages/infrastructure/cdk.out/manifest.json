@@ -23,7 +23,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::905855288736:role/cdk-hnb659fds-deploy-role-905855288736-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::905855288736:role/cdk-hnb659fds-cfn-exec-role-905855288736-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-905855288736-eu-west-1/26e0c2f749de52dd9989255276002bc50671b903af3d5ac88187883f4b203326.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-905855288736-eu-west-1/6bc9975c5ba41cc861eb4154c360834b6432ce9ff6b9cc40803d544296ec4845.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -183,34 +183,88 @@
             "data": "devvpcVPCGW7C912A36"
           }
         ],
-        "/InfrastructureStack/ec2-instance-sg/Resource": [
+        "/InfrastructureStack/backend-alb/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ec2instancesgCC5C402A"
+            "data": "backendalb4597C761"
           }
         ],
-        "/InfrastructureStack/ec2-oracle/InstanceRole/Resource": [
+        "/InfrastructureStack/backend-alb/SecurityGroup/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ec2oracleInstanceRole46CBA807"
+            "data": "backendalbSecurityGroup08BC7D37"
           }
         ],
-        "/InfrastructureStack/ec2-oracle/InstanceProfile": [
+        "/InfrastructureStack/backend-alb/SecurityGroup/to InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:80": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ec2oracleInstanceProfile70211899"
+            "data": "backendalbSecurityGrouptoInfrastructureStackbackendasgInstanceSecurityGroup15BAAAE080151792BF"
           }
         ],
-        "/InfrastructureStack/ec2-oracle/Resource": [
+        "/InfrastructureStack/backend-alb/Listener/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ec2oracleA308F13E"
+            "data": "backendalbListenerB185AD49"
+          }
+        ],
+        "/InfrastructureStack/backend-alb/Listener/default-targetGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "backendalbListenerdefaulttargetGroupC99C6DBB"
+          }
+        ],
+        "/InfrastructureStack/backend-alb/Listener/--testRule/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "backendalbListenertestRule5CEDD548"
+          }
+        ],
+        "/InfrastructureStack/backend-asg/InstanceSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "backendasgInstanceSecurityGroupE198AA5E"
+          }
+        ],
+        "/InfrastructureStack/backend-asg/InstanceSecurityGroup/from InfrastructureStackbackendalbSecurityGroupE56F38D1:80": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "backendasgInstanceSecurityGroupfromInfrastructureStackbackendalbSecurityGroupE56F38D18090FE2BFF"
+          }
+        ],
+        "/InfrastructureStack/backend-asg/InstanceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "backendasgInstanceRoleE85E2A98"
+          }
+        ],
+        "/InfrastructureStack/backend-asg/InstanceProfile": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "backendasgInstanceProfile624428D1"
+          }
+        ],
+        "/InfrastructureStack/backend-asg/LaunchConfig": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "backendasgLaunchConfigD115EED0"
+          }
+        ],
+        "/InfrastructureStack/backend-asg/ASG": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "backendasgASG823D8A0D"
           }
         ],
         "/InfrastructureStack/SsmParameterValue:--aws--service--ami-amazon-linux-latest--amzn2-ami-hvm-x86_64-gp2:C96584B6-F00A-464E-AD19-53AFF4B05118.Parameter": [
           {
             "type": "aws:cdk:logicalId",
             "data": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
+          }
+        ],
+        "/InfrastructureStack/albDNS": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "albDNS"
           }
         ],
         "/InfrastructureStack/dev-db-backend/SubnetGroup/Default": [
@@ -225,10 +279,10 @@
             "data": "devdbbackendSecurityGroup97725991"
           }
         ],
-        "/InfrastructureStack/dev-db-backend/SecurityGroup/from InfrastructureStackec2instancesgC8E77CC0:5432": [
+        "/InfrastructureStack/dev-db-backend/SecurityGroup/from InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:5432": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "devdbbackendSecurityGroupfromInfrastructureStackec2instancesgC8E77CC05432BE68C975"
+            "data": "devdbbackendSecurityGroupfromInfrastructureStackbackendasgInstanceSecurityGroup15BAAAE05432CA7FFEBD"
           }
         ],
         "/InfrastructureStack/dev-db-backend/Secret/Resource": [

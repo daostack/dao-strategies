@@ -699,60 +699,323 @@
               "version": "2.35.0"
             }
           },
-          "ec2-instance-sg": {
-            "id": "ec2-instance-sg",
-            "path": "InfrastructureStack/ec2-instance-sg",
+          "backend-alb": {
+            "id": "backend-alb",
+            "path": "InfrastructureStack/backend-alb",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "InfrastructureStack/ec2-instance-sg/Resource",
+                "path": "InfrastructureStack/backend-alb/Resource",
                 "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroup",
+                  "aws:cdk:cloudformation:type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
                   "aws:cdk:cloudformation:props": {
-                    "groupDescription": "InfrastructureStack/ec2-instance-sg",
-                    "securityGroupEgress": [
+                    "loadBalancerAttributes": [
                       {
-                        "cidrIp": "0.0.0.0/0",
-                        "description": "Allow all outbound traffic by default",
-                        "ipProtocol": "-1"
+                        "key": "deletion_protection.enabled",
+                        "value": "false"
                       }
                     ],
-                    "securityGroupIngress": [
+                    "scheme": "internet-facing",
+                    "securityGroups": [
                       {
-                        "cidrIp": "0.0.0.0/0",
+                        "Fn::GetAtt": [
+                          "backendalbSecurityGroup08BC7D37",
+                          "GroupId"
+                        ]
+                      }
+                    ],
+                    "subnets": [
+                      {
+                        "Ref": "devvpcpublicsubnet1Subnet1Subnet8D6F5BBB"
+                      },
+                      {
+                        "Ref": "devvpcpublicsubnet1Subnet2Subnet0A3D525A"
+                      },
+                      {
+                        "Ref": "devvpcpublicsubnet1Subnet3SubnetD5CB9658"
+                      }
+                    ],
+                    "type": "application"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.CfnLoadBalancer",
+                  "version": "2.35.0"
+                }
+              },
+              "SecurityGroup": {
+                "id": "SecurityGroup",
+                "path": "InfrastructureStack/backend-alb/SecurityGroup",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "InfrastructureStack/backend-alb/SecurityGroup/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroup",
+                      "aws:cdk:cloudformation:props": {
+                        "groupDescription": "Automatically created Security Group for ELB InfrastructureStackbackendalbF8C89BDF",
+                        "securityGroupIngress": [
+                          {
+                            "cidrIp": "0.0.0.0/0",
+                            "ipProtocol": "tcp",
+                            "fromPort": 80,
+                            "toPort": 80,
+                            "description": "Allow from anyone on port 80"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "devvpc91497180"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroup",
+                      "version": "2.35.0"
+                    }
+                  },
+                  "to InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:80": {
+                    "id": "to InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:80",
+                    "path": "InfrastructureStack/backend-alb/SecurityGroup/to InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:80",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroupEgress",
+                      "aws:cdk:cloudformation:props": {
+                        "groupId": {
+                          "Fn::GetAtt": [
+                            "backendalbSecurityGroup08BC7D37",
+                            "GroupId"
+                          ]
+                        },
                         "ipProtocol": "tcp",
-                        "fromPort": 22,
-                        "toPort": 22,
-                        "description": "allow SSH connections from anywhere"
+                        "description": "Load balancer to target",
+                        "destinationSecurityGroupId": {
+                          "Fn::GetAtt": [
+                            "backendasgInstanceSecurityGroupE198AA5E",
+                            "GroupId"
+                          ]
+                        },
+                        "fromPort": 80,
+                        "toPort": 80
                       }
-                    ],
-                    "vpcId": {
-                      "Ref": "devvpc91497180"
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroupEgress",
+                      "version": "2.35.0"
                     }
                   }
                 },
                 "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroup",
+                  "fqn": "aws-cdk-lib.aws_ec2.SecurityGroup",
+                  "version": "2.35.0"
+                }
+              },
+              "Listener": {
+                "id": "Listener",
+                "path": "InfrastructureStack/backend-alb/Listener",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "InfrastructureStack/backend-alb/Listener/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::ElasticLoadBalancingV2::Listener",
+                      "aws:cdk:cloudformation:props": {
+                        "defaultActions": [
+                          {
+                            "type": "forward",
+                            "targetGroupArn": {
+                              "Ref": "backendalbListenerdefaulttargetGroupC99C6DBB"
+                            }
+                          }
+                        ],
+                        "loadBalancerArn": {
+                          "Ref": "backendalb4597C761"
+                        },
+                        "port": 80,
+                        "protocol": "HTTP"
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.CfnListener",
+                      "version": "2.35.0"
+                    }
+                  },
+                  "default-targetGroup": {
+                    "id": "default-targetGroup",
+                    "path": "InfrastructureStack/backend-alb/Listener/default-targetGroup",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "InfrastructureStack/backend-alb/Listener/default-targetGroup/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+                          "aws:cdk:cloudformation:props": {
+                            "healthCheckIntervalSeconds": 30,
+                            "healthCheckPath": "/",
+                            "healthyThresholdCount": 5,
+                            "port": 80,
+                            "protocol": "HTTP",
+                            "targetGroupAttributes": [
+                              {
+                                "key": "stickiness.enabled",
+                                "value": "false"
+                              }
+                            ],
+                            "targetType": "instance",
+                            "unhealthyThresholdCount": 2,
+                            "vpcId": {
+                              "Ref": "devvpc91497180"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.CfnTargetGroup",
+                          "version": "2.35.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.ApplicationTargetGroup",
+                      "version": "2.35.0"
+                    }
+                  },
+                  "--testRule": {
+                    "id": "--testRule",
+                    "path": "InfrastructureStack/backend-alb/Listener/--testRule",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "InfrastructureStack/backend-alb/Listener/--testRule/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+                          "aws:cdk:cloudformation:props": {
+                            "actions": [
+                              {
+                                "type": "fixed-response",
+                                "fixedResponseConfig": {
+                                  "statusCode": "200",
+                                  "contentType": "text/html",
+                                  "messageBody": "<h1>Static ALB Response</h1>"
+                                }
+                              }
+                            ],
+                            "conditions": [
+                              {
+                                "field": "path-pattern",
+                                "pathPatternConfig": {
+                                  "values": [
+                                    "/test"
+                                  ]
+                                }
+                              }
+                            ],
+                            "listenerArn": {
+                              "Ref": "backendalbListenerB185AD49"
+                            },
+                            "priority": 5
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.CfnListenerRule",
+                          "version": "2.35.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.ApplicationListenerRule",
+                      "version": "2.35.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.ApplicationListener",
                   "version": "2.35.0"
                 }
               }
             },
             "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_ec2.SecurityGroup",
+              "fqn": "aws-cdk-lib.aws_elasticloadbalancingv2.ApplicationLoadBalancer",
               "version": "2.35.0"
             }
           },
-          "ec2-oracle": {
-            "id": "ec2-oracle",
-            "path": "InfrastructureStack/ec2-oracle",
+          "backend-asg": {
+            "id": "backend-asg",
+            "path": "InfrastructureStack/backend-asg",
             "children": {
-              "InstanceRole": {
-                "id": "InstanceRole",
-                "path": "InfrastructureStack/ec2-oracle/InstanceRole",
+              "InstanceSecurityGroup": {
+                "id": "InstanceSecurityGroup",
+                "path": "InfrastructureStack/backend-asg/InstanceSecurityGroup",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "InfrastructureStack/ec2-oracle/InstanceRole/Resource",
+                    "path": "InfrastructureStack/backend-asg/InstanceSecurityGroup/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroup",
+                      "aws:cdk:cloudformation:props": {
+                        "groupDescription": "InfrastructureStack/backend-asg/InstanceSecurityGroup",
+                        "securityGroupEgress": [
+                          {
+                            "cidrIp": "0.0.0.0/0",
+                            "description": "Allow all outbound traffic by default",
+                            "ipProtocol": "-1"
+                          }
+                        ],
+                        "tags": [
+                          {
+                            "key": "Name",
+                            "value": "InfrastructureStack/backend-asg"
+                          }
+                        ],
+                        "vpcId": {
+                          "Ref": "devvpc91497180"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroup",
+                      "version": "2.35.0"
+                    }
+                  },
+                  "from InfrastructureStackbackendalbSecurityGroupE56F38D1:80": {
+                    "id": "from InfrastructureStackbackendalbSecurityGroupE56F38D1:80",
+                    "path": "InfrastructureStack/backend-asg/InstanceSecurityGroup/from InfrastructureStackbackendalbSecurityGroupE56F38D1:80",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroupIngress",
+                      "aws:cdk:cloudformation:props": {
+                        "ipProtocol": "tcp",
+                        "description": "Load balancer to target",
+                        "fromPort": 80,
+                        "groupId": {
+                          "Fn::GetAtt": [
+                            "backendasgInstanceSecurityGroupE198AA5E",
+                            "GroupId"
+                          ]
+                        },
+                        "sourceSecurityGroupId": {
+                          "Fn::GetAtt": [
+                            "backendalbSecurityGroup08BC7D37",
+                            "GroupId"
+                          ]
+                        },
+                        "toPort": 80
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_ec2.CfnSecurityGroupIngress",
+                      "version": "2.35.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_ec2.SecurityGroup",
+                  "version": "2.35.0"
+                }
+              },
+              "InstanceRole": {
+                "id": "InstanceRole",
+                "path": "InfrastructureStack/backend-asg/InstanceRole",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "InfrastructureStack/backend-asg/InstanceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -771,7 +1034,7 @@
                         "tags": [
                           {
                             "key": "Name",
-                            "value": "InfrastructureStack/ec2-oracle"
+                            "value": "InfrastructureStack/backend-asg"
                           }
                         ]
                       }
@@ -789,13 +1052,13 @@
               },
               "InstanceProfile": {
                 "id": "InstanceProfile",
-                "path": "InfrastructureStack/ec2-oracle/InstanceProfile",
+                "path": "InfrastructureStack/backend-asg/InstanceProfile",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::IAM::InstanceProfile",
                   "aws:cdk:cloudformation:props": {
                     "roles": [
                       {
-                        "Ref": "ec2oracleInstanceRole46CBA807"
+                        "Ref": "backendasgInstanceRoleE85E2A98"
                       }
                     ]
                   }
@@ -805,51 +1068,83 @@
                   "version": "2.35.0"
                 }
               },
-              "Resource": {
-                "id": "Resource",
-                "path": "InfrastructureStack/ec2-oracle/Resource",
+              "LaunchConfig": {
+                "id": "LaunchConfig",
+                "path": "InfrastructureStack/backend-asg/LaunchConfig",
                 "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::EC2::Instance",
+                  "aws:cdk:cloudformation:type": "AWS::AutoScaling::LaunchConfiguration",
                   "aws:cdk:cloudformation:props": {
-                    "availabilityZone": "eu-west-1a",
-                    "iamInstanceProfile": {
-                      "Ref": "ec2oracleInstanceProfile70211899"
-                    },
                     "imageId": {
                       "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
                     },
                     "instanceType": "t2.small",
+                    "associatePublicIpAddress": true,
+                    "iamInstanceProfile": {
+                      "Ref": "backendasgInstanceProfile624428D1"
+                    },
                     "keyName": "dev-ec2-backend-key-pair",
-                    "securityGroupIds": [
+                    "securityGroups": [
                       {
                         "Fn::GetAtt": [
-                          "ec2instancesgCC5C402A",
+                          "backendasgInstanceSecurityGroupE198AA5E",
                           "GroupId"
                         ]
                       }
                     ],
-                    "subnetId": {
-                      "Ref": "devvpcpublicsubnet1Subnet1Subnet8D6F5BBB"
-                    },
-                    "tags": [
-                      {
-                        "key": "Name",
-                        "value": "InfrastructureStack/ec2-oracle"
-                      }
-                    ],
                     "userData": {
-                      "Fn::Base64": "#!/bin/bash\n# Install Node and Git\nyum update -y\ncurl -sL https://rpm.nodesource.com/setup_14.x | bash -\nyum install -y nodejs git\n\n\n# Make a directory to clone the strapilication code to\nmkdir -p /home/ec2-user/strapi && cd /home/ec2-user/strapi\ngit clone https://github.com/XamHans/dao-strategies .\n\n# Install Dependencies\nsudo npm install"
+                      "Fn::Base64": "#!/bin/bash\n# Install Node and Git\nyum update -y\ncurl -sL https://rpm.nodesource.com/setup_14.x | bash -\nyum install -y nodejs git\n\n\n# Make a directory to clone the strapilication code to\ngit clone https://github.com/XamHans/dao-strategies .\n\n#cd into dao-strategies\ncd dao-strategies\n\n# Install Dependencies\nsudo yarn install\n\n"
                     }
                   }
                 },
                 "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_ec2.CfnInstance",
+                  "fqn": "aws-cdk-lib.aws_autoscaling.CfnLaunchConfiguration",
+                  "version": "2.35.0"
+                }
+              },
+              "ASG": {
+                "id": "ASG",
+                "path": "InfrastructureStack/backend-asg/ASG",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::AutoScaling::AutoScalingGroup",
+                  "aws:cdk:cloudformation:props": {
+                    "maxSize": "1",
+                    "minSize": "1",
+                    "launchConfigurationName": {
+                      "Ref": "backendasgLaunchConfigD115EED0"
+                    },
+                    "tags": [
+                      {
+                        "key": "Name",
+                        "value": "InfrastructureStack/backend-asg",
+                        "propagateAtLaunch": true
+                      }
+                    ],
+                    "targetGroupArns": [
+                      {
+                        "Ref": "backendalbListenerdefaulttargetGroupC99C6DBB"
+                      }
+                    ],
+                    "vpcZoneIdentifier": [
+                      {
+                        "Ref": "devvpcpublicsubnet1Subnet1Subnet8D6F5BBB"
+                      },
+                      {
+                        "Ref": "devvpcpublicsubnet1Subnet2Subnet0A3D525A"
+                      },
+                      {
+                        "Ref": "devvpcpublicsubnet1Subnet3SubnetD5CB9658"
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_autoscaling.CfnAutoScalingGroup",
                   "version": "2.35.0"
                 }
               }
             },
             "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_ec2.Instance",
+              "fqn": "aws-cdk-lib.aws_autoscaling.AutoScalingGroup",
               "version": "2.35.0"
             }
           },
@@ -866,6 +1161,14 @@
             "path": "InfrastructureStack/SsmParameterValue:--aws--service--ami-amazon-linux-latest--amzn2-ami-hvm-x86_64-gp2:C96584B6-F00A-464E-AD19-53AFF4B05118",
             "constructInfo": {
               "fqn": "aws-cdk-lib.Resource",
+              "version": "2.35.0"
+            }
+          },
+          "albDNS": {
+            "id": "albDNS",
+            "path": "InfrastructureStack/albDNS",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.35.0"
             }
           },
@@ -936,14 +1239,14 @@
                       "version": "2.35.0"
                     }
                   },
-                  "from InfrastructureStackec2instancesgC8E77CC0:5432": {
-                    "id": "from InfrastructureStackec2instancesgC8E77CC0:5432",
-                    "path": "InfrastructureStack/dev-db-backend/SecurityGroup/from InfrastructureStackec2instancesgC8E77CC0:5432",
+                  "from InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:5432": {
+                    "id": "from InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:5432",
+                    "path": "InfrastructureStack/dev-db-backend/SecurityGroup/from InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:5432",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::SecurityGroupIngress",
                       "aws:cdk:cloudformation:props": {
                         "ipProtocol": "tcp",
-                        "description": "from InfrastructureStackec2instancesgC8E77CC0:5432",
+                        "description": "from InfrastructureStackbackendasgInstanceSecurityGroup15BAAAE0:5432",
                         "fromPort": 5432,
                         "groupId": {
                           "Fn::GetAtt": [
@@ -953,7 +1256,7 @@
                         },
                         "sourceSecurityGroupId": {
                           "Fn::GetAtt": [
-                            "ec2instancesgCC5C402A",
+                            "backendasgInstanceSecurityGroupE198AA5E",
                             "GroupId"
                           ]
                         },

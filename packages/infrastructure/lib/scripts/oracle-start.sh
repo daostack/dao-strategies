@@ -5,8 +5,15 @@ yum install -y nodejs git
 
 
 # Make a directory to clone the strapilication code to
-mkdir -p /home/ec2-user/strapi && cd /home/ec2-user/strapi
 git clone https://github.com/XamHans/dao-strategies .
 
+
+curl -o- -L https://yarnpkg.com/install.sh | bash
+
+#cd into dao-strategies
+cd dao-strategies
+
+
 # Install Dependencies
-sudo npm install
+sudo yarn install
+
