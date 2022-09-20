@@ -133,7 +133,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       style={{ marginTop: '16px' }}
       padding={[24, 24, 36, 24]}
       hiddenPart={
-        <TwoColumns align="start" justify="start" style={{ marginTop: '40px' }}>
+        <TwoColumns boxes={{ align: 'start', justify: 'start' }} grid={{ style: { marginTop: '40px' } }}>
           <Box>
             <InfoProperty title="Github Repositories">
               {campaign.strategyParams.repositories.map((repo: any) => (

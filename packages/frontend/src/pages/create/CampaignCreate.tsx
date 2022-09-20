@@ -1,5 +1,5 @@
-import { Box, CheckBox, DateInput, FormField, Layer, Paragraph, Spinner, Text, TextInput } from 'grommet';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { Box, CheckBox, DateInput, FormField, Layer, Paragraph, Spinner, Text, Image } from 'grommet';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ChainsDetails, getCampaignUri, CampaignCreateDetails, SharesRead, Page } from '@dao-strategies/core';
@@ -25,11 +25,15 @@ import { RouteNames } from '../MainPage';
 import {
   AppButton,
   AppCard,
+  AppDateInput,
   AppFileInput,
   AppForm,
   AppInput,
   AppSelect,
+  AppTag,
   AppTextArea,
+  CampaignIcon,
+  ExpansiveParagraph,
   HorizontalLine,
 } from '../../components/styles/BasicElements';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
@@ -44,6 +48,8 @@ import { useUserError } from '../../hooks/useErrorContext';
 import { ethers } from 'ethers';
 import { styleConstants, theme } from '../../components/styles/themes';
 import { HEADER_HEIGHT } from '../AppHeader';
+import { Parameter } from './parameter';
+import { Address } from '../../components/Address';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -55,6 +61,7 @@ export interface CampaignFormValues {
   customAssetAddress: string;
   hasCustomAsset: boolean;
   chainName: string;
+  strategyName: string;
   repositoryFullnames: string[];
   guardian: string;
   livePeriodChoice: string;
@@ -69,12 +76,14 @@ export interface ProcessedFormValues {
 const initChain = ChainsDetails.chains()[0];
 
 const initialValues: CampaignFormValues = {
-  title: '',
+  title: 'KubernetesOS',
   guardian: '',
   chainName: initChain.name,
   customAssetAddress: '',
   hasCustomAsset: false,
-  description: '',
+  description:
+    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Why do we use it?  It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using Content here, content here, making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for lorem ipsum will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).',
+  strategyName: '',
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
@@ -121,16 +130,16 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const chainOptions = ChainsDetails.chains(INCLUDED_CHAINS).map((chain) => chain.name);
   const strategyOptions = ['Github Like-weighted Pull requests'];
+  const finalDetails = shares !== undefined ? shares.details : details;
 
   if (DEBUG) console.log('CampaignCreate - render');
 
   /** Prepare all the parameters to deply the campaign and call the deployCampaign function */
-  const create = async (): Promise<void> => {
+  const create = useCallback(async (): Promise<void> => {
     if (account === undefined) throw new Error('account undefined');
     if (campaignFactory === undefined) throw new Error('campaignFactoryContract undefined');
 
     /** the strategy details are the same used for simulation, unless no simulation was done */
-    const finalDetails = shares !== undefined ? shares.details : details;
     if (finalDetails === undefined) throw new Error();
 
     if (chainId === undefined) {
@@ -171,7 +180,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     }
 
     setDeploying(false);
-  };
+  }, [finalDetails, account, campaignFactory, chainId, details, formValues]);
 
   /** Processed values from the form that are cheap to compute and useful */
   const formValuesProcessed = (): ProcessedFormValues => {
@@ -296,8 +305,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setFormValues({ ...formValues });
   };
 
-  const gap = 80;
-
   const status = useMemo((): FormStatus => {
     return {
       page: {
@@ -367,9 +374,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </FormField>
 
         <FormField name="description" label="Describe what it is about" style={{ marginBottom: '40px' }}>
-          <AppTextArea
-            placeholder="e.g. Reward the contributors of the AwesomeOS project."
-            name="description"></AppTextArea>
+          <AppTextArea placeholder="" name="description"></AppTextArea>
         </FormField>
 
         <FormField label="Logo" name="file" component={AppFileInput} style={{ marginBottom: '40px' }} />
@@ -403,13 +408,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     </Box>,
     <Box>
       <Box style={{ marginBottom: '64px' }}>
-        <FormField name="stragy" label="Select a Rule-set">
-          <AppSelect name="stragy" options={strategyOptions}></AppSelect>
+        <FormField name="strategyName" label="Select a Rule-set">
+          <AppSelect name="strategyName" options={strategyOptions}></AppSelect>
         </FormField>
       </Box>
 
-      <Box direction="row" justify="between" align="stretch" style={{ marginBottom: '66px' }}>
-        <Box style={{ width: `calc(50% - ${gap / 2}px)` }}>
+      <TwoColumns grid={{ style: { marginBottom: '66px' } }}>
+        <Box>
           <FormField
             name="description"
             label={
@@ -456,14 +461,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </>
         </Box>
 
-        <Box
-          style={{
-            width: '2px',
-            margin: `0px ${(gap - 1) / 2}px`,
-            backgroundColor: styleConstants.colors.lightGrayBorder,
-          }}></Box>
-
-        <Box style={{ width: `calc(50% - ${gap / 2}px)` }}>
+        <Box>
           <FormField name="livePeriodChoice" label="Live period">
             <AppSelect name="livePeriodChoice" options={Array.from(periodOptions.values())}></AppSelect>
           </FormField>
@@ -471,72 +469,132 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           {formValuesProcessed().periodCustom ? (
             <>
               <FormField name="customPeriodChoiceFrom" label="From">
-                <DateInput name="customPeriodChoiceFrom" format="mm/dd/yyyy"></DateInput>
+                <AppDateInput name="customPeriodChoiceFrom"></AppDateInput>
               </FormField>
               <FormField name="customPeriodChoiceTo" label="To">
-                <DateInput name="customPeriodChoiceTo" format="mm/dd/yyyy"></DateInput>
+                <AppDateInput name="customPeriodChoiceTo" format="mm/dd/yyyy"></AppDateInput>
               </FormField>
             </>
           ) : (
             <></>
           )}
         </Box>
-      </Box>
+      </TwoColumns>
     </Box>,
 
     <Box>
-      <TwoColumns style={{ overflowX: 'hidden' }}>
-        <Box>
-          <Box>
-            <Paragraph>Campaign Name</Paragraph>
-            <Paragraph>{formValues.title}</Paragraph>
-          </Box>
-          <Box>
-            <Paragraph>Creator</Paragraph>
-            <Paragraph>{account}</Paragraph>
-          </Box>
-          <Box>
-            <Paragraph>Guardian</Paragraph>
-            <Paragraph>{formValues.guardian}</Paragraph>
-          </Box>
-          <Box>
-            <Paragraph>Github Repositories</Paragraph>
-            {formValues.repositoryFullnames.map((repo) => (
-              <Box>{repo}</Box>
-            ))}
-          </Box>
-          <Box>
-            <Paragraph>Live Period</Paragraph>
-            <Paragraph>{details?.strategyParams.from}</Paragraph>
-            <Paragraph>{details?.strategyParams.to}</Paragraph>
-          </Box>
-        </Box>
-
-        <Box>
-          <Box>
-            <Paragraph>Logo</Paragraph>
-          </Box>
-          <Box>
-            <Paragraph>Description</Paragraph>
-          </Box>
-          <Box>
-            <Paragraph>Custom Asset</Paragraph>
-            <Paragraph>{formValues.hasCustomAsset ? formValues.customAssetAddress : 'none'}</Paragraph>
-          </Box>
-        </Box>
-      </TwoColumns>
-      ,
       <Box>
-        {status.isSimulating ? (
-          'simulating'
-        ) : shares !== undefined ? (
-          <Box style={{ paddingRight: '16px' }}>
-            <Box style={{ marginBottom: '24px' }}>{shares !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
-            {status.wasSimulated ? <RewardsTable shares={shares} updatePage={updatePage}></RewardsTable> : ''}
+        <Box>
+          <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', margin: '16px 0px 40px 0px' }}>
+            Basic Info
           </Box>
-        ) : (
-          <></>
-        )}
+
+          <TwoColumns>
+            <Box>
+              {' '}
+              <Parameter label="Logo">
+                <CampaignIcon
+                  iconSize="64px"
+                  src="https://img-cdn.inc.com/image/upload/w_1920,h_1080,c_fill/images/panoramic/GettyImages-1011930076_460470_i7oi1u.jpg"></CampaignIcon>
+              </Parameter>
+              <Parameter style={{ marginTop: '40px' }} label="Campaign Name" text={formValues.title}></Parameter>
+              <Parameter style={{ marginTop: '40px' }} label="Description">
+                <ExpansiveParagraph maxHeight={200}>
+                  {formValues.description !== '' ? formValues.description : '-'}
+                </ExpansiveParagraph>
+              </Parameter>
+            </Box>
+            <Box>
+              <Parameter label="network" text={formValues.chainName}></Parameter>
+
+              <Parameter style={{ marginTop: '40px' }} label="Custom ERC-20 token">
+                {formValues.hasCustomAsset ? (
+                  <Address address={formValues.customAssetAddress[0]} chainId={chainId}></Address>
+                ) : (
+                  <>-</>
+                )}
+              </Parameter>
+
+              <Parameter label="Guardian ADdress">
+                <Address address={formValues.guardian} chainId={chainId}></Address>
+              </Parameter>
+            </Box>
+          </TwoColumns>
+
+          <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
+
+          <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', margin: '0px 0px 25px 0px' }}>
+            Configuration
+          </Box>
+
+          <TwoColumns>
+            <Box>
+              <Parameter label="Rule-set" text={formValues.strategyName}></Parameter>
+              <Parameter style={{ marginTop: '40px' }} label="Github Repositories">
+                {formValues.repositoryFullnames.map((name) => {
+                  return (
+                    <AppTag>
+                      <a
+                        style={{ textDecoration: 'none', color: styleConstants.colors.ligthGrayText }}
+                        target="_blank"
+                        href={`${GITHUB_DOMAIN}${repo}`}
+                        rel="noreferrer">
+                        {name}
+                      </a>
+                    </AppTag>
+                  );
+                })}
+              </Parameter>
+            </Box>
+            <Box>
+              <Parameter label="Live Period">
+                <Box justify="start" direction="row">
+                  <Box style={{ width: '100px' }}>From: </Box>
+                  <Box>{finalDetails?.strategyParams.timeRange.start}</Box>
+                </Box>
+                <Box justify="start" direction="row">
+                  <Box style={{ width: '100px' }}>To: </Box>
+                  <Box>{finalDetails?.strategyParams.timeRange.end}</Box>
+                </Box>
+              </Parameter>
+            </Box>
+          </TwoColumns>
+
+          <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
+
+          <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', margin: '0px 0px 25px 0px' }}>
+            Contributors Board
+          </Box>
+
+          <Box>
+            {status.isSimulating ? (
+              'simulating'
+            ) : shares !== undefined && account !== undefined ? (
+              <Box style={{ paddingRight: '16px' }}>
+                <Box style={{ marginBottom: '24px' }}>{shares !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
+                {status.wasSimulated ? <RewardsTable shares={shares} updatePage={updatePage}></RewardsTable> : ''}
+              </Box>
+            ) : (
+              <Box
+                style={{
+                  height: '738px',
+                  width: '100%',
+                  border: '2px solid',
+                  borderColor: styleConstants.colors.lightGrayBorder,
+                  borderRadius: '20px',
+                }}
+                align="center"
+                justify="center">
+                <Box style={{ maxWidth: '300px' }}>
+                  Please connect your wallet to see the rewards of this configuration.
+                  <AppButton style={{ marginTop: '20px' }} onClick={() => connect()}>
+                    Connect Wallet
+                  </AppButton>
+                </Box>
+              </Box>
+            )}
+          </Box>
+        </Box>
       </Box>
     </Box>,
   ];

@@ -12,6 +12,10 @@ import {
   Layer,
   Heading,
   TextAreaProps,
+  ImageExtendedProps,
+  Image,
+  DateInputExtendedProps,
+  DateInput,
 } from 'grommet';
 import { Close, FormDown, FormUp } from 'grommet-icons';
 import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
@@ -441,5 +445,43 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
         {child}
       </Box>
     </Layer>
+  );
+};
+
+export interface ICampaignIcon extends ImageExtendedProps {
+  iconSize?: string;
+}
+
+export const CampaignIcon: FC<ICampaignIcon> = (props: ICampaignIcon) => {
+  const size = props.iconSize || '120px';
+  const reg = new RegExp('(\\d+\\s?)(\\w+)');
+  const parts = reg.exec(size);
+
+  if (parts === null) {
+    throw new Error(`size wrong`);
+  }
+
+  const value = +parts[1];
+  const units = parts[2];
+
+  return (
+    <Box
+      style={{
+        height: `${value}${units}`,
+        width: `${value}${units}`,
+        borderRadius: `${value / 2}${units}`,
+        overflow: 'hidden',
+      }}>
+      <Image fit="cover" src={props.src}></Image>
+    </Box>
+  );
+};
+
+export const AppDateInput: FC<DateInputExtendedProps> = (props: DateInputExtendedProps) => {
+  return (
+    <DateInput
+      calendarProps={{ size: 'small', style: { margin: '0 auto' } }}
+      format="mm/dd/yyyy"
+      {...props}></DateInput>
   );
 };
