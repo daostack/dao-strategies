@@ -24,14 +24,7 @@
     "VpcId": {
      "Ref": "devvpc91497180"
     },
-    "AvailabilityZone": {
-     "Fn::Select": [
-      0,
-      {
-       "Fn::GetAZs": ""
-      }
-     ]
-    },
+    "AvailabilityZone": "eu-west-1a",
     "CidrBlock": "10.0.0.0/24",
     "MapPublicIpOnLaunch": true,
     "Tags": [
@@ -108,14 +101,7 @@
     "VpcId": {
      "Ref": "devvpc91497180"
     },
-    "AvailabilityZone": {
-     "Fn::Select": [
-      1,
-      {
-       "Fn::GetAZs": ""
-      }
-     ]
-    },
+    "AvailabilityZone": "eu-west-1b",
     "CidrBlock": "10.0.1.0/24",
     "MapPublicIpOnLaunch": true,
     "Tags": [
@@ -186,21 +172,91 @@
     "aws:cdk:path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet2/DefaultRoute"
    }
   },
+  "devvpcpublicsubnet1Subnet3SubnetD5CB9658": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devvpc91497180"
+    },
+    "AvailabilityZone": "eu-west-1c",
+    "CidrBlock": "10.0.2.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "public-subnet-1"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-vpc/public-subnet-1Subnet3"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet3/Subnet"
+   }
+  },
+  "devvpcpublicsubnet1Subnet3RouteTable69E646EB": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devvpc91497180"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-vpc/public-subnet-1Subnet3"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet3/RouteTable"
+   }
+  },
+  "devvpcpublicsubnet1Subnet3RouteTableAssociationF525328F": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "devvpcpublicsubnet1Subnet3RouteTable69E646EB"
+    },
+    "SubnetId": {
+     "Ref": "devvpcpublicsubnet1Subnet3SubnetD5CB9658"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet3/RouteTableAssociation"
+   }
+  },
+  "devvpcpublicsubnet1Subnet3DefaultRoute9C6AA917": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "devvpcpublicsubnet1Subnet3RouteTable69E646EB"
+    },
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "devvpcIGW7D664B58"
+    }
+   },
+   "DependsOn": [
+    "devvpcVPCGW7C912A36"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-vpc/public-subnet-1Subnet3/DefaultRoute"
+   }
+  },
   "devvpcisolatedsubnet1Subnet1Subnet465D344F": {
    "Type": "AWS::EC2::Subnet",
    "Properties": {
     "VpcId": {
      "Ref": "devvpc91497180"
     },
-    "AvailabilityZone": {
-     "Fn::Select": [
-      0,
-      {
-       "Fn::GetAZs": ""
-      }
-     ]
-    },
-    "CidrBlock": "10.0.2.0/28",
+    "AvailabilityZone": "eu-west-1a",
+    "CidrBlock": "10.0.3.0/28",
     "MapPublicIpOnLaunch": false,
     "Tags": [
      {
@@ -258,15 +314,8 @@
     "VpcId": {
      "Ref": "devvpc91497180"
     },
-    "AvailabilityZone": {
-     "Fn::Select": [
-      1,
-      {
-       "Fn::GetAZs": ""
-      }
-     ]
-    },
-    "CidrBlock": "10.0.2.16/28",
+    "AvailabilityZone": "eu-west-1b",
+    "CidrBlock": "10.0.3.16/28",
     "MapPublicIpOnLaunch": false,
     "Tags": [
      {
@@ -316,6 +365,65 @@
    },
    "Metadata": {
     "aws:cdk:path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet2/RouteTableAssociation"
+   }
+  },
+  "devvpcisolatedsubnet1Subnet3Subnet366C9268": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devvpc91497180"
+    },
+    "AvailabilityZone": "eu-west-1c",
+    "CidrBlock": "10.0.3.32/28",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "isolated-subnet-1"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Isolated"
+     },
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet3"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet3/Subnet"
+   }
+  },
+  "devvpcisolatedsubnet1Subnet3RouteTable01C1C538": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "VpcId": {
+     "Ref": "devvpc91497180"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet3"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet3/RouteTable"
+   }
+  },
+  "devvpcisolatedsubnet1Subnet3RouteTableAssociation85C449FE": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "devvpcisolatedsubnet1Subnet3RouteTable01C1C538"
+    },
+    "SubnetId": {
+     "Ref": "devvpcisolatedsubnet1Subnet3Subnet366C9268"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "InfrastructureStack/dev-vpc/isolated-subnet-1Subnet3/RouteTableAssociation"
    }
   },
   "devvpcIGW7D664B58": {
@@ -383,17 +491,7 @@
        "Action": "sts:AssumeRole",
        "Effect": "Allow",
        "Principal": {
-        "Service": {
-         "Fn::Join": [
-          "",
-          [
-           "ec2.",
-           {
-            "Ref": "AWS::URLSuffix"
-           }
-          ]
-         ]
-        }
+        "Service": "ec2.amazonaws.com"
        }
       }
      ],
@@ -426,14 +524,7 @@
   "ec2oracleA308F13E": {
    "Type": "AWS::EC2::Instance",
    "Properties": {
-    "AvailabilityZone": {
-     "Fn::Select": [
-      0,
-      {
-       "Fn::GetAZs": ""
-      }
-     ]
-    },
+    "AvailabilityZone": "eu-west-1a",
     "IamInstanceProfile": {
      "Ref": "ec2oracleInstanceProfile70211899"
     },
@@ -480,6 +571,9 @@
      },
      {
       "Ref": "devvpcisolatedsubnet1Subnet2Subnet41B0EFDF"
+     },
+     {
+      "Ref": "devvpcisolatedsubnet1Subnet3Subnet366C9268"
      }
     ]
    },
@@ -623,12 +717,11 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11RTW/CMAz9LbuHbANtdz4kxK0qiOvkpoYF2gTZDghV/e8LhLawk53nZ/u9eKwnX/rjDS48MuVxVNlCN2sBc1QR+mnQjHWzPRk137ltNldZKCpr1qFwKDdsyHIfBDdQVDjgAzZl9saCWO96ssrInkFwmLFyghTzZUQvcH0sfbymEmX91uhErdEEsnJdkg+n+7oXYOVYwBlMI4f8hbVye0LmVlmodZP7pLuLXVtGfmcrbBWVrJsFCBTA2A9N0nsZi9kz0LHjWkr+FrOus1V8R7kGB3sk3SR9N2IKG6A9ypPpnvC/0rYqR/aBkssMCGqMH3n381SYe1fa2wVa5XyJ+sDv589v/TmJ9z+wtSMKTmyNOk/xD5GIUskbAgAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/12RTW/CMAyGf8vuIRsgdudDQtyqgrhObjAs0CbIdkCo6n9fILSFnew8fmO/TkZ6PNFfH3DlgdmdBqUtdL0WMCcV0U+NZqTr7dmo+d5ts7nKQlFasw6FQ7mzPst9ENxAUWLPezZl9saCWO86scrIXkCw77FyghTzZaRXuD2HPk9TibZ+K3Si1mgCWbktyYfzY9wbWDkWcAZTyz5/U63cgZC5URYqXec++W5jey0jv7clNop2rOsFCBTA2DVN1jsbi9kraNVxLKX9FrP2ZqP4QbkCBwckXSd/d2EKG6ADysvSneB/pWlUjuwDpS0zIKgwPuRjn2ehUc7vUB/58zL81sNx/PIjWzug4MRWqPMU/wAWed1zDgIAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "InfrastructureStack/CDKMetadata/Default"
-   },
-   "Condition": "CDKMetadataAvailable"
+   }
   }
  },
  "Parameters": {
@@ -640,200 +733,6 @@
    "Type": "AWS::SSM::Parameter::Value<String>",
    "Default": "/cdk-bootstrap/hnb659fds/version",
    "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
-  }
- },
- "Conditions": {
-  "CDKMetadataAvailable": {
-   "Fn::Or": [
-    {
-     "Fn::Or": [
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "af-south-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-east-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-northeast-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-northeast-2"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-south-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-southeast-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ap-southeast-2"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "ca-central-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "cn-north-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "cn-northwest-1"
-       ]
-      }
-     ]
-    },
-    {
-     "Fn::Or": [
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-central-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-north-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-south-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-west-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-west-2"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "eu-west-3"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "me-south-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "sa-east-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "us-east-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "us-east-2"
-       ]
-      }
-     ]
-    },
-    {
-     "Fn::Or": [
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "us-west-1"
-       ]
-      },
-      {
-       "Fn::Equals": [
-        {
-         "Ref": "AWS::Region"
-        },
-        "us-west-2"
-       ]
-      }
-     ]
-    }
-   ]
   }
  },
  "Rules": {

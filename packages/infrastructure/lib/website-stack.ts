@@ -13,21 +13,24 @@ import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 interface WebsiteStackProps extends BaseStackProps {
   domainName: string;
   siteSubDomain: string;
+  env: any;
 }
 
 export class WebsiteStack extends Stack {
-  constructor(parent: Stack, name: string, props: WebsiteStackProps) {
-    super(parent, name);
-    const zone = HostedZone.fromLookup(this, 'Zone', { domainName: props.domainName });
-    const siteDomain = props.siteSubDomain + '.' + props.domainName;
+  constructor(scope: Construct, id: string, props: WebsiteStackProps) {
+    super(scope, id, props);
+    const { domainName, siteSubDomain } = props;
+
+    const zone = HostedZone.fromLookup(this, 'Zone', { domainName: domainName });
+    const siteDomain = siteSubDomain + '.' + domainName;
     const cloudfrontOAI = new OriginAccessIdentity(this, 'cloudfront-OAI', {
-      comment: `OAI for ${name}`
+      comment: `OAI for ${siteDomain}`
     });
 
     new CfnOutput(this, 'Site', { value: 'https://' + siteDomain });
 
     // Content bucket
-    const siteBucket = new Bucket(this, 'SiteBucket', {
+    const siteBucket = new Bucket(this, 'WebsiteBucket', {
       bucketName: siteDomain,
       publicReadAccess: false,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
@@ -62,14 +65,14 @@ export class WebsiteStack extends Stack {
     });
     new CfnOutput(this, 'Certificate', { value: certificate.certificateArn });
 
-    
+
     // CloudFront distribution
     const distribution = new Distribution(this, 'SiteDistribution', {
       certificate: certificate,
       defaultRootObject: "index.html",
       domainNames: [siteDomain],
       minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
-      errorResponses:[
+      errorResponses: [
         {
           httpStatus: 403,
           responseHttpStatus: 403,
@@ -78,7 +81,7 @@ export class WebsiteStack extends Stack {
         }
       ],
       defaultBehavior: {
-        origin: new cloudfront_origins.S3Origin(siteBucket, {originAccessIdentity: cloudfrontOAI}),
+        origin: new cloudfront_origins.S3Origin(siteBucket, { originAccessIdentity: cloudfrontOAI }),
         compress: true,
         allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -93,10 +96,9 @@ export class WebsiteStack extends Stack {
       target: RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
       zone
     });
-
     // Deploy site contents to S3 bucket
     new BucketDeployment(this, 'DeployWithInvalidation', {
-      sources: [Source.asset('./site-contents')],
+      sources: [Source.asset('../../packages/frontend/build')],
       destinationBucket: siteBucket,
       distribution,
       distributionPaths: ['/*'],
