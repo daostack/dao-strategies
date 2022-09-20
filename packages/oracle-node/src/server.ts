@@ -46,14 +46,27 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.set('trust proxy', 1);
+
+const cookieConfig =
+  process.env.NODE_ENV === 'production'
+    ? {
+        sameSite: 'none',
+        secure: true, // if true only transmit cookie over https, only when frontend is also https ?
+      }
+    : {
+        sameSite: true,
+        secure: false, // if true only transmit cookie over https, only when frontend is also https ?
+      };
+
 app.use(
   Session({
     name: 'siwe-quickstart',
     secret: 'siwe-quickstart-secret',
     proxy: true,
+    resave: true,
+    saveUninitialized: true,
     cookie: {
-      sameSite: 'none',
-      secure: true, // if true only transmit cookie over https, only when frontend is also https ?
+      ...cookieConfig,
       httpOnly: false, // if true prevent client side JS from reading the cookie
       maxAge: 1000 * 60 * 10, // session max age in miliseconds
     },

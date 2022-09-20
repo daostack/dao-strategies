@@ -1,7 +1,6 @@
 import { Chain } from '@wagmi/core';
 import { BigNumber } from 'ethers';
 
-import { Strategy_ID } from './strategies';
 import { World, WorldConfig } from './world/World';
 
 export type BalancesFloat = Map<string, number>;
@@ -23,7 +22,7 @@ export interface CampaignUriDetails {
   creator: string;
   nonce: number;
   execDate: number;
-  strategyID: Strategy_ID;
+  strategyID: string;
   strategyParams: Record<string, any>;
 }
 
@@ -174,14 +173,16 @@ export type StrategyFunc = (
 ) => Promise<BalancesFloat>;
 
 export type StrategyInfo<P = any> = {
+  id: string;
+  icon?: string;
   name: string;
   description: string;
   example_params: P;
 };
 
 export type Strategy = {
-  strategyFunc: StrategyFunc;
-  strategyInfo: StrategyInfo;
+  func: StrategyFunc;
+  info: StrategyInfo;
 };
 
 export type { WorldConfig };

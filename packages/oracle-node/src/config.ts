@@ -38,8 +38,7 @@ export const DISABLE_VERIFICATION =
 const chainConfig = new Map<
   number,
   {
-    mnemonic: string;
-    path: string;
+    privateKey: string;
     url?: string;
     chainName?: string;
     alchemyKey?: string;
@@ -47,14 +46,12 @@ const chainConfig = new Map<
 >();
 
 chainConfig.set(1337, {
-  mnemonic: process.env.ORACLE_MNEMONIC,
-  path: "m/44'/60'/0'/0",
+  privateKey: process.env.ORACLE_PRIVATE_KEY_LOCAL,
   url: process.env.JSON_RPC_URL_LOCAL,
 });
 
 chainConfig.set(5, {
-  mnemonic: process.env.ORACLE_MNEMONIC,
-  path: "m/44'/60'/0'/0",
+  privateKey: process.env.ORACLE_PRIVATE_KEY_GOERLI,
   alchemyKey: process.env.ALCHEMY_KEY_GOERLI,
   chainName: 'goerli',
 });

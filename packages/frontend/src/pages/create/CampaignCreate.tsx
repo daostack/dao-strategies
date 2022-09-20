@@ -1,8 +1,15 @@
-import { Box, CheckBox, DateInput, FormField, Layer, Paragraph, Spinner, Text, Image } from 'grommet';
+import { Box, CheckBox, FormField, Layer, Text, Image, Spinner } from 'grommet';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { ChainsDetails, getCampaignUri, CampaignCreateDetails, SharesRead, Page } from '@dao-strategies/core';
+import {
+  ChainsDetails,
+  getCampaignUri,
+  CampaignCreateDetails,
+  SharesRead,
+  Page,
+  strategies,
+} from '@dao-strategies/core';
 
 import { useCampaignFactory } from '../../hooks/useContracts';
 import {
@@ -26,7 +33,6 @@ import {
   AppButton,
   AppCard,
   AppDateInput,
-  AppFileInput,
   AppForm,
   AppInput,
   AppSelect,
@@ -39,7 +45,7 @@ import {
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
 import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
-import { Add, AddCircle, FormTrash, StatusCritical } from 'grommet-icons';
+import { AddCircle, FormTrash, StatusCritical } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
@@ -50,6 +56,7 @@ import { styleConstants, theme } from '../../components/styles/themes';
 import { HEADER_HEIGHT } from '../AppHeader';
 import { Parameter } from './parameter';
 import { Address } from '../../components/Address';
+import { StrategySelector } from './strategy.selector';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -61,7 +68,7 @@ export interface CampaignFormValues {
   customAssetAddress: string;
   hasCustomAsset: boolean;
   chainName: string;
-  strategyName: string;
+  strategyId: string;
   repositoryFullnames: string[];
   guardian: string;
   livePeriodChoice: string;
@@ -83,7 +90,7 @@ const initialValues: CampaignFormValues = {
   hasCustomAsset: false,
   description:
     'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Why do we use it?  It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using Content here, content here, making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for lorem ipsum will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).',
-  strategyName: '',
+  strategyId: strategies.list()[0].info.id,
   repositoryFullnames: ['gershido/test-github-api'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
@@ -95,7 +102,7 @@ const GITHUB_DOMAIN = 'https://www.github.com/';
 const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
-  const { account, connect } = useLoggedUser();
+  const { account, chain, connect } = useLoggedUser();
   const { showError } = useUserError();
 
   const { now } = useNow();
@@ -108,18 +115,31 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const [creating, setCreating] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
 
-  /** Form data is kept in the formValues state. The strategy details is a computed
+  /**
+   * Form data is kept in the formValues state. The strategy details is a computed
    * property that should change everytime the formValues change.
    *
    * When the user steps into the final page, a simulation is triggered depending
    * on wheather the start date of the strategy is older than today.
    */
+
   const [formValues, setFormValuesState] = useState<CampaignFormValues>(initialValues);
   const [shares, setShares] = useState<SharesRead | undefined>();
   const [simulating, setSimulating] = useState<boolean>(false);
   const [deploying, setDeploying] = useState<boolean>(false);
 
   const chainId = ChainsDetails.chainOfName(formValues.chainName)?.chain.id;
+
+  /** initialize the chainId with the currently connected chainId */
+  useEffect(() => {
+    if (chain !== undefined) {
+      const connectedChainName = ChainsDetails.chainOfId(chain.id)?.chain.name;
+      if (connectedChainName !== undefined) {
+        setFormValues({ ...formValues, chainName: connectedChainName });
+      }
+    }
+  }, []);
+
   const campaignFactory = useCampaignFactory(chainId);
   const navigate = useNavigate();
 
@@ -129,7 +149,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const isLogged = account !== undefined;
 
   const chainOptions = ChainsDetails.chains(INCLUDED_CHAINS).map((chain) => chain.name);
-  const strategyOptions = ['Github Like-weighted Pull requests'];
+  const strategyOptions = strategies.list().map((s) => s.info.id);
+  const selectedStrategy = strategies.get(formValues.strategyId);
+
+  if (selectedStrategy === undefined) {
+    throw new Error(`selectedStrategy undefined`);
+  }
+
   const finalDetails = shares !== undefined ? shares.details : details;
 
   if (DEBUG) console.log('CampaignCreate - render');
@@ -224,12 +250,19 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const validate = (values: CampaignFormValues = formValues): string[] => {
     if (DEBUG) console.log('CampaignCreate - validate()');
     const errors: string[] = [];
+
     if (values.title === '') errors.push('title cannot be empty');
+
+    if (values.guardian === '') errors.push('an admin must be specified');
+
     if (values.repositoryFullnames.length === 0) errors.push('no repositories specified');
+
     if (values.hasCustomAsset && !ethers.utils.isAddress(values.customAssetAddress))
       errors.push('custom asset address not correct');
+
     setValidated(true);
     setErrors(errors);
+
     return errors;
   };
 
@@ -263,6 +296,15 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (DEBUG) console.log('repoNameChanged', name);
     setRepo(name);
     checkExist(name);
+  };
+
+  const requiredField = (text: string) => {
+    return (
+      <span>
+        <span style={{ color: 'red', marginRight: '4px' }}>*</span>
+        {text}
+      </span>
+    );
   };
 
   const existStatus = {
@@ -369,15 +411,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const pages: React.ReactNode[] = [
     <Box>
       <>
-        <FormField name="title" label="Give this Campaign a name" style={{ marginBottom: '40px' }}>
+        <FormField name="title" label={requiredField('Give this Campaign a name')} style={{ marginBottom: '40px' }}>
           <AppInput name="title" placeholder="Name"></AppInput>
         </FormField>
 
         <FormField name="description" label="Describe what it is about" style={{ marginBottom: '40px' }}>
           <AppTextArea placeholder="" name="description"></AppTextArea>
         </FormField>
-
-        <FormField label="Logo" name="file" component={AppFileInput} style={{ marginBottom: '40px' }} />
 
         <FormField name="chainName" label="Select Network" style={{ marginBottom: '40px' }}>
           <AppSelect name="chainName" options={chainOptions}></AppSelect>
@@ -401,15 +441,33 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           <></>
         )}
 
-        <FormField name="guardian" label="Add the Admin address" style={{ marginBottom: '40px' }}>
+        <FormField name="guardian" label={requiredField('Add the Admin address')} style={{ marginBottom: '40px' }}>
           <AppInput name="guardian" placeholder="0x...."></AppInput>
         </FormField>
       </>
     </Box>,
     <Box>
       <Box style={{ marginBottom: '64px' }}>
-        <FormField name="strategyName" label="Select a Rule-set">
-          <AppSelect name="strategyName" options={strategyOptions}></AppSelect>
+        <FormField name="strategyId" label="Select a Rule-set">
+          <AppSelect
+            value={
+              <StrategySelector
+                style={{
+                  border: '1px solid',
+                  borderRadius: '32px',
+                  borderColor: styleConstants.colors.lightGrayBorder,
+                }}
+                strategy={selectedStrategy}></StrategySelector>
+            }
+            name="strategyId"
+            options={strategyOptions}>
+            {(option: string) => {
+              const strategy = strategies.get(option);
+              if (strategy === undefined) throw new Error(`never`);
+
+              return <StrategySelector strategy={strategy}></StrategySelector>;
+            }}
+          </AppSelect>
         </FormField>
       </Box>
 
@@ -529,7 +587,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
           <TwoColumns>
             <Box>
-              <Parameter label="Rule-set" text={formValues.strategyName}></Parameter>
+              <Parameter label="Rule-set">
+                <StrategySelector strategy={selectedStrategy}></StrategySelector>
+              </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Github Repositories">
                 {formValues.repositoryFullnames.map((name) => {
                   return (

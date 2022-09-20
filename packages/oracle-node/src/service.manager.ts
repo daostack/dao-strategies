@@ -24,6 +24,9 @@ import { ChainProviders, Services } from './types';
 // const LOG = ['query', 'info', 'warn', 'error'];
 const LOG = ['warn', 'error'];
 
+// const wallet = ethers.Wallet.createRandom();
+// console.log('wallet', { privateKey: wallet.privateKey });
+
 export class ServiceManager {
   public client: PrismaClient;
 
@@ -58,7 +61,7 @@ export class ServiceManager {
         ? new providers.AlchemyProvider(config.chainName, config.alchemyKey)
         : new providers.JsonRpcProvider(config.url);
 
-      let signer = Wallet.fromMnemonic(config.mnemonic, config.path);
+      let signer = new Wallet(config.privateKey);
       appLogger.info(
         `signer for chainId: ${chainId} - publicKey: ${signer.address}`
       );

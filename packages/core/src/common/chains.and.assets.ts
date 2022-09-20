@@ -93,7 +93,6 @@ export class ChainsDetails {
 
   static chainOfId(id: number): ChainAndAssets | undefined {
     const entry = chainList.find((chain) => chain.chain.id === id);
-    if (entry === undefined) throw new Error(`chain with id ${id} not found`);
     return entry;
   }
 
