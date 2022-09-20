@@ -11,6 +11,11 @@ import {
   BoxExtendedProps,
   Layer,
   Heading,
+  TextAreaProps,
+  ImageExtendedProps,
+  Image,
+  DateInputExtendedProps,
+  DateInput,
 } from 'grommet';
 import { Close, FormDown, FormUp } from 'grommet-icons';
 import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
@@ -63,13 +68,65 @@ export const AppForm = Form;
 
 export const AppInput = styled(TextInput)`
   & {
+    border: 1px solid;
+    border-radius: 20px;
     height: 40px;
+    border-color: ${styleConstants.colors.lightGrayBorder};
+    padding-left: 16px;
+    font-weight: normal;
   }
 `;
 
-export const AppTextArea = TextArea;
+export const AppTextArea: FC<TextAreaProps> = (props: TextAreaProps) => {
+  const ref = useRef<HTMLTextAreaElement>();
 
-export const AppSelect = Select;
+  const autosize = () => {
+    if (ref.current === undefined) {
+      return;
+    }
+
+    if (ref.current.value === '') {
+      ref.current.style.height = '0px';
+      return;
+    }
+
+    if (ref.current.scrollHeight > ref.current.clientHeight) {
+      console.log('ref');
+      ref.current.style.height = `${ref.current.scrollHeight + 20}px`;
+    }
+  };
+
+  const onchange = () => {
+    autosize();
+  };
+
+  if (ref === null || ref === undefined) {
+    return <></>;
+  }
+
+  return (
+    <TextArea
+      onChange={() => onchange()}
+      ref={ref as any}
+      {...props}
+      style={{
+        overflow: 'hidden',
+        border: '1px solid',
+        borderRadius: '20px',
+        paddingLeft: '16px',
+        borderColor: styleConstants.colors.lightGrayBorder,
+        fontWeight: 'normal',
+        resize: 'vertical',
+        minHeight: '100px',
+      }}></TextArea>
+  );
+};
+
+export const AppSelect = styled(Select)`
+  border-color: ${styleConstants.colors.lightGrayBorder};
+  font-weight: normal;
+  padding: 8px 16px;
+`;
 
 export const AppFileInput: FC = (props: IElement) => (
   <Box fill justify="start">
@@ -84,6 +141,18 @@ export const AppFileInput: FC = (props: IElement) => (
     />
   </Box>
 );
+
+export const HorizontalLine: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <Box
+      style={{
+        width: '100%',
+        height: '1px',
+        backgroundColor: `${styleConstants.colors.lightGrayBorder}`,
+        ...props.style,
+      }}></Box>
+  );
+};
 
 export const AppCallout = styled(Box)`
   text-align: center;
@@ -376,5 +445,43 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
         {child}
       </Box>
     </Layer>
+  );
+};
+
+export interface ICampaignIcon extends ImageExtendedProps {
+  iconSize?: string;
+}
+
+export const CampaignIcon: FC<ICampaignIcon> = (props: ICampaignIcon) => {
+  const size = props.iconSize || '120px';
+  const reg = new RegExp('(\\d+\\s?)(\\w+)');
+  const parts = reg.exec(size);
+
+  if (parts === null) {
+    throw new Error(`size wrong`);
+  }
+
+  const value = +parts[1];
+  const units = parts[2];
+
+  return (
+    <Box
+      style={{
+        height: `${value}${units}`,
+        width: `${value}${units}`,
+        borderRadius: `${value / 2}${units}`,
+        overflow: 'hidden',
+      }}>
+      <Image fit="cover" src={props.src}></Image>
+    </Box>
+  );
+};
+
+export const AppDateInput: FC<DateInputExtendedProps> = (props: DateInputExtendedProps) => {
+  return (
+    <DateInput
+      calendarProps={{ size: 'small', style: { margin: '0 auto' } }}
+      format="mm/dd/yyyy"
+      {...props}></DateInput>
   );
 };

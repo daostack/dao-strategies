@@ -58,7 +58,7 @@ export const strategyDetails = (
     creator: account !== undefined ? account : '',
     nonce: 0,
     execDate: end,
-    strategyID: 'GH_PRS_REACTIONS_WEIGHED',
+    strategyID: values.strategyId,
     strategyParams: {
       repositories: repos,
       timeRange: { start, end },

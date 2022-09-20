@@ -1,28 +1,19 @@
+import { Box, BoxExtendedProps } from 'grommet';
 import { FC } from 'react';
-import styled from 'styled-components';
 
-import { IElement } from '../../components/styles/BasicElements';
-import { theme } from '../../components/styles/themes';
+import { styleConstants, theme } from '../../components/styles/themes';
 
-export interface IFormProgress extends IElement {
+export interface IFormProgress extends BoxExtendedProps {
   position: number;
   stations: Array<{
     description: string;
   }>;
   onSelected?: (position: number) => void;
-  className?: string;
 }
 
-const FormProgressCore: FC<IFormProgress> = (props: IFormProgress) => {
-  const n = props.stations.length;
-  const height = 50;
-  const width = 90;
-  const padding = width / 2;
-  const radius = 7;
-  const fullWidth = (n - 1) * width + 2 * padding;
-
-  const textVert = height / 3;
-  const circleVert = (height * 2) / 3;
+export const FormProgress: FC<IFormProgress> = (props: IFormProgress) => {
+  const height = 16;
+  const lineWidth = 2;
 
   const clicked = (ix: number) => {
     if (props.onSelected) {
@@ -30,67 +21,76 @@ const FormProgressCore: FC<IFormProgress> = (props: IFormProgress) => {
     }
   };
 
-  const lines = props.stations.map((station, ix) => {
-    const center = padding + ix * width;
-    return (
-      <g key={ix}>
-        {ix >= 1 ? (
-          <line
-            x1={center}
-            y1={circleVert}
-            x2={center - width}
-            y2={circleVert}
-            style={{ stroke: 'green', strokeWidth: 2 }}
-          />
-        ) : (
-          <></>
-        )}
-      </g>
-    );
-  });
+  const line = (selected: boolean) => {
+    const color = selected ? theme.primary : styleConstants.colors.lightGrayBorder;
+    return <Box style={{ height: lineWidth, backgroundColor: color, flexGrow: '1' }}></Box>;
+  };
 
-  const circles = props.stations.map((station, ix) => {
-    const center = padding + ix * width;
-
+  const circles = (selected: boolean, ix: number) => {
+    const bg = selected ? theme.primary : styleConstants.colors.lightGrayBorder;
     return (
-      <g key={ix}>
-        <circle cx={center} cy={circleVert} r={radius} stroke={theme.primary} strokeWidth="2" fill="transparent" />
-        <circle cx={center} cy={circleVert} r={radius - 3} fill={theme.primary} />
-        <text x={center} y={textVert} fill={theme.primary} textAnchor="middle" style={{ fontSize: '12px' }}>
-          {station.description}
-        </text>
-      </g>
-    );
-  });
-
-  const clickAreas = props.stations.map((station, ix) => {
-    return (
-      <rect
-        key={ix}
-        className="click-area"
-        x={ix * width}
-        y={0}
-        width={width}
-        height={height}
+      <Box
+        align="center"
+        justify="center"
         onClick={() => clicked(ix)}
-        fill="transparent"
-      />
+        style={{
+          flexGrow: '0',
+          height: `${height}px`,
+          width: `${height}px`,
+          borderRadius: `${height / 2}px`,
+          backgroundColor: bg,
+        }}>
+        <Box
+          align="center"
+          justify="center"
+          style={{
+            height: `${height * 0.75}px`,
+            width: `${height * 0.75}px`,
+            borderRadius: `${height / 2}px`,
+            backgroundColor: 'white',
+          }}>
+          <Box
+            style={{
+              height: `${height * 0.5}px`,
+              width: `${height * 0.5}px`,
+              borderRadius: `${height / 2}px`,
+              backgroundColor: bg,
+            }}></Box>
+        </Box>
+      </Box>
     );
-  });
+  };
 
   return (
-    <div className={props.className} style={props.style}>
-      <svg width={fullWidth} height={height}>
-        {lines}
-        {circles}
-        {clickAreas}
-      </svg>
-    </div>
+    <Box style={{ width: '100%', ...props.style }}>
+      <Box style={{ width: '100%' }} direction="row" align="center">
+        {props.stations.map((station, ix) => {
+          const selected = ix <= props.position;
+          const color = selected ? theme.primary : styleConstants.colors.ligthGrayText;
+          return (
+            <>
+              <Box style={{ width: `${height}px`, position: 'relative', overflow: 'visible' }}>
+                {circles(selected, ix)}
+                <Box
+                  style={{
+                    position: 'absolute',
+                    bottom: '-24px',
+                    minWidth: '100px',
+                    fontSize: '12px',
+                    color: color,
+                    userSelect: 'none',
+                  }}
+                  onClick={() => clicked(ix)}>
+                  {station.description}
+                </Box>
+              </Box>
+              {ix < props.stations.length - 1 ? line(ix < props.position) : <></>}
+            </>
+          );
+        })}
+      </Box>
+      {/* Empty space to cover the space from the absolute-positioned descriptions */}
+      <Box style={{ width: '100%', height: '24px' }}></Box>
+    </Box>
   );
 };
-
-export const FormProgress = styled(FormProgressCore)`
-  .click-area {
-    cursor: pointer;
-  }
-`;

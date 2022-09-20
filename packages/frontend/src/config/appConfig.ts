@@ -5,6 +5,7 @@ export const DEBUG = true;
  ****************************** */
 export const SUBGRAPH_URI = 'http://localhost:8000/subgraphs/name/dao-strategies/campaign';
 export const ORACLE_NODE_URL = 'http://localhost:3100';
+// export const ORACLE_NODE_URL = 'https://63.34.203.132:3100';
 export const DOMAIN = window.location.hostname;
 export const ORIGIN = window.location.origin;
 
@@ -16,3 +17,5 @@ export const CHALLENGE_PERIOD = 30; // 1 * DAYS;
 export const ACTIVE_DURATION = 30; // 1 * DAYS;
 export const ACTIVATION_PERIOD = 90; // 7 * DAYS;
 export const ALCHEMY_GOERLI_KEY = 'aQapGNEneTscr5ixwb05r-J-OWEEwQvF';
+
+export const INCLUDED_CHAINS = [1337, 5];

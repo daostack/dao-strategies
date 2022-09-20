@@ -8,6 +8,7 @@ export const styleConstants = {
   colors: {
     ligthGrayText: '#989BA0',
     lightGrayBorder: '#F0EDED',
+    alertText: '#EF3E36',
   },
 };
 
@@ -29,6 +30,11 @@ const extension: ThemeType = {
     font: {
       size: styleConstants.textFontSizes[0],
     },
+    input: {
+      font: {
+        size: '14px',
+      },
+    },
   },
   button: {
     border: { radius: '24px' },
@@ -49,8 +55,15 @@ const extension: ThemeType = {
     },
     label: {
       weight: 700,
+      size: '14px',
+      margin: '0px 0px 8px 0px',
     },
     border: false,
+  },
+  fileInput: {
+    message: {
+      size: '14px',
+    },
   },
   select: {
     control: {
