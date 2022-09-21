@@ -4,7 +4,6 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "prod": "ts-node src/server.ts",
     "prisma-migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
     "prisma-reset": "rm -rf ./src/prisma/migrations && cd ./src &&  npx prisma migrate reset --force --preview-feature && npx prisma migrate dev --name init && cd ..",
     "prisma-generate": "npx prisma generate --schema=./src/prisma/schema.prisma",
@@ -12,6 +11,7 @@
     "reboot": "yarn prisma-reset && yarn start",
     "start": "nodemon src/server.ts",
     "start-debug": "ts-node --inspect src/server.ts",
+    "prod": "NODE_ENV='production' ts-node src/server.ts",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts",
     "lint-fix": "eslint --config ./.eslintrc --ignore-path ./.eslintignore ./src/**/*.ts --fix"
   },

@@ -6,7 +6,6 @@ import {
   CampaignUriDetails,
   getCampaignUri,
   IStrategyComputation,
-  Strategy_ID,
   bigIntToNumber,
   RootDetails,
   SharesRead,
@@ -223,7 +222,7 @@ export class CampaignService {
   }
 
   async runStrategy(
-    strategyId: Strategy_ID,
+    strategyId: string,
     strategyParams: any
   ): Promise<Balances> {
     appLogger.info(`calling strategy ${strategyId}`);

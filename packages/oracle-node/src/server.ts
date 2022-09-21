@@ -36,6 +36,12 @@ interface BigInt {
 // create express app
 const app = express();
 
+appLogger.info(
+  `Running in ${
+    process.env.NODE_ENV !== undefined ? process.env.NODE_ENV : 'default(dev)'
+  } mode`
+);
+
 /** CORS configuration */
 const corsOptions = {
   origin: 'http://localhost:3000',
