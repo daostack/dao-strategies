@@ -1,6 +1,6 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Asset, ChainAndAssets, ChainsDetails, TokenBalance } from '@dao-strategies/core';
-import { AppTag, IElement } from './styles/BasicElements';
+import { AppHeading, AppTag, IElement } from './styles/BasicElements';
 import { FC } from 'react';
 import { assetValue, formatEther, truncate } from '../utils/ethers';
 import { styleConstants } from './styles/themes';
@@ -125,7 +125,7 @@ export const AssetsTable: FC<IAssetsTable> = (props: IAssetsTable) => {
 
             <Box direction="row" justify="between">
               <Box>Total Claim</Box>
-              <Box style={{ fontSize: styleConstants.headingFontSizes[1], fontWeight: '700' }}>~{claimValue}</Box>
+              <AppHeading level="2">~{claimValue}</AppHeading>
             </Box>
           </>
         ) : (

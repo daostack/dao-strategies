@@ -3,7 +3,7 @@ import { Box, BoxExtendedProps, Spinner } from 'grommet';
 import { FC } from 'react';
 import { Address } from './Address';
 import { ChainTag } from './Assets';
-import { AppCard, AppTag, FixedHeightPar, IElement } from './styles/BasicElements';
+import { AppCard, AppHeading, AppTag, FixedHeightPar, IElement } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
 
 export interface ICampaignCard extends BoxExtendedProps {
@@ -26,9 +26,9 @@ export const CampaignCard: FC<ICampaignCard> = (props: ICampaignCard) => {
   return (
     <AppCard {...props} style={{ ...props.style }}>
       <Box direction="row" align="center" justify="between">
-        <Box style={{ fontSize: styleConstants.headingFontSizes[1], fontWeight: '700', margin: '8px 0px 8px 0px' }}>
+        <AppHeading level="2" style={{ margin: '8px 0px 8px 0px' }}>
           {campaign.title}
-        </Box>{' '}
+        </AppHeading>
         <Box direction="row" align="center">
           <ChainTag style={{ marginRight: '12px' }} chain={chain}></ChainTag>{' '}
           <Address address={campaign.address} chainId={campaign.chainId}></Address>

@@ -69,11 +69,14 @@ export const strategyDetails = (
 /** Derive the start and end timestamps from the form string values */
 export const getStartEnd = (values: CampaignFormValues, today: DateManager): [number, number] => {
   if (values.livePeriodChoice === periodOptions.get(PeriodKeys.custom)) {
-    let from = new DateManager(new Date(values.customPeriodChoiceFrom));
-    let to = new DateManager(new Date(values.customPeriodChoiceFrom));
+    if (values.customPeriodChoiceFrom === '' || values.customPeriodChoiceTo === '') {
+      return [0, 0];
+    }
 
-    from = from.setTimeOfDay('00:00:00');
-    to = to.setTimeOfDay('00:00:00').addDays(1);
+    let from = DateManager.from(values.customPeriodChoiceFrom, true);
+    let to = DateManager.from(values.customPeriodChoiceTo, true);
+
+    to = to.addDays(1);
 
     return [from.getTime(), to.getTime()];
   } else {

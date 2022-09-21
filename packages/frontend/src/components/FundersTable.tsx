@@ -12,6 +12,7 @@ import { IElement } from './styles/BasicElements';
 export interface FundersTableI extends IElement {
   funders?: CampaignFundersRead;
   updatePage: (page: Page) => void;
+  invert?: boolean;
 }
 
 export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
@@ -61,5 +62,13 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
     }
   };
 
-  return <PagedTable page={funders.page} columns={columns} rows={row} updatePage={props.updatePage}></PagedTable>;
+  return (
+    <PagedTable
+      invert={props.invert}
+      style={{ ...props.style }}
+      page={funders.page}
+      columns={columns}
+      rows={row}
+      updatePage={props.updatePage}></PagedTable>
+  );
 };

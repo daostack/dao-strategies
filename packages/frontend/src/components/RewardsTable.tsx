@@ -7,12 +7,14 @@ import { FC } from 'react';
 import { valueToString } from '../utils/general';
 import { PagedTable, TableColumn } from './PagedTable';
 import { IElement } from './styles/BasicElements';
+import { styleConstants } from './styles/themes';
 
 export interface RewardsTableI extends IElement {
   shares: SharesRead;
   showReward?: boolean;
   raised?: TokenBalance[];
   updatePage: (page: Page) => void;
+  invert?: boolean;
 }
 
 export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
@@ -64,9 +66,19 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
 
   const columns: TableColumn[] = [
     { title: 'user handle', width: widths[0], align: 'start' },
-    { title: 'score (%)', width: widths[1] },
-    { title: 'reward', width: widths[2] },
+    {
+      title: (
+        <span>
+          shares (<span style={{ fontWeight: 'normal' }}>/100</span>)
+        </span>
+      ),
+      width: widths[1],
+    },
   ];
+
+  if (showReward) {
+    columns.push({ title: 'reward', width: widths[2] });
+  }
 
   const row = (rowIx: number, colIx: number) => {
     if (rowIx >= data.length) {
@@ -100,5 +112,12 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
     }
   };
 
-  return <PagedTable page={shares.page} columns={columns} rows={row} updatePage={props.updatePage}></PagedTable>;
+  return (
+    <PagedTable
+      invert={props.invert}
+      page={shares.page}
+      columns={columns}
+      rows={row}
+      updatePage={props.updatePage}></PagedTable>
+  );
 };

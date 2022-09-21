@@ -1,4 +1,4 @@
-import { Box, Spinner, Heading, Layer } from 'grommet';
+import { Box, Spinner } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 import { ChainsDetails, Page } from '@dao-strategies/core';
 
@@ -8,6 +8,7 @@ import {
   AppButton,
   AppCallout,
   AppCard,
+  AppHeading,
   AppModal,
   AppTag,
   ExpansibleCard,
@@ -90,7 +91,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             marginRight: '20px',
           }}></Box>
         <Box>
-          <Heading size="small">{campaign.title}</Heading>
+          <AppHeading level="1">{campaign.title}</AppHeading>
         </Box>
       </Box>
 
@@ -111,7 +112,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         )}
       </Box>
 
-      <Box direction="row" align="center" justify="start" style={{ marginTop: '16px', fontWeight: 400 }}>
+      {/* <Box direction="row" align="center" justify="start" style={{ marginTop: '16px', fontWeight: 400 }}>
         <Box direction="row">
           Created by:{' '}
           <Address style={{ marginLeft: '8px' }} address={campaign.creatorId} chainId={campaign.chainId}></Address>
@@ -120,10 +121,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           Guarded by:{' '}
           <Address style={{ marginLeft: '8px' }} address={campaign.guardian} chainId={campaign.chainId}></Address>
         </Box>
-      </Box>
+      </Box> */}
 
-      <Box style={{ marginBottom: '36px' }}>
-        <ExpansiveParagraph maxHeight={200}>{campaign.description}</ExpansiveParagraph>
+      <Box>
+        <ExpansiveParagraph maxHeight={120}>{campaign.description}</ExpansiveParagraph>
       </Box>
     </AppCard>
   );
@@ -146,8 +147,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           </Box>
           <Box>
             <InfoProperty title="Contribution Period">
-              <Box>Start date: {campaign.strategyParams.timeRange.start}</Box>
-              <Box>End date: {campaign.strategyParams.timeRange.end}</Box>
+              <Box>Start date: {DateManager.from(campaign.strategyParams.timeRange.start).toString()}</Box>
+              <Box>End date: {DateManager.from(campaign.strategyParams.timeRange.end).toString()}</Box>
             </InfoProperty>
             <InfoProperty style={{ marginTop: '36px' }} title="Campaign address">
               <Address address={campaign.address} chainId={campaign.chainId}></Address>
@@ -155,13 +156,13 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           </Box>
         </TwoColumns>
       }>
-      <Box direction="row" align="center" style={{ height: '60px', flexShrink: 0 }}>
-        <Box style={{ width: '40px' }} align="center">
-          <img style={{ height: '30px', width: '30px' }} alt="logout" src="/images/Github.png"></img>
+      <Box direction="row" align="center">
+        <Box style={{ width: '16px' }} align="center">
+          <img style={{ height: '16px', width: '16px' }} alt="logout" src="/images/Github.png"></img>
         </Box>
-        <Box style={{ padding: '0px 8px', fontSize: styleConstants.headingFontSizes[1], fontWeight: '700' }}>
+        <AppHeading level="3" style={{ padding: '0px 8px' }}>
           Github
-        </Box>
+        </AppHeading>
       </Box>
 
       <Box style={{ marginTop: '13px', flexShrink: 0 }}>
@@ -175,13 +176,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     <>
       {shares !== undefined ? (
         <>
-          <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Contributors</Heading>
-          <AppCard>
+          <AppCard style={{ marginTop: '52px', padding: '24px 24px' }}>
+            <AppHeading level="2" style={{ marginBottom: '24px' }}>
+              Contributors board
+            </AppHeading>
             <RewardsTable
               shares={shares}
               showReward
               raised={otherDetails?.raised}
-              style={{ marginBottom: '36px' }}
               updatePage={updatePage}></RewardsTable>
           </AppCard>
         </>
@@ -192,18 +194,19 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const fundersTable = (
-    <AppCard style={{ marginTop: '130px' }}>
+    <AppCard style={{ marginTop: '40px', padding: '24px 24px' }}>
       {funders !== undefined ? (
         <>
           <Box direction="row" justify="between" align="center">
-            <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>Funders</Heading>
+            <AppHeading level="2" style={{ marginBottom: '24px' }}>
+              Funders
+            </AppHeading>
             <Box style={{ height: '20px', width: '20px' }} onClick={() => getFunders(funders.page)}>
               <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
             </Box>
           </Box>
-          <AppCard>
-            <FundersTable funders={funders} updatePage={updatePage}></FundersTable>
-          </AppCard>
+
+          <FundersTable funders={funders} updatePage={updatePage}></FundersTable>
         </>
       ) : (
         <Spinner></Spinner>

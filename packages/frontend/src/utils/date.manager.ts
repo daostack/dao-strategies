@@ -10,8 +10,31 @@ export class DateManager {
   private bias: number = 0;
 
   /** input date is in seconds if provided */
-  constructor(date?: Date | number) {
-    this.date = date ? (typeof date === 'number' ? new Date(date * 1000) : date) : new Date();
+  constructor(date?: Date | number | string, utc: boolean = false) {
+    if (typeof date === 'number') {
+      this.date = new Date(date * 1000);
+    } else if (typeof date === 'string') {
+      if (utc) {
+        /**
+         * the string is interpreted as UTC in the UX, but the Date constructure interprets it as local string.
+         * So we need to shift the local time offset.
+         */
+        const temp = new Date(date);
+        temp.getTimezoneOffset();
+        this.date = new Date(temp.getTime() - temp.getTimezoneOffset() * 60 * 1000);
+      } else {
+        this.date = new Date(date);
+      }
+    } else if (date instanceof Date) {
+      this.date = date;
+    } else {
+      this.date = new Date();
+    }
+  }
+
+  static from(date?: Date | number | string, utc: boolean = false): DateManager {
+    const datem = new DateManager(date, utc);
+    return datem;
   }
 
   async sync() {
@@ -54,13 +77,6 @@ export class DateManager {
 
   addDays(n: number): DateManager {
     this.date = add(this.date, { days: n });
-    return this;
-  }
-
-  setTimeOfDay(time: string): DateManager {
-    const str = this.date.toUTCString();
-    const newDate = str.substring(0, 10) + time;
-    this.date = new Date(newDate);
     return this;
   }
 

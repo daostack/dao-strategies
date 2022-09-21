@@ -9,6 +9,8 @@ export const styleConstants = {
     ligthGrayText: '#989BA0',
     lightGrayBorder: '#F0EDED',
     alertText: '#EF3E36',
+    cardBackground: '#FFFFFF',
+    highlightedLight: '#FBFDFC',
   },
 };
 
@@ -26,6 +28,7 @@ const extension: ThemeType = {
       brand: theme.primary,
       brandLight: theme.primaryLight,
       background: '#F3F2EF',
+      text: '#585858',
     },
     font: {
       size: styleConstants.textFontSizes[0],
@@ -35,6 +38,27 @@ const extension: ThemeType = {
         size: '14px',
       },
     },
+  },
+  heading: {
+    color: '#0E0F19',
+    level: {
+      1: {
+        medium: {
+          size: styleConstants.headingFontSizes[0],
+        },
+      },
+      2: {
+        medium: {
+          size: styleConstants.headingFontSizes[1],
+        },
+      },
+      3: {
+        medium: {
+          size: styleConstants.headingFontSizes[2],
+        },
+      },
+    },
+    responsiveBreakpoint: undefined,
   },
   button: {
     border: { radius: '24px' },

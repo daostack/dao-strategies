@@ -16,6 +16,8 @@ import {
   Image,
   DateInputExtendedProps,
   DateInput,
+  HeaderExtendedProps,
+  HeadingExtendedProps,
 } from 'grommet';
 import { Close, FormDown, FormUp } from 'grommet-icons';
 import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
@@ -41,6 +43,14 @@ export const AppTag: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
       }}>
       {props.children}
     </Box>
+  );
+};
+
+export const AppHeading: FC<HeadingExtendedProps> = (props: HeadingExtendedProps) => {
+  return (
+    <Heading {...props} weight="700" margin="none">
+      {props.children}
+    </Heading>
   );
 };
 
@@ -165,7 +175,7 @@ export const AppCallout = styled(Box)`
 `;
 
 const cardStyle: React.CSSProperties = {
-  backgroundColor: '#FBFDFC',
+  backgroundColor: styleConstants.colors.cardBackground,
   border: 'solid 1px',
   borderColor: styleConstants.colors.lightGrayBorder,
   padding: '16px 24px',
@@ -264,7 +274,7 @@ export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
     borderColor: styleConstants.colors.lightGrayBorder,
     backgroundColor: 'white',
     height: '30px',
-    width: '30px',
+    width: '27px',
   };
 
   const iconStyle: React.CSSProperties = { height: '20px', width: '20px' };
@@ -441,7 +451,7 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
         <Box style={{ marginBottom: '20px' }} onClick={() => close()}>
           <Close style={{ height: '12px', width: '12px' }}></Close>
         </Box>
-        <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>{props.heading}</Heading>
+        <AppHeading level="2">{props.heading}</AppHeading>
         {child}
       </Box>
     </Layer>
@@ -480,7 +490,8 @@ export const CampaignIcon: FC<ICampaignIcon> = (props: ICampaignIcon) => {
 export const AppDateInput: FC<DateInputExtendedProps> = (props: DateInputExtendedProps) => {
   return (
     <DateInput
-      calendarProps={{ size: 'small', style: { margin: '0 auto' } }}
+      calendarProps={{ daysOfWeek: true, size: 'small', style: { margin: '0 auto' } }}
+      inputProps={{ style: { fontWeight: 'normal' } }}
       format="mm/dd/yyyy"
       {...props}></DateInput>
   );

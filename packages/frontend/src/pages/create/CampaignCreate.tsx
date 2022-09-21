@@ -34,6 +34,7 @@ import {
   AppCard,
   AppDateInput,
   AppForm,
+  AppHeading,
   AppInput,
   AppSelect,
   AppTag,
@@ -57,6 +58,7 @@ import { HEADER_HEIGHT } from '../AppHeader';
 import { Parameter } from './parameter';
 import { Address } from '../../components/Address';
 import { StrategySelector } from './strategy.selector';
+import { DateManager } from '../../utils/date.manager';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -83,14 +85,14 @@ export interface ProcessedFormValues {
 const initChain = ChainsDetails.chains()[0];
 
 const initialValues: CampaignFormValues = {
-  title: '',
-  guardian: '',
+  title: 'sample', // '',
+  guardian: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // '',
   chainName: initChain.name,
-  customAssetAddress: '',
+  customAssetAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
   hasCustomAsset: false,
-  description: '',
+  description: 'A description', // '',
   strategyId: strategies.list()[0].info.id,
-  repositoryFullnames: [],
+  repositoryFullnames: ['pepoospina/js-uprtcl'], //[],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
   customPeriodChoiceTo: '',
@@ -253,12 +255,21 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
     if (values.title === '') errors.push('title cannot be empty');
 
-    if (values.guardian === '') errors.push('an admin must be specified');
+    if (!ethers.utils.isAddress(values.guardian)) errors.push('the admin must be a valid ethereum address');
 
     if (values.repositoryFullnames.length === 0) errors.push('no repositories specified');
 
     if (values.hasCustomAsset && !ethers.utils.isAddress(values.customAssetAddress))
       errors.push('custom asset address not correct');
+
+    if (
+      values.livePeriodChoice === periodOptions.get(PeriodKeys.custom) &&
+      (values.customPeriodChoiceFrom === '' ||
+        values.customPeriodChoiceTo === '' ||
+        values.customPeriodChoiceFrom === undefined ||
+        values.customPeriodChoiceTo === undefined)
+    )
+      errors.push(`custom period not specificed`);
 
     setValidated(true);
     setErrors(errors);
@@ -337,7 +348,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const addRepo = (repo: string) => {
     formValues.repositoryFullnames.push(getValidName(repo) as string);
-    setFormValues({ ...formValues });
+    onValuesUpdated({ ...formValues });
     repoNameChanged('');
   };
 
@@ -369,7 +380,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       hasErrors: errors.length > 0,
       wrongNetwork: chain !== undefined && chain.id !== chainId,
     };
-  }, [creating, deploying, isLogged, pageIx, periodType, simulating, shares, chainId, chain]);
+  }, [pageIx, periodType, isLogged, simulating, shares, creating, deploying, errors.length, chain, chainId]);
 
   const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
     connect,
@@ -536,7 +547,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                 <AppDateInput name="customPeriodChoiceFrom"></AppDateInput>
               </FormField>
               <FormField name="customPeriodChoiceTo" label="To">
-                <AppDateInput name="customPeriodChoiceTo" format="mm/dd/yyyy"></AppDateInput>
+                <AppDateInput name="customPeriodChoiceTo"></AppDateInput>
               </FormField>
             </>
           ) : (
@@ -549,9 +560,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     <Box>
       <Box>
         <Box>
-          <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', margin: '16px 0px 40px 0px' }}>
+          <AppHeading level="3" style={{ margin: '16px 0px 40px 0px' }}>
             Basic Info
-          </Box>
+          </AppHeading>
 
           <TwoColumns>
             <Box>
@@ -563,7 +574,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Campaign Name" text={formValues.title}></Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Description">
-                <ExpansiveParagraph maxHeight={200}>
+                <ExpansiveParagraph maxHeight={100}>
                   {formValues.description !== '' ? formValues.description : '-'}
                 </ExpansiveParagraph>
               </Parameter>
@@ -573,13 +584,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
               <Parameter style={{ marginTop: '40px' }} label="Custom ERC-20 token">
                 {formValues.hasCustomAsset ? (
-                  <Address address={formValues.customAssetAddress[0]} chainId={chainId}></Address>
+                  <Address address={formValues.customAssetAddress} chainId={chainId}></Address>
                 ) : (
                   <>-</>
                 )}
               </Parameter>
 
-              <Parameter label="Guardian ADdress">
+              <Parameter style={{ marginTop: '40px' }} label="Guardian ADdress">
                 <Address address={formValues.guardian} chainId={chainId}></Address>
               </Parameter>
             </Box>
@@ -587,9 +598,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
           <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
 
-          <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', margin: '0px 0px 25px 0px' }}>
+          <AppHeading level="3" style={{ margin: '0px 0px 25px 0px' }}>
             Configuration
-          </Box>
+          </AppHeading>
 
           <TwoColumns>
             <Box>
@@ -599,7 +610,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               <Parameter style={{ marginTop: '40px' }} label="Github Repositories">
                 {formValues.repositoryFullnames.map((name) => {
                   return (
-                    <AppTag>
+                    <AppTag style={{ marginBottom: '12px' }}>
                       <a
                         style={{ textDecoration: 'none', color: styleConstants.colors.ligthGrayText }}
                         target="_blank"
@@ -615,12 +626,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Box>
               <Parameter label="Live Period">
                 <Box justify="start" direction="row">
-                  <Box style={{ width: '100px' }}>From: </Box>
-                  <Box>{finalDetails?.strategyParams.timeRange.start}</Box>
+                  <Box style={{ width: '60px' }}>From: </Box>
+                  <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.start).toString()}</Box>
                 </Box>
                 <Box justify="start" direction="row">
-                  <Box style={{ width: '100px' }}>To: </Box>
-                  <Box>{finalDetails?.strategyParams.timeRange.end}</Box>
+                  <Box style={{ width: '60px' }}>To: </Box>
+                  <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.end).toString()}</Box>
                 </Box>
               </Parameter>
             </Box>
@@ -628,9 +639,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
           <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
 
-          <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', margin: '0px 0px 25px 0px' }}>
+          <AppHeading level="3" margin="0px 0px 25px 0px">
             Contributors Board
-          </Box>
+          </AppHeading>
 
           <Box>
             {status.isSimulating ? (
@@ -638,7 +649,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             ) : shares !== undefined && account !== undefined ? (
               <Box style={{ paddingRight: '16px' }}>
                 <Box style={{ marginBottom: '24px' }}>{shares !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
-                {status.wasSimulated ? <RewardsTable shares={shares} updatePage={updatePage}></RewardsTable> : ''}
+                {status.wasSimulated ? (
+                  <RewardsTable invert shares={shares} updatePage={updatePage}></RewardsTable>
+                ) : (
+                  ''
+                )}
               </Box>
             ) : (
               <Box
@@ -700,16 +715,15 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </Box>
 
           <Box style={{ width: '100%', margin: '0px 0px 0px 0px' }}>
-            <Box
+            <AppHeading
+              level="2"
               style={{
-                fontSize: styleConstants.headingFontSizes[1],
-                fontWeight: '700',
                 textAlign: 'left',
                 color: '#0E0F19',
                 margin: '40px 0px 0px 0px',
               }}>
               {heading}
-            </Box>
+            </AppHeading>
             <HorizontalLine style={{ margin: '24px 0px' }}></HorizontalLine>
           </Box>
 
