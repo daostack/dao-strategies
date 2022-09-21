@@ -20,7 +20,7 @@ import {
   HeadingExtendedProps,
 } from 'grommet';
 import { Close, FormDown, FormUp } from 'grommet-icons';
-import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { styleConstants, theme } from './themes';
 
@@ -58,18 +58,14 @@ export interface IValueElement extends IElement {
   value?: string;
 }
 
-export interface IButton extends ButtonExtendedProps {}
+export interface IButton extends ButtonExtendedProps {
+  inline?: boolean;
+}
 
 export const AppButton = (props: IButton) => {
   return (
     <>
-      <Button primary={props.primary} style={props.style} disabled={props.disabled} onClick={props.onClick}>
-        <Box pad={{ vertical: 'small', horizontal: 'medium' }}>
-          <Text textAlign="center" weight="bold">
-            {props.children as React.ReactNode[]}
-          </Text>
-        </Box>
-      </Button>
+      <Button {...props}></Button>
     </>
   );
 };
@@ -233,24 +229,23 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
           style={{
             display: 'flex',
             flexDirection: 'row',
-            justifyContent: 'start',
+            justifyContent: 'center',
             alignItems: 'end',
             fontWeight: '700',
-            padding: '0px 0px 10px 0px',
+            padding: '0px 0px 0px 0px',
             position: 'absolute',
             width: '100%',
             left: '0',
             bottom: '0',
-            height: '120px',
+            height: '60px',
             cursor: 'pointer',
-            backgroundColor: 'red',
             background: `${
               expanded
                 ? 'none'
-                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
+                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
             }`,
           }}>
-          See more {expanded ? <FormUp></FormUp> : <FormDown></FormDown>}
+          <AppButton inline>{expanded ? 'Show-less' : 'Show-more'}</AppButton>
         </div>
       ) : (
         <></>

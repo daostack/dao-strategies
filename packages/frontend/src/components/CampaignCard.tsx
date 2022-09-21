@@ -3,8 +3,7 @@ import { Box, BoxExtendedProps, Spinner } from 'grommet';
 import { FC } from 'react';
 import { Address } from './Address';
 import { ChainTag } from './Assets';
-import { AppCard, AppHeading, AppTag, FixedHeightPar, IElement } from './styles/BasicElements';
-import { styleConstants } from './styles/themes';
+import { AppCard, AppHeading, AppTag, FixedHeightPar } from './styles/BasicElements';
 
 export interface ICampaignCard extends BoxExtendedProps {
   campaign?: CampaignReadDetails;

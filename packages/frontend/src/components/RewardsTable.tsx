@@ -96,7 +96,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
       case 0:
         return (
           <>
-            @{datum.user}
+            @{datum.user.split(':')[1]}
             {datum.badge ? <StatusGood style={{ marginLeft: '6px' }} color="#5762D5"></StatusGood> : <></>}
           </>
         );

@@ -107,9 +107,7 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
               The payment address for another {'N'} contributors has been proposed by the oracle. Will be active in{' '}
               {info.timeToActive}
             </Box>
-            <AppButton style={{ alignSelf: 'center' }} primary>
-              See Update
-            </AppButton>
+            <AppButton label="See Update" style={{ alignSelf: 'center' }} primary />
           </>
         ) : (
           <>

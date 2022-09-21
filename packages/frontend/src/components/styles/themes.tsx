@@ -11,13 +11,13 @@ export const styleConstants = {
     alertText: '#EF3E36',
     cardBackground: '#FFFFFF',
     highlightedLight: '#FBFDFC',
+    links: '#5762D5',
   },
 };
 
 export const theme = {
   primary: '#4BA664',
   primaryLight: 'rgba(75, 166, 99, 0.05)',
-  links: '#5762D5',
   buttonLight: 'rgb(75, 166, 100, 0.05)',
   buttonLightBorder: 'rgb(75, 166, 100, 0.2)',
 };
@@ -61,16 +61,16 @@ const extension: ThemeType = {
     responsiveBreakpoint: undefined,
   },
   button: {
-    border: { radius: '24px' },
-    primary: { color: theme.primary },
+    primary: {
+      color: 'white',
+    },
     extend: (props) => {
-      return props.primary
-        ? css`
-            * {
-              color: white;
-            }
-          `
-        : ``;
+      return css`
+        & {
+          border-radius: 50px;
+          padding: 14px 14px;
+        }
+      `;
     },
   },
   formField: {
