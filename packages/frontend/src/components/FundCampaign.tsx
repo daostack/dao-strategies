@@ -113,7 +113,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
               </FormField>
             </Box>
 
-            <AppButton primary disabled={disabled} onClick={() => fund()} style={{ marginTop: '20px' }}>
+            <AppButton disabled={disabled} onClick={() => fund()} style={{ marginTop: '20px' }}>
               {isLogged ? 'Fund' : 'Connect & Fund'}
             </AppButton>
           </Box>

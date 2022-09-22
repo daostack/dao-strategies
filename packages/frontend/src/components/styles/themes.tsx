@@ -60,17 +60,24 @@ const extension: ThemeType = {
     },
     responsiveBreakpoint: undefined,
   },
+  /** watch out, button is used everywere as sub-element by Grommet. */
   button: {
     primary: {
-      color: 'white',
-    },
-    extend: (props) => {
-      return css`
+      color: theme.primary,
+      extend: css`
         & {
-          border-radius: 50px;
-          padding: 14px 14px;
+          color: white;
+          font-weight: 500;
         }
-      `;
+      `,
+    },
+    secondary: {
+      extend: css`
+        & {
+          color: 'red ' @!!!!!;
+          font-weight: 500;
+        }
+      `,
     },
   },
   formField: {

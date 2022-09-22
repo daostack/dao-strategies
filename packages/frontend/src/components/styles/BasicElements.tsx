@@ -16,11 +16,10 @@ import {
   Image,
   DateInputExtendedProps,
   DateInput,
-  HeaderExtendedProps,
   HeadingExtendedProps,
 } from 'grommet';
 import { Close, FormDown, FormUp } from 'grommet-icons';
-import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { styleConstants, theme } from './themes';
 
@@ -58,14 +57,29 @@ export interface IValueElement extends IElement {
   value?: string;
 }
 
+type _type = 'slim' | 'normal' | 'large' | undefined;
+
 export interface IButton extends ButtonExtendedProps {
   inline?: boolean;
+  _type?: _type;
 }
 
 export const AppButton = (props: IButton) => {
+  const style = ((_type: _type): React.CSSProperties => {
+    switch (_type) {
+      case 'slim':
+        return { padding: '8px 16px', borderRadius: '50px' };
+      case 'normal':
+      case undefined:
+        return { padding: '14px 28px', borderRadius: '50px' };
+      default:
+        return {};
+    }
+  })(props._type);
+
   return (
     <>
-      <Button {...props}></Button>
+      <Button {...props} style={{ ...style }}></Button>
     </>
   );
 };
