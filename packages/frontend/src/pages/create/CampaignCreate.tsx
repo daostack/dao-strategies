@@ -46,7 +46,7 @@ import {
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
 import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
-import { AddCircle, FormTrash, StatusCritical } from 'grommet-icons';
+import { AddCircle, FormPreviousLink, FormTrash, StatusCritical } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
@@ -99,8 +99,7 @@ const initialValues: CampaignFormValues = {
 };
 
 const GITHUB_DOMAIN = 'https://www.github.com/';
-
-const DEBUG = true;
+const DEBUG = false;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, chain, switchNetwork, connect } = useLoggedUser();
@@ -330,7 +329,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const repoButton = ((status) => {
     if (!status.inputIsValid) {
-      return <AddCircle color={theme.primaryLight}></AddCircle>;
+      return <AddCircle color={styleConstants.colors.primaryLight}></AddCircle>;
     }
     // else
     if (status.checking) {
@@ -338,7 +337,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     }
     // else
     if (status.inputExists && status.repoIsNew) {
-      return <AddCircle onClick={() => addRepo(validRepo)} color={theme.primary}></AddCircle>;
+      return <AddCircle onClick={() => addRepo(validRepo)} color={styleConstants.colors.primary}></AddCircle>;
     }
     // else
     if (status.inputDontExist || !status.repoIsNew) {
@@ -404,7 +403,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const leftText = () => {
     if (pageIx === 0) return 'Cancel';
-    return 'Back';
+    return (
+      <Box direction="row" align="center">
+        <FormPreviousLink style={{ marginRight: '6px' }}></FormPreviousLink>Previous
+      </Box>
+    );
   };
 
   const simulationText =
@@ -443,7 +446,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <FormField
           name="hasCustomAsset"
           label="Reward Tokens"
-          style={{ marginBottom: formValues.hasCustomAsset ? '10px' : '40px' }}>
+          style={{
+            marginBottom: formValues.hasCustomAsset ? '10px' : '40px',
+            fontSize: styleConstants.textFontSizes.small,
+          }}>
           <CheckBox name="hasCustomAsset" label="Use custom asset" />
         </FormField>
 
@@ -685,7 +691,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       <Box
         justify="start"
         align="center"
-        style={{ marginTop: HEADER_HEIGHT, padding: '2vw 3vw 70px 3vw', fontSize: '14px', width: '100%' }}>
+        style={{ marginTop: HEADER_HEIGHT, padding: '2vw 3vw 70px 3vw', width: '100%' }}>
         <AppCard
           style={{
             padding: '48px 64px 88px 64px',
@@ -719,7 +725,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               level="2"
               style={{
                 textAlign: 'left',
-                color: '#0E0F19',
                 margin: '40px 0px 0px 0px',
               }}>
               {heading}
@@ -741,10 +746,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
           <Box style={{ width: '100%' }}>
             <Box direction="row" justify="between" style={{ width: '100%' }}>
-              <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
-              <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
-                {rightText}
-              </AppButton>
+              <AppButton secondary gray label={leftText()} onClick={() => leftClicked()} />
+              <AppButton primary gray label={rightText} onClick={() => rightAction()} disabled={rightDisabled} />
             </Box>
 
             <Box direction="row" justify="end" style={{ width: '100%' }}>

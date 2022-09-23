@@ -15,7 +15,7 @@ export const Parameter: FC<IParameter> = (props: IParameter) => {
           color: styleConstants.colors.ligthGrayText,
           marginBottom: '13px',
           textTransform: 'uppercase',
-          fontSize: '14px',
+          fontSize: styleConstants.textFontSizes.small,
         }}>
         {props.label}
       </Box>
@@ -23,7 +23,7 @@ export const Parameter: FC<IParameter> = (props: IParameter) => {
         {props.text === undefined ? (
           props.children
         ) : (
-          <Box style={{ fontWeight: '500', fontSize: '16px' }}>{props.text}</Box>
+          <Box style={{ fontWeight: '500', fontSize: styleConstants.textFontSizes.normal }}>{props.text}</Box>
         )}
       </Box>
     </Box>

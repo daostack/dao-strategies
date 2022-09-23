@@ -11,6 +11,7 @@ import {
   AppHeading,
   AppModal,
   AppTag,
+  CircleIcon,
   ExpansibleCard,
   ExpansiveParagraph,
   InfoProperty,
@@ -30,7 +31,7 @@ import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { Link } from 'react-router-dom';
 import { FundersTable } from '../../components/FundersTable';
-import { Refresh } from 'grommet-icons';
+import { Inspect, Next, Refresh, Semantics } from 'grommet-icons';
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -101,7 +102,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         <></>
       )}
 
-      <Box style={{ fontSize: styleConstants.textFontSizes[1] }}>
+      <Box style={{ fontSize: styleConstants.textFontSizes.small }}>
         {campaign.executed ? (
           <Box>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Box>
         ) : (
@@ -236,7 +237,12 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         value={valueLocked}
         symbol="$"
         action={
-          <AppButton secondary label="Fund Campaign" style={{ width: '100%' }} onClick={() => setShowFund(true)} />
+          <AppButton
+            secondary
+            label="Fund Campaign"
+            style={{ width: '100%', fontSize: styleConstants.textFontSizes.small }}
+            onClick={() => setShowFund(true)}
+          />
         }></BalanceCard>
     </>
   );
@@ -252,11 +258,36 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       ) : (
         <></>
       )}
-      <Box style={{ padding: '0px 24px' }}>
-        <AppButton primary onClick={() => setShowGuardianControl(true)} style={{ marginTop: '36px' }}>
-          Show Advanced Status
-        </AppButton>
-      </Box>
+
+      <AppCard
+        direction="row"
+        align="center"
+        onClick={() => setShowGuardianControl(true)}
+        style={{
+          marginTop: '36px',
+          width: '100%',
+          fontSize: styleConstants.textFontSizes.small,
+          minHeight: 'auto',
+        }}>
+        <CircleIcon
+          icon={<Inspect></Inspect>}
+          color={styleConstants.colors.primary}
+          style={{ marginRight: '12px', flexGrow: 0 }}
+        />
+        <Box style={{ flexGrow: 1 }}>
+          <Box
+            direction="row"
+            style={{
+              width: 'fit-content',
+              borderBottom: '2px dashed',
+              borderColor: styleConstants.colors.ligthGrayText,
+            }}>
+            Admin Control Center
+          </Box>
+        </Box>
+
+        <Next color={styleConstants.colors.text} style={{ marginRight: '12px', flexGrow: 0, height: '12px' }}></Next>
+      </AppCard>
     </>
   );
 

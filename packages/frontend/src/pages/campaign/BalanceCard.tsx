@@ -22,6 +22,7 @@ export const BalanceCard: FC<BalanceCardProps> = (props: BalanceCardProps) => {
         style={{
           textTransform: 'uppercase',
           fontWeight: '700',
+          fontSize: styleConstants.textFontSizes.small,
           color: styleConstants.colors.ligthGrayText,
         }}>
         {props.title}

@@ -18,7 +18,7 @@ import {
   DateInput,
   HeadingExtendedProps,
 } from 'grommet';
-import { Close, FormDown, FormUp } from 'grommet-icons';
+import { Close, FormDown, FormUp, IconProps } from 'grommet-icons';
 import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { styleConstants, theme } from './themes';
@@ -62,6 +62,7 @@ type _type = 'slim' | 'normal' | 'large' | undefined;
 export interface IButton extends ButtonExtendedProps {
   inline?: boolean;
   _type?: _type;
+  gray?: boolean;
 }
 
 export const AppButton = (props: IButton) => {
@@ -77,9 +78,20 @@ export const AppButton = (props: IButton) => {
     }
   })(props._type);
 
+  const newProps = { ...props };
+
+  let textColor = newProps.secondary ? styleConstants.colors.primary : undefined;
+
+  if (props.gray) {
+    newProps.color = newProps.secondary
+      ? styleConstants.colors.lessLightGrayBorder
+      : styleConstants.colors.ligthGrayText;
+    textColor = newProps.secondary ? styleConstants.colors.headingDark : '#ffffff';
+  }
+
   return (
     <>
-      <Button {...props} style={{ ...style }}></Button>
+      <Button {...newProps} style={{ textAlign: 'center', color: textColor, ...style, ...props.style }} />
     </>
   );
 };
@@ -388,8 +400,10 @@ export const NumberedRow: FC<INumberedRow> = (props: INumberedRow) => {
             width: '24px',
             height: '24px',
             borderRadius: '12px',
-            backgroundColor: props.disabled ? theme.primaryLight : theme.buttonLightBorder,
-            color: props.disabled ? '#6D6D6D' : theme.primary,
+            backgroundColor: props.disabled
+              ? styleConstants.colors.primaryLight
+              : styleConstants.colors.buttonLightBorder,
+            color: props.disabled ? '#6D6D6D' : styleConstants.colors.primary,
             textAlign: 'center',
           }}>
           {props.number}
@@ -503,5 +517,33 @@ export const AppDateInput: FC<DateInputExtendedProps> = (props: DateInputExtende
       inputProps={{ style: { fontWeight: 'normal' } }}
       format="mm/dd/yyyy"
       {...props}></DateInput>
+  );
+};
+
+export interface ICircleIcon extends BoxExtendedProps {
+  icon: ReactElement;
+  size?: number;
+}
+
+export const CircleIcon: FC<ICircleIcon> = (props: ICircleIcon) => {
+  const size = props.size || 40;
+  const icon = React.cloneElement(props.icon, {
+    color: props.color || styleConstants.colors.primary,
+    size: `${size * 0.5}px`,
+  });
+  return (
+    <Box
+      justify="center"
+      align="center"
+      style={{
+        height: `${size}px`,
+        width: `${size}px`,
+        borderRadius: `${size / 2}px`,
+        backgroundColor: styleConstants.colors.primaryLight,
+        overflow: 'hidden',
+        ...props.style,
+      }}>
+      {icon}
+    </Box>
   );
 };
