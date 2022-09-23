@@ -20,7 +20,6 @@ import { TwoColumns, ViewportContainer } from '../../components/styles/LayoutCom
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { truncate } from '../../utils/ethers';
-import { AdvancedCampaignStatus } from '../../components/AdvancedCampaignStatus';
 import { DateManager } from '../../utils/date.manager';
 import { HEADER_HEIGHT } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
@@ -31,7 +30,10 @@ import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { Link } from 'react-router-dom';
 import { FundersTable } from '../../components/FundersTable';
-import { Inspect, Next, Refresh, Semantics } from 'grommet-icons';
+import { Refresh } from 'grommet-icons';
+import { FixedAdmin } from './fixed.admin';
+
+export const CAMPAIGN_MAX_WIDTH = 1200;
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -39,7 +41,6 @@ export interface ICampaignPageProps {
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
-  const [showGuardianControl, setShowGuardianControl] = useState<boolean>(false);
 
   const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, checkClaimInfo, funders, getFunders } =
     useCampaignContext();
@@ -248,48 +249,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const claim = <ClaimCard style={{ marginBottom: '40px' }} campaignAddress={campaign.address}></ClaimCard>;
-
-  const guardian = (
-    <>
-      {showGuardianControl ? (
-        <AppModal heading="Advanced Status" onClosed={() => setShowGuardianControl(false)}>
-          <AdvancedCampaignStatus campaignAddress={campaign.address}></AdvancedCampaignStatus>
-        </AppModal>
-      ) : (
-        <></>
-      )}
-
-      <AppCard
-        direction="row"
-        align="center"
-        onClick={() => setShowGuardianControl(true)}
-        style={{
-          marginTop: '36px',
-          width: '100%',
-          fontSize: styleConstants.textFontSizes.small,
-          minHeight: 'auto',
-        }}>
-        <CircleIcon
-          icon={<Inspect></Inspect>}
-          color={styleConstants.colors.primary}
-          style={{ marginRight: '12px', flexGrow: 0 }}
-        />
-        <Box style={{ flexGrow: 1 }}>
-          <Box
-            direction="row"
-            style={{
-              width: 'fit-content',
-              borderBottom: '2px dashed',
-              borderColor: styleConstants.colors.ligthGrayText,
-            }}>
-            Admin Control Center
-          </Box>
-        </Box>
-
-        <Next color={styleConstants.colors.text} style={{ marginRight: '12px', flexGrow: 0, height: '12px' }}></Next>
-      </AppCard>
-    </>
-  );
+  const guardian = <FixedAdmin address={campaign.address}></FixedAdmin>;
 
   const left = (
     <>
@@ -325,7 +285,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
       <Box
         style={{
-          maxWidth: '1200px',
+          maxWidth: `${CAMPAIGN_MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
         <CampaignGrid gap="24px">
