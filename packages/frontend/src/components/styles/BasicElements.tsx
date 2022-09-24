@@ -207,10 +207,11 @@ const cardStyle: React.CSSProperties = {
 
 interface AppCardProps extends BoxExtendedProps {}
 
-export const AppCard: FC<AppCardProps> = (props: AppCardProps) => {
+export const AppCard = React.forwardRef<HTMLDivElement, AppCardProps>((props, ref) => {
   return (
     <Box
       {...props}
+      ref={ref}
       style={{
         ...cardStyle,
         ...props.style,
@@ -218,7 +219,7 @@ export const AppCard: FC<AppCardProps> = (props: AppCardProps) => {
       {props.children}
     </Box>
   );
-};
+});
 
 interface IExpansibleParagraph extends IElement {
   maxHeight: number;

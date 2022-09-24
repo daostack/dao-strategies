@@ -101,10 +101,11 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
           padding: '0px 24px',
           color: styleConstants.colors.ligthGrayText,
         }}>
-        {props.columns.map((column) => {
+        {props.columns.map((column, ix) => {
           const show = column.show === undefined ? true : column.show;
           return show ? (
             <Box
+              key={ix}
               direction="row"
               justify={column.align || 'center'}
               style={{ width: column.width, textAlign: column.align ? column.align : 'center' }}>
@@ -140,7 +141,7 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
                 const show = column.show === undefined ? true : column.show; // Repeated code as above. Changes need to be done in both places
                 return show ? (
                   <Box
-                    key={colIx}
+                    key={`${rowIx}-${colIx}`}
                     direction="row"
                     justify={column.align || 'center'}
                     style={{ width: props.columns[colIx].width, userSelect: 'text' }}>

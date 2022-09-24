@@ -1,5 +1,5 @@
 import { Box, Spinner } from 'grommet';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { ChainsDetails, Page } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
@@ -11,7 +11,6 @@ import {
   AppHeading,
   AppModal,
   AppTag,
-  CircleIcon,
   ExpansibleCard,
   ExpansiveParagraph,
   InfoProperty,
@@ -32,8 +31,13 @@ import { Link } from 'react-router-dom';
 import { FundersTable } from '../../components/FundersTable';
 import { Refresh } from 'grommet-icons';
 import { FixedAdmin } from './fixed.admin';
+import React from 'react';
+import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 
+/** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_MAX_WIDTH = 1200;
+export const CAMPAIGN_PAD_SIDES = 5;
+export const CAMPAIGN_GAP = 24;
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -46,6 +50,32 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     useCampaignContext();
 
   const { user } = useLoggedUser();
+
+  /** Things below are needed to keep the width of the admin button equal to the width of the Fund Campaign card */
+  // react to window dimension changes
+  const { w_width } = useWindowDimensions();
+  // remember the width
+  const [colWidth, setColWidth] = useState<number>(0);
+  // remember the DOM element
+  let colRef = useRef<HTMLDivElement>(null);
+
+  // called everytime the DOM element changes
+  const fundCardRefUpdated = (ref: React.RefObject<HTMLDivElement>): void => {
+    if (ref !== null) {
+      colRef = ref;
+      checkSize();
+    }
+  };
+
+  // called to set the size
+  const checkSize = () => {
+    if (colRef !== null) {
+      setColWidth((colRef as any).offsetWidth);
+    }
+  };
+
+  // needed to react to window resize
+  useEffect(() => checkSize(), [w_width]);
 
   const updatePage = (page: Page) => {
     getShares(page);
@@ -139,8 +169,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         <TwoColumns boxes={{ align: 'start', justify: 'start' }} grid={{ style: { marginTop: '40px' } }}>
           <Box>
             <InfoProperty title="Github Repositories">
-              {campaign.strategyParams.repositories.map((repo: any) => (
-                <AppTag>{`${repo.owner}/${repo.repo}`}</AppTag>
+              {campaign.strategyParams.repositories.map((repo: any, ix: number) => (
+                <AppTag key={ix}>{`${repo.owner}/${repo.repo}`}</AppTag>
               ))}
             </InfoProperty>
             <InfoProperty style={{ marginTop: '36px' }} title="Guardian Address">
@@ -232,6 +262,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         <></>
       )}
       <BalanceCard
+        ref={fundCardRefUpdated as any}
         style={{ padding: '24px' }}
         title="Rewards Raised"
         assets={otherDetails?.balances}
@@ -249,7 +280,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const claim = <ClaimCard style={{ marginBottom: '40px' }} campaignAddress={campaign.address}></ClaimCard>;
-  const guardian = <FixedAdmin address={campaign.address}></FixedAdmin>;
+  const guardian = <FixedAdmin btnWidth={colWidth} address={campaign.address}></FixedAdmin>;
 
   const left = (
     <>
@@ -273,8 +304,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       style={{
         paddingTop: HEADER_HEIGHT,
         paddingBottom: '40px',
-        paddingLeft: '5vw',
-        paddingRight: '5vw',
+        paddingLeft: `${CAMPAIGN_PAD_SIDES}vw`,
+        paddingRight: `${CAMPAIGN_PAD_SIDES}vw`,
       }}>
       <Box style={{ margin: '50px 0px' }} direction="row" align="center">
         <Link style={{ marginRight: '6px', textDecoration: 'none' }} to="/">
@@ -288,7 +319,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           maxWidth: `${CAMPAIGN_MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
-        <CampaignGrid gap="24px">
+        <CampaignGrid gap={`${CAMPAIGN_GAP}px`}>
           <Box gridArea={CampaignAreas.left}>{left}</Box>
           <Box gridArea={CampaignAreas.right}>{right}</Box>
         </CampaignGrid>

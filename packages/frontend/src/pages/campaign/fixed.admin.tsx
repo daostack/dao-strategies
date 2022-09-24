@@ -5,18 +5,14 @@ import { AdvancedCampaignStatus } from '../../components/AdvancedCampaignStatus'
 
 import { AppCard, AppModal, CircleIcon } from '../../components/styles/BasicElements';
 import { styleConstants } from '../../components/styles/themes';
-import { useWindowDimensions } from '../../hooks/useWindowDimensions';
-import { CAMPAIGN_MAX_WIDTH } from './CampaignPage';
 
 export interface IFixedAdmin extends BoxExtendedProps {
   address: string;
+  btnWidth: number;
 }
 
 export const FixedAdmin: FC<IFixedAdmin> = (props: IFixedAdmin) => {
   const [showGuardianControl, setShowGuardianControl] = useState<boolean>(false);
-  const { width } = useWindowDimensions();
-
-  const buttonWidth = width > CAMPAIGN_MAX_WIDTH ? (1200 * 2) / 5 : (width * 2) / 5;
 
   return showGuardianControl ? (
     <AppModal heading="Advanced Status" onClosed={() => setShowGuardianControl(false)}>
@@ -30,7 +26,7 @@ export const FixedAdmin: FC<IFixedAdmin> = (props: IFixedAdmin) => {
       style={{
         fontSize: styleConstants.textFontSizes.small,
         minHeight: 'auto',
-        width: `${buttonWidth}px`,
+        width: `${props.btnWidth}px`,
         position: 'fixed',
         bottom: '36px',
       }}>
