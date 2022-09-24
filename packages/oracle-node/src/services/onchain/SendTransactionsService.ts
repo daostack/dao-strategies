@@ -72,12 +72,21 @@ export class SendTransactionService {
     root: string
   ): Promise<void> {
     const signer = this.providers.get(chainId).signer;
+    const signerAddress = await signer.getAddress();
 
     const campaign = campaignInstance(address, signer);
+    appLogger.info(
+      `OnChainService - publishShares, 
+        address: ${address}, 
+        root: ${root}, 
+        chainId: ${chainId}, 
+        signer: ${signerAddress}`
+    );
     const tx = await campaign.proposeShares(root, ZERO_BYTES32);
     const rec = await tx.wait();
+
     appLogger.info(
-      `OnChainService - publishedShares, address: ${address}, root: ${root}, block: ${rec.blockNumber}`
+      `OnChainService - publishedShares! block: ${rec.blockNumber}`
     );
   }
 }

@@ -26,7 +26,7 @@ import {
   ACTIVE_DURATION,
   CHALLENGE_PERIOD,
   INCLUDED_CHAINS,
-  ORACLE_ADDRESS,
+  oracleAddressMap,
 } from '../../config/appConfig';
 import { RouteNames } from '../MainPage';
 import {
@@ -172,13 +172,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       throw new Error(`chain ${formValues.chainName} not found`);
     }
     const activationTime = 0;
+    const oracle = oracleAddressMap.get(chainId);
+    if (oracle === undefined) {
+      throw new Error(`Oracle address not found for chain ${chainId}`);
+    }
 
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
       title: formValues.title,
       guardian: formValues.guardian,
       description: formValues.description,
-      oracle: ORACLE_ADDRESS,
+      oracle,
       activationTime,
       CHALLENGE_PERIOD: CHALLENGE_PERIOD,
       ACTIVATION_PERIOD: ACTIVATION_PERIOD,

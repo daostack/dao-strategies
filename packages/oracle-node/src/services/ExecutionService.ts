@@ -90,7 +90,9 @@ export class ExecuteService {
 
     const incoming = await this.services.campaign.findPendingRepublish(now);
 
-    appLogger.info(`Check Incoming Republishing ${now}`);
+    appLogger.info(
+      `Check Incoming Republishing ${now} - found: ${JSON.stringify(incoming)}`
+    );
 
     await Promise.all(
       incoming.map(async (uri) => {
