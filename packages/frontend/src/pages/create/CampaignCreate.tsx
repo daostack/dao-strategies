@@ -26,7 +26,7 @@ import {
   ACTIVE_DURATION,
   CHALLENGE_PERIOD,
   INCLUDED_CHAINS,
-  ORACLE_ADDRESS,
+  oracleAddressMap,
 } from '../../config/appConfig';
 import { RouteNames } from '../MainPage';
 import {
@@ -34,6 +34,7 @@ import {
   AppCard,
   AppDateInput,
   AppForm,
+  AppHeading,
   AppInput,
   AppSelect,
   AppTag,
@@ -45,7 +46,7 @@ import {
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
 import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
-import { AddCircle, FormTrash, StatusCritical } from 'grommet-icons';
+import { AddCircle, FormPreviousLink, FormTrash, StatusCritical } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
@@ -57,6 +58,7 @@ import { HEADER_HEIGHT } from '../AppHeader';
 import { Parameter } from './parameter';
 import { Address } from '../../components/Address';
 import { StrategySelector } from './strategy.selector';
+import { DateManager } from '../../utils/date.manager';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -83,22 +85,21 @@ export interface ProcessedFormValues {
 const initChain = ChainsDetails.chains()[0];
 
 const initialValues: CampaignFormValues = {
-  title: '',
-  guardian: '',
+  title: 'sample', // '',
+  guardian: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // '',
   chainName: initChain.name,
-  customAssetAddress: '',
+  customAssetAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
   hasCustomAsset: false,
-  description: '',
+  description: 'A description', // '',
   strategyId: strategies.list()[0].info.id,
-  repositoryFullnames: [],
+  repositoryFullnames: ['pepoospina/js-uprtcl'], //[],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
   customPeriodChoiceTo: '',
 };
 
 const GITHUB_DOMAIN = 'https://www.github.com/';
-
-const DEBUG = true;
+const DEBUG = false;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, chain, switchNetwork, connect } = useLoggedUser();
@@ -171,13 +172,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       throw new Error(`chain ${formValues.chainName} not found`);
     }
     const activationTime = 0;
+    const oracle = oracleAddressMap.get(chainId);
+    if (oracle === undefined) {
+      throw new Error(`Oracle address not found for chain ${chainId}`);
+    }
 
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
       title: formValues.title,
       guardian: formValues.guardian,
       description: formValues.description,
-      oracle: ORACLE_ADDRESS,
+      oracle,
       activationTime,
       CHALLENGE_PERIOD: CHALLENGE_PERIOD,
       ACTIVATION_PERIOD: ACTIVATION_PERIOD,
@@ -253,12 +258,21 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
     if (values.title === '') errors.push('title cannot be empty');
 
-    if (values.guardian === '') errors.push('an admin must be specified');
+    if (!ethers.utils.isAddress(values.guardian)) errors.push('the admin must be a valid ethereum address');
 
     if (values.repositoryFullnames.length === 0) errors.push('no repositories specified');
 
     if (values.hasCustomAsset && !ethers.utils.isAddress(values.customAssetAddress))
       errors.push('custom asset address not correct');
+
+    if (
+      values.livePeriodChoice === periodOptions.get(PeriodKeys.custom) &&
+      (values.customPeriodChoiceFrom === '' ||
+        values.customPeriodChoiceTo === '' ||
+        values.customPeriodChoiceFrom === undefined ||
+        values.customPeriodChoiceTo === undefined)
+    )
+      errors.push(`custom period not specificed`);
 
     setValidated(true);
     setErrors(errors);
@@ -319,7 +333,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const repoButton = ((status) => {
     if (!status.inputIsValid) {
-      return <AddCircle color={theme.primaryLight}></AddCircle>;
+      return <AddCircle color={styleConstants.colors.primaryLight}></AddCircle>;
     }
     // else
     if (status.checking) {
@@ -327,7 +341,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     }
     // else
     if (status.inputExists && status.repoIsNew) {
-      return <AddCircle onClick={() => addRepo(validRepo)} color={theme.primary}></AddCircle>;
+      return <AddCircle onClick={() => addRepo(validRepo)} color={styleConstants.colors.primary}></AddCircle>;
     }
     // else
     if (status.inputDontExist || !status.repoIsNew) {
@@ -337,7 +351,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const addRepo = (repo: string) => {
     formValues.repositoryFullnames.push(getValidName(repo) as string);
-    setFormValues({ ...formValues });
+    onValuesUpdated({ ...formValues });
     repoNameChanged('');
   };
 
@@ -369,7 +383,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       hasErrors: errors.length > 0,
       wrongNetwork: chain !== undefined && chain.id !== chainId,
     };
-  }, [creating, deploying, isLogged, pageIx, periodType, simulating, shares, chainId, chain]);
+  }, [pageIx, periodType, isLogged, simulating, shares, creating, deploying, errors.length, chain, chainId]);
 
   const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
     connect,
@@ -393,7 +407,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const leftText = () => {
     if (pageIx === 0) return 'Cancel';
-    return 'Back';
+    return (
+      <Box direction="row" align="center">
+        <FormPreviousLink style={{ marginRight: '6px' }}></FormPreviousLink>Previous
+      </Box>
+    );
   };
 
   const simulationText =
@@ -432,7 +450,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <FormField
           name="hasCustomAsset"
           label="Reward Tokens"
-          style={{ marginBottom: formValues.hasCustomAsset ? '10px' : '40px' }}>
+          style={{
+            marginBottom: formValues.hasCustomAsset ? '10px' : '40px',
+            fontSize: styleConstants.textFontSizes.small,
+          }}>
           <CheckBox name="hasCustomAsset" label="Use custom asset" />
         </FormField>
 
@@ -536,7 +557,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                 <AppDateInput name="customPeriodChoiceFrom"></AppDateInput>
               </FormField>
               <FormField name="customPeriodChoiceTo" label="To">
-                <AppDateInput name="customPeriodChoiceTo" format="mm/dd/yyyy"></AppDateInput>
+                <AppDateInput name="customPeriodChoiceTo"></AppDateInput>
               </FormField>
             </>
           ) : (
@@ -549,9 +570,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     <Box>
       <Box>
         <Box>
-          <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', margin: '16px 0px 40px 0px' }}>
+          <AppHeading level="3" style={{ margin: '16px 0px 40px 0px' }}>
             Basic Info
-          </Box>
+          </AppHeading>
 
           <TwoColumns>
             <Box>
@@ -563,7 +584,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Campaign Name" text={formValues.title}></Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Description">
-                <ExpansiveParagraph maxHeight={200}>
+                <ExpansiveParagraph maxHeight={100}>
                   {formValues.description !== '' ? formValues.description : '-'}
                 </ExpansiveParagraph>
               </Parameter>
@@ -573,13 +594,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
               <Parameter style={{ marginTop: '40px' }} label="Custom ERC-20 token">
                 {formValues.hasCustomAsset ? (
-                  <Address address={formValues.customAssetAddress[0]} chainId={chainId}></Address>
+                  <Address address={formValues.customAssetAddress} chainId={chainId}></Address>
                 ) : (
                   <>-</>
                 )}
               </Parameter>
 
-              <Parameter label="Guardian ADdress">
+              <Parameter style={{ marginTop: '40px' }} label="Guardian ADdress">
                 <Address address={formValues.guardian} chainId={chainId}></Address>
               </Parameter>
             </Box>
@@ -587,9 +608,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
           <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
 
-          <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', margin: '0px 0px 25px 0px' }}>
+          <AppHeading level="3" style={{ margin: '0px 0px 25px 0px' }}>
             Configuration
-          </Box>
+          </AppHeading>
 
           <TwoColumns>
             <Box>
@@ -599,7 +620,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               <Parameter style={{ marginTop: '40px' }} label="Github Repositories">
                 {formValues.repositoryFullnames.map((name) => {
                   return (
-                    <AppTag>
+                    <AppTag style={{ marginBottom: '12px' }}>
                       <a
                         style={{ textDecoration: 'none', color: styleConstants.colors.ligthGrayText }}
                         target="_blank"
@@ -615,12 +636,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Box>
               <Parameter label="Live Period">
                 <Box justify="start" direction="row">
-                  <Box style={{ width: '100px' }}>From: </Box>
-                  <Box>{finalDetails?.strategyParams.timeRange.start}</Box>
+                  <Box style={{ width: '60px' }}>From: </Box>
+                  <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.start).toString()}</Box>
                 </Box>
                 <Box justify="start" direction="row">
-                  <Box style={{ width: '100px' }}>To: </Box>
-                  <Box>{finalDetails?.strategyParams.timeRange.end}</Box>
+                  <Box style={{ width: '60px' }}>To: </Box>
+                  <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.end).toString()}</Box>
                 </Box>
               </Parameter>
             </Box>
@@ -628,9 +649,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
           <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
 
-          <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', margin: '0px 0px 25px 0px' }}>
+          <AppHeading level="3" margin="0px 0px 25px 0px">
             Contributors Board
-          </Box>
+          </AppHeading>
 
           <Box>
             {status.isSimulating ? (
@@ -638,7 +659,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             ) : shares !== undefined && account !== undefined ? (
               <Box style={{ paddingRight: '16px' }}>
                 <Box style={{ marginBottom: '24px' }}>{shares !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
-                {status.wasSimulated ? <RewardsTable shares={shares} updatePage={updatePage}></RewardsTable> : ''}
+                {status.wasSimulated ? (
+                  <RewardsTable invert shares={shares} updatePage={updatePage}></RewardsTable>
+                ) : (
+                  ''
+                )}
               </Box>
             ) : (
               <Box
@@ -670,7 +695,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       <Box
         justify="start"
         align="center"
-        style={{ marginTop: HEADER_HEIGHT, padding: '2vw 3vw 70px 3vw', fontSize: '14px', width: '100%' }}>
+        style={{ marginTop: HEADER_HEIGHT, padding: '2vw 3vw 70px 3vw', width: '100%' }}>
         <AppCard
           style={{
             padding: '48px 64px 88px 64px',
@@ -700,16 +725,14 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </Box>
 
           <Box style={{ width: '100%', margin: '0px 0px 0px 0px' }}>
-            <Box
+            <AppHeading
+              level="2"
               style={{
-                fontSize: styleConstants.headingFontSizes[1],
-                fontWeight: '700',
                 textAlign: 'left',
-                color: '#0E0F19',
                 margin: '40px 0px 0px 0px',
               }}>
               {heading}
-            </Box>
+            </AppHeading>
             <HorizontalLine style={{ margin: '24px 0px' }}></HorizontalLine>
           </Box>
 
@@ -727,10 +750,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
           <Box style={{ width: '100%' }}>
             <Box direction="row" justify="between" style={{ width: '100%' }}>
-              <AppButton onClick={() => leftClicked()}>{leftText()}</AppButton>
-              <AppButton primary onClick={() => rightAction()} disabled={rightDisabled}>
-                {rightText}
-              </AppButton>
+              <AppButton secondary gray label={leftText()} onClick={() => leftClicked()} />
+              <AppButton primary gray label={rightText} onClick={() => rightAction()} disabled={rightDisabled} />
             </Box>
 
             <Box direction="row" justify="end" style={{ width: '100%' }}>

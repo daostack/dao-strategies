@@ -16,8 +16,9 @@ import {
   Image,
   DateInputExtendedProps,
   DateInput,
+  HeadingExtendedProps,
 } from 'grommet';
-import { Close, FormDown, FormUp } from 'grommet-icons';
+import { Close, FormDown, FormUp, IconProps } from 'grommet-icons';
 import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { styleConstants, theme } from './themes';
@@ -44,22 +45,53 @@ export const AppTag: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   );
 };
 
+export const AppHeading: FC<HeadingExtendedProps> = (props: HeadingExtendedProps) => {
+  return (
+    <Heading {...props} weight="700" margin="none">
+      {props.children}
+    </Heading>
+  );
+};
+
 export interface IValueElement extends IElement {
   value?: string;
 }
 
-export interface IButton extends ButtonExtendedProps {}
+type _type = 'slim' | 'normal' | 'large' | undefined;
+
+export interface IButton extends ButtonExtendedProps {
+  inline?: boolean;
+  _type?: _type;
+  gray?: boolean;
+}
 
 export const AppButton = (props: IButton) => {
+  const style = ((_type: _type): React.CSSProperties => {
+    switch (_type) {
+      case 'slim':
+        return { padding: '8px 16px', borderRadius: '50px' };
+      case 'normal':
+      case undefined:
+        return { padding: '14px 28px', borderRadius: '50px' };
+      default:
+        return {};
+    }
+  })(props._type);
+
+  const newProps = { ...props };
+
+  let textColor = newProps.secondary ? styleConstants.colors.primary : undefined;
+
+  if (props.gray) {
+    newProps.color = newProps.secondary
+      ? styleConstants.colors.lessLightGrayBorder
+      : styleConstants.colors.ligthGrayText;
+    textColor = newProps.secondary ? styleConstants.colors.headingDark : '#ffffff';
+  }
+
   return (
     <>
-      <Button primary={props.primary} style={props.style} disabled={props.disabled} onClick={props.onClick}>
-        <Box pad={{ vertical: 'small', horizontal: 'medium' }}>
-          <Text textAlign="center" weight="bold">
-            {props.children as React.ReactNode[]}
-          </Text>
-        </Box>
-      </Button>
+      <Button {...newProps} style={{ textAlign: 'center', color: textColor, ...style, ...props.style }} />
     </>
   );
 };
@@ -165,7 +197,7 @@ export const AppCallout = styled(Box)`
 `;
 
 const cardStyle: React.CSSProperties = {
-  backgroundColor: '#FBFDFC',
+  backgroundColor: styleConstants.colors.cardBackground,
   border: 'solid 1px',
   borderColor: styleConstants.colors.lightGrayBorder,
   padding: '16px 24px',
@@ -175,10 +207,11 @@ const cardStyle: React.CSSProperties = {
 
 interface AppCardProps extends BoxExtendedProps {}
 
-export const AppCard: FC<AppCardProps> = (props: AppCardProps) => {
+export const AppCard = React.forwardRef<HTMLDivElement, AppCardProps>((props, ref) => {
   return (
     <Box
       {...props}
+      ref={ref}
       style={{
         ...cardStyle,
         ...props.style,
@@ -186,7 +219,7 @@ export const AppCard: FC<AppCardProps> = (props: AppCardProps) => {
       {props.children}
     </Box>
   );
-};
+});
 
 interface IExpansibleParagraph extends IElement {
   maxHeight: number;
@@ -223,24 +256,23 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
           style={{
             display: 'flex',
             flexDirection: 'row',
-            justifyContent: 'start',
+            justifyContent: 'center',
             alignItems: 'end',
             fontWeight: '700',
-            padding: '0px 0px 10px 0px',
+            padding: '0px 0px 0px 0px',
             position: 'absolute',
             width: '100%',
             left: '0',
             bottom: '0',
-            height: '120px',
+            height: '60px',
             cursor: 'pointer',
-            backgroundColor: 'red',
             background: `${
               expanded
                 ? 'none'
-                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
+                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
             }`,
           }}>
-          See more {expanded ? <FormUp></FormUp> : <FormDown></FormDown>}
+          <AppButton inline>{expanded ? 'Show-less' : 'Show-more'}</AppButton>
         </div>
       ) : (
         <></>
@@ -264,7 +296,7 @@ export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
     borderColor: styleConstants.colors.lightGrayBorder,
     backgroundColor: 'white',
     height: '30px',
-    width: '30px',
+    width: '27px',
   };
 
   const iconStyle: React.CSSProperties = { height: '20px', width: '20px' };
@@ -369,8 +401,10 @@ export const NumberedRow: FC<INumberedRow> = (props: INumberedRow) => {
             width: '24px',
             height: '24px',
             borderRadius: '12px',
-            backgroundColor: props.disabled ? theme.primaryLight : theme.buttonLightBorder,
-            color: props.disabled ? '#6D6D6D' : theme.primary,
+            backgroundColor: props.disabled
+              ? styleConstants.colors.primaryLight
+              : styleConstants.colors.buttonLightBorder,
+            color: props.disabled ? '#6D6D6D' : styleConstants.colors.primary,
             textAlign: 'center',
           }}>
           {props.number}
@@ -441,7 +475,7 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
         <Box style={{ marginBottom: '20px' }} onClick={() => close()}>
           <Close style={{ height: '12px', width: '12px' }}></Close>
         </Box>
-        <Heading style={{ fontSize: styleConstants.headingFontSizes[1] }}>{props.heading}</Heading>
+        <AppHeading level="2">{props.heading}</AppHeading>
         {child}
       </Box>
     </Layer>
@@ -480,8 +514,37 @@ export const CampaignIcon: FC<ICampaignIcon> = (props: ICampaignIcon) => {
 export const AppDateInput: FC<DateInputExtendedProps> = (props: DateInputExtendedProps) => {
   return (
     <DateInput
-      calendarProps={{ size: 'small', style: { margin: '0 auto' } }}
+      calendarProps={{ daysOfWeek: true, size: 'small', style: { margin: '0 auto' } }}
+      inputProps={{ style: { fontWeight: 'normal' } }}
       format="mm/dd/yyyy"
       {...props}></DateInput>
+  );
+};
+
+export interface ICircleIcon extends BoxExtendedProps {
+  icon: ReactElement;
+  size?: number;
+}
+
+export const CircleIcon: FC<ICircleIcon> = (props: ICircleIcon) => {
+  const size = props.size || 40;
+  const icon = React.cloneElement(props.icon, {
+    color: props.color || styleConstants.colors.primary,
+    size: `${size * 0.5}px`,
+  });
+  return (
+    <Box
+      justify="center"
+      align="center"
+      style={{
+        height: `${size}px`,
+        width: `${size}px`,
+        borderRadius: `${size / 2}px`,
+        backgroundColor: styleConstants.colors.primaryLight,
+        overflow: 'hidden',
+        ...props.style,
+      }}>
+      {icon}
+    </Box>
   );
 };

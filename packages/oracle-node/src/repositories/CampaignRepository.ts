@@ -335,9 +335,19 @@ export class CampaignRepository {
     const uris = await this.client.campaign.findMany({
       where: {
         registered: true,
-        republishDate: {
-          lte: now,
-        },
+        executed: true,
+        OR: [
+          {
+            republishDate: {
+              lte: now,
+            },
+          },
+          {
+            republishDate: {
+              equals: null,
+            },
+          },
+        ],
       },
       select: {
         uri: true,

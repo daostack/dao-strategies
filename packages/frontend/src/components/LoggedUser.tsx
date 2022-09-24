@@ -22,7 +22,7 @@ export const LoggedUser: FC = () => {
 
   if (account === undefined) {
     return (
-      <AppButton primary onClick={connect}>
+      <AppButton _type="slim" primary onClick={connect}>
         Connect Wallet
       </AppButton>
     );

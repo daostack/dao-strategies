@@ -7,7 +7,7 @@ import { useLoggedUser } from '../hooks/useLoggedUser';
 import { useNow } from '../hooks/useNow';
 import { lockCampaign } from '../pages/campaign.support';
 
-import { AppButton, AppCard } from './styles/BasicElements';
+import { AppButton, AppCard, AppHeading } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
 
 interface IAdvancedCampaign {
@@ -82,36 +82,32 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
     locked,
   };
 
-  const cardsStyle: React.CSSProperties = { width: '100%', minHeight: 'auto', marginBottom: '24px' };
+  const cardsStyle: React.CSSProperties = { width: '100%', marginBottom: '24px' };
 
   return (
     <Box align="center" justify="center" pad="medium">
       <AppCard direction="row" align="center" style={cardsStyle}>
-        <Box
+        <AppHeading
+          level="2"
           style={{
-            fontSize: styleConstants.headingFontSizes[1],
-            fontWeight: '700',
             marginRight: '12px',
-            flexShrink: '0',
           }}>
           {info.nPending}
-        </Box>
+        </AppHeading>
         <Box> contributors have not yet set their payment address and cannot receive their reward (see list)</Box>
       </AppCard>
 
       <AppCard align="start" style={cardsStyle}>
         {info.candidateRoot ? (
           <>
-            <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', marginBottom: '16px' }}>
+            <AppHeading level="3" style={{ marginBottom: '16px' }}>
               New update proposed by the oracle!
-            </Box>
+            </AppHeading>
             <Box style={{ marginBottom: '16px' }}>
               The payment address for another {'N'} contributors has been proposed by the oracle. Will be active in{' '}
               {info.timeToActive}
             </Box>
-            <AppButton style={{ alignSelf: 'center' }} primary>
-              See Update
-            </AppButton>
+            <AppButton label="See Update" style={{ alignSelf: 'center' }} primary />
           </>
         ) : (
           <>
@@ -122,9 +118,9 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
       </AppCard>
 
       <AppCard style={cardsStyle}>
-        <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', marginBottom: '16px' }}>
+        <AppHeading level="3" style={{ marginBottom: '16px' }}>
           Advanced Actions
-        </Box>
+        </AppHeading>
         {!isLogged ? <AppButton onClick={() => connect()}>Connect Wallet</AppButton> : <></>}
         <Box direction="row" justify="between" align="center">
           <Box>{info.locked ? 'Unlock' : 'Lock'} the campaign</Box>

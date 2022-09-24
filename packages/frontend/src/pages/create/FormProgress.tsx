@@ -22,12 +22,12 @@ export const FormProgress: FC<IFormProgress> = (props: IFormProgress) => {
   };
 
   const line = (selected: boolean) => {
-    const color = selected ? theme.primary : styleConstants.colors.lightGrayBorder;
+    const color = selected ? styleConstants.colors.primary : styleConstants.colors.lightGrayBorder;
     return <Box style={{ height: lineWidth, backgroundColor: color, flexGrow: '1' }}></Box>;
   };
 
   const circles = (selected: boolean, ix: number) => {
-    const bg = selected ? theme.primary : styleConstants.colors.lightGrayBorder;
+    const bg = selected ? styleConstants.colors.primary : styleConstants.colors.lightGrayBorder;
     return (
       <Box
         align="center"
@@ -66,7 +66,7 @@ export const FormProgress: FC<IFormProgress> = (props: IFormProgress) => {
       <Box style={{ width: '100%' }} direction="row" align="center">
         {props.stations.map((station, ix) => {
           const selected = ix <= props.position;
-          const color = selected ? theme.primary : styleConstants.colors.ligthGrayText;
+          const color = selected ? styleConstants.colors.primary : styleConstants.colors.ligthGrayText;
           return (
             <>
               <Box style={{ width: `${height}px`, position: 'relative', overflow: 'visible' }}>

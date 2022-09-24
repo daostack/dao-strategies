@@ -32,7 +32,7 @@ export const PageNumber: FC<IPageNumber> = (props: IPageNumber) => {
 };
 
 export interface TableColumn {
-  title: string;
+  title: string | React.ReactNode;
   width?: string;
   show?: boolean;
   align?: 'start' | 'end' | 'center';
@@ -43,6 +43,7 @@ export interface PagedTableI extends BoxExtendedProps {
   columns: TableColumn[];
   rows: (row: number, column: number) => React.ReactElement;
   updatePage: (page: Page) => void;
+  invert?: boolean;
 }
 
 export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
@@ -73,8 +74,22 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
     return <></>;
   }
 
+  const invert = props.invert !== undefined ? props.invert : false;
+  const rowColor = invert ? styleConstants.colors.cardBackground : styleConstants.colors.highlightedLight;
+  const backgroundColor = invert ? styleConstants.colors.highlightedLight : styleConstants.colors.cardBackground;
+
   return (
-    <Box style={{ width: '100%', userSelect: 'none', ...props.style }}>
+    <Box
+      style={{
+        width: '100%',
+        userSelect: 'none',
+        padding: '24px 16px',
+        border: '1px solid',
+        borderColor: styleConstants.colors.lightGrayBorder,
+        borderRadius: '8px',
+        backgroundColor: backgroundColor,
+        ...props.style,
+      }}>
       <Box
         direction="row"
         style={{
@@ -83,12 +98,17 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
           fontSize: '12px',
           fontWeight: '700',
           marginBottom: '26px',
-          padding: '10px 36px',
+          padding: '0px 24px',
+          color: styleConstants.colors.ligthGrayText,
         }}>
-        {props.columns.map((column) => {
+        {props.columns.map((column, ix) => {
           const show = column.show === undefined ? true : column.show;
           return show ? (
-            <Box direction="row" justify={column.align || 'center'} style={{ width: column.width }}>
+            <Box
+              key={ix}
+              direction="row"
+              justify={column.align || 'center'}
+              style={{ width: column.width, textAlign: column.align ? column.align : 'center' }}>
               {column.title}
             </Box>
           ) : (
@@ -110,8 +130,8 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
                 borderRadius: '20px',
                 height: '40px',
                 marginBottom: '16px',
-                padding: '10px 36px',
-                backgroundImage: 'white',
+                padding: '10px 16px',
+                backgroundColor: rowColor,
               }}>
               {Array.from(Array(page.perPage).keys()).map((colIx) => {
                 const column = props.columns[colIx];
@@ -121,7 +141,7 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
                 const show = column.show === undefined ? true : column.show; // Repeated code as above. Changes need to be done in both places
                 return show ? (
                   <Box
-                    key={colIx}
+                    key={`${rowIx}-${colIx}`}
                     direction="row"
                     justify={column.align || 'center'}
                     style={{ width: props.columns[colIx].width, userSelect: 'text' }}>
