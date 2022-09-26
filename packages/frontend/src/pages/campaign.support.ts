@@ -171,6 +171,8 @@ export const deployCampaign = async (
   const uriHex = ethers.utils.hexlify(uriCid.multihash.digest);
   const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Date.now().toString())); // uriHex;
 
+  console.log(`campaignFactory.createCampaign`, { uriHex, createDetails });
+
   const ex = await campaignFactory.createCampaign(
     uriHex,
     createDetails.guardian,

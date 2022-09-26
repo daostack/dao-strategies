@@ -96,23 +96,29 @@ export class PriceService {
       return undefined;
     }
 
-    const assetId = ((): string => {
-      switch (asset.id) {
+    const coingeckoName = ((id: string): string => {
+      switch (id) {
         case 'ether':
           return 'ethereum';
         case 'dai':
           return 'dai';
         case 'usdc':
           return 'usd-coin';
+        default:
+          return undefined;
       }
-    })();
+    })(asset.id);
+
+    if (coingeckoName === undefined) {
+      return undefined;
+    }
 
     const vs = 'usd';
 
     get = new Promise<AssetPrice>((resolve, reject) => {
       /* eslint-disable */
       void fetch(
-        `${COINGECKO_URL}/simple/price?ids=${assetId}&vs_currencies=${vs}`,
+        `${COINGECKO_URL}/simple/price?ids=${coingeckoName}&vs_currencies=${vs}`,
         {
           method: 'get',
           headers: { 'Content-Type': 'application/json' },
@@ -127,9 +133,10 @@ export class PriceService {
             }
 
             const price =
-              result[assetId] === undefined || result[assetId][vs] === undefined
+              result[coingeckoName] === undefined ||
+              result[coingeckoName][vs] === undefined
                 ? 0
-                : result[assetId][vs];
+                : result[coingeckoName][vs];
 
             resolve({
               address,

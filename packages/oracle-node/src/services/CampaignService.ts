@@ -66,6 +66,9 @@ export class CampaignService {
   /** keep track of campaigns which are being run */
   running: Map<string, Promise<SharesRead>> = new Map();
 
+  /** keep track of campaigns which are being published */
+  publishing: Map<string, Promise<void>> = new Map();
+
   /** Co-dependency between CampaignService and CampaignOnChainService :( */
   protected readDataService: ReadDataService;
 
@@ -240,63 +243,83 @@ export class CampaignService {
 
   /**  */
   async publishCampaign(uri: string): Promise<void> {
-    appLogger.info(`publishCampaign: ${uri}`);
-    const campaign = await this.get(uri);
-    /**
-     * computeRoot will also save the root as a new campaign root if different from
-     * the previous one
-     */
-    const rootDetails = await this.computeRoot(campaign);
-
-    const publishInfo = await this.readDataService.getPublishInfo(
-      campaign.address,
-      campaign.chainId
-    );
-
-    appLogger.debug(
-      `publishCampaign: rootDetails: ${JSON.stringify(
-        rootDetails
-      )} - publishInfo: ${JSON.stringify(publishInfo)}`
-    );
-
-    if (
-      rootDetails.root !== publishInfo.status.approvedRoot &&
-      rootDetails.root !== publishInfo.status.pendingRoot &&
-      publishInfo.status.isProposeWindowActive
-    ) {
-      appLogger.debug(`publishCampaign - root: ${rootDetails.root}`);
-      await this.sendTransactionService.publishShares(
-        campaign.address,
-        campaign.chainId,
-        rootDetails.root
-      );
-
-      await this.campaignRepo.setPublished(uri, true, this.timeService.now());
-    } else {
-      appLogger.debug(
-        `publishCampaign skipped, merkle root not new: ${rootDetails.root}`
-      );
+    if (this.publishing.has(uri)) {
+      appLogger.warn(`publishCampaign reentered ${uri}`);
+      return this.publishing.get(uri);
     }
 
-    /** republishing is configured when publishing if there were pending shareholders */
-    if (rootDetails.totalPending > 0) {
-      if (!publishInfo.status.locked) {
-        /**
-         * schedule to republish when oracle clock reaches the publish start. Add a margin to make sure
-         * that the onchain clock will also hold the time-based condition.
-         */
-        if (publishInfo.derived === undefined)
-          throw new Error(
-            'publish info does not include the derived parameters'
-          );
+    const publish = async (): Promise<void> => {
+      appLogger.info(`publishCampaign: ${uri}`);
+      const campaign = await this.get(uri);
+      /**
+       * computeRoot will also save the root as a new campaign root if different from
+       * the previous one
+       */
+      const rootDetails = await this.computeRoot(campaign);
 
-        appLogger.debug(`publishCampaign - configuring republish ${uri} `);
-        await this.campaignRepo.setRepublishDate(
-          uri,
-          publishInfo.derived.nextWindowStarts + this.config.republishTimeMargin
+      const publishInfo = await this.readDataService.getPublishInfo(
+        campaign.address,
+        campaign.chainId
+      );
+
+      appLogger.debug(
+        `publishCampaign: rootDetails: ${JSON.stringify(
+          rootDetails
+        )} - publishInfo: ${JSON.stringify(publishInfo)}`
+      );
+
+      if (
+        rootDetails.root !== publishInfo.status.approvedRoot &&
+        rootDetails.root !== publishInfo.status.pendingRoot &&
+        publishInfo.status.isProposeWindowActive
+      ) {
+        appLogger.debug(`publishCampaign - root: ${rootDetails.root}`);
+        await this.sendTransactionService.publishShares(
+          campaign.address,
+          campaign.chainId,
+          rootDetails.root
+        );
+
+        await this.campaignRepo.setPublished(uri, true, this.timeService.now());
+      } else {
+        appLogger.debug(
+          `publishCampaign skipped, merkle root not new: ${rootDetails.root}`
         );
       }
+
+      /** republishing is configured when publishing if there were pending shareholders */
+      if (rootDetails.totalPending > 0) {
+        if (!publishInfo.status.locked) {
+          /**
+           * schedule to republish when oracle clock reaches the publish start. Add a margin to make sure
+           * that the onchain clock will also hold the time-based condition.
+           */
+          if (publishInfo.derived === undefined)
+            throw new Error(
+              'publish info does not include the derived parameters'
+            );
+
+          appLogger.debug(`publishCampaign - configuring republish ${uri} `);
+          await this.campaignRepo.setRepublishDate(
+            uri,
+            publishInfo.derived.nextWindowStarts +
+              this.config.republishTimeMargin
+          );
+        }
+      }
+    };
+
+    const publishing = publish();
+    this.publishing.set(uri, publishing);
+
+    try {
+      await publishing;
+    } catch (e) {
+      appLogger.error(`Error publishing shares to ${uri}`);
+      console.error(e);
     }
+
+    this.publishing.delete(uri);
   }
 
   isPendingExecution(uri: string, now: number): Promise<boolean> {

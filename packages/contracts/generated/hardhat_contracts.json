@@ -5,8 +5,19 @@
       "chainId": "5",
       "contracts": {
         "Campaign": {
-          "address": "0x53D9B16816b4327972179CFa29d9F8e15b1408fd",
+          "address": "0x156E17D51a2B9020F2085Cf12678E2b83251ffb0",
           "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "blockTime",
+                  "type": "uint256"
+                }
+              ],
+              "name": "ChallengePeriodActive",
+              "type": "error"
+            },
             {
               "inputs": [],
               "name": "InvalidProof",
@@ -15,11 +26,6 @@
             {
               "inputs": [],
               "name": "Locked",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "MerkleRootUpdateNotAllowed",
               "type": "error"
             },
             {
@@ -38,13 +44,30 @@
               "type": "error"
             },
             {
-              "inputs": [],
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "blockTime",
+                  "type": "uint256"
+                }
+              ],
               "name": "OnlyInChallengePeriod",
               "type": "error"
             },
             {
               "inputs": [],
               "name": "OnlyOracle",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "blockTime",
+                  "type": "uint256"
+                }
+              ],
+              "name": "ProposeWindowNotActive",
               "type": "error"
             },
             {
@@ -308,6 +331,27 @@
               "type": "function"
             },
             {
+              "inputs": [],
+              "name": "checkChallengePeriod",
+              "outputs": [],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "checkMerkleRootUpdateAllowed",
+              "outputs": [],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "checkProposeWindowActive",
+              "outputs": [],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [
                 {
                   "internalType": "address",
@@ -519,19 +563,6 @@
             {
               "inputs": [],
               "name": "locked",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "merkleRootUpdateAllowed",
               "outputs": [
                 {
                   "internalType": "bool",
@@ -764,7 +795,7 @@
           ]
         },
         "CampaignFactory": {
-          "address": "0xDdd9b62b6d0d508139FB381566A80748FEF55145",
+          "address": "0x3f47eD290108EA908442641dA0eD7083772B7f35",
           "abi": [
             {
               "inputs": [
@@ -971,6 +1002,17 @@
           "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
           "abi": [
             {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "blockTime",
+                  "type": "uint256"
+                }
+              ],
+              "name": "ChallengePeriodActive",
+              "type": "error"
+            },
+            {
               "inputs": [],
               "name": "InvalidProof",
               "type": "error"
@@ -978,11 +1020,6 @@
             {
               "inputs": [],
               "name": "Locked",
-              "type": "error"
-            },
-            {
-              "inputs": [],
-              "name": "MerkleRootUpdateNotAllowed",
               "type": "error"
             },
             {
@@ -1001,13 +1038,30 @@
               "type": "error"
             },
             {
-              "inputs": [],
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "blockTime",
+                  "type": "uint256"
+                }
+              ],
               "name": "OnlyInChallengePeriod",
               "type": "error"
             },
             {
               "inputs": [],
               "name": "OnlyOracle",
+              "type": "error"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "blockTime",
+                  "type": "uint256"
+                }
+              ],
+              "name": "ProposeWindowNotActive",
               "type": "error"
             },
             {
@@ -1271,6 +1325,27 @@
               "type": "function"
             },
             {
+              "inputs": [],
+              "name": "checkChallengePeriod",
+              "outputs": [],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "checkMerkleRootUpdateAllowed",
+              "outputs": [],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "checkProposeWindowActive",
+              "outputs": [],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [
                 {
                   "internalType": "address",
@@ -1482,19 +1557,6 @@
             {
               "inputs": [],
               "name": "locked",
-              "outputs": [
-                {
-                  "internalType": "bool",
-                  "name": "",
-                  "type": "bool"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "merkleRootUpdateAllowed",
               "outputs": [
                 {
                   "internalType": "bool",

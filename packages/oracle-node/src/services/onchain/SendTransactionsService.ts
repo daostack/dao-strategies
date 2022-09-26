@@ -14,6 +14,7 @@ export const ZERO_BYTES32 =
 
 export class SendTransactionService {
   readonly campaignFactory: Typechain.CampaignFactory;
+  private publishing: Map<string, Promise<void>> = new Map();
 
   constructor(protected providers: ChainProviders) {}
 
@@ -71,22 +72,46 @@ export class SendTransactionService {
     chainId: number,
     root: string
   ): Promise<void> {
-    const signer = this.providers.get(chainId).signer;
-    const signerAddress = await signer.getAddress();
+    const unique = `${chainId}-${address}-${root}`;
 
-    const campaign = campaignInstance(address, signer);
-    appLogger.info(
-      `OnChainService - publishShares, 
-        address: ${address}, 
-        root: ${root}, 
-        chainId: ${chainId}, 
-        signer: ${signerAddress}`
-    );
-    const tx = await campaign.proposeShares(root, ZERO_BYTES32);
-    const rec = await tx.wait();
+    if (this.publishing.has(unique)) {
+      appLogger.warn(
+        `OnChainService - publishShares - reentered, 
+          unique: ${unique}`
+      );
+      return this.publishing.get(unique);
+    }
 
-    appLogger.info(
-      `OnChainService - publishedShares! block: ${rec.blockNumber}`
-    );
+    const publish = async (): Promise<void> => {
+      const signer = this.providers.get(chainId).signer;
+      const signerAddress = await signer.getAddress();
+
+      const campaign = campaignInstance(address, signer);
+      appLogger.info(
+        `OnChainService - publishShares, 
+          address: ${address}, 
+          root: ${root}, 
+          chainId: ${chainId}, 
+          signer: ${signerAddress}`
+      );
+      const tx = await campaign.proposeShares(root, ZERO_BYTES32);
+      const rec = await tx.wait();
+
+      appLogger.info(
+        `OnChainService - publishedShares! block: ${rec.blockNumber}`
+      );
+    };
+
+    const publishing = publish();
+    this.publishing.set(unique, publishing);
+
+    try {
+      await publishing;
+    } catch (e) {
+      appLogger.error(`error publishing ${unique}`);
+      console.error(e);
+    }
+
+    this.publishing.delete(unique);
   }
 }
