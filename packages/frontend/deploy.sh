@@ -17,6 +17,6 @@ cp -r ./build/* ./stage
 bucket="s3://app.commonvalue.xyz"
 echo $bucket;
 
-aws s3 sync ./stage "$bucket" --profile commonvalue
+aws s3 sync --delete ./stage "$bucket" --profile commonvalue
 
 rm -rf ./stage

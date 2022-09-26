@@ -28,4 +28,5 @@ export const ACTIVE_DURATION = 1 * MINUTES; // 1 * DAYS;
 export const ACTIVATION_PERIOD = 5 * MINUTES; // 7 * DAYS;
 export const ALCHEMY_GOERLI_KEY = 'aQapGNEneTscr5ixwb05r-J-OWEEwQvF';
 
-export const INCLUDED_CHAINS = [1337, 5];
+// export const INCLUDED_CHAINS = [1337, 5];
+export const INCLUDED_CHAINS = [5];
