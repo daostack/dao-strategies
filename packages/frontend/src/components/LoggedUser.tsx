@@ -31,13 +31,14 @@ export const LoggedUser: FC = () => {
   const option = (key: number) => {
     switch (key) {
       case 0:
-        return githubAccount ? (
-          <Box pad="small">{imageAndText('/images/Github.png', `linked from @${githubAccount.split(':')[1]}`)}</Box>
-        ) : (
+        return (
           <Box onClick={() => setShowLinkGithub(true)} pad="small">
-            {imageAndText('/images/Github.png', 'link account')}
+            {githubAccount
+              ? imageAndText('/images/Github.png', `linked from @${githubAccount.split(':')[1]}`)
+              : imageAndText('/images/Github.png', 'link account')}
           </Box>
         );
+
       case 1:
         return (
           <Box onClick={() => startLogout()} pad="small">

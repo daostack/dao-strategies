@@ -64,7 +64,11 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
 
   const startLogout = async () => {
     /** destroy session */
-    await logout();
+    try {
+      await logout();
+    } catch (e) {
+      console.error(e);
+    }
     /** disconnect */
     disconnect();
     /** clear user details */
