@@ -310,6 +310,7 @@ export class CampaignService {
     };
 
     const publishing = publish();
+    this.publishing.set(uri, publishing);
 
     try {
       await publishing;
