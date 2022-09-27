@@ -99,11 +99,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       </ViewportContainer>
     );
 
-  const valueLocked =
-    otherDetails && otherDetails.balances
-      ? truncate(ChainsDetails.valueOfAssets(otherDetails.balances).toString(), 2)
-      : '0';
-
   const assets = otherDetails && otherDetails.balances ? otherDetails.balances : [];
 
   const customAsset =
@@ -256,7 +251,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             setShowFund(false);
             getOtherDetails();
           }}>
-          <FundCampaign assets={assets} chainId={campaign.chainId} address={campaign.address}></FundCampaign>
+          <FundCampaign
+            assets={assets}
+            defaultAsset={customAsset}
+            chainId={campaign.chainId}
+            address={campaign.address}></FundCampaign>
         </AppModal>
       ) : (
         <></>
@@ -266,8 +265,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         style={{ padding: '24px' }}
         title="Rewards Raised"
         assets={otherDetails?.balances}
-        value={valueLocked}
-        symbol="$"
+        preferred={customAsset?.id}
         action={
           <AppButton
             secondary

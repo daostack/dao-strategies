@@ -1,18 +1,17 @@
 import { TokenBalance } from '@dao-strategies/core';
 import { Box, BoxExtendedProps, Tip } from 'grommet';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ReactElement } from 'react';
 import { AssetBalance } from '../../components/Assets';
 import { AppCard } from '../../components/styles/BasicElements';
 import { styleConstants } from '../../components/styles/themes';
+import { AssetsValue } from '../../components/Assets';
 
 interface BalanceCardProps extends BoxExtendedProps {
   title: string;
   subtitle?: ReactElement;
-  value: string;
-  symbol?: string;
-  coin?: string;
   assets?: TokenBalance[];
+  preferred?: string;
   action?: ReactElement;
 }
 
@@ -45,22 +44,11 @@ export const BalanceCard = React.forwardRef<HTMLDivElement, BalanceCardProps>((p
             )}
           </Box>
         }>
-        <Box
-          style={{
-            margin: '16px 0px 24px 0px',
-            fontSize: '32px',
-            borderBottom: '2px dashed',
-            borderColor: styleConstants.colors.lightGrayBorder,
-            paddingBottom: '4px',
-          }}>
-          {props.value !== '0' ? (
-            <>
-              {props.symbol} {props.value} {props.coin}
-            </>
-          ) : (
-            '--'
-          )}
-        </Box>
+        <AssetsValue
+          style={{ margin: '16px 0px 24px 0px' }}
+          assets={props.assets}
+          preferred={props.preferred}
+          type="card"></AssetsValue>
       </Tip>
       {props.action !== undefined ? props.action : <></>}
     </AppCard>

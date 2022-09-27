@@ -118,8 +118,6 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
             <ChainTag style={{ margin: '18px 0px' }} chain={chain}></ChainTag>
           </>
         }
-        value={claimValue}
-        symbol="$"
         assets={status.claim?.assets}
         action={
           canClaim ? (
