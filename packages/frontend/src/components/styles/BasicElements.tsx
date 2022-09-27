@@ -43,7 +43,7 @@ export interface IValueElement extends IElement {
   value?: string;
 }
 
-export interface IButton extends ButtonExtendedProps {}
+export interface IButton extends ButtonExtendedProps { }
 
 export const AppButton = (props: IButton) => {
   return (
@@ -71,19 +71,7 @@ export const AppTextArea = TextArea;
 
 export const AppSelect = Select;
 
-export const AppFileInput: FC = (props: IElement) => (
-  <Box fill justify="start">
-    <FileInput
-      onChange={(event, el: any) => {
-        const fileList = el.files;
-        for (let i = 0; i < fileList.length; i += 1) {
-          const file = fileList[i];
-          console.log(file.name);
-        }
-      }}
-    />
-  </Box>
-);
+
 
 export const AppCallout = styled(Box)`
   text-align: center;
@@ -104,7 +92,7 @@ const cardStyle: React.CSSProperties = {
   minHeight: '122px',
 };
 
-interface AppCardProps extends BoxExtendedProps {}
+interface AppCardProps extends BoxExtendedProps { }
 
 export const AppCard: FC<AppCardProps> = (props: AppCardProps) => {
   return (
@@ -165,11 +153,10 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
             height: '120px',
             cursor: 'pointer',
             backgroundColor: 'red',
-            background: `${
-              expanded
-                ? 'none'
-                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
-            }`,
+            background: `${expanded
+              ? 'none'
+              : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
+              }`,
           }}>
           See more {expanded ? <FormUp></FormUp> : <FormDown></FormDown>}
         </div>

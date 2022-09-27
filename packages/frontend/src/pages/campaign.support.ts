@@ -201,11 +201,23 @@ export const deployCampaign = async (
 export const registerCampaign = async (uri: string, details: CampaignCreateDetails) => {
   /** a deployed campaign is registered in the backend */
 
-  await fetch(ORACLE_NODE_URL + `/campaign/register/${uri}`, {
+  const registerCampaignRequest = fetch(ORACLE_NODE_URL + `/campaign/register/${uri}`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(details),
     credentials: 'include',
+  });
+
+  const uploadCampaignLogoRequest = fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(details),
+    credentials: 'include',
+  });
+
+  Promise.all([registerCampaignRequest, uploadCampaignLogoRequest]).then((results) => {
+
+    console.log(`Results: ${results}`);
   });
 };
 

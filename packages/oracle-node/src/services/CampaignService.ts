@@ -20,10 +20,12 @@ import {
   Share,
 } from '@prisma/client';
 import { ethers } from 'ethers';
+import * as fs from 'fs';
 
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
+import { CAMPAIGN_ASSET_BUCKET, s3 } from '../utils/awsClient';
 
 import { campaignToUriDetails } from './CampaignUri';
 import { IndexingService } from './onchain/IndexService';
@@ -79,7 +81,7 @@ export class CampaignService {
     protected strategyComputation: IStrategyComputation,
     protected sendTransactionService: SendTransactionService,
     protected config: CampaigServiceConfig
-  ) {}
+  ) { }
 
   setOnChainRead(_readData: ReadDataService): void {
     this.readDataService = _readData;
@@ -487,6 +489,32 @@ export class CampaignService {
   ): Promise<void> {
     await this.campaignRepo.setDetails(uri, details, by);
   }
+
+  async uploadLogoToS3(
+    logo: any,
+    uri: string,
+    by: string
+  ): Promise<void> {
+    // check if eligable (if person who creates campaign is same that uploads logo)
+    const campaign = await this.get(uri);
+    if (campaign.creatorId !== by) {
+      throw new Error('campaign logo can only be set by campaign creator')
+    }
+    // rename logo file to ${campaignId}{timestamp}
+    const fileStream = fs.createReadStream(logo.path);
+    const params = {
+      Bucket: CAMPAIGN_ASSET_BUCKET,
+      Key: `${uri}${this.timeService.now()}`,
+      Body: fileStream,
+    };
+    // upload to s3 and get back url
+    const uploadResult = await s3.upload(params).promise();
+    console.log(uploadResult.Location)
+    // store logo url in campaigns row
+    this.campaignRepo.set
+    console.log('upload to s3')
+  }
+
 
   setExecuted(uri: string): Promise<void> {
     return this.campaignRepo.setExecuted(uri, true);

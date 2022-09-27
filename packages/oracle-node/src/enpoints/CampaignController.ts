@@ -11,6 +11,7 @@ import {
   CampaignReadDetails,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
+import { FileArray } from 'express-fileupload';
 
 import { ServiceManager } from '../service.manager';
 
@@ -123,6 +124,26 @@ export class CampaignController extends Controller {
     await this.manager.execution.executeAndPublish(
       request.params.uri as string,
       now
+    );
+  }
+
+  async uploadLogo(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<void> {
+    if (!request.files || !request.files.logo) {
+      throw new Error('no files uploaded or no input named "logo" found, cant process with upload to s3');
+    }
+    if (!request.body) {
+      throw new Error('no campaign specified in body, cant create a unique URI for campaigns logo');
+    }
+
+    await this.manager.services.campaign.uploadLogoToS3(
+      request.files as FileArray,
+      request.params.uri as string, //uri is the campaignID
+      loggedUser
     );
   }
 

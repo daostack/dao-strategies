@@ -18,7 +18,6 @@ import { ACTIVATION_PERIOD, ACTIVE_DURATION, CHALLENGE_PERIOD, ORACLE_ADDRESS } 
 import { RouteNames } from '../MainPage';
 import {
   AppButton,
-  AppFileInput,
   AppForm,
   AppInput,
   AppSelect,
@@ -34,6 +33,8 @@ import { FormStatus, getButtonActions } from './buttons.actions';
 import { useNow } from '../../hooks/useNow';
 import { useUserError } from '../../hooks/useErrorContext';
 import { ethers } from 'ethers';
+import { LogoUpload } from '../../components/LogoUpload';
+import { generateKey } from '../../utils/general';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -42,6 +43,7 @@ export interface ICampaignCreateProps {
 export interface CampaignFormValues {
   title: string;
   description: string;
+  logoUrl: string | undefined;
   customAssetAddress: string;
   hasCustomAsset: boolean;
   chainName: string;
@@ -61,6 +63,7 @@ const initChain = ChainsDetails.chains()[0];
 const initialValues: CampaignFormValues = {
   title: 'My Campaign',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+  logoUrl: undefined,
   chainName: initChain.name,
   customAssetAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
   hasCustomAsset: true,
@@ -194,6 +197,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   /** Hook called everytime any field in the form is updated, it keeps the formValues state in synch */
   const onValuesUpdated = (values: CampaignFormValues) => {
+    console.log(values)
     if (DEBUG) console.log('CampaignCreate - onValuesUpdated()');
     if (validated) {
       // validate every change after the first time
@@ -305,18 +309,20 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     periodType === PeriodType.retroactive
       ? `The rewards for this campaign will be:`
       : periodType === PeriodType.ongoing
-      ? `So far, the rewards for this campaign would be. Final rewards will be computed once the campaign ends.`
-      : '';
+        ? `So far, the rewards for this campaign would be. Final rewards will be computed once the campaign ends.`
+        : '';
 
   const pages: React.ReactNode[] = [
     <Box>
       <>
         <FormField name="title" label="Give this Campaign a name" style={{ borderStyle: 'none' }}>
+          {/* Campaigns Title Field */}
           <AppInput
             name="title"
             style={{ border: '1px solid #F0EDED', width: '50vw', borderRadius: '20px' }}></AppInput>
         </FormField>
         <FormField name="description" label="Describe what it is about">
+          {/* Campaigns Description Field */}
           <AppTextArea
             placeholder="Make it something epic!"
             name="description"
@@ -328,7 +334,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               overflow: 'hidden',
             }}></AppTextArea>
         </FormField>
-        <FormField label="Logo" name="file" component={AppFileInput} style={{ width: '16rem' }} />
+        {/* Upload Logo Component, responsible for cropping, uploading a campaigns logo */}
+        <LogoUpload />
+        {/* Guardian Address Input Field */}
         <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
           <AppInput
             name="guardian"
@@ -373,7 +381,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <>
           {formValues.repositoryFullnames.map((repo) => {
             return (
-              <Box direction="row">
+              <Box key={generateKey('repos')} direction="row">
                 <a target="_blank" href={`${GITHUB_DOMAIN}${repo}`} rel="noreferrer">
                   {repo}
                 </a>
