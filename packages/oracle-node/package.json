@@ -20,7 +20,6 @@
     "@dao-strategies/core": "^0.0.0",
     "@octokit/plugin-paginate-rest": "^2.18.0",
     "@prisma/client": "^3.13.0",
-    "@types/express-fileupload": "^1.4.1",
     "@types/jest": "^28.1.0",
     "aws-sdk": "^2.1223.0",
     "body-parser": "^1.19.1",

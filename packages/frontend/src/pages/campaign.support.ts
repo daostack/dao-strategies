@@ -148,8 +148,10 @@ export const deployCampaign = async (
   campaignFactory: Typechain.CampaignFactory,
   uri: string | undefined,
   createDetails: CampaignCreateDetails,
-  details: CampaignUriDetails | undefined
+  details: CampaignUriDetails | undefined,
+  logo: any,
 ) => {
+  console.log('deployCampaign logo status', logo)
   let uriDefined;
   if (uri !== undefined) {
     uriDefined = uri;
@@ -194,12 +196,13 @@ export const deployCampaign = async (
 
   console.log('campaign contract deployed', { address });
 
-  await registerCampaign(uriDefined, createDetails);
+  await registerCampaign(uriDefined, createDetails, logo);
   return address;
 };
-
-export const registerCampaign = async (uri: string, details: CampaignCreateDetails) => {
+//check type
+export const registerCampaign = async (uri: string, details: CampaignCreateDetails, logo: any) => {
   /** a deployed campaign is registered in the backend */
+  console.log('registerCampaign logo status', logo)
 
   const registerCampaignRequest = fetch(ORACLE_NODE_URL + `/campaign/register/${uri}`, {
     method: 'post',
@@ -208,15 +211,18 @@ export const registerCampaign = async (uri: string, details: CampaignCreateDetai
     credentials: 'include',
   });
 
+  const formData = new FormData();
+  //logo is actually a file list so therefore access the first item in the filelist
+  formData.append('logo', logo[0]);
+  console.log('append logo ', logo[0]);
+
   const uploadCampaignLogoRequest = fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
     method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(details),
+    body: formData,
     credentials: 'include',
   });
 
   Promise.all([registerCampaignRequest, uploadCampaignLogoRequest]).then((results) => {
-
     console.log(`Results: ${results}`);
   });
 };

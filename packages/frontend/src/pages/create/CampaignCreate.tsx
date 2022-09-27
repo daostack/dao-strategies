@@ -1,4 +1,4 @@
-import { Box, CheckBox, DateInput, FormField, Layer, Paragraph, Spinner, Text, TextInput } from 'grommet';
+import { Box, CheckBox, DateInput, FileInput, FormField, Layer, Paragraph, Spinner, Text, TextInput } from 'grommet';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,7 +43,7 @@ export interface ICampaignCreateProps {
 export interface CampaignFormValues {
   title: string;
   description: string;
-  logoUrl: string | undefined;
+  logo: any | undefined;
   customAssetAddress: string;
   hasCustomAsset: boolean;
   chainName: string;
@@ -63,7 +63,7 @@ const initChain = ChainsDetails.chains()[0];
 const initialValues: CampaignFormValues = {
   title: 'My Campaign',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-  logoUrl: undefined,
+  logo: undefined,
   chainName: initChain.name,
   customAssetAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
   hasCustomAsset: true,
@@ -77,7 +77,7 @@ const initialValues: CampaignFormValues = {
 
 const GITHUB_DOMAIN = 'https://www.github.com/';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, connect } = useLoggedUser();
@@ -146,6 +146,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       customAssets: formValues.hasCustomAsset ? [formValues.customAssetAddress] : [],
     };
 
+
     if (shares === undefined) {
       throw new Error(`shares undefined`);
     }
@@ -154,7 +155,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     /** if the campaign was not simulated it must be created first */
     try {
       setCreating(true);
-      const campaignAddress = await deployCampaign(campaignFactory, shares.uri, otherDetails, finalDetails);
+      const campaignAddress = await deployCampaign(campaignFactory, shares.uri, otherDetails, finalDetails, formValues.logo);
 
       setCreating(false);
       navigate(RouteNames.Campaign(campaignAddress));
@@ -177,7 +178,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   /** single wrapper of setFormValues to detect details changes */
   const setFormValues = (nextFormValues: CampaignFormValues) => {
     if (formValues === undefined) return;
-
     const oldDetails = strategyDetails(formValues, now, account);
 
     /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
@@ -196,9 +196,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   /** Hook called everytime any field in the form is updated, it keeps the formValues state in synch */
-  const onValuesUpdated = (values: CampaignFormValues) => {
-    console.log(values)
-    if (DEBUG) console.log('CampaignCreate - onValuesUpdated()');
+  const onValuesUpdated = async (values: CampaignFormValues) => {
+    if (DEBUG) console.log('CampaignCreate - onValuesUpdated()', values);
+    if (!values.logo) {
+
+    }
     if (validated) {
       // validate every change after the first time
       validate(values);
@@ -335,7 +337,18 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             }}></AppTextArea>
         </FormField>
         {/* Upload Logo Component, responsible for cropping, uploading a campaigns logo */}
-        <LogoUpload />
+        <FormField name="logo" label="Logo of the campaign">
+          <FileInput
+            name="logo"
+            multiple={false}
+            accept="image/png, image/webp, image/jpeg"
+            messages={{
+              dropPrompt: 'Drop logo here',
+              // browse: numFiles > 0 ? 'Replace Logo' : 'Select Logo',
+            }}
+            style={{ width: 'fill', borderRadius: '50px' }}
+          />
+        </FormField>
         {/* Guardian Address Input Field */}
         <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
           <AppInput

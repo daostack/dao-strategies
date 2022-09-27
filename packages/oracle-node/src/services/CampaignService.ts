@@ -497,9 +497,10 @@ export class CampaignService {
   ): Promise<void> {
     // check if eligable (if person who creates campaign is same that uploads logo)
     const campaign = await this.get(uri);
-    if (campaign.creatorId !== by) {
-      throw new Error('campaign logo can only be set by campaign creator')
-    }
+    console.log('campaign.creatorId ', campaign.creatorId, ' BY ', by)
+    // if (campaign.creatorId !== by) {
+    //   throw new Error('campaign logo can only be set by campaign creator')
+    // }
     // rename logo file to ${campaignId}{timestamp}
     const fileStream = fs.createReadStream(logo.path);
     const params = {
@@ -509,9 +510,9 @@ export class CampaignService {
     };
     // upload to s3 and get back url
     const uploadResult = await s3.upload(params).promise();
-    console.log(uploadResult.Location)
+    console.log('S3 LOCATION', uploadResult.Location)
     // store logo url in campaigns row
-    this.campaignRepo.set
+    // this.campaignRepo.
     console.log('upload to s3')
   }
 

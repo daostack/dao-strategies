@@ -15,7 +15,6 @@ export const LogoUpload: FC<LogoUploadI> = (props: LogoUploadI) => {
         if (!logo) throw new Error('no file selected, cant proceed logo upload')
         const formData = new FormData();
         formData.append("logo", logo);
-
     }
 
     return (

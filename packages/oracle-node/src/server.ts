@@ -74,9 +74,7 @@ app.use(
 app.use(bodyParser.json());
 
 /** enable files upload */
-app.use(fileUpload({
-  createParentPath: true
-}));
+app.use(fileUpload({ debug: true }));
 
 /** Services instantiation */
 const manager = new ServiceManager(config);
@@ -89,9 +87,8 @@ Routes.forEach((route) => {
     route.route,
     async (req: Request, res: Response, next: Function) => {
       try {
-        //TODO: TS ERROR - Property 'session' does not exist on type 'Request' bla bla
         const loggedUser: string | undefined =
-          (req as any).session?.siwe?.address.toLowerCase();
+          req.session?.siwe?.address.toLowerCase();
 
         if (route.protected) {
           if (loggedUser === undefined) {

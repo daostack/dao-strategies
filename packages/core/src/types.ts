@@ -31,7 +31,7 @@ export interface CampaignUriDetails {
 export interface CampaignCreateDetails {
   title: string;
   description: string;
-  formData: FormData;
+  logo: any;
   guardian: string;
   oracle: string;
   activationTime: number;

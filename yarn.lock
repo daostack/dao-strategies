@@ -2944,7 +2944,6 @@ __metadata:
     "@dao-strategies/core": ^0.0.0
     "@octokit/plugin-paginate-rest": ^2.18.0
     "@prisma/client": ^3.13.0
-    "@types/express-fileupload": ^1.4.1
     "@types/jest": ^28.1.0
     "@types/node": ^16.11.10
     "@types/node-fetch": ^2.6.2
@@ -6139,15 +6138,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/busboy@npm:*":
-  version: 1.5.0
-  resolution: "@types/busboy@npm:1.5.0"
-  dependencies:
-    "@types/node": "*"
-  checksum: ffa7bf25c0395f6927526b7d97e70cd2df789e4ca0d231e41855fb08542fa236891ce457d83cc50cac6e5cef6be092ab80597070dcf1413f736462690a23e987
-  languageName: node
-  linkType: hard
-
 "@types/chai@npm:*, @types/chai@npm:^4.3.0":
   version: 4.3.3
   resolution: "@types/chai@npm:4.3.3"
@@ -6221,16 +6211,6 @@ __metadata:
   version: 0.0.51
   resolution: "@types/estree@npm:0.0.51"
   checksum: e56a3bcf759fd9185e992e7fdb3c6a5f81e8ff120e871641607581fb3728d16c811702a7d40fa5f869b7f7b4437ab6a87eb8d98ffafeee51e85bbe955932a189
-  languageName: node
-  linkType: hard
-
-"@types/express-fileupload@npm:^1.4.1":
-  version: 1.4.1
-  resolution: "@types/express-fileupload@npm:1.4.1"
-  dependencies:
-    "@types/busboy": "*"
-    "@types/express": "*"
-  checksum: 54fff7a11dea74ddc716c0ae610dbf557fa27eb5eb4dff99cd2c88c4722321188342319e77d4df94e801d601d5ccd8287d0c31aea786d652b7760a1e681223b6
   languageName: node
   linkType: hard
 
