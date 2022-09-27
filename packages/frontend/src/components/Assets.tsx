@@ -147,7 +147,7 @@ export interface IAssetsValue extends BoxExtendedProps {
 
 export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
   if (!props.assets) {
-    return <>'--'</>;
+    return <Box style={{ ...props.style }}>--</Box>;
   }
 
   const ratio = props.ratio !== undefined ? props.ratio : 1.0;
@@ -184,7 +184,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
   const hasValue = rewardUSD > 0;
 
   const { preferredString, secondaryString } = (() => {
-    const usdString = hasValue ? `~$${valueToString(rewardUSD, 2)}` : '-';
+    const usdString = hasValue ? `$${valueToString(rewardUSD, 2)}` : '-';
     const tokensString = hasCustom ? ` ${hasValue ? '+ ' : ''}${customStr}` : '';
 
     let preferredString = usdString;
@@ -193,7 +193,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
     if (preferred) {
       const value = +ethers.utils.formatUnits(preferred.balance, preferred.decimals);
       preferredString = `${valueToString(value, 2)} ${preferred.name}`;
-      secondaryString = usdString + tokensString;
+      secondaryString = hasValue ? `+ ${usdString}` : '' + tokensString;
     }
 
     return { preferredString, secondaryString };
@@ -225,9 +225,10 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
     );
   } else {
     return (
-      <>{`${hasValue ? `~$${valueToString(rewardUSD, 2)}` : hasCustom ? '' : '-'}${
-        hasCustom ? ` ${hasValue ? '+ ' : ''}${customStr}` : ''
-      }`}</>
+      <span>
+        <b>{preferredString}</b>
+        {secondaryString}
+      </span>
     );
   }
 };

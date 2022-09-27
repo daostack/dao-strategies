@@ -29,9 +29,7 @@ export interface CampaignInterface extends utils.Interface {
     "approvedMerkleRoot()": FunctionFragment;
     "balanceOfAsset(address)": FunctionFragment;
     "challenge(uint8)": FunctionFragment;
-    "checkChallengePeriod()": FunctionFragment;
     "checkMerkleRootUpdateAllowed()": FunctionFragment;
-    "checkProposeWindowActive()": FunctionFragment;
     "claim(address,uint256,bytes32[],address[],address)": FunctionFragment;
     "claimed(address,address)": FunctionFragment;
     "deployTime()": FunctionFragment;
@@ -91,15 +89,7 @@ export interface CampaignInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "checkChallengePeriod",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "checkMerkleRootUpdateAllowed",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "checkProposeWindowActive",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -225,15 +215,7 @@ export interface CampaignInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "checkChallengePeriod",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "checkMerkleRootUpdateAllowed",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "checkProposeWindowActive",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
@@ -416,11 +398,7 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    checkChallengePeriod(overrides?: CallOverrides): Promise<[void]>;
-
     checkMerkleRootUpdateAllowed(overrides?: CallOverrides): Promise<[void]>;
-
-    checkProposeWindowActive(overrides?: CallOverrides): Promise<[void]>;
 
     claim(
       account: string,
@@ -546,11 +524,7 @@ export interface Campaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  checkChallengePeriod(overrides?: CallOverrides): Promise<void>;
-
   checkMerkleRootUpdateAllowed(overrides?: CallOverrides): Promise<void>;
-
-  checkProposeWindowActive(overrides?: CallOverrides): Promise<void>;
 
   claim(
     account: string,
@@ -669,11 +643,7 @@ export interface Campaign extends BaseContract {
 
     challenge(action: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    checkChallengePeriod(overrides?: CallOverrides): Promise<void>;
-
     checkMerkleRootUpdateAllowed(overrides?: CallOverrides): Promise<void>;
-
-    checkProposeWindowActive(overrides?: CallOverrides): Promise<void>;
 
     claim(
       account: string,
@@ -850,11 +820,7 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    checkChallengePeriod(overrides?: CallOverrides): Promise<BigNumber>;
-
     checkMerkleRootUpdateAllowed(overrides?: CallOverrides): Promise<BigNumber>;
-
-    checkProposeWindowActive(overrides?: CallOverrides): Promise<BigNumber>;
 
     claim(
       account: string,
@@ -979,15 +945,7 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    checkChallengePeriod(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     checkMerkleRootUpdateAllowed(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    checkProposeWindowActive(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

@@ -281,28 +281,9 @@ contract Campaign is Initializable, ReentrancyGuard {
         return balanceOfAsset(asset) + totalClaimed[asset];
     }
 
-    /** revert if this is not the challenge period */
-    function checkChallengePeriod() public view {
-        bool active = isChallengePeriod();
-        if (!active) {
-            revert ChallengePeriodActive(block.timestamp);
-        }
-    }
-
     /** Indicates whether the campaign is currently at a challenge period */
     function isChallengePeriod() public view returns (bool) {
         return block.timestamp < activationTime;
-    }
-
-    /** revert if this the window is not open
-     * updating the merkle root is allowed only at predefined time windows
-     * of duration ACTIVE_DURATION every ACTIVE_PERIOD */
-
-    function checkProposeWindowActive() public view {
-        bool active = isProposeWindowActive();
-        if (!active) {
-            revert ProposeWindowNotActive(block.timestamp);
-        }
     }
 
     function isProposeWindowActive() public view returns (bool) {
@@ -311,8 +292,13 @@ contract Campaign is Initializable, ReentrancyGuard {
 
     /** Reverits of the merkleRoot is not allowed. */
     function checkMerkleRootUpdateAllowed() public view {
-        checkChallengePeriod();
-        checkProposeWindowActive();
+        if (isChallengePeriod()) {
+            revert ChallengePeriodActive(block.timestamp);
+        }
+
+        if (!isProposeWindowActive()) {
+            revert ProposeWindowNotActive(block.timestamp);
+        }
     }
 
     /** If true, a locked campaign means withdrawals are enabled */
