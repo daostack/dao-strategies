@@ -1,7 +1,5 @@
 import { ContractsJson } from './common';
 
-export const LOCAL_CHAINID = 3117;
-
 const chainConstants = new Map<number, { multicallAddress?: string }>();
 
 chainConstants.set(1337, {

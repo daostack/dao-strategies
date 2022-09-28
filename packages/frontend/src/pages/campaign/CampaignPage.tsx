@@ -139,20 +139,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         )}
       </Box>
 
-      <Box direction="row" align="center" justify="start" style={{ marginTop: '16px', fontWeight: 400 }}>
-        <Box direction="row">
-          Created by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.creatorId} chainId={campaign.chainId}></Address>
-        </Box>
-        <Box style={{ marginLeft: '16px' }} direction="row">
-          Guarded by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.guardian} chainId={campaign.chainId}></Address>
-        </Box>
-        <Box style={{ marginLeft: '16px' }} direction="row">
-          Oracle: <Address style={{ marginLeft: '8px' }} address={campaign.oracle} chainId={campaign.chainId}></Address>
-        </Box>
-      </Box>
-
       <Box>
         <ExpansiveParagraph maxHeight={120}>{campaign.description}</ExpansiveParagraph>
       </Box>

@@ -167,6 +167,8 @@ export interface PublishInfo {
   };
 }
 
+export type IDPlatform = 'github' | 'twitter';
+
 export type StrategyFunc = (
   world: World,
   params: any
@@ -178,6 +180,7 @@ export type StrategyInfo<P = any> = {
   name: string;
   description: string;
   example_params: P;
+  platform: IDPlatform;
 };
 
 export type Strategy = {

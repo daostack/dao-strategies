@@ -6,6 +6,7 @@ import { useCampaignInstance } from '../hooks/useContracts';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { useNow } from '../hooks/useNow';
 import { lockCampaign } from '../pages/campaign.support';
+import { Address } from './Address';
 
 import { AppButton, AppCard, AppHeading } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
@@ -143,7 +144,21 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
         )}
       </AppCard>
 
-      <AppButton onClick={() => refresh()}>Refresh</AppButton>
+      <AppCard style={cardsStyle}>
+        <Box style={{ marginTop: '8px' }} direction="row">
+          Created by:{' '}
+          <Address style={{ marginLeft: '8px' }} address={campaign.creatorId} chainId={campaign.chainId}></Address>
+        </Box>
+        <Box direction="row">
+          Guarded by:{' '}
+          <Address style={{ marginLeft: '8px' }} address={campaign.guardian} chainId={campaign.chainId}></Address>
+        </Box>
+        <Box direction="row">
+          Oracle: <Address style={{ marginLeft: '8px' }} address={campaign.oracle} chainId={campaign.chainId}></Address>
+        </Box>
+      </AppCard>
+
+      <AppButton secondary label="Refresh" onClick={() => refresh()} />
     </Box>
   );
 };

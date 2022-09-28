@@ -20,4 +20,5 @@ export const strategyInfo: StrategyInfo<Params> = {
       end: 1653215165,
     },
   },
+  platform: 'github',
 };

@@ -25,6 +25,7 @@ export const styleConstants = {
     lessLightGrayBorder: '#E0E0E0',
     alertText: '#EF3E36',
     cardBackground: '#FFFFFF',
+    whiteElements: '#FFFFFF',
     highlightedLight: '#FBFDFC',
     links: '#5762D5',
   },
