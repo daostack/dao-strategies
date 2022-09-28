@@ -22,14 +22,6 @@ export const ViewportContainer: FC<any> = (props: IElement) => {
   );
 };
 
-export const ColumnView: FC<any> = (props: IElement) => {
-  return (
-    <Box style={{ maxWidth: '900px', margin: '0 auto' }} align="center">
-      {props.children}
-    </Box>
-  );
-};
-
 export interface ITwoColumns {
   children?: ReactNode | ReactNode[];
   grid?: GridExtendedProps;

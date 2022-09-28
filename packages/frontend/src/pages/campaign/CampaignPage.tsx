@@ -20,7 +20,7 @@ import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { truncate } from '../../utils/ethers';
 import { DateManager } from '../../utils/date.manager';
-import { HEADER_HEIGHT } from '../AppHeader';
+import { HEADER_HEIGHT, MAX_WIDTH } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
 import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
@@ -35,7 +35,6 @@ import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 
 /** constants to deduce the size of the fixed-size admin control button */
-export const CAMPAIGN_MAX_WIDTH = 1200;
 export const CAMPAIGN_PAD_SIDES = 5;
 export const CAMPAIGN_GAP = 24;
 
@@ -303,7 +302,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
       <Box
         style={{
-          maxWidth: `${CAMPAIGN_MAX_WIDTH}px`,
+          maxWidth: `${MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
         <CampaignGrid gap={`${CAMPAIGN_GAP}px`}>

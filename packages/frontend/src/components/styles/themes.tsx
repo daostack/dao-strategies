@@ -13,6 +13,9 @@ export const styleConstants = {
     normal: '16px',
     small: '14px',
   },
+  font: {
+    secondary: 'Raleway',
+  },
   colors: {
     primary: '#4BA664',
     primaryLight: 'rgba(75, 166, 100, 0.1)',
