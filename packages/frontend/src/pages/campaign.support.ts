@@ -200,31 +200,26 @@ export const deployCampaign = async (
   return address;
 };
 //check type
-export const registerCampaign = async (uri: string, details: CampaignCreateDetails, logo: any) => {
+export const registerCampaign = async (uri: string, details: CampaignCreateDetails, logo: FileList) => {
   /** a deployed campaign is registered in the backend */
-  console.log('registerCampaign logo status', logo)
-
-  const registerCampaignRequest = fetch(ORACLE_NODE_URL + `/campaign/register/${uri}`, {
+  await fetch(ORACLE_NODE_URL + `/campaign/register/${uri}`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(details),
     credentials: 'include',
   });
 
-  const formData = new FormData();
   //logo is actually a file list so therefore access the first item in the filelist
+  const formData = new FormData();
   formData.append('logo', logo[0]);
   console.log('append logo ', logo[0]);
-
-  const uploadCampaignLogoRequest = fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
+  await fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
     method: 'post',
     body: formData,
     credentials: 'include',
   });
 
-  Promise.all([registerCampaignRequest, uploadCampaignLogoRequest]).then((results) => {
-    console.log(`Results: ${results}`);
-  });
+
 };
 
 export const getCampaign = async (uri: string): Promise<CampaignReadDetails> => {

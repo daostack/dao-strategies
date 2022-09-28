@@ -132,7 +132,6 @@ export class CampaignController extends Controller {
     next: NextFunction,
     loggedUser: string | undefined
   ): Promise<void> {
-    console.log('DO WE HAVE THE FILE ? ', request.files)
     const { logo } = request.files;
     const { uri } = request.params;
 
@@ -142,7 +141,6 @@ export class CampaignController extends Controller {
     if (!uri) {
       throw new Error('no uri specified, not able to create correct naming');
     }
-    console.log('REQUEST PARAMS ', request.params)
     await this.manager.services.campaign.uploadLogoToS3(
       logo,
       uri as string, //uri is the campaignID

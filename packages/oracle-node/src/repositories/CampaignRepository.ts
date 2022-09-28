@@ -35,7 +35,7 @@ export interface AddressShares {
 }
 
 export class CampaignRepository {
-  constructor(protected client: PrismaClient) {}
+  constructor(protected client: PrismaClient) { }
 
   async create(campaignDetails: Prisma.CampaignCreateInput): Promise<Campaign> {
     return this.client.campaign.create({
@@ -120,6 +120,13 @@ export class CampaignRepository {
     await this.client.campaign.update({
       where: { uri: uri },
       data: { published: value, publishDate: date },
+    });
+  }
+
+  async setLogoUrl(uri: string, value: string): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { logoUrl: value },
     });
   }
 
