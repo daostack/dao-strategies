@@ -337,18 +337,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             }}></AppTextArea>
         </FormField>
         {/* Upload Logo Component, responsible for cropping, uploading a campaigns logo */}
-        <FormField name="logo" label="Logo of the campaign">
-          <FileInput
-            name="logo"
-            multiple={false}
-            accept="image/png, image/webp, image/jpeg"
-            messages={{
-              dropPrompt: 'Drop logo here',
-              // browse: numFiles > 0 ? 'Replace Logo' : 'Select Logo',
-            }}
-            style={{ width: 'fill', borderRadius: '50px' }}
-          />
-        </FormField>
+        <LogoUpload />
         {/* Guardian Address Input Field */}
         <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
           <AppInput
