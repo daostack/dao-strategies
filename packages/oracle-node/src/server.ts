@@ -44,7 +44,10 @@ appLogger.info(
 
 /** CORS configuration */
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin:
+    process.env.NODE_ENV === 'production'
+      ? 'http://app.commonvalue.xyz.s3-website-eu-west-1.amazonaws.com'
+      : 'http://localhost:3000',
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   credentials: true,
 };
