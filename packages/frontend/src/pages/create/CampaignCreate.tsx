@@ -31,6 +31,7 @@ import {
 import { RouteNames } from '../MainPage';
 import {
   AppButton,
+  AppCallout,
   AppCard,
   AppDateInput,
   AppForm,
@@ -415,11 +416,15 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const simulationText =
-    periodType === PeriodType.retroactive
-      ? `The rewards for this campaign will be:`
-      : periodType === PeriodType.ongoing
-      ? `So far, the rewards for this campaign would be. Final rewards will be computed once the campaign ends.`
-      : '';
+    periodType === PeriodType.retroactive ? (
+      `The rewards for this contribution would be shared accordingly.`
+    ) : periodType === PeriodType.ongoing ? (
+      <AppCallout style={{ marginTop: '24px' }}>
+        Since the contribution period is not over, this is not the final result
+      </AppCallout>
+    ) : (
+      ''
+    );
 
   const heading = ((_pageIx: number) => {
     switch (_pageIx) {

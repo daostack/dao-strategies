@@ -18,7 +18,7 @@ import {
   DateInput,
   HeadingExtendedProps,
 } from 'grommet';
-import { Close, FormDown, FormUp, IconProps } from 'grommet-icons';
+import { CircleQuestion, Close, FormDown, FormUp, IconProps } from 'grommet-icons';
 import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { styleConstants, theme } from './themes';
@@ -36,7 +36,7 @@ export const AppTag: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
       align="center"
       style={{
         borderRadius: '30px',
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+        backgroundColor: styleConstants.colors.lightGrayBackground,
         padding: '6.5px 16px',
         ...props.style,
       }}>
@@ -186,15 +186,23 @@ export const HorizontalLine: FC<BoxExtendedProps> = (props: BoxExtendedProps) =>
   );
 };
 
-export const AppCallout = styled(Box)`
-  text-align: center;
-  background-color: ${(props) => props.theme.global.colors.brandLight};
-  border-style: solid;
-  border-width: 3px;
-  border-color: ${(props) => props.theme.global.colors.brand};
-  border-radius: 16px;
-  padding: 16px 48px;
-`;
+export const AppCallout: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <Box
+      direction="row"
+      align="center"
+      style={{
+        backgroundColor: styleConstants.colors.lightGrayBackground,
+        fontSize: styleConstants.textFontSizes.small,
+        borderRadius: '8px',
+        padding: '14.5px 14.5px',
+        ...props.style,
+      }}>
+      <CircleQuestion style={{ marginRight: '20px' }}></CircleQuestion>
+      {props.children}
+    </Box>
+  );
+};
 
 const cardStyle: React.CSSProperties = {
   backgroundColor: styleConstants.colors.cardBackground,
