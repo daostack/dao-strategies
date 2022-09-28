@@ -14,6 +14,7 @@ import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/date.manager';
 import { Page } from '@dao-strategies/core';
+import { toBase64 } from '../utils/general';
 
 /** The period string is parsed to derive the actual period. That's why
  * we need to use enums and maps to avoid using manual strings as keys
@@ -149,9 +150,8 @@ export const deployCampaign = async (
   uri: string | undefined,
   createDetails: CampaignCreateDetails,
   details: CampaignUriDetails | undefined,
-  logo: any,
+  logo: File | string | undefined,
 ) => {
-  console.log('deployCampaign logo status', logo)
   let uriDefined;
   if (uri !== undefined) {
     uriDefined = uri;
@@ -196,11 +196,12 @@ export const deployCampaign = async (
 
   console.log('campaign contract deployed', { address });
 
-  await registerCampaign(uriDefined, createDetails, logo);
+  await registerCampaign(uriDefined, createDetails);
+  await registerCampaignLogo(logo, uriDefined);  //do we need to await this? Can we show local logo ?
   return address;
 };
-//check type
-export const registerCampaign = async (uri: string, details: CampaignCreateDetails, logo: FileList) => {
+
+export const registerCampaign = async (uri: string, details: CampaignCreateDetails) => {
   /** a deployed campaign is registered in the backend */
   await fetch(ORACLE_NODE_URL + `/campaign/register/${uri}`, {
     method: 'post',
@@ -208,19 +209,30 @@ export const registerCampaign = async (uri: string, details: CampaignCreateDetai
     body: JSON.stringify(details),
     credentials: 'include',
   });
+};
 
-  //logo is actually a file list so therefore access the first item in the filelist
+const registerCampaignLogo = async (logo: File | string | undefined, uri: string): Promise<void> => {
+  // if no logo set, we can return
+  if (!logo) return;
+
   const formData = new FormData();
-  formData.append('logo', logo[0]);
-  console.log('append logo ', logo[0]);
+  // we want to always send logo as base64 file to backend, so lets check if its 
+  if (logo && logo instanceof File) {
+    const logoBase64 = await toBase64(logo);
+    console.log('logobAse64 ', logoBase64);
+    if (!logoBase64) throw new Error("logo converting to base64 failed, logoBase64 is undefined")
+    formData.append('logo', logoBase64);
+  } else {
+    formData.append('logo', logo);
+  }
+
   await fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
     method: 'post',
     body: formData,
     credentials: 'include',
   });
 
-
-};
+}
 
 export const getCampaign = async (uri: string): Promise<CampaignReadDetails> => {
   const response = await fetch(ORACLE_NODE_URL + `/campaign/${uri}`, {

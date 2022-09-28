@@ -11268,6 +11268,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cropperjs@npm:^1.5.12":
+  version: 1.5.12
+  resolution: "cropperjs@npm:1.5.12"
+  checksum: 8dcbceb3659ad72d421038abf7f9d08ca13a061dc6c643497efc043033e22b17411b5558db29a841cb4f0a3b7943a20e6a3d9fecf3901185b7cd027f8097442b
+  languageName: node
+  linkType: hard
+
 "cross-fetch@npm:^2.1.0, cross-fetch@npm:^2.1.1":
   version: 2.2.6
   resolution: "cross-fetch@npm:2.2.6"
@@ -15064,6 +15071,7 @@ __metadata:
     multiformats: ^9.6.5
     rc-select: ^14.1.5
     react: ^18.1.0
+    react-cropper: ^2.1.8
     react-css-theme-switcher: ^0.3.0
     react-dom: ^18.1.0
     react-image-crop: ^10.0.7
@@ -24620,6 +24628,17 @@ __metadata:
     regenerator-runtime: ^0.13.9
     whatwg-fetch: ^3.6.2
   checksum: 1bb031080af15397d6eb9c69a0c2e93799991f7197a086e4409ba719398f1256b542a3d6c9a34673d516c684eef3e8226c99b335982593851f58f65f6e43571b
+  languageName: node
+  linkType: hard
+
+"react-cropper@npm:^2.1.8":
+  version: 2.1.8
+  resolution: "react-cropper@npm:2.1.8"
+  dependencies:
+    cropperjs: ^1.5.12
+  peerDependencies:
+    react: ">=16.0.0"
+  checksum: f2961a871f0e641f72dcd6e21b74ad10c6d06f0fa24da790b32b6e47ab601cc1b163750952f405ef14ee983750afe8923c8ffd0f7f8bf661096996b43e52a2b2
   languageName: node
   linkType: hard
 

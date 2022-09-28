@@ -33,8 +33,8 @@ import { FormStatus, getButtonActions } from './buttons.actions';
 import { useNow } from '../../hooks/useNow';
 import { useUserError } from '../../hooks/useErrorContext';
 import { ethers } from 'ethers';
-import { LogoUpload } from '../../components/LogoUpload';
-import { generateKey } from '../../utils/general';
+import { SelectLogo } from '../../components/SelectLogo';
+import { toBase64 } from '../../utils/general';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -43,7 +43,7 @@ export interface ICampaignCreateProps {
 export interface CampaignFormValues {
   title: string;
   description: string;
-  logo: any | undefined;
+  logo: string | File | undefined;
   customAssetAddress: string;
   hasCustomAsset: boolean;
   chainName: string;
@@ -156,7 +156,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     try {
       setCreating(true);
       const campaignAddress = await deployCampaign(campaignFactory, shares.uri, otherDetails, finalDetails, formValues.logo);
-
       setCreating(false);
       navigate(RouteNames.Campaign(campaignAddress));
     } catch (e) {
@@ -198,9 +197,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   /** Hook called everytime any field in the form is updated, it keeps the formValues state in synch */
   const onValuesUpdated = async (values: CampaignFormValues) => {
     if (DEBUG) console.log('CampaignCreate - onValuesUpdated()', values);
-    if (!values.logo) {
-
-    }
     if (validated) {
       // validate every change after the first time
       validate(values);
@@ -336,8 +332,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               overflow: 'hidden',
             }}></AppTextArea>
         </FormField>
-        {/* Upload Logo Component, responsible for cropping, uploading a campaigns logo */}
-        <LogoUpload />
+        {/* Upload Logo Component, responsible for selecting, cropping a campaigns logo */}
+        <SelectLogo onValuesUpdated={onValuesUpdated} campaignFormValues={formValues} />
         {/* Guardian Address Input Field */}
         <FormField name="guardian" label="Guardian Address" rules={[{ required: true }]}>
           <AppInput
@@ -383,7 +379,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <>
           {formValues.repositoryFullnames.map((repo) => {
             return (
-              <Box key={generateKey('repos')} direction="row">
+              <Box direction="row">
                 <a target="_blank" href={`${GITHUB_DOMAIN}${repo}`} rel="noreferrer">
                   {repo}
                 </a>
