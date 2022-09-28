@@ -8,4 +8,5 @@ export const strategyInfo: StrategyInfo = {
   example_params: {
     tweetId: '1558820214699016193',
   },
+  platform: 'github',
 };

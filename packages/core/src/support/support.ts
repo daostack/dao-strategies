@@ -1,6 +1,6 @@
 import { BigNumber } from 'ethers';
 
-import { Balances, BalancesFloat, BalancesObject } from '../types';
+import { Balances, BalancesFloat, BalancesObject, IDPlatform } from '../types';
 
 export const balancesToObject = (balances: Balances): BalancesObject => {
   const balancesObject: BalancesObject = {};
@@ -93,6 +93,17 @@ export const normalizeShares = (balancesFloat: BalancesFloat): Balances => {
   }
 
   return balances;
+};
+
+export const renameIds = (
+  balances: Balances,
+  platform: IDPlatform
+): Balances => {
+  const renamed: Balances = new Map();
+  balances.forEach((amount, account) => {
+    renamed.set(`${platform}:${account}`, amount);
+  });
+  return renamed;
 };
 
 export const bigIntToNumber = (

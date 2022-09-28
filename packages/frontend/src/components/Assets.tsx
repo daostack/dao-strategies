@@ -4,6 +4,8 @@ import { AppHeading, AppTag, IElement } from './styles/BasicElements';
 import { FC } from 'react';
 import { assetValue, formatEther, truncate } from '../utils/ethers';
 import { styleConstants } from './styles/themes';
+import { ethers } from 'ethers';
+import { valueToString } from '../utils/general';
 
 export interface ChainTagI extends BoxExtendedProps {
   chain?: ChainAndAssets;
@@ -134,4 +136,99 @@ export const AssetsTable: FC<IAssetsTable> = (props: IAssetsTable) => {
       </Box>
     </>
   );
+};
+
+export interface IAssetsValue extends BoxExtendedProps {
+  assets?: TokenBalance[];
+  preferred?: string;
+  ratio?: number;
+  type?: 'card' | 'inline';
+}
+
+export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
+  if (!props.assets) {
+    return <Box style={{ ...props.style }}>--</Box>;
+  }
+
+  const ratio = props.ratio !== undefined ? props.ratio : 1.0;
+  const type = props.type || 'card';
+
+  /** the preferred asset will be shown alone and big if provided */
+  const preferred =
+    props.preferred !== undefined ? props.assets.find((asset) => asset.id === props.preferred) : undefined;
+  /** remove the preferred asset from the list of assets */
+  const assets = preferred ? props.assets.filter((asset) => asset.id !== preferred.id) : props.assets;
+
+  const raisedWithPrice = assets.filter((token) => token.price !== undefined);
+  const rewardUSD = raisedWithPrice
+    .map((token) => {
+      const raised = +ethers.utils.formatUnits(token.balance, token.decimals) * (token.price as number);
+      return raised * ratio;
+    })
+    .reduce((total, reward) => total + reward, 0);
+
+  const raisedCustom = assets.filter((token) => token.price === undefined);
+
+  let hasCustom = false;
+
+  const customStr = raisedCustom
+    .map((token) => {
+      const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
+      if (raised > 0) {
+        hasCustom = true;
+      }
+      return `${valueToString(raised * ratio, 2)} ${token.name}`;
+    })
+    .reduce((total, reward) => total.concat(' ' + reward), '');
+
+  const hasValue = rewardUSD > 0;
+
+  const { preferredString, secondaryString } = (() => {
+    const usdString = hasValue ? `$${valueToString(rewardUSD, 2)}` : '-';
+    const tokensString = hasCustom ? ` ${hasValue ? '+ ' : ''}${customStr}` : '';
+
+    let preferredString = usdString;
+    let secondaryString = tokensString;
+
+    if (preferred) {
+      const value = +ethers.utils.formatUnits(preferred.balance, preferred.decimals);
+      preferredString = `${valueToString(value, 2)} ${preferred.name}`;
+      secondaryString = hasValue ? `+ ${usdString}` : '' + tokensString;
+    }
+
+    return { preferredString, secondaryString };
+  })();
+
+  /** If no preferred asset, then the USD value will be prioritized. */
+  if (type === 'card') {
+    return (
+      <Box
+        style={{
+          borderBottom: '2px dashed',
+          borderColor: styleConstants.colors.lightGrayBorder,
+          paddingBottom: '4px',
+          ...props.style,
+        }}>
+        <Box
+          direction="row"
+          justify="center"
+          style={{
+            fontSize: '32px',
+            marginBottom: '6px',
+          }}>
+          {preferredString}
+        </Box>
+        <Box direction="row" justify="end">
+          {secondaryString}
+        </Box>
+      </Box>
+    );
+  } else {
+    return (
+      <span>
+        <b>{preferredString}</b>
+        {secondaryString}
+      </span>
+    );
+  }
 };

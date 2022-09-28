@@ -3,11 +3,11 @@ import { SharesRead, TokenBalance } from '@dao-strategies/core';
 import { ethers } from 'ethers';
 import { Box, Spinner } from 'grommet';
 import { StatusGood } from 'grommet-icons';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { valueToString } from '../utils/general';
 import { PagedTable, TableColumn } from './PagedTable';
 import { IElement } from './styles/BasicElements';
-import { styleConstants } from './styles/themes';
+import { AssetsValue } from './Assets';
 
 export interface RewardsTableI extends IElement {
   shares: SharesRead;
@@ -33,32 +33,10 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
   const data: any[] = Object.entries(shares.shares).map(([address, share]) => {
     const ratio = +ethers.utils.formatEther(share);
 
-    let reward: string | undefined;
+    let reward: ReactNode | undefined;
 
     if (showReward && props.raised) {
-      const raisedWithPrice = props.raised.filter((token) => token.price !== undefined);
-      const rewardUSD = raisedWithPrice
-        .map((token) => {
-          const raised = +ethers.utils.formatUnits(token.balance, token.decimals) * (token.price as number);
-          return raised * ratio;
-        })
-        .reduce((total, reward) => total + reward, 0);
-
-      const raisedCustom = props.raised.filter((token) => token.price === undefined);
-
-      let hasCustom = false;
-
-      const customStr = raisedCustom
-        .map((token) => {
-          const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
-          if (raised > 0) {
-            hasCustom = true;
-          }
-          return `${valueToString(raised * ratio, 2)} ${token.name}`;
-        })
-        .reduce((total, reward) => total.concat(' ' + reward), '');
-
-      reward = `${rewardUSD > 0 ? `~$${valueToString(rewardUSD, 2)}` : '-'}${hasCustom ? ` + ${customStr}` : ''}`;
+      reward = <AssetsValue assets={props.raised} ratio={ratio} type="inline"></AssetsValue>;
     }
 
     return [address, valueToString(ratio * 100, 1), reward, true, ''];

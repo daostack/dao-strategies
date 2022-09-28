@@ -5,7 +5,7 @@
       "chainId": "5",
       "contracts": {
         "Campaign": {
-          "address": "0x156E17D51a2B9020F2085Cf12678E2b83251ffb0",
+          "address": "0x812c7EAd2f2607481152B0b352ec3b03030a00E9",
           "abi": [
             {
               "inputs": [
@@ -332,21 +332,7 @@
             },
             {
               "inputs": [],
-              "name": "checkChallengePeriod",
-              "outputs": [],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
               "name": "checkMerkleRootUpdateAllowed",
-              "outputs": [],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "checkProposeWindowActive",
               "outputs": [],
               "stateMutability": "view",
               "type": "function"
@@ -795,7 +781,7 @@
           ]
         },
         "CampaignFactory": {
-          "address": "0x3f47eD290108EA908442641dA0eD7083772B7f35",
+          "address": "0xd8b25219E1b6133b129393141805c324bEEa701A",
           "abi": [
             {
               "inputs": [
@@ -1326,21 +1312,7 @@
             },
             {
               "inputs": [],
-              "name": "checkChallengePeriod",
-              "outputs": [],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
               "name": "checkMerkleRootUpdateAllowed",
-              "outputs": [],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "checkProposeWindowActive",
               "outputs": [],
               "stateMutability": "view",
               "type": "function"

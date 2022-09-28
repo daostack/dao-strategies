@@ -20,7 +20,7 @@ import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { truncate } from '../../utils/ethers';
 import { DateManager } from '../../utils/date.manager';
-import { HEADER_HEIGHT } from '../AppHeader';
+import { HEADER_HEIGHT, MAX_WIDTH } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
 import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
@@ -35,7 +35,6 @@ import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 
 /** constants to deduce the size of the fixed-size admin control button */
-export const CAMPAIGN_MAX_WIDTH = 1200;
 export const CAMPAIGN_PAD_SIDES = 5;
 export const CAMPAIGN_GAP = 24;
 
@@ -99,11 +98,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       </ViewportContainer>
     );
 
-  const valueLocked =
-    otherDetails && otherDetails.balances
-      ? truncate(ChainsDetails.valueOfAssets(otherDetails.balances).toString(), 2)
-      : '0';
-
   const assets = otherDetails && otherDetails.balances ? otherDetails.balances : [];
 
   const customAsset =
@@ -143,17 +137,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           </>
         )}
       </Box>
-
-      {/* <Box direction="row" align="center" justify="start" style={{ marginTop: '16px', fontWeight: 400 }}>
-        <Box direction="row">
-          Created by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.creatorId} chainId={campaign.chainId}></Address>
-        </Box>
-        <Box style={{ marginLeft: '16px' }} direction="row">
-          Guarded by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.guardian} chainId={campaign.chainId}></Address>
-        </Box>
-      </Box> */}
 
       <Box>
         <ExpansiveParagraph maxHeight={120}>{campaign.description}</ExpansiveParagraph>
@@ -256,7 +239,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             setShowFund(false);
             getOtherDetails();
           }}>
-          <FundCampaign assets={assets} chainId={campaign.chainId} address={campaign.address}></FundCampaign>
+          <FundCampaign
+            assets={assets}
+            defaultAsset={customAsset}
+            chainId={campaign.chainId}
+            address={campaign.address}></FundCampaign>
         </AppModal>
       ) : (
         <></>
@@ -266,8 +253,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         style={{ padding: '24px' }}
         title="Rewards Raised"
         assets={otherDetails?.balances}
-        value={valueLocked}
-        symbol="$"
+        preferred={customAsset?.id}
         action={
           <AppButton
             secondary
@@ -316,7 +302,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
       <Box
         style={{
-          maxWidth: `${CAMPAIGN_MAX_WIDTH}px`,
+          maxWidth: `${MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
         <CampaignGrid gap={`${CAMPAIGN_GAP}px`}>

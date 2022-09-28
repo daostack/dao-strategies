@@ -1,5 +1,5 @@
 import { strategies } from '../strategies';
-import { normalizeShares } from '../support';
+import { normalizeShares, renameIds } from '../support';
 import { Balances } from '../types';
 import { World, WorldConfig } from '../world/World';
 
@@ -15,11 +15,12 @@ export class StrategyComputation implements IStrategyComputation {
   }
 
   async runStrategy(strategyId: string, params: any): Promise<Balances> {
-    const shares = await strategies.get(strategyId)?.func(this.world, params);
-
-    if (shares === undefined) {
+    const strategy = strategies.get(strategyId);
+    if (strategy === undefined) {
       throw Error(`Strategy ${strategyId} not found`);
     }
-    return normalizeShares(shares);
+    const shares = await strategy.func(this.world, params);
+
+    return renameIds(normalizeShares(shares), strategy.info.platform);
   }
 }

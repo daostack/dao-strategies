@@ -13,6 +13,9 @@ export const styleConstants = {
     normal: '16px',
     small: '14px',
   },
+  font: {
+    secondary: 'Raleway',
+  },
   colors: {
     primary: '#4BA664',
     primaryLight: 'rgba(75, 166, 100, 0.1)',
@@ -25,6 +28,7 @@ export const styleConstants = {
     lessLightGrayBorder: '#E0E0E0',
     alertText: '#EF3E36',
     cardBackground: '#FFFFFF',
+    whiteElements: '#FFFFFF',
     highlightedLight: '#FBFDFC',
     links: '#5762D5',
   },

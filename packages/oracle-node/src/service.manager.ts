@@ -1,11 +1,14 @@
-import { ContractsJson, IStrategyComputation } from '@dao-strategies/core';
+import {
+  ContractsJson,
+  IStrategyComputation,
+  StrategyComputation,
+} from '@dao-strategies/core';
 import { PrismaClient } from '@prisma/client';
-import { ethers, providers } from 'ethers';
+import { providers } from 'ethers';
 import { Wallet } from 'ethers/lib/ethers';
-
 import { StrategyComputationMock } from '../test/mocks/strategy.computation';
 
-import { chainConfig, PRICE_UPDATE_PERIOD } from './config';
+import { chainConfig, PRICE_UPDATE_PERIOD, worldConfig } from './config';
 import { appLogger } from './logger';
 import { CampaignRepository } from './repositories/CampaignRepository';
 import { IndexRepository } from './repositories/IndexRepository';
@@ -75,8 +78,10 @@ export class ServiceManager {
     this.userRepo = new UserRepository(this.client);
     this.indexRepo = new IndexRepository(this.client);
 
-    this.strategyComputation = new StrategyComputationMock();
-    // this.strategyComputation = new StrategyComputation();
+    this.strategyComputation =
+      process.env.MOCK_STRATEGY_COMPUTATION.toLocaleLowerCase() === 'true'
+        ? new StrategyComputationMock()
+        : new StrategyComputation(worldConfig);
 
     this.timeService = new TimeService();
     this.sendTransactionService = new SendTransactionService(this.providers);

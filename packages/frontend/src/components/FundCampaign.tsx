@@ -23,6 +23,7 @@ interface IFundCampaign extends IElement {
   assets: Asset[];
   chainId: number;
   address: string;
+  defaultAsset?: Asset;
   onSuccess?: () => void;
 }
 
@@ -41,6 +42,15 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
       });
     }
   }, [props.assets]);
+
+  useEffect(() => {
+    if (props.defaultAsset) {
+      setFormValues({
+        ...formValues,
+        asset: props.defaultAsset.id,
+      });
+    }
+  }, [props.defaultAsset]);
 
   const isLogged = account !== undefined;
   const assets = props.assets;

@@ -4,8 +4,10 @@ export const DEBUG = true;
  * APP CONFIG:
  ****************************** */
 export const SUBGRAPH_URI = 'http://localhost:8000/subgraphs/name/dao-strategies/campaign';
-// export const ORACLE_NODE_URL = 'http://localhost:3100';
-export const ORACLE_NODE_URL = 'https://api.commonvalue.xyz';
+
+export const ORACLE_NODE_URL =
+  process.env.NODE_ENV === 'production' ? 'https://api.commonvalue.xyz' : 'http://localhost:3100';
+
 export const DOMAIN = window.location.hostname;
 export const ORIGIN = window.location.origin;
 
@@ -29,4 +31,4 @@ export const ACTIVATION_PERIOD = 5 * MINUTES; // 7 * DAYS;
 export const ALCHEMY_GOERLI_KEY = 'aQapGNEneTscr5ixwb05r-J-OWEEwQvF';
 
 // export const INCLUDED_CHAINS = [1337, 5];
-export const INCLUDED_CHAINS = [5];
+export const INCLUDED_CHAINS = process.env.NODE_ENV === 'production' ? [5] : [1337, 5];
