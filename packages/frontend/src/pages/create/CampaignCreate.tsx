@@ -85,14 +85,14 @@ export interface ProcessedFormValues {
 const initChain = ChainsDetails.chains()[0];
 
 const initialValues: CampaignFormValues = {
-  title: 'sample', // '',
-  guardian: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // '',
+  title: '', // 'sample',
+  guardian: '', // '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
   chainName: initChain.name,
-  customAssetAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
+  customAssetAddress: '', // '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
   hasCustomAsset: false,
-  description: 'A description', // '',
+  description: '', // 'A description',
   strategyId: strategies.list()[0].info.id,
-  repositoryFullnames: ['pepoospina/js-uprtcl'], //[],
+  repositoryFullnames: [], //['pepoospina/js-uprtcl'],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
   customPeriodChoiceTo: '',
@@ -402,7 +402,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const leftClicked = () => {
     if (pageIx > 0) setPageIx(pageIx - 1);
-    else navigate('/');
+    else navigate(RouteNames.Base);
   };
 
   const leftText = () => {
