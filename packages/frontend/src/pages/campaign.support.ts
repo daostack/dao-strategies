@@ -150,7 +150,7 @@ export const deployCampaign = async (
   uri: string | undefined,
   createDetails: CampaignCreateDetails,
   details: CampaignUriDetails | undefined,
-  logo: File | string | undefined,
+  logo: File | undefined,
 ) => {
   let uriDefined;
   if (uri !== undefined) {
@@ -180,6 +180,7 @@ export const deployCampaign = async (
     createDetails.ACTIVE_DURATION,
     salt
   );
+
   const txReceipt = await ex.wait();
 
   if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
@@ -211,24 +212,13 @@ export const registerCampaign = async (uri: string, details: CampaignCreateDetai
   });
 };
 
-const registerCampaignLogo = async (logo: File | string | undefined, uri: string): Promise<void> => {
+const registerCampaignLogo = async (logo: File | undefined, uri: string): Promise<void> => {
   // if no logo set, we can return
   if (!logo) return;
 
   const formData = new FormData();
-  console.log('what is logo ', logo)
-  // we want to always send logo as base64 file to backend, so lets check if it is 
-  if (logo && logo instanceof File) {
-    const logoBase64 = await toBase64(logo);
-    console.log('logobAse64 ', logoBase64);
-    if (!logoBase64) throw new Error("logo converting to base64 failed, logoBase64 is undefined")
-    formData.append('logo', logoBase64);
-    console.log('logo append after toBase64 operation ', logoBase64)
-
-  } else {
-    formData.append('logo', logo);
-    console.log('logo as already base64 ', logo)
-  }
+  console.log('what is logo ', logo, ' or ')
+  formData.append('logo', logo);
 
   await fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
     method: 'post',

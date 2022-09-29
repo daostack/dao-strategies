@@ -4,7 +4,9 @@ import { AppButton, IElement } from "./styles/BasicElements"
 import 'cropperjs/dist/cropper.css';
 import { Cropper, ReactCropperElement } from "react-cropper";
 import { CampaignFormValues } from "../pages/create/CampaignCreate";
+import { Buffer } from 'buffer';
 
+//helper css to make crop area rounded
 import "../css/roundCrop.css";
 
 export interface SelectLogoI extends IElement {
@@ -16,7 +18,7 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
     const [numFiles] = useState(0);
     const [showCropModal, setShowCropModal] = useState(false);
     const [image, setImage] = useState(undefined);
-    const [cropData, setCropData] = useState('#');
+    const [cropData, setCropData] = useState('');
     const imageRef = useRef<ReactCropperElement>(null);
     const [cropper, setCropper] = useState<Cropper>();
 
@@ -33,16 +35,40 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
         const reader = new FileReader();
         reader.onload = () => {
             setImage(reader.result as any);
+            setShowCropModal(true);
         };
         reader.readAsDataURL(logo);
-        setShowCropModal(true);
     }
 
-    const saveCroppedLogo = (): void => {
-        campaignFormValues.logo = cropData;
-        onValuesUpdated(campaignFormValues);
-        setShowCropModal(false);
+    const saveCroppedBase64 = (): void => {
+        getCropData();
     }
+
+    /***
+    * Converts a dataUrl base64 image string into a File byte array
+    * dataUrl example:
+    * data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIsAAACLCAYAAABRGWr/AAAAAXNSR0IA...etc
+    */
+    const base64ToFile = (dataUrl: string, filename: string): File | undefined => {
+        const arr = dataUrl.split(',');
+        if (arr.length < 2) { return undefined; }
+        const mimeArr = arr[0].match(/:(.*?);/);
+        if (!mimeArr || mimeArr.length < 2) { return undefined; }
+        const mime = mimeArr[1];
+        const buff = Buffer.from(arr[1], 'base64');
+        return new File([buff], filename, { type: mime });
+    }
+
+    const convertBase64FromCropToFile = async () => {
+        if (cropData) {
+            campaignFormValues.logo = await base64ToFile(cropData, 'croppedLogo.png');;
+            onValuesUpdated(campaignFormValues);
+            setShowCropModal(false);
+        }
+    }
+    useEffect(() => {
+        convertBase64FromCropToFile();
+    }, [cropData])
 
     return (
         <>
@@ -69,15 +95,13 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
                         animate={true}
                         animation="fadeIn"
                         position="center"
-                        margin="xlarge"
+                        margin={{ horizontal: 'large' }}
                         modal={true}
                         onEsc={() => setShowCropModal(false)}
                         onClickOutside={() => setShowCropModal(false)}
                     >
                         <Heading> Crop your image </Heading>
-
                         <Cropper
-                            style={{ height: 400, width: '100%' }}
                             initialAspectRatio={1 / 1}
                             preview=".img-preview"
                             viewMode={1} //restrict the crop box not to exceed the size of the canvas.
@@ -90,22 +114,7 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
                                 setCropper(instance);
                             }}
                         />
-                        <Box alignSelf="center" pad="medium" width="medium" >
-                            <AppButton primary onClick={getCropData}>Crop Image</AppButton>
-                        </Box>
-
-                        <Box
-                            align="center"
-                            alignSelf="center" pad="medium" width="medium"
-                            overflow="hidden"
-                        >
-                            <img src={cropData} alt="cropped image" />
-                        </Box>
-                        <Grid columns={{ count: 2, size: 'auto' }} gap="medium" margin="medium">
-                            <AppButton primary onClick={() => saveCroppedLogo()}>Save</AppButton>
-                            <AppButton secondary onClick={() => setShowCropModal(false)}>Close</AppButton>
-                        </Grid>
-
+                        <AppButton alignSelf="center" primary onClick={() => saveCroppedBase64()}>Select Image</AppButton>
                     </Layer>
                 )}
             </Box>

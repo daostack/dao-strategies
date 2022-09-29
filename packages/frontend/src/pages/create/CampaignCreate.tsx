@@ -43,7 +43,7 @@ export interface ICampaignCreateProps {
 export interface CampaignFormValues {
   title: string;
   description: string;
-  logo: string | File | undefined;
+  logo: File | undefined;
   customAssetAddress: string;
   hasCustomAsset: boolean;
   chainName: string;
