@@ -25,6 +25,7 @@ const ForCard: FC<IForCard> = (props: IForCard) => {
   return (
     <AppCard
       fill
+      justify="center"
       style={{
         borderRadius: '24px',
         position: 'relative',
@@ -33,7 +34,7 @@ const ForCard: FC<IForCard> = (props: IForCard) => {
       }}>
       <Box
         fill
-        style={{ zIndex: 2, padding: '60px 16px' }}
+        style={{ zIndex: 2, padding: '60px 4vw', maxHeight: '380px' }}
         align="center"
         justify="center"
         onClick={() => navigate(props.path)}>
@@ -59,7 +60,9 @@ const ForCard: FC<IForCard> = (props: IForCard) => {
           }}>
           {props.subtitle}
         </Box>
-        <Link to="./create">{props.action}</Link>
+        <Link style={{ alignSelf: 'stretch' }} to="./create">
+          {props.action}
+        </Link>
       </Box>
       <Box
         style={{
@@ -68,6 +71,7 @@ const ForCard: FC<IForCard> = (props: IForCard) => {
           width: '100%',
           position: 'absolute',
           background: `url(${props.backgroundUrl}) center no-repeat`,
+          backgroundSize: 'cover',
         }}></Box>
     </AppCard>
   );
@@ -97,16 +101,18 @@ const WelcomeMessageCore: FC<IWelcomeMessage> = (props: IWelcomeMessage) => {
           subtitle="Find what excites you, contribute and get rewarded"
           path="/campaigns"
           action={
-            <Link to="./campaigns">
-              <AppButton primary label="Explore campaigns" />
-            </Link>
+            <AppButton
+              primary
+              style={{ width: '100%', backgroundColor: 'white', color: styleConstants.colors.primary, border: 'none' }}
+              label="Explore campaigns"
+            />
           }
           backgroundUrl="/images/welcome-bg-1.png"></ForCard>
         <ForCard
           title="For Communities"
           subtitle="Incentivize, grow and reward your contributors"
           path="/create"
-          action={<AppButton secondary label="Create a campaign" />}
+          action={<AppButton primary style={{ width: '100%' }} label="Create a campaign" />}
           backgroundUrl="/images/welcome-bg-2.png"></ForCard>
       </Box>
     </Box>
