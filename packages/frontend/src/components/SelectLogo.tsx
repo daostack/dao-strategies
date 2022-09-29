@@ -5,6 +5,8 @@ import 'cropperjs/dist/cropper.css';
 import { Cropper, ReactCropperElement } from "react-cropper";
 import { CampaignFormValues } from "../pages/create/CampaignCreate";
 
+import "../css/roundCrop.css";
+
 export interface SelectLogoI extends IElement {
     onValuesUpdated: (values: CampaignFormValues) => void;
     campaignFormValues: CampaignFormValues;
@@ -67,11 +69,13 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
                         animate={true}
                         animation="fadeIn"
                         position="center"
-                        margin="large"
+                        margin="xlarge"
                         modal={true}
                         onEsc={() => setShowCropModal(false)}
                         onClickOutside={() => setShowCropModal(false)}
                     >
+                        <Heading> Crop your image </Heading>
+
                         <Cropper
                             style={{ height: 400, width: '100%' }}
                             initialAspectRatio={16 / 9}

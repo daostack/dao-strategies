@@ -216,14 +216,18 @@ const registerCampaignLogo = async (logo: File | string | undefined, uri: string
   if (!logo) return;
 
   const formData = new FormData();
-  // we want to always send logo as base64 file to backend, so lets check if its 
+  console.log('what is logo ', logo)
+  // we want to always send logo as base64 file to backend, so lets check if it is 
   if (logo && logo instanceof File) {
     const logoBase64 = await toBase64(logo);
     console.log('logobAse64 ', logoBase64);
     if (!logoBase64) throw new Error("logo converting to base64 failed, logoBase64 is undefined")
     formData.append('logo', logoBase64);
+    console.log('logo append after toBase64 operation ', logoBase64)
+
   } else {
     formData.append('logo', logo);
+    console.log('logo as already base64 ', logo)
   }
 
   await fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {

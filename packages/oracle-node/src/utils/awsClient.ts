@@ -20,11 +20,10 @@ const uploadLogoToS3 = async (uri: string, currentTime: number, logoBuffer: Buff
     else if (!currentTime) throw new Error("Cant upload logo to s3, currentTime paramter not given for this operation")
     else if (!logoBuffer) throw new Error("Cant upload logo to s3, logoBuffer paramter not given for this operation")
 
-    const stream = Readable.from(logoBuffer);
     const uploadParams = {
         Bucket: bucketName, // name of the bucket --> campaign asset bucket
         Key: `${uri}${currentTime}`,  // rename logo file to ${campaignId}{timestamp}
-        Body: stream,     //we recieve the buffer of the logo, we need a stream for s3 upload
+        Body: Buffer.from(logoBuffer),     //we recieve the buffer of the logo, we need a stream for s3 upload
     };
     // upload to s3 and get back url
     const uploadResult = await s3.upload(uploadParams).promise();
