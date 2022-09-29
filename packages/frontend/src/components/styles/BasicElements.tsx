@@ -17,9 +17,11 @@ import {
   DateInputExtendedProps,
   DateInput,
   HeadingExtendedProps,
+  FormFieldExtendedProps,
+  FormField,
 } from 'grommet';
 import { CircleQuestion, Close, FormDown, FormUp, IconProps } from 'grommet-icons';
-import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
+import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { styleConstants, theme } from './themes';
 
@@ -97,6 +99,14 @@ export const AppButton = (props: IButton) => {
 };
 
 export const AppForm = Form;
+
+export interface IAppFormField extends FormFieldExtendedProps {
+  help?: string | ReactNode;
+}
+
+export const AppFormField: FC<IAppFormField> = (props: IAppFormField) => {
+  return <FormField {...props}>{props.children}</FormField>;
+};
 
 export const AppInput = styled(TextInput)`
   & {

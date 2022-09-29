@@ -12,6 +12,7 @@ export const styleConstants = {
     large: '18px',
     normal: '16px',
     small: '14px',
+    xsmall: '12px',
   },
   font: {
     secondary: 'Raleway',

@@ -1,4 +1,4 @@
-import { Box, CheckBox, FormField, Layer, Text, Image, Spinner } from 'grommet';
+import { Box, CheckBox, Layer, Text, Spinner } from 'grommet';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,6 +35,7 @@ import {
   AppCard,
   AppDateInput,
   AppForm,
+  AppFormField,
   AppHeading,
   AppInput,
   AppSelect,
@@ -60,6 +61,7 @@ import { Parameter } from './parameter';
 import { Address } from '../../components/Address';
 import { StrategySelector } from './strategy.selector';
 import { DateManager } from '../../utils/date.manager';
+import { FieldLabel } from './field.label';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -100,7 +102,7 @@ const initialValues: CampaignFormValues = {
 };
 
 const GITHUB_DOMAIN = 'https://www.github.com/';
-const DEBUG = false;
+const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, chain, switchNetwork, connect } = useLoggedUser();
@@ -137,6 +139,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       const connectedChainName = ChainsDetails.chainOfId(chain.id)?.chain.name;
       if (connectedChainName !== undefined) {
         setFormValues({ ...formValues, chainName: connectedChainName });
+      } else {
+        setFormValues({ ...formValues, chainName: ChainsDetails.chains()[0].name });
       }
     }
   }, []);
@@ -245,7 +249,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   /** Hook called everytime any field in the form is updated, it keeps the formValues state in synch */
   const onValuesUpdated = (values: CampaignFormValues) => {
-    if (DEBUG) console.log('CampaignCreate - onValuesUpdated()');
+    if (DEBUG) console.log('CampaignCreate - onValuesUpdated()', { values });
     if (validated) {
       // validate every change after the first time
       validate(values);
@@ -311,15 +315,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (DEBUG) console.log('repoNameChanged', name);
     setRepo(name);
     checkExist(name);
-  };
-
-  const requiredField = (text: string) => {
-    return (
-      <span>
-        <span style={{ color: 'red', marginRight: '4px' }}>*</span>
-        {text}
-      </span>
-    );
   };
 
   const existStatus = {
@@ -440,19 +435,25 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const pages: React.ReactNode[] = [
     <Box>
       <>
-        <FormField name="title" label={requiredField('Give this Campaign a name')} style={{ marginBottom: '40px' }}>
+        <AppFormField
+          name="title"
+          label={<FieldLabel label="Give this Campaign a name" required></FieldLabel>}
+          style={{ marginBottom: '40px' }}>
           <AppInput name="title" placeholder="Name"></AppInput>
-        </FormField>
+        </AppFormField>
 
-        <FormField name="description" label="Describe what it is about" style={{ marginBottom: '40px' }}>
+        <AppFormField name="description" label="Describe what it is about" style={{ marginBottom: '40px' }}>
           <AppTextArea placeholder="" name="description"></AppTextArea>
-        </FormField>
+        </AppFormField>
 
-        <FormField name="chainName" label="Select Network" style={{ marginBottom: '40px' }}>
+        <AppFormField
+          name="chainName"
+          label={<FieldLabel label="Select Network" required help="Select network"></FieldLabel>}
+          style={{ marginBottom: '40px' }}>
           <AppSelect name="chainName" options={chainOptions}></AppSelect>
-        </FormField>
+        </AppFormField>
 
-        <FormField
+        <AppFormField
           name="hasCustomAsset"
           label="Reward Tokens"
           style={{
@@ -460,27 +461,30 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             fontSize: styleConstants.textFontSizes.small,
           }}>
           <CheckBox name="hasCustomAsset" label="Use custom asset" />
-        </FormField>
+        </AppFormField>
 
         {formValues.hasCustomAsset ? (
-          <FormField name="customAssetAddress" label="Token address" style={{ marginBottom: '40px' }}>
+          <AppFormField name="customAssetAddress" label="Token address" style={{ marginBottom: '40px' }}>
             <AppInput
               name="customAssetAddress"
               placeholder="0x0..."
               style={{ border: '1px solid ', borderRadius: '20px' }}></AppInput>
-          </FormField>
+          </AppFormField>
         ) : (
           <></>
         )}
 
-        <FormField name="guardian" label={requiredField('Add the Admin address')} style={{ marginBottom: '40px' }}>
+        <AppFormField
+          name="guardian"
+          label={<FieldLabel label="Add the Admin address" required help="The title of the campaign"></FieldLabel>}
+          style={{ marginBottom: '40px' }}>
           <AppInput name="guardian" placeholder="0x...."></AppInput>
-        </FormField>
+        </AppFormField>
       </>
     </Box>,
     <Box>
       <Box style={{ marginBottom: '64px' }}>
-        <FormField name="strategyId" label="Select a Rule-set">
+        <AppFormField name="strategyId" label="Select a Rule-set">
           <AppSelect
             value={
               <StrategySelector
@@ -500,12 +504,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               return <StrategySelector strategy={strategy}></StrategySelector>;
             }}
           </AppSelect>
-        </FormField>
+        </AppFormField>
       </Box>
 
       <TwoColumns grid={{ style: { marginBottom: '66px' } }}>
         <Box>
-          <FormField
+          <AppFormField
             name="description"
             label={
               <Box>
@@ -527,7 +531,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                 {repoButton}
               </Box>
             </Box>
-          </FormField>
+          </AppFormField>
 
           <>
             {formValues.repositoryFullnames.map((repo) => {
@@ -552,18 +556,18 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </Box>
 
         <Box>
-          <FormField name="livePeriodChoice" label="Live period">
+          <AppFormField name="livePeriodChoice" label="Live period">
             <AppSelect name="livePeriodChoice" options={Array.from(periodOptions.values())}></AppSelect>
-          </FormField>
+          </AppFormField>
 
           {formValuesProcessed().periodCustom ? (
             <>
-              <FormField name="customPeriodChoiceFrom" label="From">
+              <AppFormField name="customPeriodChoiceFrom" label="From">
                 <AppDateInput name="customPeriodChoiceFrom"></AppDateInput>
-              </FormField>
-              <FormField name="customPeriodChoiceTo" label="To">
+              </AppFormField>
+              <AppFormField name="customPeriodChoiceTo" label="To">
                 <AppDateInput name="customPeriodChoiceTo"></AppDateInput>
-              </FormField>
+              </AppFormField>
             </>
           ) : (
             <></>
@@ -756,7 +760,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           <Box style={{ width: '100%' }}>
             <Box direction="row" justify="between" style={{ width: '100%' }}>
               <AppButton secondary gray label={leftText()} onClick={() => leftClicked()} />
-              <AppButton primary gray label={rightText} onClick={() => rightAction()} disabled={rightDisabled} />
+              <AppButton primary label={rightText} onClick={() => rightAction()} disabled={rightDisabled} />
             </Box>
 
             <Box direction="row" justify="end" style={{ width: '100%' }}>
