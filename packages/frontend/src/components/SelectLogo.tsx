@@ -78,7 +78,7 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
 
                         <Cropper
                             style={{ height: 400, width: '100%' }}
-                            initialAspectRatio={16 / 9}
+                            initialAspectRatio={1 / 1}
                             preview=".img-preview"
                             viewMode={1} //restrict the crop box not to exceed the size of the canvas.
                             guides={true}
