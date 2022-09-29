@@ -15,7 +15,7 @@ export interface IFieldLabel extends BoxExtendedProps {
 export const FieldLabel: FC<IFieldLabel> = (props: IFieldLabel) => {
   const required = props.required !== undefined ? props.required : false;
   return (
-    <Box direction="row" align="center">
+    <Box direction="row" align="center" style={{ ...props.style }}>
       <Box>
         <span>
           {required ? <span style={{ color: 'red', marginRight: '4px' }}>*</span> : <></>}
@@ -27,8 +27,10 @@ export const FieldLabel: FC<IFieldLabel> = (props: IFieldLabel) => {
         <DropButton
           style={{ marginLeft: '9px' }}
           dropContent={<HelpDrop>{props.help}</HelpDrop>}
-          dropProps={{ margin: '10px', align: { bottom: 'top' }, style: { borderRadius: '20px' } } as any}>
-          <Box justify="center">
+          dropProps={
+            { margin: '10px', align: { bottom: 'top' }, style: { borderRadius: '20px', maxWidth: '280px' } } as any
+          }>
+          <Box justify="center" style={{ overflow: 'hidden' }}>
             <CircleQuestion style={{ height: '13.33px', width: '13.33px' }}></CircleQuestion>
           </Box>
         </DropButton>

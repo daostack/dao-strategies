@@ -448,14 +448,24 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
         <AppFormField
           name="chainName"
-          label={<FieldLabel label="Select Network" required help="Select network"></FieldLabel>}
+          label={
+            <FieldLabel
+              label="Select Network"
+              required
+              help="The campaign funds will be controlled by a contract deployed on this network."></FieldLabel>
+          }
           style={{ marginBottom: '40px' }}>
           <AppSelect name="chainName" options={chainOptions}></AppSelect>
         </AppFormField>
 
         <AppFormField
           name="hasCustomAsset"
-          label="Reward Tokens"
+          label={
+            <FieldLabel
+              label="Reward Token"
+              required
+              help="If you want the campaign to raise funds on a special ERC-20 token, please add it here. By default, campaigns can be funded with the native token and popular stable-coins of each network."></FieldLabel>
+          }
           style={{
             marginBottom: formValues.hasCustomAsset ? '10px' : '40px',
             fontSize: styleConstants.textFontSizes.small,
@@ -476,7 +486,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
         <AppFormField
           name="guardian"
-          label={<FieldLabel label="Add the Admin address" required help="The title of the campaign"></FieldLabel>}
+          label={
+            <FieldLabel
+              label="Add the Admin address"
+              required
+              help='The campaign "Admin" can review the results of the campaign (published by the oracle) before they are effective and revert them if these are not satisfactory. This means that funds are, ultimately, not under the control of the oracle.'></FieldLabel>
+          }
           style={{ marginBottom: '40px' }}>
           <AppInput name="guardian" placeholder="0x...."></AppInput>
         </AppFormField>
@@ -484,7 +499,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     </Box>,
     <Box>
       <Box style={{ marginBottom: '64px' }}>
-        <AppFormField name="strategyId" label="Select a Rule-set">
+        <AppFormField
+          name="strategyId"
+          label={
+            <FieldLabel
+              label="Select a rule-set"
+              help="The campaign will compute a list of shareholders based on programmed rules. These are programmatic rules that can fetch data from web2 and web3 protocols."></FieldLabel>
+          }>
           <AppSelect
             value={
               <StrategySelector
@@ -513,7 +534,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             name="description"
             label={
               <Box>
-                <Box style={{ marginBottom: '8px' }}>Add Github repository</Box>
+                {
+                  <FieldLabel
+                    style={{ marginBottom: '8px' }}
+                    label="Add Github repository"
+                    help="The campaign will compute a list of shareholders based on programmed rules. These are programmatic rules that can fetch data from web2 and web3 protocols."></FieldLabel>
+                }
                 <Box style={{ fontWeight: 'normal', fontSize: '13px' }}>
                   Use the format 'user/repo' or paste the link to the repo.
                 </Box>
