@@ -2,12 +2,14 @@ import { LoggedUserDetails, VerificationIntent } from '@dao-strategies/core';
 import { InjectedConnector } from '@wagmi/core';
 import { Signer } from 'ethers';
 import { ReactNode, createContext, useContext, FC, useState, useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { Chain, Connector, useAccount, useConnect, useDisconnect, useNetwork, useSwitchNetwork } from 'wagmi';
 import { checkLoggedUser, logout, signInWithEthereum } from '../utils/loggedUser';
 import { useUserError } from './useErrorContext';
 
 export type LoggedUserContextType = {
   account: string | undefined;
+  chain: Chain | undefined;
+  switchNetwork: ((chainId_?: number | undefined) => void) | undefined;
   user: LoggedUserDetails | undefined;
   githubAccount: string | undefined;
   checkAndLogin: (signer: Signer) => Promise<void>;
@@ -27,10 +29,15 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
     connector: new InjectedConnector(),
   });
 
+  const { chain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
+
   const { disconnect } = useDisconnect();
 
   const { address, isConnecting } = useAccount();
   const [user, setUser] = useState<LoggedUserDetails | undefined>(undefined);
+
+  // const [connector, setConnector] = useState<Connector>();
 
   const { showError } = useUserError();
 
@@ -57,7 +64,11 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
 
   const startLogout = async () => {
     /** destroy session */
-    await logout();
+    try {
+      await logout();
+    } catch (e) {
+      console.error(e);
+    }
     /** disconnect */
     disconnect();
     /** clear user details */
@@ -118,6 +129,8 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
     <LoggedUserContextValue.Provider
       value={{
         account: accountAddress,
+        chain,
+        switchNetwork,
         githubAccount: verification ? verification.from : undefined,
         checkAndLogin,
         user,

@@ -10,10 +10,9 @@ import { useNow } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { truncate } from '../utils/ethers';
 
-import { AppButton, AppInput, AppModal, AppTag, IElement } from './styles/BasicElements';
-import { AssetBalance, AssetsTable, ChainTag } from './Assets';
+import { AppButton, AppInput, AppModal, IElement } from './styles/BasicElements';
+import { AssetsTable, ChainTag } from './Assets';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
-import { styleConstants } from './styles/themes';
 
 interface IParams extends IElement {
   campaignAddress: string;
@@ -119,8 +118,6 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
             <ChainTag style={{ margin: '18px 0px' }} chain={chain}></ChainTag>
           </>
         }
-        value={claimValue}
-        symbol="$"
         assets={status.claim?.assets}
         action={
           canClaim ? (

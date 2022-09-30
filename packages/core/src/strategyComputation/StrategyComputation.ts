@@ -1,10 +1,10 @@
-import { strategies, Strategy_ID } from '../strategies';
-import { normalizeShares } from '../support';
+import { strategies } from '../strategies';
+import { normalizeShares, renameIds } from '../support';
 import { Balances } from '../types';
 import { World, WorldConfig } from '../world/World';
 
 export interface IStrategyComputation {
-  runStrategy(strategyId: Strategy_ID, params: any): Promise<Balances>;
+  runStrategy(strategyId: string, params: any): Promise<Balances>;
 }
 
 export class StrategyComputation implements IStrategyComputation {
@@ -14,11 +14,13 @@ export class StrategyComputation implements IStrategyComputation {
     this.world = new World(config);
   }
 
-  async runStrategy(strategyId: Strategy_ID, params: any): Promise<Balances> {
-    const shares = await strategies[strategyId].strategyFunc(
-      this.world,
-      params
-    );
-    return normalizeShares(shares);
+  async runStrategy(strategyId: string, params: any): Promise<Balances> {
+    const strategy = strategies.get(strategyId);
+    if (strategy === undefined) {
+      throw Error(`Strategy ${strategyId} not found`);
+    }
+    const shares = await strategy.func(this.world, params);
+
+    return renameIds(normalizeShares(shares), strategy.info.platform);
   }
 }

@@ -1,8 +1,4 @@
-import {
-  CampaignReadDetails,
-  Strategy_ID,
-  bigIntToNumber,
-} from '@dao-strategies/core';
+import { CampaignReadDetails, bigIntToNumber } from '@dao-strategies/core';
 import { Campaign } from '@prisma/client';
 
 export const toCampaignExternal = (campaign: Campaign): CampaignReadDetails => {
@@ -10,7 +6,7 @@ export const toCampaignExternal = (campaign: Campaign): CampaignReadDetails => {
     ...campaign,
     creator: campaign.creatorId,
     execDate: bigIntToNumber(campaign.execDate),
-    strategyID: campaign.stratID as Strategy_ID,
+    strategyID: campaign.stratID,
     strategyParams: JSON.parse(campaign.stratParamsStr) as Record<string, any>,
   };
 

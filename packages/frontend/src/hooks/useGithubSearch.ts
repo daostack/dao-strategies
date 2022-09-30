@@ -3,15 +3,18 @@ import { useDebounce } from 'use-debounce';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 
+const DEBUG = true;
+
 export const useGithubSearch = (): {
   loading: boolean;
   repos: string[];
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   checking: boolean;
+  checkExist: (name: string) => void;
+  validRepo: string;
   isValid: boolean;
-  checkExist: React.Dispatch<React.SetStateAction<string>>;
-  isValidName: (name: string) => boolean;
+  getValidName: (name: string) => string | undefined;
 } => {
   const [repos, setRepos] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -45,27 +48,51 @@ export const useGithubSearch = (): {
   const [checking, setChecking] = useState<boolean>(false);
   const [fullName, setFullName] = useState<string>('');
   const [isValid, setIsValid] = useState<boolean>(false);
-  const [debouncedName] = useDebounce(fullName, 1200, { leading: true });
+  const [debouncedName] = useDebounce(fullName, 1200, { leading: false });
 
-  const isValidName = (name: string) => {
-    return name.split('/').length === 2;
+  const checkExist = (name: string) => {
+    if (DEBUG) console.log('checkExist', name);
+    setChecking(false);
+    setFullName(name);
+  };
+
+  const getValidName = (name: string): string | undefined => {
+    const github_domain = 'https://github.com/';
+    let orgAndName = name;
+
+    if (name.length > github_domain.length && name.startsWith(github_domain)) {
+      orgAndName = name.slice(github_domain.length);
+    }
+    return orgAndName.split('/').length === 2 ? orgAndName : undefined;
   };
 
   useEffect(() => {
-    setChecking(true);
-    if (isValidName(debouncedName)) {
-      fetch(ORACLE_NODE_URL + `/social/github/exist?fullName=${debouncedName}`, {
-        method: 'post',
+    if (DEBUG) console.log('debouncedName', debouncedName);
+
+    const validName = getValidName(debouncedName);
+    if (validName !== undefined) {
+      setChecking(true);
+      if (DEBUG) console.log('isValidName. Fetching', validName);
+
+      fetch(ORACLE_NODE_URL + `/social/github/repo/${validName}`, {
+        method: 'get',
         credentials: 'include',
-      }).then((response) => {
-        response.json().then((data) => {
+      })
+        .then((response) => {
+          response.json().then((data) => {
+            if (DEBUG) console.log('github/exist. response', response);
+            setChecking(false);
+            setIsValid(data);
+          });
+        })
+        .catch((e) => {
           setChecking(false);
-          setIsValid(data);
+          setIsValid(false);
+          console.error(e);
         });
-      });
     } else {
       setChecking(false);
-      setRepos([]);
+      setIsValid(false);
     }
   }, [debouncedName]);
 
@@ -75,8 +102,9 @@ export const useGithubSearch = (): {
     query: debouncedQuery,
     setQuery,
     checking,
+    checkExist,
+    validRepo: debouncedName,
     isValid,
-    checkExist: setFullName,
-    isValidName,
+    getValidName,
   };
 };

@@ -3,7 +3,6 @@ import {
   Balances,
   BalancesFloat,
   normalizeShares,
-  Strategy_ID,
   IStrategyComputation,
 } from '@dao-strategies/core';
 import random from 'random';
@@ -17,7 +16,7 @@ const userNames = Array.from(Array(N).keys()).map((e) => `github:user${e}`);
 const randomShare = random.uniform(0, 1);
 
 export class StrategyComputationMock implements IStrategyComputation {
-  async runStrategy(strategyId: Strategy_ID, params: any): Promise<Balances> {
+  async runStrategy(strategyId: string, params: any): Promise<Balances> {
     const shares: BalancesFloat = new Map();
 
     userNames.forEach((user: string) => {

@@ -47,6 +47,10 @@ dist
 cache
 artifacts
 
+# localhost deployments
+packages/contracts/generated/deployments/localhost
+
+
 # misc
 .DS_Store
 .netlify

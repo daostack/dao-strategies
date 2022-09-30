@@ -10,14 +10,13 @@ export const GlobalStyles = createGlobalStyle`
     margin: 0;
   }
   p {
-    opacity: 0.6;
-    line-height: 1.5;
-  }
+    }
   img {
     max-width: 100%;
   }
 
-  h1 {
-    margin: 12px 0px;
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0px 0px;
   }
+
 `;

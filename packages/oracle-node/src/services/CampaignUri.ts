@@ -1,8 +1,4 @@
-import {
-  Strategy_ID,
-  getCampaignUri,
-  CampaignUriDetails,
-} from '@dao-strategies/core';
+import { getCampaignUri, CampaignUriDetails } from '@dao-strategies/core';
 import { Campaign } from '@prisma/client';
 
 export const campaignToUriDetails = (
@@ -12,7 +8,7 @@ export const campaignToUriDetails = (
     creator: campaign.creatorId,
     execDate: campaign.execDate as unknown as number,
     nonce: campaign.nonce,
-    strategyID: campaign.stratID as Strategy_ID,
+    strategyID: campaign.stratID,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     strategyParams: JSON.parse(campaign.stratParamsStr),
   };

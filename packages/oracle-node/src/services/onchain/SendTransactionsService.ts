@@ -1,39 +1,22 @@
 import {
   campaignInstance,
   CampaignCreateDetails,
-  ContractsJson,
   Typechain,
 } from '@dao-strategies/core';
-
-import { Wallet, Signer, Contract, providers } from 'ethers';
 import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
+
 import { appLogger } from '../../logger';
+import { ChainProviders } from '../../types';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-/* eslint-disable */
-const CampaignFactoryJson =
-  ContractsJson.jsonOfChain().contracts.CampaignFactory;
-/* eslint-enable */
-
 export class SendTransactionService {
   readonly campaignFactory: Typechain.CampaignFactory;
+  private publishing: Map<string, Promise<void>> = new Map();
 
-  constructor(
-    protected signer: Signer,
-    protected provider: providers.Provider
-  ) {
-    /* eslint-disable */
-
-    this.campaignFactory = new Contract(
-      CampaignFactoryJson.address,
-      CampaignFactoryJson.abi,
-      this.signer
-    ) as Typechain.CampaignFactory;
-    /* eslint-enable */
-  }
+  constructor(protected providers: ChainProviders) {}
 
   // async ready(): Promise<void> {
   //   if (this.signer.provider === undefined) {
@@ -84,12 +67,51 @@ export class SendTransactionService {
     /* eslint-enable */
   }
 
-  async publishShares(address: string, root: string): Promise<void> {
-    const campaign = campaignInstance(address, this.signer);
-    const tx = await campaign.proposeShares(root, ZERO_BYTES32);
-    const rec = await tx.wait();
-    appLogger.info(
-      `OnChainService - publishedShares, address: ${address}, root: ${root}, block: ${rec.blockNumber}`
-    );
+  async publishShares(
+    address: string,
+    chainId: number,
+    root: string
+  ): Promise<void> {
+    const unique = `${chainId}-${address}-${root}`;
+
+    if (this.publishing.has(unique)) {
+      appLogger.warn(
+        `OnChainService - publishShares - reentered, 
+          unique: ${unique}`
+      );
+      return this.publishing.get(unique);
+    }
+
+    const publish = async (): Promise<void> => {
+      const signer = this.providers.get(chainId).signer;
+      const signerAddress = await signer.getAddress();
+
+      const campaign = campaignInstance(address, signer);
+      appLogger.info(
+        `OnChainService - publishShares, 
+          address: ${address}, 
+          root: ${root}, 
+          chainId: ${chainId}, 
+          signer: ${signerAddress}`
+      );
+      const tx = await campaign.proposeShares(root, ZERO_BYTES32);
+      const rec = await tx.wait();
+
+      appLogger.info(
+        `OnChainService - publishedShares! block: ${rec.blockNumber}`
+      );
+    };
+
+    const publishing = publish();
+    this.publishing.set(unique, publishing);
+
+    try {
+      await publishing;
+    } catch (e) {
+      appLogger.error(`error publishing ${unique}`);
+      console.error(e);
+    }
+
+    this.publishing.delete(unique);
   }
 }

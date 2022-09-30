@@ -6,6 +6,7 @@ CREATE TABLE "Campaign" (
     "uri" TEXT NOT NULL,
     "title" TEXT,
     "description" TEXT,
+    "logoUrl" TEXT,
     "creatorId" TEXT,
     "nonce" INTEGER NOT NULL,
     "chainId" INTEGER,
