@@ -1,13 +1,12 @@
 import { Box, Button, FileInput, FormField, Grid, Heading, Layer } from "grommet"
-import { ChangeEvent, FC, useEffect, useRef, useState } from "react";
+import { ChangeEvent, FC, useEffect, useReducer, useRef, useState } from "react";
 import { AppButton, IElement } from "./styles/BasicElements"
-import 'cropperjs/dist/cropper.css';
 import { Cropper, ReactCropperElement } from "react-cropper";
 import { CampaignFormValues } from "../pages/create/CampaignCreate";
 import { Buffer } from 'buffer';
 
-//helper css to make crop area rounded
-import "../css/roundCrop.css";
+//helper css
+import 'cropperjs/dist/cropper.css';
 
 export interface SelectLogoI extends IElement {
     onValuesUpdated: (values: CampaignFormValues) => void;
@@ -21,6 +20,7 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
     const [cropData, setCropData] = useState('');
     const imageRef = useRef<ReactCropperElement>(null);
     const [cropper, setCropper] = useState<Cropper>();
+    const [, forceUpdate] = useReducer((x) => x + 1, 0)
 
     const getCropData = () => {
         if (typeof cropper !== 'undefined') {
@@ -59,16 +59,36 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
         return new File([buff], filename, { type: mime });
     }
 
+    const getImageTypeFromBase64String = (base64Data: string): string => {
+        return base64Data.substring("data:image/".length, base64Data.indexOf(";base64"))
+    }
+
+
     const convertBase64FromCropToFile = async () => {
         if (cropData) {
-            campaignFormValues.logo = await base64ToFile(cropData, 'croppedLogo.png');;
+            campaignFormValues.logo = await base64ToFile(cropData, `croppedLogo.${getImageTypeFromBase64String(cropData)}`);;
+            // set the NEW CROPPED file to the fileinput, so its shown
+            const fileInput = document.querySelector('#logo-select-input');
+            if (campaignFormValues.logo && fileInput) {
+                (fileInput as HTMLInputElement).value = '';
+                var newFileList = new DataTransfer();
+                newFileList.items.add(campaignFormValues.logo);
+                (fileInput as HTMLInputElement).files = newFileList.files
+                forceUpdate() // due to the nature of useRef we need a force UI Update otherwise new file list wont be shown
+            }
             onValuesUpdated(campaignFormValues);
             setShowCropModal(false);
         }
     }
+
+    const renderFilename = (file: any): JSX.Element => {
+        console.log('renderFile ', file, ' ', `croppedLogo.${getImageTypeFromBase64String(cropData)}`);
+        return (<p>{cropData ? `croppedLogo.${getImageTypeFromBase64String(cropData)}` : file.name}</p>)
+    }
     useEffect(() => {
         convertBase64FromCropToFile();
     }, [cropData])
+
 
     return (
         <>
@@ -77,47 +97,47 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
                 <Box fill justify="start">
                     <FileInput
                         name="logo"
+                        id="logo-select-input"
                         multiple={false}
+                        renderFile={renderFilename}
                         onChange={handleSelectLogo}
                         accept="image/png, image/webp, image/jpeg"
                         messages={{
                             dropPrompt: 'Drop logo here',
                             browse: numFiles > 0 ? 'Replace Logo' : 'Select Logo',
                         }}
-                        style={{ width: 'fill', borderRadius: '50px' }} />
+                        style={{ width: 'fill', height: 'fill', minHeight: '15px', borderRadius: '50px' }} />
                 </Box>
             </FormField>
 
             {/*Crop Logo Part */}
-            <Box>
-                {showCropModal && (
-                    <Layer
-                        animate={true}
-                        animation="fadeIn"
-                        position="center"
-                        margin={{ horizontal: 'large' }}
-                        modal={true}
-                        onEsc={() => setShowCropModal(false)}
-                        onClickOutside={() => setShowCropModal(false)}
-                    >
-                        <Heading> Crop your image </Heading>
-                        <Cropper
-                            initialAspectRatio={1 / 1}
-                            preview=".img-preview"
-                            viewMode={1} //restrict the crop box not to exceed the size of the canvas.
-                            guides={true}
-                            src={image}
-                            ref={imageRef}
-                            dragMode={'move'}
-                            checkOrientation={true} // https://github.com/fengyuanchen/cropperjs/issues/671
-                            onInitialized={(instance) => {
-                                setCropper(instance);
-                            }}
-                        />
-                        <AppButton alignSelf="center" primary onClick={() => saveCroppedBase64()}>Select Image</AppButton>
-                    </Layer>
-                )}
-            </Box>
+            {showCropModal && (
+                <Layer
+                    animate={true}
+                    animation="fadeIn"
+                    position="center"
+                    margin={{ horizontal: 'large' }}
+                    modal={true}
+                    onEsc={() => setShowCropModal(false)}
+                    onClickOutside={() => setShowCropModal(false)}
+                >
+                    <Heading> Crop your image </Heading>
+                    <Cropper
+                        initialAspectRatio={1 / 1}
+                        aspectRatio={1}
+                        viewMode={1} //restrict the crop box not to exceed the size of the canvas.
+                        guides={true}
+                        src={image}
+                        ref={imageRef}
+                        dragMode={'move'}
+                        checkOrientation={true} // https://github.com/fengyuanchen/cropperjs/issues/671
+                        onInitialized={(instance) => {
+                            setCropper(instance);
+                        }}
+                    />
+                    <AppButton alignSelf="center" primary onClick={() => saveCroppedBase64()}>Select Image</AppButton>
+                </Layer>
+            )}
         </>
     )
 }

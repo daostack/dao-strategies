@@ -19,4 +19,16 @@ export const GlobalStyles = createGlobalStyle`
     margin: 0px 0px;
   }
 
+  .cropper-view-box {
+      box-shadow: 0 0 0 1px #39f;
+      border-radius: 50%;
+      outline: 0;
+  }
+  .cropper-face {
+      background-color: inherit !important;
+  }
+
+  .cropper-view-box {
+      outline: inherit !important;
+  }
 `;

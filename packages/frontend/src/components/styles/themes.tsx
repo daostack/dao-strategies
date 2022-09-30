@@ -165,5 +165,5 @@ const extension: ThemeType = {
   },
 };
 
-export const lightTheme = deepMerge(grommet, extension);
+export const lightTheme = deepMerge(grommet, dark);
 export const darkTheme = deepMerge(dark, extension);
