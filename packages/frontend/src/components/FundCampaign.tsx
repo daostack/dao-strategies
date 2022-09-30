@@ -1,12 +1,13 @@
 import { Asset, campaignInstance, ChainsDetails, erc20Instance } from '@dao-strategies/core';
-import { Contract, ethers } from 'ethers';
-import { Select, Box, Header, FormField, TextInput, Spinner, Heading } from 'grommet';
+import { ethers } from 'ethers';
+import { Select, Box, FormField, TextInput, Spinner } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 import { useSigner } from 'wagmi';
+import { useBalanceOf } from '../hooks/useBalanceOf';
 import { useLoggedUser } from '../hooks/useLoggedUser';
+import { valueToString } from '../utils/general';
 import { AssetIcon } from './Assets';
 import { AppForm, AppButton, IElement } from './styles/BasicElements';
-import { styleConstants } from './styles/themes';
 
 interface FundFormValues {
   asset: string;
@@ -30,8 +31,13 @@ interface IFundCampaign extends IElement {
 export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const [formValues, setFormValues] = useState<FundFormValues>(initialValues);
   const [funding, setFunding] = useState<boolean>(false);
-
   const { account, connect } = useLoggedUser();
+
+  const selectedAsset = props.assets.find((asset) => asset.id === formValues.asset);
+
+  const { balance } = useBalanceOf(selectedAsset?.address, props.chainId, account);
+  const balanceStr = balance ? valueToString(+ethers.utils.formatUnits(balance.balance, balance.decimals)) : '--';
+
   const { data: signer } = useSigner();
 
   useEffect(() => {
@@ -58,8 +64,6 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const onValuesUpdated = (values: FundFormValues) => {
     setFormValues({ ...values });
   };
-
-  const selectedAsset = props.assets.find((asset) => asset.id === formValues.asset);
 
   const fund = async () => {
     if (!isLogged) {
@@ -103,7 +107,14 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
         <AppForm style={{ width: '100%' }} value={formValues} onChange={onValuesUpdated as any}>
           <Box>
             <Box style={{ position: 'relative' }}>
-              <FormField name="amount" label="Enter amount to fund">
+              <FormField
+                name="amount"
+                label={
+                  <Box direction="row" justify="between">
+                    <Box>Enter amount to fund</Box>
+                    <Box style={{ textDecoration: 'underline' }}>{balanceStr}</Box>
+                  </Box>
+                }>
                 <TextInput name="amount" placeholder="0"></TextInput>
               </FormField>
               <FormField name="asset" style={{ border: '0px none', position: 'absolute', right: '0px', top: '30px' }}>

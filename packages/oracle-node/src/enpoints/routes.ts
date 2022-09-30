@@ -93,6 +93,13 @@ export const Routes: RouteConfig[] = [
   },
   {
     method: 'get',
+    route: '/onchain/balanceOf/:chainId/:asset/:account',
+    controller: CampaignController,
+    action: 'balanceOf',
+    protected: false,
+  },
+  {
+    method: 'get',
     route: '/user/me',
     controller: UserController,
     action: 'me',

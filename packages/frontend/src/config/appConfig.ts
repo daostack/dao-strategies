@@ -32,3 +32,5 @@ export const ALCHEMY_GOERLI_KEY = 'aQapGNEneTscr5ixwb05r-J-OWEEwQvF';
 
 // export const INCLUDED_CHAINS = [1337, 5];
 export const INCLUDED_CHAINS = process.env.NODE_ENV === 'production' ? [5] : [1337, 5];
+
+export const GITHUB_DOMAIN = 'https://github.com/';

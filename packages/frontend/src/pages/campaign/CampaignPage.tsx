@@ -1,6 +1,7 @@
+import { Link } from 'react-router-dom';
 import { Box, Spinner } from 'grommet';
 import { FC, useEffect, useRef, useState } from 'react';
-import { ChainsDetails, Page } from '@dao-strategies/core';
+import { Page } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
@@ -10,15 +11,14 @@ import {
   AppCard,
   AppHeading,
   AppModal,
-  AppTag,
   ExpansibleCard,
   ExpansiveParagraph,
   InfoProperty,
+  RepoTag,
 } from '../../components/styles/BasicElements';
 import { TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
-import { truncate } from '../../utils/ethers';
 import { DateManager } from '../../utils/date.manager';
 import { HEADER_HEIGHT, MAX_WIDTH } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
@@ -27,7 +27,6 @@ import { BalanceCard } from './BalanceCard';
 import { styleConstants } from '../../components/styles/themes';
 import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
-import { Link } from 'react-router-dom';
 import { FundersTable } from '../../components/FundersTable';
 import { Refresh } from 'grommet-icons';
 import { FixedAdmin } from './fixed.admin';
@@ -153,7 +152,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           <Box>
             <InfoProperty title="Github Repositories">
               {campaign.strategyParams.repositories.map((repo: any, ix: number) => (
-                <AppTag key={ix}>{`${repo.owner}/${repo.repo}`}</AppTag>
+                <RepoTag repo={`${repo.owner}/${repo.repo}`} key={ix} style={{ marginBottom: '6px' }} />
               ))}
             </InfoProperty>
             <InfoProperty style={{ marginTop: '36px' }} title="Guardian Address">

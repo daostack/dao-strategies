@@ -24,6 +24,7 @@ import {
 import { CircleQuestion, Close, FormDown, FormUp, IconProps } from 'grommet-icons';
 import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { GITHUB_DOMAIN } from '../../config/appConfig';
 import { styleConstants, theme } from './themes';
 
 export interface IElement {
@@ -192,6 +193,28 @@ export const AppSelect: FC<SelectExtendedProps> = (props: SelectExtendedProps) =
         padding: '8px 16px',
         borderRadius: '24px',
       }}></Select>
+  );
+};
+
+export const SelectRow: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <Box direction="row" align="center" style={{ width: '100%', padding: '6px 12px', ...props.style }}>
+      {props.children}
+    </Box>
+  );
+};
+
+export const SelectValue: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <SelectRow
+      style={{
+        border: '1px solid',
+        borderRadius: '32px',
+        borderColor: styleConstants.colors.lightGrayBorder,
+        ...props.style,
+      }}>
+      {props.children}
+    </SelectRow>
   );
 };
 
@@ -589,5 +612,19 @@ export const CircleIcon: FC<ICircleIcon> = (props: ICircleIcon) => {
       }}>
       {icon}
     </Box>
+  );
+};
+
+export interface IRepoTag extends BoxExtendedProps {
+  repo: string;
+}
+
+export const RepoTag: FC<IRepoTag> = (props: IRepoTag) => {
+  return (
+    <AppTag style={{ ...props.style }}>
+      <a style={{ textDecoration: 'none' }} target="_blank" href={`${GITHUB_DOMAIN}${props.repo}`} rel="noreferrer">
+        {props.repo}
+      </a>
+    </AppTag>
   );
 };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { ORACLE_NODE_URL } from '../config/appConfig';
+import { GITHUB_DOMAIN, ORACLE_NODE_URL } from '../config/appConfig';
 
 const DEBUG = true;
 
@@ -57,7 +57,7 @@ export const useGithubSearch = (): {
   };
 
   const getValidName = (name: string): string | undefined => {
-    const github_domain = 'https://github.com/';
+    const github_domain = GITHUB_DOMAIN;
     let orgAndName = name;
 
     if (name.length > github_domain.length && name.startsWith(github_domain)) {

@@ -21,11 +21,14 @@ import {
   strategyDetails,
   sharesFromDetails,
   SET_FROM_NOW,
+  reactionConfigOptions,
+  ReactionConfig,
 } from '../campaign.support';
 import {
   ACTIVATION_PERIOD,
   ACTIVE_DURATION,
   CHALLENGE_PERIOD,
+  GITHUB_DOMAIN,
   INCLUDED_CHAINS,
   oracleAddressMap,
 } from '../../config/appConfig';
@@ -45,6 +48,9 @@ import {
   CampaignIcon,
   ExpansiveParagraph,
   HorizontalLine,
+  RepoTag,
+  SelectRow,
+  SelectValue,
 } from '../../components/styles/BasicElements';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
@@ -80,6 +86,7 @@ export interface CampaignFormValues {
   livePeriodChoice: string;
   customPeriodChoiceFrom: string;
   customPeriodChoiceTo: string;
+  reactionsConfig: ReactionConfig;
 }
 
 export interface ProcessedFormValues {
@@ -100,10 +107,10 @@ const initialValues: CampaignFormValues = {
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
   customPeriodChoiceTo: '',
+  reactionsConfig: ReactionConfig.PRS_AND_REACTS,
 };
 
 const MORE_SOON = 'MORE_SOON';
-const GITHUB_DOMAIN = 'https://www.github.com/';
 const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
@@ -482,86 +489,84 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   })(pageIx);
 
   const pages: React.ReactNode[] = [
-    <Box>
-      <>
-        <AppFormField
-          name="title"
-          label={<FieldLabel label="Give this Campaign a name" required></FieldLabel>}
-          style={{ marginBottom: '40px' }}>
-          <AppInput name="title" placeholder="Name"></AppInput>
-        </AppFormField>
+    <Box style={{ fontSize: styleConstants.textFontSizes.small }}>
+      <AppFormField
+        name="title"
+        label={<FieldLabel label="Give this Campaign a name" required></FieldLabel>}
+        style={{ marginBottom: '40px' }}>
+        <AppInput name="title" placeholder="Name"></AppInput>
+      </AppFormField>
 
-        <AppFormField name="description" label="Describe what it is about" style={{ marginBottom: '40px' }}>
-          <AppTextArea placeholder="" name="description"></AppTextArea>
-        </AppFormField>
+      <AppFormField name="description" label="Describe what it is about" style={{ marginBottom: '40px' }}>
+        <AppTextArea placeholder="" name="description"></AppTextArea>
+      </AppFormField>
 
-        <AppFormField
-          name="chainName"
-          label={
-            <FieldLabel
-              label="Select Network"
-              required
-              help="The campaign funds will be controlled by a contract deployed on this network."></FieldLabel>
-          }
-          style={{ marginBottom: '40px' }}>
-          <AppSelect name="chainName" options={chainOptions}></AppSelect>
-        </AppFormField>
+      <AppFormField
+        name="chainName"
+        label={
+          <FieldLabel
+            label="Select Network"
+            required
+            help="The campaign funds will be controlled by a contract deployed on this network."></FieldLabel>
+        }
+        style={{ marginBottom: '40px' }}>
+        <AppSelect name="chainName" options={chainOptions}></AppSelect>
+      </AppFormField>
 
-        <AppFormField
-          name="hasCustomAsset"
-          label={
-            <FieldLabel
-              label="Reward Token"
-              required
-              help="If you want the campaign to raise funds on a special ERC-20 token, please add it here. By default, campaigns can be funded with the native token and popular stable-coins of each network."></FieldLabel>
-          }
-          style={{
-            marginBottom: formValues.hasCustomAsset ? '10px' : '40px',
-            fontSize: styleConstants.textFontSizes.small,
-          }}>
-          <CheckBox name="hasCustomAsset" label="Use custom asset" />
-        </AppFormField>
+      <AppFormField
+        name="hasCustomAsset"
+        label={
+          <FieldLabel
+            label="Reward Token"
+            required
+            help="If you want the campaign to raise funds on a special ERC-20 token, please add it here. By default, campaigns can be funded with the native token and popular stable-coins of each network."></FieldLabel>
+        }
+        style={{
+          marginBottom: formValues.hasCustomAsset ? '10px' : '40px',
+          fontSize: styleConstants.textFontSizes.small,
+        }}>
+        <CheckBox name="hasCustomAsset" label="Use custom asset" />
+      </AppFormField>
 
-        {formValues.hasCustomAsset ? (
-          <AppFormField name="customAssetAddress" label="Token address" style={{ marginBottom: '40px' }}>
-            <AppInput
-              name="customAssetAddress"
-              placeholder="0x0..."
-              style={{ border: '1px solid ', borderRadius: '20px' }}></AppInput>
-          </AppFormField>
+      {formValues.hasCustomAsset ? (
+        <AppFormField name="customAssetAddress" label="Token address" style={{ marginBottom: '40px' }}>
+          <AppInput
+            name="customAssetAddress"
+            placeholder="0x0..."
+            style={{ border: '1px solid ', borderRadius: '20px' }}></AppInput>
+        </AppFormField>
+      ) : (
+        <></>
+      )}
+
+      <AppFormField
+        name="guardian"
+        label={
+          <FieldLabel
+            label="Add the Admin address"
+            required
+            help='The campaign "Admin" can review the results of the campaign (published by the oracle) before they are effective and revert them if these are not satisfactory. This means that funds are, ultimately, not under the control of the oracle.'></FieldLabel>
+        }
+        style={{ marginBottom: '40px' }}>
+        <AppInput name="guardian" placeholder="0x...."></AppInput>
+        {account !== undefined && account !== formValues.guardian ? (
+          <AppButton
+            style={{ marginLeft: '16px' }}
+            onClick={() => setAccountAsGuardian()}
+            label={
+              <Box direction="row" align="center">
+                set current account{' '}
+                <Address disableClick style={{ marginLeft: '4px' }} address={account} chainId={chainId}></Address>
+              </Box>
+            }
+            _type="inline"
+          />
         ) : (
           <></>
         )}
-
-        <AppFormField
-          name="guardian"
-          label={
-            <FieldLabel
-              label="Add the Admin address"
-              required
-              help='The campaign "Admin" can review the results of the campaign (published by the oracle) before they are effective and revert them if these are not satisfactory. This means that funds are, ultimately, not under the control of the oracle.'></FieldLabel>
-          }
-          style={{ marginBottom: '40px' }}>
-          <AppInput name="guardian" placeholder="0x...."></AppInput>
-          {account !== undefined && account !== formValues.guardian ? (
-            <AppButton
-              style={{ marginLeft: '16px' }}
-              onClick={() => setAccountAsGuardian()}
-              label={
-                <Box direction="row" align="center">
-                  set current account{' '}
-                  <Address disableClick style={{ marginLeft: '4px' }} address={account} chainId={chainId}></Address>
-                </Box>
-              }
-              _type="inline"
-            />
-          ) : (
-            <></>
-          )}
-        </AppFormField>
-      </>
+      </AppFormField>
     </Box>,
-    <Box>
+    <Box style={{ fontSize: styleConstants.textFontSizes.small }}>
       <Box style={{ marginBottom: '64px' }}>
         <AppFormField
           name="strategyId"
@@ -571,15 +576,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               help="The campaign will compute a list of shareholders based on programmed rules. These are programmatic rules that can fetch data from web2 and web3 protocols."></FieldLabel>
           }>
           <AppSelect
-            value={
-              <StrategySelector
-                style={{
-                  border: '1px solid',
-                  borderRadius: '32px',
-                  borderColor: styleConstants.colors.lightGrayBorder,
-                }}
-                strategy={selectedStrategy}></StrategySelector>
-            }
+            value={<StrategySelector strategy={selectedStrategy}></StrategySelector>}
             name="strategyId"
             options={strategyOptions}>
             {(option: string) => {
@@ -603,10 +600,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </AppFormField>
       </Box>
 
-      <TwoColumns>
+      <TwoColumns line={false} gap={40}>
         <Box>
           <AppFormField name="reactionsConfig" label="Count contribution scores using">
-            <AppSelect name="reactionsConfig" options={['']}></AppSelect>
+            <AppSelect
+              name="reactionsConfig"
+              options={Array.from(reactionConfigOptions.keys())}
+              value={<SelectValue>{reactionConfigOptions.get(formValues.reactionsConfig)}</SelectValue>}>
+              {(option: ReactionConfig) => {
+                return <SelectRow>{reactionConfigOptions.get(option)}</SelectRow>;
+              }}
+            </AppSelect>
           </AppFormField>
         </Box>
         <Box>
@@ -651,13 +655,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             {formValues.repositoryFullnames.map((repo) => {
               return (
                 <Box style={{ width: '100%', marginTop: '25px' }} direction="row" justify="between" align="center">
-                  <a
-                    style={{ textDecoration: 'none', color: styleConstants.colors.ligthGrayText }}
-                    target="_blank"
-                    href={`${GITHUB_DOMAIN}${repo}`}
-                    rel="noreferrer">
-                    {repo}
-                  </a>
+                  <RepoTag repo={repo} />
                   <Box onClick={() => clearRepo(repo)} style={{ width: '28px', height: '28px' }}>
                     <FormTrash
                       style={{ width: '28px', height: '28px' }}
@@ -760,17 +758,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Github Repositories">
                 {formValues.repositoryFullnames.map((name) => {
-                  return (
-                    <AppTag style={{ marginBottom: '12px' }}>
-                      <a
-                        style={{ textDecoration: 'none', color: styleConstants.colors.ligthGrayText }}
-                        target="_blank"
-                        href={`${GITHUB_DOMAIN}${repo}`}
-                        rel="noreferrer">
-                        {name}
-                      </a>
-                    </AppTag>
-                  );
+                  return <RepoTag repo={name} style={{ marginBottom: '12px' }} />;
                 })}
               </Parameter>
             </Box>

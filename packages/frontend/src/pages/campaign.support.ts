@@ -46,6 +46,18 @@ export enum PeriodType {
   future = 'future',
 }
 
+export enum ReactionConfig {
+  PRS_AND_REACTS = 'PRS_AND_REACTS',
+  ONLY_PRS = 'ONLY_PRS',
+  ONLY_REACTS = 'ONLY_REACTS',
+}
+
+export const reactionConfigOptions: Map<ReactionConfig, string> = new Map();
+
+reactionConfigOptions.set(ReactionConfig.PRS_AND_REACTS, 'Both Pull Requests & Reactions');
+reactionConfigOptions.set(ReactionConfig.ONLY_PRS, 'Only Pull Requests');
+reactionConfigOptions.set(ReactionConfig.ONLY_REACTS, 'Only Reactions');
+
 export const strategyDetails = (
   values: CampaignFormValues,
   now: DateManager | undefined,
