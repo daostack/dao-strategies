@@ -45,6 +45,7 @@ const ForCard: FC<IForCard> = (props: IForCard) => {
             fontFamily: styleConstants.font.secondary,
             fontWeight: '600',
             fontSize: '40px',
+            textAlign: 'center',
           }}>
           {props.title}
         </AppHeading>

@@ -59,7 +59,7 @@ export interface IValueElement extends IElement {
   value?: string;
 }
 
-type _type = 'slim' | 'normal' | 'large' | undefined;
+type _type = 'slim' | 'normal' | 'large' | 'inline' | undefined;
 
 export interface IButton extends ButtonExtendedProps {
   inline?: boolean;
@@ -81,6 +81,22 @@ export const AppButton = (props: IButton) => {
   })(props._type);
 
   const newProps = { ...props };
+
+  if (props._type === 'inline') {
+    return (
+      <Box
+        direction="row"
+        onClick={props.onClick}
+        style={{
+          textDecoration: 'none',
+          color: styleConstants.colors.links,
+          fontSize: styleConstants.textFontSizes.xsmall,
+          ...props.style,
+        }}>
+        {props.label}
+      </Box>
+    );
+  }
 
   let textColor = newProps.secondary ? styleConstants.colors.primary : undefined;
 

@@ -351,15 +351,24 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     repoNameChanged('');
   };
 
-  const clearRepo = (repo: string) => {
-    const ix = formValues.repositoryFullnames.indexOf(repo);
-    formValues.repositoryFullnames.splice(ix, 1);
-    setFormValues({ ...formValues });
-  };
+  const clearRepo = useCallback(
+    (repo: string) => {
+      const ix = formValues.repositoryFullnames.indexOf(repo);
+      formValues.repositoryFullnames.splice(ix, 1);
+      setFormValues({ ...formValues });
+    },
+    [formValues]
+  );
 
   const switchNetworkCall = useCallback(() => {
     if (switchNetwork) switchNetwork(chainId);
   }, [chainId]);
+
+  const setAccountAsGuardian = useCallback(() => {
+    if (account !== undefined) {
+      setFormValues({ ...formValues, guardian: account });
+    }
+  }, [formValues, account]);
 
   const status = useMemo((): FormStatus => {
     return {
@@ -494,6 +503,21 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           }
           style={{ marginBottom: '40px' }}>
           <AppInput name="guardian" placeholder="0x...."></AppInput>
+          {account !== undefined && account !== formValues.guardian ? (
+            <AppButton
+              style={{ marginLeft: '16px' }}
+              onClick={() => setAccountAsGuardian()}
+              label={
+                <Box direction="row" align="center">
+                  set current account{' '}
+                  <Address style={{ marginLeft: '4px' }} address={account} chainId={chainId}></Address>
+                </Box>
+              }
+              _type="inline"
+            />
+          ) : (
+            <></>
+          )}
         </AppFormField>
       </>
     </Box>,
