@@ -452,6 +452,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           <AppTextArea placeholder="" name="description"></AppTextArea>
         </FormField>
 
+        <SelectLogo onValuesUpdated={onValuesUpdated} campaignFormValues={formValues} />
+
         <FormField name="chainName" label="Select Network" style={{ marginBottom: '40px' }}>
           <AppSelect name="chainName" options={chainOptions}></AppSelect>
         </FormField>
