@@ -342,9 +342,19 @@ export class CampaignRepository {
     const uris = await this.client.campaign.findMany({
       where: {
         registered: true,
-        republishDate: {
-          lte: now,
-        },
+        executed: true,
+        OR: [
+          {
+            republishDate: {
+              lte: now,
+            },
+          },
+          {
+            republishDate: {
+              equals: null,
+            },
+          },
+        ],
       },
       select: {
         uri: true,
@@ -487,7 +497,7 @@ export class CampaignRepository {
   async list(user?: string): Promise<Campaign[]> {
     const res = await this.client.campaign.findMany({
       where: { registered: true },
-      orderBy: { valueLocked: 'desc' },
+      orderBy: { chainId: { sort: 'desc', nulls: 'last' } },
       take: 10,
     });
     return res;

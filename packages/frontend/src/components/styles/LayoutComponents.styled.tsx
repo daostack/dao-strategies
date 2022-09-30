@@ -8,8 +8,9 @@ import {
   GridSizeType,
   ResponsiveContext,
 } from 'grommet';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { IElement } from './BasicElements';
+import { styleConstants } from './themes';
 
 export const ViewportContainer: FC<any> = (props: IElement) => {
   return (
@@ -21,31 +22,36 @@ export const ViewportContainer: FC<any> = (props: IElement) => {
   );
 };
 
-export const ColumnView: FC<any> = (props: IElement) => {
-  return (
-    <Box style={{ maxWidth: '900px', margin: '0 auto' }} align="center">
-      {props.children}
-    </Box>
-  );
-};
-
-export interface ITwoColumns extends BoxExtendedProps {}
+export interface ITwoColumns {
+  children?: ReactNode | ReactNode[];
+  grid?: GridExtendedProps;
+  boxes?: BoxExtendedProps;
+}
 
 export const TwoColumns: FC<ITwoColumns> = (props: ITwoColumns) => {
   return (
     <Grid
       fill
-      columns={['1/2', '1/2']}
+      columns={['1fr', '80px', '1fr']}
       rows={['auto']}
       areas={[
         { name: 'left', start: [0, 0], end: [0, 0] },
-        { name: 'right', start: [1, 0], end: [1, 0] },
+        { name: 'center', start: [1, 0], end: [1, 0] },
+        { name: 'right', start: [2, 0], end: [2, 0] },
       ]}
-      style={{ ...props.style }}>
-      <Box gridArea="left" direction="column" align={props.align} justify={props.justify}>
+      style={{ ...props.grid?.style }}>
+      <Box gridArea="left" direction="column" {...props.boxes}>
         {(props.children as React.ReactNode[])[0]}
       </Box>
-      <Box gridArea="right" direction="column" align={props.align} justify={props.justify}>
+      <Box gridArea="center" align="center">
+        <Box
+          style={{
+            height: '100%',
+            width: '2px',
+            backgroundColor: styleConstants.colors.lightGrayBorder,
+          }}></Box>
+      </Box>
+      <Box gridArea="right" direction="column" {...props.boxes}>
         {(props.children as React.ReactNode[])[1]}
       </Box>
     </Grid>

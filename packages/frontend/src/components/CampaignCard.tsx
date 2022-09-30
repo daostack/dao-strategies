@@ -1,15 +1,15 @@
-import { CampaignReadDetails } from '@dao-strategies/core';
+import { CampaignReadDetails, ChainsDetails } from '@dao-strategies/core';
 import { Box, BoxExtendedProps, Spinner } from 'grommet';
-import { FC } from 'react';
+import React from 'react';
 import { Address } from './Address';
-import { AppCard, AppTag, FixedHeightPar, IElement } from './styles/BasicElements';
-import { styleConstants } from './styles/themes';
+import { ChainTag } from './Assets';
+import { AppCard, AppHeading, AppTag, FixedHeightPar } from './styles/BasicElements';
 
 export interface ICampaignCard extends BoxExtendedProps {
   campaign?: CampaignReadDetails;
 }
 
-export const CampaignCard: FC<ICampaignCard> = (props: ICampaignCard) => {
+export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((props, ref) => {
   const campaign = props.campaign;
 
   if (!campaign) {
@@ -20,14 +20,17 @@ export const CampaignCard: FC<ICampaignCard> = (props: ICampaignCard) => {
     );
   }
 
+  const chain = ChainsDetails.chainOfId(campaign.chainId);
+
   return (
-    <AppCard {...props} style={{ ...props.style }}>
+    <AppCard {...props} ref={ref} style={{ ...props.style }}>
       <Box direction="row" align="center" justify="between">
-        <Box style={{ fontSize: styleConstants.headingFontSizes[1], fontWeight: '700', margin: '8px 0px 8px 0px' }}>
+        <AppHeading level="2" style={{ margin: '8px 0px 8px 0px' }}>
           {campaign.title}
-        </Box>{' '}
+        </AppHeading>
         <Box direction="row" align="center">
-          Address: <Address address={campaign.address} chainId={campaign.chainId}></Address>
+          <ChainTag style={{ marginRight: '12px' }} chain={chain}></ChainTag>{' '}
+          <Address address={campaign.address} chainId={campaign.chainId}></Address>
         </Box>
       </Box>
 
@@ -48,4 +51,4 @@ export const CampaignCard: FC<ICampaignCard> = (props: ICampaignCard) => {
       </Box>
     </AppCard>
   );
-};
+});

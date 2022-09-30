@@ -16,7 +16,13 @@
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
       "runtimeExecutable": "${workspaceFolder}/packages/contracts/node_modules/.bin/hardhat",
-      "args": ["deploy", "--export-all", "./generated/hardhat_contracts.json"],
+      "args": [
+        "deploy",
+        "--export-all",
+        "./generated/hardhat_contracts.json",
+        "--network",
+        "goerli"
+      ],
       "cwd": "${workspaceFolder}/packages/contracts"
     },
     {

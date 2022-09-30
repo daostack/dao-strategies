@@ -6,14 +6,15 @@ import {
   TokenBalance,
 } from '@dao-strategies/core';
 import { FundEvent } from '@prisma/client';
-import { providers } from 'ethers';
 
 import { config } from '../../config';
 import { appLogger } from '../../logger';
 import { CampaignRepository } from '../../repositories/CampaignRepository';
 import { IndexRepository } from '../../repositories/IndexRepository';
+import { ChainProvider, ChainProviders } from '../../types';
 import { CampaignService } from '../CampaignService';
 import { PriceService } from '../PriceService';
+
 import { ReadDataService } from './ReadDataService';
 
 const DEBUG = true;
@@ -27,12 +28,21 @@ export class IndexingService {
     protected campaign: CampaignService,
     protected readDataService: ReadDataService,
     protected price: PriceService,
-    protected provider: providers.Provider
+    protected providers: ChainProviders
   ) {}
+
+  getProvider(chainId: number): ChainProvider {
+    const provider = this.providers.get(chainId);
+    if (!provider) {
+      throw new Error(`provider not found ${chainId}`);
+    }
+    return provider;
+  }
 
   async updateFundersIndex(
     uri: string,
     address: string,
+    chainId: number,
     fromBlock: number,
     toBlock: number
   ): Promise<void> {
@@ -54,7 +64,10 @@ export class IndexingService {
     const update = async (address: string): Promise<string[]> => {
       if (DEBUG)
         appLogger.debug(`IndexingService - updateCampaignIndex() - update`);
-      const campaign = campaignProvider(address, this.provider);
+      const campaign = campaignProvider(
+        address,
+        this.getProvider(chainId).provider
+      );
 
       /** all Fund events */
       const filter = campaign.filters.Fund(null, null, null);
@@ -178,7 +191,9 @@ export class IndexingService {
     const campaign = await this.campaign.get(uri);
 
     const fundersBlock = await this.indexRepo.getBlockOfFunders(uri);
-    const latestBlock = await this.readDataService.getBlockNumber();
+    const latestBlock = await this.readDataService.getBlockNumber(
+      campaign.chainId
+    );
 
     if (DEBUG)
       appLogger.debug(
@@ -189,6 +204,7 @@ export class IndexingService {
       await this.updateFundersIndex(
         campaign.uri,
         campaign.address,
+        campaign.chainId,
         fundersBlock,
         latestBlock
       );
@@ -200,7 +216,9 @@ export class IndexingService {
     const campaign = await this.campaign.getFromAddress(address);
 
     const tvlBlock = await this.indexRepo.getBlockOfFunders(campaign.uri);
-    const latestBlock = await this.readDataService.getBlockNumber();
+    const latestBlock = await this.readDataService.getBlockNumber(
+      campaign.chainId
+    );
 
     if (DEBUG)
       appLogger.debug(

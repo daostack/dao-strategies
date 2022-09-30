@@ -44,7 +44,9 @@ export class SocialApiController extends Controller {
     _next: NextFunction
   ): Promise<boolean> {
     /* eslint-disable */
-    return this.manager.services.socialApi.repoIsValid(request.query.fullName as string);
+    return this.manager.services.socialApi.repoIsValid(
+      request.params.org + '/' + request.params.name
+    );
     /* eslint-enable */
   }
 }

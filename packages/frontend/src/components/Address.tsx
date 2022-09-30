@@ -2,7 +2,7 @@ import { ChainsDetails } from '@dao-strategies/core';
 import { Box, BoxExtendedProps } from 'grommet';
 import { Link } from 'grommet-icons';
 import { FC } from 'react';
-import { theme } from './styles/themes';
+import { styleConstants, theme } from './styles/themes';
 
 interface IAddress extends BoxExtendedProps {
   address: string | null | undefined;
@@ -26,15 +26,15 @@ export const Address: FC<IAddress> = (props: IAddress) => {
       {exploreAddress ? (
         <Box align="center" direction="row">
           <a
-            style={{ color: theme.links, textDecoration: 'none' }}
+            style={{ color: styleConstants.colors.links, textDecoration: 'none' }}
             target="_blank"
             rel="noreferrer"
             href={exploreAddress(props.address)}>
-            {addressStr} <Link color={theme.links} style={{ height: '14px' }}></Link>
+            {addressStr} <Link color={styleConstants.colors.links} style={{ height: '14px' }}></Link>
           </a>
         </Box>
       ) : (
-        <span style={{ color: theme.links }}>{addressStr}</span>
+        <span style={{ color: styleConstants.colors.links }}>{addressStr}</span>
       )}
     </Box>
   );

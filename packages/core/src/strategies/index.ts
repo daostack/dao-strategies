@@ -1,11 +1,10 @@
-import { Strategy } from '../types';
+import { github_strategies } from './github';
+import { StrategiesMap } from './strategies.map';
+import { twitter_strategies } from './twitter';
 
-import { github_strategies, GH_STRATEGY_ID } from './github';
-import { twitter_strategies, TW_STRATEGY_ID } from './twitter';
+const strategies = new StrategiesMap();
 
-export type Strategy_ID = GH_STRATEGY_ID | TW_STRATEGY_ID;
+strategies.merge(github_strategies);
+strategies.merge(twitter_strategies);
 
-export const strategies: Record<Strategy_ID, Strategy> = {
-  ...github_strategies,
-  ...twitter_strategies,
-};
+export { strategies };

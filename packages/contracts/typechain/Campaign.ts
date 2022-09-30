@@ -29,6 +29,7 @@ export interface CampaignInterface extends utils.Interface {
     "approvedMerkleRoot()": FunctionFragment;
     "balanceOfAsset(address)": FunctionFragment;
     "challenge(uint8)": FunctionFragment;
+    "checkMerkleRootUpdateAllowed()": FunctionFragment;
     "claim(address,uint256,bytes32[],address[],address)": FunctionFragment;
     "claimed(address,address)": FunctionFragment;
     "deployTime()": FunctionFragment;
@@ -41,7 +42,6 @@ export interface CampaignInterface extends utils.Interface {
     "isProposeWindowActive()": FunctionFragment;
     "lockForWithdrawals()": FunctionFragment;
     "locked()": FunctionFragment;
-    "merkleRootUpdateAllowed()": FunctionFragment;
     "oracle()": FunctionFragment;
     "pendingMerkleRoot()": FunctionFragment;
     "proposeShares(bytes32,bytes32)": FunctionFragment;
@@ -87,6 +87,10 @@ export interface CampaignInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "challenge",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "checkMerkleRootUpdateAllowed",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "claim",
@@ -138,10 +142,6 @@ export interface CampaignInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "locked", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "merkleRootUpdateAllowed",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "oracle", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "pendingMerkleRoot",
@@ -214,6 +214,10 @@ export interface CampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "challenge", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "checkMerkleRootUpdateAllowed",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "deployTime", data: BytesLike): Result;
@@ -244,10 +248,6 @@ export interface CampaignInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "locked", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "merkleRootUpdateAllowed",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "oracle", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "pendingMerkleRoot",
@@ -398,6 +398,8 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    checkMerkleRootUpdateAllowed(overrides?: CallOverrides): Promise<[void]>;
+
     claim(
       account: string,
       share: BigNumberish,
@@ -449,8 +451,6 @@ export interface Campaign extends BaseContract {
     lockForWithdrawals(overrides?: CallOverrides): Promise<[boolean]>;
 
     locked(overrides?: CallOverrides): Promise<[boolean]>;
-
-    merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<[boolean]>;
 
     oracle(overrides?: CallOverrides): Promise<[string]>;
 
@@ -524,6 +524,8 @@ export interface Campaign extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  checkMerkleRootUpdateAllowed(overrides?: CallOverrides): Promise<void>;
+
   claim(
     account: string,
     share: BigNumberish,
@@ -571,8 +573,6 @@ export interface Campaign extends BaseContract {
   lockForWithdrawals(overrides?: CallOverrides): Promise<boolean>;
 
   locked(overrides?: CallOverrides): Promise<boolean>;
-
-  merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<boolean>;
 
   oracle(overrides?: CallOverrides): Promise<string>;
 
@@ -643,6 +643,8 @@ export interface Campaign extends BaseContract {
 
     challenge(action: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
+    checkMerkleRootUpdateAllowed(overrides?: CallOverrides): Promise<void>;
+
     claim(
       account: string,
       share: BigNumberish,
@@ -690,8 +692,6 @@ export interface Campaign extends BaseContract {
     lockForWithdrawals(overrides?: CallOverrides): Promise<boolean>;
 
     locked(overrides?: CallOverrides): Promise<boolean>;
-
-    merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<boolean>;
 
     oracle(overrides?: CallOverrides): Promise<string>;
 
@@ -820,6 +820,8 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    checkMerkleRootUpdateAllowed(overrides?: CallOverrides): Promise<BigNumber>;
+
     claim(
       account: string,
       share: BigNumberish,
@@ -867,8 +869,6 @@ export interface Campaign extends BaseContract {
     lockForWithdrawals(overrides?: CallOverrides): Promise<BigNumber>;
 
     locked(overrides?: CallOverrides): Promise<BigNumber>;
-
-    merkleRootUpdateAllowed(overrides?: CallOverrides): Promise<BigNumber>;
 
     oracle(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -945,6 +945,10 @@ export interface Campaign extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    checkMerkleRootUpdateAllowed(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     claim(
       account: string,
       share: BigNumberish,
@@ -996,10 +1000,6 @@ export interface Campaign extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     locked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    merkleRootUpdateAllowed(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     oracle(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

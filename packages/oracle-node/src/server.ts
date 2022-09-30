@@ -11,6 +11,9 @@ import { Routes } from './enpoints/routes';
 import { appLogger } from './logger';
 import { ServiceManager } from './service.manager';
 
+// import { createRedisClient } from './utils/redisClient';
+// const RedisStore = require("connect-redis")(Session)
+
 /* eslint-disable 
   @typescript-eslint/no-unsafe-member-access,
   unused-imports/no-unused-vars-ts,
@@ -34,22 +37,49 @@ interface BigInt {
 // create express app
 const app = express();
 
+appLogger.info(
+  `Running in ${
+    process.env.NODE_ENV !== undefined ? process.env.NODE_ENV : 'default(dev)'
+  } mode`
+);
+
 /** CORS configuration */
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin:
+    process.env.NODE_ENV === 'production'
+      ? 'http://app.commonvalue.xyz.s3-website-eu-west-1.amazonaws.com'
+      : 'http://localhost:3000',
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   credentials: true,
 };
 
 app.use(cors(corsOptions));
 
+app.set('trust proxy', 1);
+
+const cookieConfig =
+  process.env.NODE_ENV === 'production'
+    ? {
+        sameSite: 'none',
+        secure: true, // if true only transmit cookie over https, only when frontend is also https ?
+      }
+    : {
+        sameSite: true,
+        secure: false, // if true only transmit cookie over https, only when frontend is also https ?
+      };
+
 app.use(
   Session({
     name: 'siwe-quickstart',
     secret: 'siwe-quickstart-secret',
+    proxy: true,
     resave: true,
     saveUninitialized: true,
-    cookie: { secure: false, sameSite: true },
+    cookie: {
+      ...cookieConfig,
+      httpOnly: false, // if true prevent client side JS from reading the cookie
+      maxAge: 1000 * 60 * 10, // session max age in miliseconds
+    },
   })
 );
 
@@ -89,7 +119,6 @@ Routes.forEach((route) => {
       try {
         const loggedUser: string | undefined =
           req.session?.siwe?.address.toLowerCase();
-
         if (route.protected) {
           if (loggedUser === undefined) {
             throw new Error(

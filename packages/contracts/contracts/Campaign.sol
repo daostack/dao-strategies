@@ -62,14 +62,17 @@ contract Campaign is Initializable, ReentrancyGuard {
     event Lock(bool locked);
 
     error InvalidProof();
-    error MerkleRootUpdateNotAllowed();
+
+    error ProposeWindowNotActive(uint256 blockTime);
+    error ChallengePeriodActive(uint256 blockTime);
+    error OnlyInChallengePeriod(uint256 blockTime);
+
     error NoRewardAvailable();
     error OnlyGuardian();
     error WithdrawalNotAllowed();
     error NoAssetsToWithdraw();
     error OnlyOracle();
     error Locked();
-    error OnlyInChallengePeriod();
 
     modifier onlyGuardian() {
         if (msg.sender != guardian) {
@@ -134,9 +137,7 @@ contract Campaign is Initializable, ReentrancyGuard {
     /** Only the oracle can propose new merkleRoot. The proposal is stored and becomes active only
      * after a CHALLENGE_PERIOD */
     function proposeShares(bytes32 _sharesMerkleRoot, bytes32 _sharesUri) external onlyOracle notLocked {
-        if (!merkleRootUpdateAllowed()) {
-            revert MerkleRootUpdateNotAllowed();
-        }
+        checkMerkleRootUpdateAllowed();
 
         approvedMerkleRoot = pendingMerkleRoot;
         pendingMerkleRoot = _sharesMerkleRoot;
@@ -188,7 +189,7 @@ contract Campaign is Initializable, ReentrancyGuard {
      * 3. Cancel the whole campaign, claiming is not allowed and asset providers can withdraw back their assets */
     function challenge(ChallengeAction action) external onlyGuardian notLocked {
         if (!isChallengePeriod()) {
-            revert OnlyInChallengePeriod();
+            revert OnlyInChallengePeriod(block.timestamp);
         }
 
         pendingMerkleRoot = bytes32(0);
@@ -282,29 +283,22 @@ contract Campaign is Initializable, ReentrancyGuard {
 
     /** Indicates whether the campaign is currently at a challenge period */
     function isChallengePeriod() public view returns (bool) {
-        if (block.timestamp < activationTime) {
-            return true;
-        }
-        return false;
+        return block.timestamp < activationTime;
     }
 
     function isProposeWindowActive() public view returns (bool) {
         return (uint256(block.timestamp) - uint256(deployTime)) % ACTIVATION_PERIOD < ACTIVE_DURATION;
     }
 
-    /** Indicates whether updating the merkle root is currently possible.
-     * updating the merkle root is allowed only at predefined time windows
-     * of duration ACTIVE_DURATION every ACTIVE_PERIOD */
-    function merkleRootUpdateAllowed() public view returns (bool) {
+    /** Reverits of the merkleRoot is not allowed. */
+    function checkMerkleRootUpdateAllowed() public view {
         if (isChallengePeriod()) {
-            return false;
+            revert ChallengePeriodActive(block.timestamp);
         }
 
         if (!isProposeWindowActive()) {
-            return false;
+            revert ProposeWindowNotActive(block.timestamp);
         }
-
-        return true;
     }
 
     /** If true, a locked campaign means withdrawals are enabled */

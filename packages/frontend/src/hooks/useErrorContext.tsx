@@ -12,19 +12,19 @@ export interface ErrorContextProps {
 }
 
 export const ErrorContext: FC<ErrorContextProps> = (props) => {
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<{ message: string; forceReload: boolean } | undefined>(undefined);
 
   const hasError = error !== undefined;
 
-  const showError = async (message: string) => {
-    setError(message);
+  const showError = async (message: string, forceReload: boolean = false) => {
+    setError({ message, forceReload });
   };
 
   const errorWindow = hasError ? (
-    <Layer>
+    <Layer onClickOutside={() => setError(undefined)}>
       <Box pad="medium">
-        {error}
-        <a href="/">reload</a>
+        {error.message}
+        {error.forceReload ? <a href="/">reload</a> : <></>}
       </Box>
     </Layer>
   ) : (
