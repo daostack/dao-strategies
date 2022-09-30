@@ -38,6 +38,8 @@ periodOptions.set(PeriodKeys.next3Months, `${NEXT} 3 months`);
 periodOptions.set(PeriodKeys.next6Months, `${NEXT} 6 months`);
 periodOptions.set(PeriodKeys.custom, CUSTOM);
 
+export const SET_FROM_NOW = 'SET_FROM_NOW';
+
 export enum PeriodType {
   retroactive = 'retroactive',
   ongoing = 'ongoing',
@@ -73,7 +75,10 @@ export const getStartEnd = (values: CampaignFormValues, today: DateManager): [nu
       return [0, 0];
     }
 
-    let from = DateManager.from(values.customPeriodChoiceFrom, true);
+    let from = DateManager.from(
+      values.customPeriodChoiceFrom === SET_FROM_NOW ? today : values.customPeriodChoiceFrom,
+      true
+    );
     let to = DateManager.from(values.customPeriodChoiceTo, true);
 
     to = to.addDays(1);

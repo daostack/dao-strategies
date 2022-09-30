@@ -31,13 +31,9 @@ const ForCard: FC<IForCard> = (props: IForCard) => {
         position: 'relative',
         overflow: 'hidden',
         padding: '0',
-      }}>
-      <Box
-        fill
-        style={{ zIndex: 2, padding: '60px 4vw', maxHeight: '380px' }}
-        align="center"
-        justify="center"
-        onClick={() => navigate(props.path)}>
+      }}
+      onClick={() => navigate(props.path)}>
+      <Box fill style={{ zIndex: 2, padding: '60px 4vw', maxHeight: '380px' }} align="center" justify="center">
         <AppHeading
           level={2}
           style={{

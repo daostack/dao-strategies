@@ -1,4 +1,4 @@
-import { Box, CheckBox, Layer, Text, Spinner } from 'grommet';
+import { Box, CheckBox, Layer, Text, Spinner, Image } from 'grommet';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,6 +20,7 @@ import {
   PeriodType,
   strategyDetails,
   sharesFromDetails,
+  SET_FROM_NOW,
 } from '../campaign.support';
 import {
   ACTIVATION_PERIOD,
@@ -370,6 +371,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     }
   }, [formValues, account]);
 
+  const setFromNow = () => {
+    if (now !== undefined) {
+      setFormValues({ ...formValues, customPeriodChoiceFrom: SET_FROM_NOW });
+    }
+  };
+
   const status = useMemo((): FormStatus => {
     return {
       page: {
@@ -510,7 +517,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               label={
                 <Box direction="row" align="center">
                   set current account{' '}
-                  <Address style={{ marginLeft: '4px' }} address={account} chainId={chainId}></Address>
+                  <Address disableClick style={{ marginLeft: '4px' }} address={account} chainId={chainId}></Address>
                 </Box>
               }
               _type="inline"
@@ -551,6 +558,19 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </AppSelect>
         </AppFormField>
       </Box>
+
+      <TwoColumns>
+        <Box>
+          <AppFormField name="reactionsConfig" label="Count contribution scores using">
+            <AppSelect name="reactionsConfig" options={['']}></AppSelect>
+          </AppFormField>
+        </Box>
+        <Box>
+          <Image src="/images/gh-pr-diagram.png" />
+        </Box>
+      </TwoColumns>
+
+      <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
 
       <TwoColumns grid={{ style: { marginBottom: '66px' } }}>
         <Box>
@@ -612,7 +632,19 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
           {formValuesProcessed().periodCustom ? (
             <>
-              <AppFormField name="customPeriodChoiceFrom" label="From">
+              <AppFormField
+                name="customPeriodChoiceFrom"
+                label={
+                  <Box direction="row" align="center">
+                    From:{' '}
+                    <AppButton
+                      style={{ marginLeft: '6px' }}
+                      onClick={() => setFromNow()}
+                      _type="inline"
+                      label="(set from now on)"
+                    />
+                  </Box>
+                }>
                 <AppDateInput name="customPeriodChoiceFrom"></AppDateInput>
               </AppFormField>
               <AppFormField name="customPeriodChoiceTo" label="To">
@@ -695,7 +727,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Box>
               <Parameter label="Live Period">
                 <Box justify="start" direction="row">
-                  <Box style={{ width: '60px' }}>From: </Box>
+                  <Box style={{ width: '60px' }}>From:</Box>
                   <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.start).toString()}</Box>
                 </Box>
                 <Box justify="start" direction="row">
