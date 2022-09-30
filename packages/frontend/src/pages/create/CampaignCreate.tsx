@@ -102,6 +102,7 @@ const initialValues: CampaignFormValues = {
   customPeriodChoiceTo: '',
 };
 
+const MORE_SOON = 'MORE_SOON';
 const GITHUB_DOMAIN = 'https://www.github.com/';
 const DEBUG = true;
 
@@ -157,6 +158,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const chainOptions = ChainsDetails.chains(INCLUDED_CHAINS).map((chain) => chain.name);
   const strategyOptions = strategies.list().map((s) => s.info.id);
   const selectedStrategy = strategies.get(formValues.strategyId);
+
+  /** show one option */
+  strategyOptions.push(MORE_SOON);
 
   if (selectedStrategy === undefined) {
     throw new Error(`selectedStrategy undefined`);
@@ -251,6 +255,29 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   /** Hook called everytime any field in the form is updated, it keeps the formValues state in synch */
   const onValuesUpdated = (values: CampaignFormValues) => {
     if (DEBUG) console.log('CampaignCreate - onValuesUpdated()', { values });
+
+    /** ignore some cases */
+    if (values.strategyId === MORE_SOON) {
+      return;
+    }
+
+    /** auto-set start and end dates */
+    if (
+      formValues.livePeriodChoice === periodOptions.get(PeriodKeys.custom) &&
+      values.livePeriodChoice !== periodOptions.get(PeriodKeys.custom)
+    ) {
+      if (values.customPeriodChoiceFrom === '' && now !== undefined) {
+        values.customPeriodChoiceFrom = now.toString();
+      }
+    }
+
+    /** set end date as the start date initially */
+    if (formValues.customPeriodChoiceFrom === '' && values.customPeriodChoiceFrom !== '') {
+      if (values.customPeriodChoiceTo === '') {
+        values.customPeriodChoiceTo = values.customPeriodChoiceFrom;
+      }
+    }
+
     if (validated) {
       // validate every change after the first time
       validate(values);
@@ -371,11 +398,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     }
   }, [formValues, account]);
 
-  const setFromNow = () => {
-    if (now !== undefined) {
-      setFormValues({ ...formValues, customPeriodChoiceFrom: SET_FROM_NOW });
+  const setFromNow = useCallback(() => {
+    if (formValues.customPeriodChoiceFrom !== SET_FROM_NOW) {
+      if (now !== undefined) {
+        setFormValues({ ...formValues, customPeriodChoiceFrom: SET_FROM_NOW });
+      }
+    } else {
+      if (now !== undefined) {
+        setFormValues({ ...formValues, customPeriodChoiceFrom: now.toString() });
+      }
     }
-  };
+  }, [formValues, now]);
 
   const status = useMemo((): FormStatus => {
     return {
@@ -550,6 +583,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             name="strategyId"
             options={strategyOptions}>
             {(option: string) => {
+              if (option === MORE_SOON) {
+                return (
+                  <Box
+                    justify="center"
+                    direction="row"
+                    style={{ padding: '12px 0px', color: styleConstants.colors.ligthGrayText }}>
+                    More coming soon
+                  </Box>
+                );
+              }
+
               const strategy = strategies.get(option);
               if (strategy === undefined) throw new Error(`never`);
 
@@ -641,11 +685,17 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                       style={{ marginLeft: '6px' }}
                       onClick={() => setFromNow()}
                       _type="inline"
-                      label="(set from now on)"
+                      label={
+                        formValues.customPeriodChoiceFrom !== SET_FROM_NOW ? '(set from now on)' : '(set specific date)'
+                      }
                     />
                   </Box>
                 }>
-                <AppDateInput name="customPeriodChoiceFrom"></AppDateInput>
+                {formValues.customPeriodChoiceFrom !== SET_FROM_NOW ? (
+                  <AppDateInput name="customPeriodChoiceFrom"></AppDateInput>
+                ) : (
+                  <AppTag style={{ width: '100%', textAlign: 'center' }}>From now on</AppTag>
+                )}
               </AppFormField>
               <AppFormField name="customPeriodChoiceTo" label="To">
                 <AppDateInput name="customPeriodChoiceTo"></AppDateInput>

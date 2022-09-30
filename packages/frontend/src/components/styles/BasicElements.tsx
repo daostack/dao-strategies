@@ -19,6 +19,7 @@ import {
   HeadingExtendedProps,
   FormFieldExtendedProps,
   FormField,
+  SelectExtendedProps,
 } from 'grommet';
 import { CircleQuestion, Close, FormDown, FormUp, IconProps } from 'grommet-icons';
 import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
@@ -180,11 +181,19 @@ export const AppTextArea: FC<TextAreaProps> = (props: TextAreaProps) => {
   );
 };
 
-export const AppSelect = styled(Select)`
-  border-color: ${styleConstants.colors.lightGrayBorder};
-  font-weight: normal;
-  padding: 8px 16px;
-`;
+export const AppSelect: FC<SelectExtendedProps> = (props: SelectExtendedProps) => {
+  return (
+    <Select
+      {...props}
+      dropProps={{ style: { borderRadius: '24px', padding: '10px 0px', marginTop: '8px' } } as any}
+      style={{
+        borderColor: styleConstants.colors.lightGrayBorder,
+        fontWeight: 'normal',
+        padding: '8px 16px',
+        borderRadius: '24px',
+      }}></Select>
+  );
+};
 
 export const AppFileInput: FC = (props: IElement) => (
   <Box fill justify="start">
