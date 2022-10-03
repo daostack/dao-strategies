@@ -1,9 +1,10 @@
 import { Asset, campaignInstance, ChainsDetails, erc20Instance } from '@dao-strategies/core';
 import { ethers } from 'ethers';
 import { Select, Box, FormField, TextInput, Spinner } from 'grommet';
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { useSigner } from 'wagmi';
 import { useBalanceOf } from '../hooks/useBalanceOf';
+import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { valueToString } from '../utils/general';
 import { AssetIcon } from './Assets';
@@ -33,8 +34,10 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const [formValues, setFormValues] = useState<FundFormValues>(initialValues);
   const [funding, setFunding] = useState<boolean>(false);
   const { account, connect } = useLoggedUser();
+  const { recentFunders, getFundEvents } = useCampaignContext();
 
   const selectedAsset = props.assets.find((asset) => asset.id === formValues.asset);
+  const isNative = selectedAsset ? ChainsDetails.isNative(selectedAsset) : false;
 
   const { balance } = useBalanceOf(selectedAsset?.address, props.chainId, account);
 
@@ -48,6 +51,10 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
       });
     }
   }, [props.assets]);
+
+  useEffect(() => {
+    getFundEvents();
+  }, []);
 
   useEffect(() => {
     if (props.defaultAsset) {
@@ -65,7 +72,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     setFormValues({ ...values });
   };
 
-  const fund = async () => {
+  const fund = useCallback(async () => {
     if (!isLogged) {
       connect();
       return;
@@ -76,7 +83,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
 
     let tx;
     const campaign = campaignInstance(props.address, signer);
-    if (ChainsDetails.isNative(selectedAsset)) {
+    if (isNative) {
       tx = await campaign.fund(ethers.constants.AddressZero, 0, { value: ethers.utils.parseEther(formValues.amount) });
     } else {
       const token = erc20Instance(selectedAsset.address, signer);
@@ -97,7 +104,8 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     setFunding(false);
 
     if (props.onSuccess !== undefined) props.onSuccess();
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLogged, selectedAsset, signer, isNative, formValues.amount, account]);
 
   const balanceNum = balance ? +ethers.utils.formatUnits(balance.balance, balance.decimals) : undefined;
   const disabled = funding || selectedAsset === undefined || +formValues.amount === 0;
@@ -189,6 +197,17 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
         ) : (
           <></>
         )}
+
+        <Box>
+          <Box>Recent funders</Box>
+          {recentFunders ? (
+            recentFunders.map((funder) => {
+              return <Box>{funder.amount}</Box>;
+            })
+          ) : (
+            <></>
+          )}
+        </Box>
       </Box>
     </>
   );

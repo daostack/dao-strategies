@@ -10,7 +10,9 @@ import {
   CampaignFundersRead,
   CampaignReadDetails,
   TokenBalance,
+  FundEventRead,
 } from '@dao-strategies/core';
+import { FundEvent } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
 import { ServiceManager } from '../service.manager';
@@ -195,7 +197,25 @@ export class CampaignController extends Controller {
     /* eslint-disable */
     return this.manager.services.indexingService.getCampaignFunders(
       request.params.uri as string,
-      request.body.page as Page
+      request.body.page as Page,
+      request.body.force as boolean
+    );
+    /* eslint-enable */
+  }
+
+  getFundEvents(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<FundEventRead[]> {
+    /* eslint-disable */
+    const number =
+      request.body.number !== undefined ? +request.body.number : 10;
+    return this.manager.services.indexingService.getCampaignFundEvents(
+      request.params.uri as string,
+      number as number,
+      request.body.force as boolean
     );
     /* eslint-enable */
   }

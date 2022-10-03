@@ -241,6 +241,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           onSuccess={() => {
             setShowFund(false);
             getOtherDetails();
+            getFunders(undefined, true);
           }}>
           <FundCampaign
             assets={assets}

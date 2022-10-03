@@ -44,6 +44,13 @@ export const Routes: RouteConfig[] = [
   },
   {
     method: 'post',
+    route: '/campaign/fundEvents/:uri',
+    controller: CampaignController,
+    action: 'getFundEvents',
+    protected: false,
+  },
+  {
+    method: 'post',
     route: '/campaign/create',
     controller: CampaignController,
     action: 'create',
