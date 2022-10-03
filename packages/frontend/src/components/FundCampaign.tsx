@@ -7,7 +7,8 @@ import { useBalanceOf } from '../hooks/useBalanceOf';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { valueToString } from '../utils/general';
 import { AssetIcon } from './Assets';
-import { AppForm, AppButton, IElement } from './styles/BasicElements';
+import { AppForm, AppButton, IElement, AppInput } from './styles/BasicElements';
+import { styleConstants } from './styles/themes';
 
 interface FundFormValues {
   asset: string;
@@ -36,7 +37,6 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const selectedAsset = props.assets.find((asset) => asset.id === formValues.asset);
 
   const { balance } = useBalanceOf(selectedAsset?.address, props.chainId, account);
-  const balanceStr = balance ? valueToString(+ethers.utils.formatUnits(balance.balance, balance.decimals)) : '--';
 
   const { data: signer } = useSigner();
 
@@ -99,23 +99,48 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     if (props.onSuccess !== undefined) props.onSuccess();
   };
 
-  const disabled = funding || selectedAsset === undefined;
+  const balanceNum = balance ? +ethers.utils.formatUnits(balance.balance, balance.decimals) : undefined;
+  const disabled = funding || selectedAsset === undefined || +formValues.amount === 0;
+  const notEnoughFunds = balanceNum !== undefined ? balanceNum < +formValues.amount : false;
+
+  const balanceStr =
+    balance !== undefined && balanceNum !== undefined ? (
+      <Box direction="row" align="center" style={{ color: styleConstants.colors.ligthGrayText }}>
+        Balance:
+        <Box style={{ marginLeft: '8px', textDecoration: 'underline' }}>{`${valueToString(balanceNum)} ${
+          balance.name
+        }`}</Box>
+      </Box>
+    ) : (
+      '--'
+    );
 
   return (
     <>
-      <Box style={{ width: '100%' }} direction="column" align="start">
+      <Box style={{ width: '100%', ...props.style }} direction="column" align="start">
         <AppForm style={{ width: '100%' }} value={formValues} onChange={onValuesUpdated as any}>
           <Box>
             <Box style={{ position: 'relative' }}>
               <FormField
                 name="amount"
                 label={
-                  <Box direction="row" justify="between">
+                  <Box direction="row" justify="between" style={{ fontWeight: '400' }}>
                     <Box>Enter amount to fund</Box>
-                    <Box style={{ textDecoration: 'underline' }}>{balanceStr}</Box>
+                    {balanceStr}
                   </Box>
                 }>
-                <TextInput name="amount" placeholder="0"></TextInput>
+                <AppInput
+                  style={{
+                    padding: '0px 24px',
+                    height: '72px',
+                    fontSize: styleConstants.headingFontSizes[3],
+                    fontWeight: '700',
+                    color: styleConstants.colors.ligthGrayText,
+                    borderRadius: '46px',
+                  }}
+                  type="number"
+                  name="amount"
+                  placeholder="0.0"></AppInput>
               </FormField>
               <FormField name="asset" style={{ border: '0px none', position: 'absolute', right: '0px', top: '30px' }}>
                 <Select
@@ -134,9 +159,23 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
               </FormField>
             </Box>
 
-            <AppButton disabled={disabled} onClick={() => fund()} style={{ marginTop: '20px' }}>
-              {isLogged ? 'Fund' : 'Connect & Fund'}
-            </AppButton>
+            <AppButton
+              label={isLogged ? 'Fund Campaign' : 'Connect to fund'}
+              primary
+              disabled={disabled || notEnoughFunds}
+              onClick={() => fund()}
+              style={{ marginTop: '20px' }}
+            />
+            {notEnoughFunds ? (
+              <Box
+                direction="row"
+                justify="end"
+                style={{ paddingRight: '20px', marginTop: '8px', color: styleConstants.colors.alertText }}>
+                not enough funds
+              </Box>
+            ) : (
+              ''
+            )}
           </Box>
         </AppForm>
 

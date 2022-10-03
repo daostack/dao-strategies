@@ -43,7 +43,7 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
 
   const row = (rowIx: number, colIx: number) => {
     if (rowIx >= data.length) {
-      return <></>;
+      return <>-</>;
     }
     const datum = {
       amount: valueToString(data[rowIx][0], 2),

@@ -86,8 +86,6 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         : '0';
   }
 
-  const chain = ChainsDetails.chainOfId(campaign.chainId);
-
   return (
     <>
       {status.canClaim && showClaim ? (
@@ -113,11 +111,6 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
       <BalanceCard
         style={{ padding: '24px', ...props.style }}
         title="My Rewards"
-        subtitle={
-          <>
-            <ChainTag style={{ margin: '18px 0px' }} chain={chain}></ChainTag>
-          </>
-        }
         assets={status.claim?.assets}
         action={
           canClaim ? (

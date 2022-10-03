@@ -111,6 +111,7 @@ const initialValues: CampaignFormValues = {
 };
 
 const MORE_SOON = 'MORE_SOON';
+const PER_PAGE = 8;
 const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
@@ -325,7 +326,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       if (DEBUG) console.log('CampaignCreate - simulate()');
       setSimulating(true);
 
-      await simulate({ number: 0, perPage: 10 });
+      await simulate({ number: 0, perPage: PER_PAGE });
 
       setSimulating(false);
     };
@@ -518,7 +519,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         label={
           <FieldLabel
             label="Reward Token"
-            required
             help="If you want the campaign to raise funds on a special ERC-20 token, please add it here. By default, campaigns can be funded with the native token and popular stable-coins of each network."></FieldLabel>
         }
         style={{
@@ -629,7 +629,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                 {
                   <FieldLabel
                     style={{ marginBottom: '8px' }}
-                    label="Add Github repository"
+                    label="Add Github repositories"
                     help="The campaign will compute a list of shareholders based on programmed rules. These are programmatic rules that can fetch data from web2 and web3 protocols."></FieldLabel>
                 }
                 <Box style={{ fontWeight: 'normal', fontSize: '13px' }}>
@@ -652,18 +652,24 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </AppFormField>
 
           <>
-            {formValues.repositoryFullnames.map((repo) => {
-              return (
-                <Box style={{ width: '100%', marginTop: '25px' }} direction="row" justify="between" align="center">
-                  <RepoTag repo={repo} />
-                  <Box onClick={() => clearRepo(repo)} style={{ width: '28px', height: '28px' }}>
-                    <FormTrash
-                      style={{ width: '28px', height: '28px' }}
-                      color={styleConstants.colors.ligthGrayText}></FormTrash>
+            {formValues.repositoryFullnames.length > 0 ? (
+              formValues.repositoryFullnames.map((repo) => {
+                return (
+                  <Box style={{ width: '100%', marginTop: '25px' }} direction="row" justify="between" align="center">
+                    <RepoTag repo={repo} />
+                    <Box onClick={() => clearRepo(repo)} style={{ width: '28px', height: '28px' }}>
+                      <FormTrash
+                        style={{ width: '28px', height: '28px' }}
+                        color={styleConstants.colors.ligthGrayText}></FormTrash>
+                    </Box>
                   </Box>
-                </Box>
-              );
-            })}
+                );
+              })
+            ) : (
+              <Box style={{ marginTop: '16px', textAlign: 'center', color: styleConstants.colors.ligthGrayText }}>
+                (no repositores currently selected)
+              </Box>
+            )}
           </>
         </Box>
 
@@ -783,13 +789,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </AppHeading>
 
           <Box>
-            {status.isSimulating ? (
-              'simulating'
-            ) : shares !== undefined && account !== undefined ? (
+            {account !== undefined ? (
               <Box style={{ paddingRight: '16px' }}>
                 <Box style={{ marginBottom: '24px' }}>{shares !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
                 {status.wasSimulated ? (
-                  <RewardsTable invert shares={shares} updatePage={updatePage}></RewardsTable>
+                  <RewardsTable invert shares={shares} updatePage={updatePage} perPage={PER_PAGE}></RewardsTable>
                 ) : (
                   ''
                 )}

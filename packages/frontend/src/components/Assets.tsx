@@ -184,7 +184,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
   const hasValue = rewardUSD > 0;
 
   const { preferredString, secondaryString } = (() => {
-    const usdString = hasValue ? `$${valueToString(rewardUSD, 2)}` : '-';
+    const usdString = `$${valueToString(rewardUSD, 2)}`;
     const tokensString = hasCustom ? ` ${hasValue ? '+ ' : ''}${customStr}` : '';
 
     let preferredString = usdString;
