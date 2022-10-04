@@ -11,9 +11,10 @@ import {
   bigNumberToNumber,
   erc20Provider,
   Asset,
+  erc20Instance,
 } from '@dao-strategies/core';
 import { Campaign } from '@prisma/client';
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { ChainProvider, ChainProviders } from '../../types';
 
 import { awaitWithTimeout } from '../../utils/utils';
@@ -342,5 +343,32 @@ export class ReadDataService {
       chainId,
       address
     );
+  }
+
+  async getBalanceOf(
+    assetAddress: string,
+    chainId: number,
+    account: string
+  ): Promise<TokenBalance> {
+    const asset = ChainsDetails.assetOfAddress(chainId, assetAddress);
+    const { provider } = this.providers.get(chainId);
+
+    let get: Promise<BigNumber>;
+
+    if (assetAddress === ethers.constants.AddressZero) {
+      get = provider.getBalance(account);
+    } else {
+      const contract = erc20Provider(assetAddress, provider);
+      get = contract.balanceOf(account);
+    }
+
+    const balance = await get;
+    const price = await this.priceOf(chainId, assetAddress);
+
+    return {
+      ...asset,
+      balance: balance.toString(),
+      price,
+    };
   }
 }

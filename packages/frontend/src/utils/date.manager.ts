@@ -10,7 +10,7 @@ export class DateManager {
   private bias: number = 0;
 
   /** input date is in seconds if provided */
-  constructor(date?: Date | number | string, utc: boolean = false) {
+  constructor(date?: DateManager | Date | number | string, utc: boolean = false) {
     if (typeof date === 'number') {
       this.date = new Date(date * 1000);
     } else if (typeof date === 'string') {
@@ -27,12 +27,14 @@ export class DateManager {
       }
     } else if (date instanceof Date) {
       this.date = date;
+    } else if (date instanceof Date) {
+      this.date = date;
     } else {
       this.date = new Date();
     }
   }
 
-  static from(date?: Date | number | string, utc: boolean = false): DateManager {
+  static from(date?: DateManager | Date | number | string, utc: boolean = false): DateManager {
     const datem = new DateManager(date, utc);
     return datem;
   }

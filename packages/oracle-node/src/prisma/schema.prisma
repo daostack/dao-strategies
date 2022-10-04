@@ -106,7 +106,7 @@ model FundEvent {
   hash            String          @id
   campaign        Campaign        @relation(fields: [campaignId], references: [uri])
   campaignId      String
-  funder          CampaignFunder? @relation(fields: [campaignId, funderAddress], references: [campaignId, address])
+  funder          CampaignFunder  @relation(fields: [campaignId, funderAddress], references: [campaignId, address])
   funderAddress   String
   asset           String
   amount          String

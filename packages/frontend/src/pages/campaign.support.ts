@@ -39,11 +39,25 @@ periodOptions.set(PeriodKeys.next3Months, `${NEXT} 3 months`);
 periodOptions.set(PeriodKeys.next6Months, `${NEXT} 6 months`);
 periodOptions.set(PeriodKeys.custom, CUSTOM);
 
+export const SET_FROM_NOW = 'SET_FROM_NOW';
+
 export enum PeriodType {
   retroactive = 'retroactive',
   ongoing = 'ongoing',
   future = 'future',
 }
+
+export enum ReactionConfig {
+  PRS_AND_REACTS = 'PRS_AND_REACTS',
+  ONLY_PRS = 'ONLY_PRS',
+  ONLY_REACTS = 'ONLY_REACTS',
+}
+
+export const reactionConfigOptions: Map<ReactionConfig, string> = new Map();
+
+reactionConfigOptions.set(ReactionConfig.PRS_AND_REACTS, 'Both Pull Requests & Reactions');
+reactionConfigOptions.set(ReactionConfig.ONLY_PRS, 'Only Pull Requests');
+reactionConfigOptions.set(ReactionConfig.ONLY_REACTS, 'Only Reactions');
 
 export const strategyDetails = (
   values: CampaignFormValues,
@@ -74,7 +88,10 @@ export const getStartEnd = (values: CampaignFormValues, today: DateManager): [nu
       return [0, 0];
     }
 
-    let from = DateManager.from(values.customPeriodChoiceFrom, true);
+    let from = DateManager.from(
+      values.customPeriodChoiceFrom === SET_FROM_NOW ? today : values.customPeriodChoiceFrom,
+      true
+    );
     let to = DateManager.from(values.customPeriodChoiceTo, true);
 
     to = to.addDays(1);

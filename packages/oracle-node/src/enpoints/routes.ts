@@ -51,6 +51,13 @@ export const Routes: RouteConfig[] = [
   },
   {
     method: 'post',
+    route: '/campaign/fundEvents/:uri',
+    controller: CampaignController,
+    action: 'getFundEvents',
+    protected: false,
+  },
+  {
+    method: 'post',
     route: '/campaign/create',
     controller: CampaignController,
     action: 'create',
@@ -96,6 +103,13 @@ export const Routes: RouteConfig[] = [
     route: '/time/now',
     controller: CampaignController,
     action: 'timeNow',
+    protected: false,
+  },
+  {
+    method: 'get',
+    route: '/onchain/balanceOf/:chainId/:asset/:account',
+    controller: CampaignController,
+    action: 'balanceOf',
     protected: false,
   },
   {

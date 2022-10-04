@@ -31,4 +31,13 @@ export const GlobalStyles = createGlobalStyle`
   .cropper-view-box {
       outline: inherit !important;
   }
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    display: none;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
 `;

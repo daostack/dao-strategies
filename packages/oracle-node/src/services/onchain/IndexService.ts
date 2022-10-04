@@ -1,7 +1,10 @@
 import {
+  bigIntToNumber,
+  CampaignFunder,
   CampaignFundersRead,
   campaignProvider,
   ChainsDetails,
+  FundEventRead,
   Page,
   TokenBalance,
 } from '@dao-strategies/core';
@@ -182,11 +185,11 @@ export class IndexingService {
 
     await Promise.all([
       this.campaignRepo.setCampaignValueLocked(uri, value),
-      this.indexRepo.setFundersBlock(uri, balances.blockNumber),
+      this.indexRepo.setTvlBlock(uri, balances.blockNumber),
     ]);
   }
 
-  async checkFundersUpdate(uri: string): Promise<void> {
+  async checkFundersUpdate(uri: string, force: boolean): Promise<void> {
     if (DEBUG) appLogger.debug(`IndexingService - checkUpdate() ${uri}`);
     const campaign = await this.campaign.get(uri);
 
@@ -200,7 +203,7 @@ export class IndexingService {
         `IndexingService - fundersBlock: ${fundersBlock}, latestBlock: ${latestBlock}`
       );
 
-    if (latestBlock - fundersBlock >= config.fundersUpdatePeriod) {
+    if (latestBlock - fundersBlock >= config.fundersUpdatePeriod || force) {
       await this.updateFundersIndex(
         campaign.uri,
         campaign.address,
@@ -232,10 +235,11 @@ export class IndexingService {
 
   async getCampaignFunders(
     uri: string,
-    page: Page = { number: 0, perPage: 10 }
+    page: Page = { number: 0, perPage: 10 },
+    force: boolean
   ): Promise<CampaignFundersRead> {
     /** check update index everytime someone ask for the funders */
-    await this.checkFundersUpdate(uri);
+    await this.checkFundersUpdate(uri, force);
 
     if (DEBUG) appLogger.debug(`IndexingService - getCampaignFunders() ${uri}`);
     const funders = await this.indexRepo.getFunders(uri, page);
@@ -248,5 +252,25 @@ export class IndexingService {
       );
 
     return funders;
+  }
+
+  async getCampaignFundEvents(
+    uri: string,
+    n: number,
+    force: boolean
+  ): Promise<FundEventRead[]> {
+    await this.checkFundersUpdate(uri, force);
+
+    const events = await this.indexRepo.getFundEventsLatest(uri, n);
+    return events.map((event) => {
+      return {
+        amount: event.amount,
+        asset: event.asset,
+        blockNumber: bigIntToNumber(event.blockNumber),
+        funder: event.funderAddress,
+        txHash: event.hash,
+        uri,
+      };
+    });
   }
 }

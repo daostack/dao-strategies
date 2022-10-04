@@ -159,6 +159,7 @@ export class IndexRepository {
     await this.client.campaignFunder.create({ data });
   }
 
+  /** get ALL fund events */
   getFundEvents(uri: string, addresses?: string[]): Promise<FundEvent[]> {
     if (addresses !== undefined && addresses.length > 0) {
       return addresses.length > 1
@@ -184,6 +185,19 @@ export class IndexRepository {
         },
       });
     }
+  }
+
+  async getFundEventsLatest(uri: string, n: number): Promise<FundEvent[]> {
+    return this.client.fundEvent.findMany({
+      where: {
+        campaignId: uri,
+      },
+      orderBy: {
+        blockNumber: 'desc',
+      },
+      skip: 0,
+      take: n,
+    });
   }
 
   async upsertFunder(
