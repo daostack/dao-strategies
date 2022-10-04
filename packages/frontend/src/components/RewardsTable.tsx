@@ -8,13 +8,15 @@ import { valueToString } from '../utils/general';
 import { PagedTable, TableColumn } from './PagedTable';
 import { IElement } from './styles/BasicElements';
 import { AssetsValue } from './Assets';
+import { styleConstants } from './styles/themes';
 
 export interface RewardsTableI extends IElement {
-  shares: SharesRead;
+  shares?: SharesRead;
   showReward?: boolean;
   raised?: TokenBalance[];
   updatePage: (page: Page) => void;
   invert?: boolean;
+  perPage: number; // needed to render the "loading" table of the correct size even if "shares" is undefined
 }
 
 export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
@@ -23,11 +25,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
   const widths = showReward ? ['40%', '20%', '40%'] : ['60%', '40%'];
 
   if (shares === undefined) {
-    return (
-      <Box fill justify="center" align="center">
-        <Spinner></Spinner>
-      </Box>
-    );
+    return <PagedTable loading perPage={props.perPage}></PagedTable>;
   }
 
   const data: any[] = Object.entries(shares.shares).map(([address, share]) => {
@@ -60,7 +58,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
 
   const row = (rowIx: number, colIx: number) => {
     if (rowIx >= data.length) {
-      return <></>;
+      return <Box style={{ color: styleConstants.colors.ligthGrayText }}>-</Box>;
     }
     const datum = {
       user: data[rowIx][0],
@@ -92,6 +90,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
 
   return (
     <PagedTable
+      loading={shares === undefined}
       invert={props.invert}
       page={shares.page}
       columns={columns}

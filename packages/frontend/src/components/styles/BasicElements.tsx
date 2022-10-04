@@ -17,10 +17,14 @@ import {
   DateInputExtendedProps,
   DateInput,
   HeadingExtendedProps,
+  FormFieldExtendedProps,
+  FormField,
+  SelectExtendedProps,
 } from 'grommet';
-import { Close, FormDown, FormUp, IconProps } from 'grommet-icons';
-import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
+import { CircleQuestion, Close, FormDown, FormUp, IconProps } from 'grommet-icons';
+import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { GITHUB_DOMAINS } from '../../config/appConfig';
 import { styleConstants, theme } from './themes';
 
 export interface IElement {
@@ -36,7 +40,7 @@ export const AppTag: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
       align="center"
       style={{
         borderRadius: '30px',
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+        backgroundColor: styleConstants.colors.lightGrayBackground,
         padding: '6.5px 16px',
         ...props.style,
       }}>
@@ -57,7 +61,7 @@ export interface IValueElement extends IElement {
   value?: string;
 }
 
-type _type = 'slim' | 'normal' | 'large' | undefined;
+type _type = 'slim' | 'normal' | 'large' | 'inline' | undefined;
 
 export interface IButton extends ButtonExtendedProps {
   inline?: boolean;
@@ -80,6 +84,22 @@ export const AppButton = (props: IButton) => {
 
   const newProps = { ...props };
 
+  if (props._type === 'inline') {
+    return (
+      <Box
+        direction="row"
+        onClick={props.onClick}
+        style={{
+          textDecoration: 'none',
+          color: styleConstants.colors.links,
+          fontSize: styleConstants.textFontSizes.xsmall,
+          ...props.style,
+        }}>
+        {props.label}
+      </Box>
+    );
+  }
+
   let textColor = newProps.secondary ? styleConstants.colors.primary : undefined;
 
   if (props.gray) {
@@ -97,6 +117,14 @@ export const AppButton = (props: IButton) => {
 };
 
 export const AppForm = Form;
+
+export interface IAppFormField extends FormFieldExtendedProps {
+  help?: string | ReactNode;
+}
+
+export const AppFormField: FC<IAppFormField> = (props: IAppFormField) => {
+  return <FormField {...props}>{props.children}</FormField>;
+};
 
 export const AppInput = styled(TextInput)`
   & {
@@ -154,11 +182,41 @@ export const AppTextArea: FC<TextAreaProps> = (props: TextAreaProps) => {
   );
 };
 
-export const AppSelect = styled(Select)`
-  border-color: ${styleConstants.colors.lightGrayBorder};
-  font-weight: normal;
-  padding: 8px 16px;
-`;
+export const AppSelect: FC<SelectExtendedProps> = (props: SelectExtendedProps) => {
+  return (
+    <Select
+      {...props}
+      dropProps={{ style: { borderRadius: '24px', padding: '10px 0px', marginTop: '8px' } } as any}
+      style={{
+        borderColor: styleConstants.colors.lightGrayBorder,
+        fontWeight: 'normal',
+        padding: '8px 16px',
+        borderRadius: '24px',
+      }}></Select>
+  );
+};
+
+export const SelectRow: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <Box direction="row" align="center" style={{ width: '100%', padding: '6px 12px', ...props.style }}>
+      {props.children}
+    </Box>
+  );
+};
+
+export const SelectValue: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <SelectRow
+      style={{
+        border: '1px solid',
+        borderRadius: '32px',
+        borderColor: styleConstants.colors.lightGrayBorder,
+        ...props.style,
+      }}>
+      {props.children}
+    </SelectRow>
+  );
+};
 
 export const AppFileInput: FC = (props: IElement) => (
   <Box fill justify="start">
@@ -186,15 +244,23 @@ export const HorizontalLine: FC<BoxExtendedProps> = (props: BoxExtendedProps) =>
   );
 };
 
-export const AppCallout = styled(Box)`
-  text-align: center;
-  background-color: ${(props) => props.theme.global.colors.brandLight};
-  border-style: solid;
-  border-width: 3px;
-  border-color: ${(props) => props.theme.global.colors.brand};
-  border-radius: 16px;
-  padding: 16px 48px;
-`;
+export const AppCallout: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <Box
+      direction="row"
+      align="center"
+      style={{
+        backgroundColor: styleConstants.colors.lightGrayBackground,
+        fontSize: styleConstants.textFontSizes.small,
+        borderRadius: '8px',
+        padding: '14.5px 14.5px',
+        ...props.style,
+      }}>
+      <CircleQuestion style={{ marginRight: '20px' }}></CircleQuestion>
+      {props.children}
+    </Box>
+  );
+};
 
 const cardStyle: React.CSSProperties = {
   backgroundColor: styleConstants.colors.cardBackground,
@@ -470,8 +536,8 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
   };
 
   return (
-    <Layer position="right" onEsc={() => close()} onClickOutside={() => close()}>
-      <Box style={{ padding: '5vh 2.5vw', height: '100vh', minWidth: '35vw', maxWidth: '600px' }}>
+    <Layer style={{ ...props.style }} position="right" onEsc={() => close()} onClickOutside={() => close()}>
+      <Box style={{ padding: '5vh 2.5vw', height: '100vh', width: '550px' }}>
         <Box style={{ marginBottom: '20px' }} onClick={() => close()}>
           <Close style={{ height: '12px', width: '12px' }}></Close>
         </Box>
@@ -546,5 +612,19 @@ export const CircleIcon: FC<ICircleIcon> = (props: ICircleIcon) => {
       }}>
       {icon}
     </Box>
+  );
+};
+
+export interface IRepoTag extends BoxExtendedProps {
+  repo: string;
+}
+
+export const RepoTag: FC<IRepoTag> = (props: IRepoTag) => {
+  return (
+    <AppTag style={{ ...props.style }}>
+      <a style={{ textDecoration: 'none' }} target="_blank" href={`${GITHUB_DOMAINS[0]}${props.repo}`} rel="noreferrer">
+        {props.repo}
+      </a>
+    </AppTag>
   );
 };

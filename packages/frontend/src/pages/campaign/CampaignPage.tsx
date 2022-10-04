@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Box, Spinner } from 'grommet';
 import { FC, useEffect, useRef, useState } from 'react';
 import { ChainsDetails, Page } from '@dao-strategies/core';
@@ -10,15 +11,14 @@ import {
   AppCard,
   AppHeading,
   AppModal,
-  AppTag,
   ExpansibleCard,
   ExpansiveParagraph,
   InfoProperty,
+  RepoTag,
 } from '../../components/styles/BasicElements';
 import { TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
-import { truncate } from '../../utils/ethers';
 import { DateManager } from '../../utils/date.manager';
 import { HEADER_HEIGHT, MAX_WIDTH } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
@@ -27,16 +27,17 @@ import { BalanceCard } from './BalanceCard';
 import { styleConstants } from '../../components/styles/themes';
 import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
-import { Link } from 'react-router-dom';
 import { FundersTable } from '../../components/FundersTable';
 import { Refresh } from 'grommet-icons';
 import { FixedAdmin } from './fixed.admin';
 import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
+import { ChainTag } from '../../components/Assets';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
 export const CAMPAIGN_GAP = 24;
+const PER_PAGE = 8;
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -81,10 +82,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   };
 
   useEffect(() => {
-    getShares({ number: 0, perPage: 6 });
+    getShares({ number: 0, perPage: PER_PAGE });
     getOtherDetails();
     checkClaimInfo();
-    getFunders({ number: 0, perPage: 6 });
+    getFunders({ number: 0, perPage: PER_PAGE });
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
@@ -99,6 +100,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     );
 
   const assets = otherDetails && otherDetails.balances ? otherDetails.balances : [];
+  const chain = ChainsDetails.chainOfId(campaign.chainId);
 
   const customAsset =
     otherDetails && otherDetails.balances
@@ -153,7 +155,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           <Box>
             <InfoProperty title="Github Repositories">
               {campaign.strategyParams.repositories.map((repo: any, ix: number) => (
-                <AppTag key={ix}>{`${repo.owner}/${repo.repo}`}</AppTag>
+                <RepoTag repo={`${repo.owner}/${repo.repo}`} key={ix} style={{ marginBottom: '6px' }} />
               ))}
             </InfoProperty>
             <InfoProperty style={{ marginTop: '36px' }} title="Guardian Address">
@@ -199,7 +201,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
               shares={shares}
               showReward
               raised={otherDetails?.raised}
-              updatePage={updatePage}></RewardsTable>
+              updatePage={updatePage}
+              perPage={PER_PAGE}></RewardsTable>
           </AppCard>
         </>
       ) : (
@@ -238,12 +241,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           onSuccess={() => {
             setShowFund(false);
             getOtherDetails();
+            getFunders(undefined, true);
           }}>
           <FundCampaign
             assets={assets}
             defaultAsset={customAsset}
             chainId={campaign.chainId}
-            address={campaign.address}></FundCampaign>
+            address={campaign.address}
+            style={{ marginTop: '64px' }}></FundCampaign>
         </AppModal>
       ) : (
         <></>
@@ -252,6 +257,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         ref={fundCardRefUpdated as any}
         style={{ padding: '24px' }}
         title="Rewards Raised"
+        subtitle={
+          <>
+            <ChainTag style={{ margin: '18px 0px' }} chain={chain}></ChainTag>
+          </>
+        }
         assets={otherDetails?.balances}
         preferred={customAsset?.id}
         action={
@@ -265,7 +275,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     </>
   );
 
-  const claim = <ClaimCard style={{ marginBottom: '40px' }} campaignAddress={campaign.address}></ClaimCard>;
+  const claim = <ClaimCard style={{ marginTop: '40px' }} campaignAddress={campaign.address}></ClaimCard>;
   const guardian = <FixedAdmin btnWidth={colWidth} address={campaign.address}></FixedAdmin>;
 
   const left = (
@@ -279,8 +289,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const right = (
     <>
-      {user !== undefined ? claim : <></>}
       {funds}
+      {user !== undefined ? claim : <></>}
       {guardian}
     </>
   );
