@@ -185,6 +185,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
       title: formValues.title,
+      logo: formValues.logo,
       guardian: formValues.guardian,
       description: formValues.description,
       oracle,
@@ -427,8 +428,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     periodType === PeriodType.retroactive
       ? `The rewards for this campaign will be:`
       : periodType === PeriodType.ongoing
-      ? `So far, the rewards for this campaign would be. Final rewards will be computed once the campaign ends.`
-      : '';
+        ? `So far, the rewards for this campaign would be. Final rewards will be computed once the campaign ends.`
+        : '';
 
   const heading = ((_pageIx: number) => {
     switch (_pageIx) {

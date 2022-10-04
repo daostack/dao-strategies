@@ -1,9 +1,10 @@
-import { Box, Button, FileInput, FormField, Grid, Heading, Layer } from "grommet"
+import { Box, Image, Text, FileInput, FormField, Grid, Heading, Layer } from "grommet"
 import { ChangeEvent, FC, useEffect, useReducer, useRef, useState } from "react";
 import { AppButton, IElement } from "./styles/BasicElements"
 import { Cropper, ReactCropperElement } from "react-cropper";
 import { CampaignFormValues } from "../pages/create/CampaignCreate";
 import { Buffer } from 'buffer';
+import { Close } from 'grommet-icons';
 
 //helper css
 import 'cropperjs/dist/cropper.css';
@@ -94,7 +95,7 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
         <>
             {/*Select Logo Part */}
             <FormField name="logo" label="Logo of the campaign">
-                <Box fill justify="start">
+                {!cropData ? (<Box fill justify="start">
                     <FileInput
                         name="logo"
                         id="logo-select-input"
@@ -108,6 +109,16 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
                         }}
                         style={{ width: 'fill', height: 'fill', minHeight: '15px', borderRadius: '50px' }} />
                 </Box>
+                ) : (
+                    <Box direction="column">
+                        <Image
+                            fit="cover"
+                            height="64px" width="64px"
+                            src={cropData}
+                            style={{ borderRadius: '100px' }}
+                        />
+                        <AppButton secondary>Remove</AppButton>
+                    </Box>)}
             </FormField>
 
             {/*Crop Logo Part */}
@@ -116,26 +127,37 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
                     animate={true}
                     animation="fadeIn"
                     position="center"
-                    margin={{ horizontal: 'large' }}
                     modal={true}
+                    style={{ borderRadius: '20px' }}
                     onEsc={() => setShowCropModal(false)}
                     onClickOutside={() => setShowCropModal(false)}
                 >
-                    <Heading> Crop your image </Heading>
-                    <Cropper
-                        initialAspectRatio={1 / 1}
-                        aspectRatio={1}
-                        viewMode={1} //restrict the crop box not to exceed the size of the canvas.
-                        guides={true}
-                        src={image}
-                        ref={imageRef}
-                        dragMode={'move'}
-                        checkOrientation={true} // https://github.com/fengyuanchen/cropperjs/issues/671
-                        onInitialized={(instance) => {
-                            setCropper(instance);
-                        }}
-                    />
-                    <AppButton alignSelf="center" primary onClick={() => saveCroppedBase64()}>Select Image</AppButton>
+                    <Box pad={{ horizontal: 'medium', vertical: 'small' }} width="25rem" height="35rem" background="white" style={{ borderRadius: '20px' }}>
+                        <Box direction="row">
+                            <Heading style={{ width: '95%', fontSize: '18px' }}> Crop your image </Heading>
+                            <Close onClick={() => { setShowCropModal(false) }} style={{ marginTop: '1rem', cursor: 'pointer', width: '14px', opacity: 0.75 }} />
+                        </Box>
+                        <Cropper
+                            initialAspectRatio={1 / 1}
+                            aspectRatio={1}
+                            style={{ width: 'fill', height: '75%' }}
+                            guides={true}
+                            src={image}
+                            ref={imageRef}
+                            dragMode={'move'}
+                            checkOrientation={true} // https://github.com/fengyuanchen/cropperjs/issues/671
+                            onInitialized={(instance) => {
+                                setCropper(instance);
+                            }}
+                        />
+                        <AppButton
+                            primary
+                            margin={{ top: '1rem' }}
+                            onClick={() => saveCroppedBase64()}>
+                            <Text style={{ width: 'fill', fontSize: '16px' }}>Select Image</Text>
+                        </AppButton>
+                    </Box>
+
                 </Layer>
             )}
         </>
