@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Box, Spinner } from 'grommet';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { ChainsDetails, Page } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
@@ -46,8 +46,18 @@ export interface ICampaignPageProps {
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
 
-  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, checkClaimInfo, funders, getFunders } =
-    useCampaignContext();
+  const {
+    isLoading,
+    campaign,
+    getShares,
+    shares,
+    getOtherDetails,
+    otherDetails,
+    checkClaimInfo,
+    funders,
+    getFunders,
+    getFundEvents,
+  } = useCampaignContext();
 
   const { user } = useLoggedUser();
 
@@ -89,6 +99,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
+
+  const fundedSuccess = async () => {
+    setShowFund(false);
+    getOtherDetails();
+    // force re-index funders
+    await getFunders(undefined, true);
+    getFundEvents();
+  };
 
   if (campaign === undefined || isLoading)
     return (
@@ -235,14 +253,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const funds = (
     <>
       {showFund ? (
-        <AppModal
-          heading="Fund Campaign"
-          onClosed={() => setShowFund(false)}
-          onSuccess={() => {
-            setShowFund(false);
-            getOtherDetails();
-            getFunders(undefined, true);
-          }}>
+        <AppModal heading="Fund Campaign" onClosed={() => setShowFund(false)} onSuccess={fundedSuccess}>
           <FundCampaign
             assets={assets}
             defaultAsset={customAsset}

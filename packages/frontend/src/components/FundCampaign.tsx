@@ -100,7 +100,8 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     }
 
     setFunding(true);
-    await tx.wait();
+    const res = await tx.wait();
+    console.log('funded', { res });
     setFunding(false);
 
     if (props.onSuccess !== undefined) props.onSuccess();

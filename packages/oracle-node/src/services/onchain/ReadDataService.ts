@@ -40,20 +40,10 @@ export class ReadDataService {
   }
 
   async getBlockNumber(chainId: number): Promise<number> {
-    /* eslint-disable */
-    /**
-     * Something is weird here. the Provider interface in ethers
-     * exposes an asyn method to the the blocknumber but it
-     * is not found and runtime. While the blocknumber is there
-     * to be directly read
-     */
-    const anyProvider = this.providers.get(chainId).provider as any;
-    const blockNumber =
-      anyProvider.blockNumber !== undefined
-        ? (anyProvider.blockNumber as number)
-        : await anyProvider.getBlockNumber();
+    const blockNumber = await this.providers
+      .get(chainId)
+      .provider.getBlockNumber();
     return blockNumber;
-    /* eslint-enable */
   }
 
   async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
