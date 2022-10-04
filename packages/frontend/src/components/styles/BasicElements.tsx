@@ -24,7 +24,7 @@ import {
 import { CircleQuestion, Close, FormDown, FormUp, IconProps } from 'grommet-icons';
 import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { GITHUB_DOMAIN } from '../../config/appConfig';
+import { GITHUB_DOMAINS } from '../../config/appConfig';
 import { styleConstants, theme } from './themes';
 
 export interface IElement {
@@ -622,7 +622,7 @@ export interface IRepoTag extends BoxExtendedProps {
 export const RepoTag: FC<IRepoTag> = (props: IRepoTag) => {
   return (
     <AppTag style={{ ...props.style }}>
-      <a style={{ textDecoration: 'none' }} target="_blank" href={`${GITHUB_DOMAIN}${props.repo}`} rel="noreferrer">
+      <a style={{ textDecoration: 'none' }} target="_blank" href={`${GITHUB_DOMAINS[0]}${props.repo}`} rel="noreferrer">
         {props.repo}
       </a>
     </AppTag>

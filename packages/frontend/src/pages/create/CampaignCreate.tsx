@@ -28,7 +28,6 @@ import {
   ACTIVATION_PERIOD,
   ACTIVE_DURATION,
   CHALLENGE_PERIOD,
-  GITHUB_DOMAIN,
   INCLUDED_CHAINS,
   oracleAddressMap,
 } from '../../config/appConfig';

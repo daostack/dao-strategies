@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { GITHUB_DOMAIN, ORACLE_NODE_URL } from '../config/appConfig';
+import { GITHUB_DOMAINS, ORACLE_NODE_URL } from '../config/appConfig';
 
 const DEBUG = true;
 
@@ -57,11 +57,11 @@ export const useGithubSearch = (): {
   };
 
   const getValidName = (name: string): string | undefined => {
-    const github_domain = GITHUB_DOMAIN;
     let orgAndName = name;
 
-    if (name.length > github_domain.length && name.startsWith(github_domain)) {
-      orgAndName = name.slice(github_domain.length);
+    const startsWith = GITHUB_DOMAINS.find((github_domain) => name.startsWith(github_domain));
+    if (startsWith !== undefined) {
+      orgAndName = name.slice(startsWith.length);
     }
     return orgAndName.split('/').length === 2 ? orgAndName : undefined;
   };
