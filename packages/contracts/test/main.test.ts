@@ -4,6 +4,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
+import scenarios from "./scenarios.json";
 
 import { Campaign, Campaign__factory, CampaignFactory__factory } from './../typechain';
 import { toWei, toBigNumber, fastForwardToTimestamp, getTimestamp } from './support';
@@ -31,7 +32,7 @@ const deployCampaignFactory = async (campaignMasterAddress: string) => {
     return await campaignFactory.deployed();
 }
 
-describe("Campaign via Factory", () => {
+describe("Basic Test", () => {
     let campaignFactory: CampaignFactory;
     let counter = 0;
     before(async () => {
@@ -152,8 +153,26 @@ describe("Campaign via Factory", () => {
                             let tx = await campaginProxy.connect(account1).claim(account1.address, claimer1Shares, proofAccount1, [ethers.constants.AddressZero], account1.address);
                             await expect(tx.wait()).to.be.reverted;
                         });
-                    });
 
+                        describe("and the oracle pulishes the root again", () => {
+                            beforeEach(async () => {
+                                let tx = await campaginProxy.connect(oracle).proposeShares(tree.getHexRoot(), ZERO_BYTES);
+                                await tx.wait();
+                                const activationTime = await campaginProxy.activationTime();
+                                await fastForwardToTimestamp(activationTime.add(10));
+                            });
+
+                            it("first account claims successfully", async () => {
+                                let account1BalanceBeforeClaim = await ethers.provider.getBalance(account1.address);
+                                const proofAccount1 = tree.getProof(account1.address, claimer1Shares);
+                                let tx = await campaginProxy.connect(account1).claim(account1.address, claimer1Shares, proofAccount1, [ethers.constants.AddressZero], account1.address);
+                                const { gasUsed, effectiveGasPrice } = await tx.wait();
+                                let gasCostClaim = gasUsed.mul(effectiveGasPrice);
+                                let account1balanceAfterClaim = await ethers.provider.getBalance(account1.address);
+                                expect(account1balanceAfterClaim.add(gasCostClaim)).to.eq(account1BalanceBeforeClaim.add(ethers.utils.parseEther('0.5')));
+                            });
+                        });
+                    });
                 });
 
                 describe("and first account claims after challenge period", () => {
@@ -238,10 +257,129 @@ describe("Campaign via Factory", () => {
                 });
 
             });
+        });
+    });
+});
 
+describe("Scenario Tests", () => {
+    let campaignFactory: CampaignFactory;
+    let counter = 0;
+
+    before(async () => {
+        let campaignMaster = await deployCampaign();
+        campaignFactory = await deployCampaignFactory(campaignMaster.address);
+    })
+
+    for (let scenerioIndex = 0; scenerioIndex < scenarios.length; scenerioIndex++) {
+        const { shares, fundsPerFunderEth } = scenarios[scenerioIndex];
+        const sharesScaled = shares.map(share => toBigNumber(share, 18));
+
+        let campaginProxy: Campaign;
+        let funders: SignerWithAddress[];
+        let claimers: SignerWithAddress[];
+        let handler: SignerWithAddress;
+        let guardian: SignerWithAddress;
+        let oracle: SignerWithAddress;
+        let fundsSum: number;
+
+        beforeEach(async () => {
+            const signers = await ethers.getSigners();
+            handler = signers[0]
+            oracle = signers[1];
+            guardian = signers[2];
+            funders = signers.slice(3, 3 + fundsPerFunderEth.length);
+            claimers = signers.slice(3 + funders.length, 3 + funders.length + shares.length);
+
+            fundsSum = fundsPerFunderEth.reduce((partialSum, a) => partialSum + a, 0);
+
+            const campaignCreationTx = await campaignFactory.createCampaign(
+                ZERO_BYTES,
+                guardian.address,
+                oracle.address,
+                0,
+                SECONDS_IN_WEEK,
+                SECONDS_IN_WEEK,
+                SECONDS_IN_DAY,
+                ethers.utils.keccak256(ethers.utils.toUtf8Bytes(counter.toString()))
+            );
+            counter++;
+            const campaignCreationReceipt = await campaignCreationTx.wait();
+            const campaignProxyAddress: string = (campaignCreationReceipt as any).events[1].args[1]; // get campaign proxy address from the CampaignCreated event
+            campaginProxy = await ethers.getContractAt("Campaign", campaignProxyAddress);
+        });
+
+        describe(`when the allocation is ${shares.join(",")}`, () => {
+            let tree: BalanceTree;
+
+            describe("and the oracle includes them all in the tree, challenge period passes", () => {
+                beforeEach(async () => {
+                    const claimersBalances: Balances = new Map();
+                    for (let shareIndex = 0; shareIndex < sharesScaled.length; shareIndex++) {
+                        claimersBalances.set(claimers[shareIndex].address, sharesScaled[shareIndex]);
+                    }
+                    tree = new BalanceTree(claimersBalances);
+                    let tx = await campaginProxy.connect(oracle).proposeShares(tree.getHexRoot(), ZERO_BYTES);
+                    await tx.wait();
+                    const activationTime = await campaginProxy.activationTime();
+                    await fastForwardToTimestamp(activationTime.add(10));
+                });
+
+                describe("and all funders fund before claims begin", () => {
+                    beforeEach(async () => {
+                        for (let funderIndex = 0; funderIndex < funders.length; funderIndex++) {
+                            let tx = await campaginProxy.connect(funders[funderIndex]).fund(ethers.constants.AddressZero, ethers.utils.parseEther(fundsPerFunderEth[funderIndex].toString()), { value: ethers.utils.parseEther(fundsPerFunderEth[funderIndex].toString()) });
+                            await tx.wait();
+                        }
+                    });
+
+                    it("returns sum of funds for balanceOfAsset Ether", async () => {
+                        expect(await campaginProxy.balanceOfAsset(ethers.constants.AddressZero)).to.eq(
+                            ethers.utils.parseEther(fundsSum.toString()).toString()
+                        );
+                    });
+
+                    for (let claimerIndex = 0; claimerIndex < shares.length; claimerIndex++) {
+                        describe(`and claimer number ${claimerIndex + 1} tries to claim`, () => {
+                            it("claims successfully", async () => {
+                                let accountBalanceBeforeClaim = await ethers.provider.getBalance(claimers[claimerIndex].address);
+                                const proof = tree.getProof(claimers[claimerIndex].address, sharesScaled[claimerIndex]);
+                                let tx = await campaginProxy.connect(claimers[claimerIndex]).claim(claimers[claimerIndex].address, sharesScaled[claimerIndex], proof, [ethers.constants.AddressZero], claimers[claimerIndex].address);
+                                const { gasUsed, effectiveGasPrice } = await tx.wait();
+                                let gasCostClaim = gasUsed.mul(effectiveGasPrice);
+                                let accountbalanceAfterClaim = await ethers.provider.getBalance(claimers[claimerIndex].address);
+                                let rewardAmount = sharesScaled[claimerIndex].mul(fundsSum);
+                                expect(accountbalanceAfterClaim.add(gasCostClaim)).to.eq(accountBalanceBeforeClaim.add(rewardAmount));
+                            });
+                        });
+                    }
+                });
+
+                for (let funderIndex = 0; funderIndex < fundsPerFunderEth.length; funderIndex++) {
+                    describe(`and funder number ${funderIndex + 1} funds the campaign`, () => {
+                        beforeEach(async () => {
+                            let tx = await campaginProxy.connect(funders[funderIndex]).fund(ethers.constants.AddressZero, ethers.utils.parseEther(fundsPerFunderEth[funderIndex].toString()), { value: ethers.utils.parseEther(fundsPerFunderEth[funderIndex].toString()) });
+                            await tx.wait();
+                        });
+
+                        for (let claimerIndex = 0; claimerIndex < shares.length; claimerIndex++) {
+                            describe(`and claimer number ${claimerIndex + 1} tries to claim`, () => {
+                                it("claims successfully", async () => {
+                                    let accountBalanceBeforeClaim = await ethers.provider.getBalance(claimers[claimerIndex].address);
+                                    const proof = tree.getProof(claimers[claimerIndex].address, sharesScaled[claimerIndex]);
+                                    let tx = await campaginProxy.connect(claimers[claimerIndex]).claim(claimers[claimerIndex].address, sharesScaled[claimerIndex], proof, [ethers.constants.AddressZero], claimers[claimerIndex].address);
+                                    const { gasUsed, effectiveGasPrice } = await tx.wait();
+                                    let gasCostClaim = gasUsed.mul(effectiveGasPrice);
+                                    let accountbalanceAfterClaim = await ethers.provider.getBalance(claimers[claimerIndex].address);
+                                    let rewardAmount = sharesScaled[claimerIndex].mul(fundsPerFunderEth[funderIndex]);
+                                    expect(accountbalanceAfterClaim.add(gasCostClaim)).to.eq(accountBalanceBeforeClaim.add(rewardAmount));
+                                });
+                            });
+                        }
+                    });
+                }
+            });
 
 
         });
-
-    });
+    }
 });
