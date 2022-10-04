@@ -218,7 +218,8 @@ export const deployCampaign = async (
   createDetails.address = address;
 
   console.log('campaign contract deployed', { address });
-
+  delete createDetails.logo; //send details without logo property, because it leads to problems on the backend side to resolve logo on model schema which doesnt exist because it is called logoUrl
+  console.warn('sending ', { createDetails })
   await registerCampaign(uriDefined, createDetails);
   await registerCampaignLogo(logo, uriDefined);  //do we need to await this? Can we show local logo ?
   return address;

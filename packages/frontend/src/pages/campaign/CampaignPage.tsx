@@ -11,6 +11,7 @@ import {
   AppCard,
   AppHeading,
   AppModal,
+  CampaignIcon,
   ExpansibleCard,
   ExpansiveParagraph,
   InfoProperty,
@@ -50,7 +51,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     useCampaignContext();
 
   const { user } = useLoggedUser();
-
   /** Things below are needed to keep the width of the admin button equal to the width of the Fund Campaign card */
   // react to window dimension changes
   const { w_width } = useWindowDimensions();
@@ -110,14 +110,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const details = (
     <AppCard style={{ paddingBottom: '18px' }}>
       <Box direction="row" align="center" justify="start" style={{ marginBottom: '16px' }}>
-        <Box
-          style={{
-            backgroundColor: '#ccc',
-            height: '80px',
-            width: '80px',
-            borderRadius: '40px',
-            marginRight: '20px',
-          }}></Box>
+        <CampaignIcon width="32px" height="32" src={campaign?.logoUrl} />
         <Box>
           <AppHeading level="1">{campaign.title}</AppHeading>
         </Box>

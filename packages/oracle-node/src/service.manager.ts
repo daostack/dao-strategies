@@ -79,7 +79,7 @@ export class ServiceManager {
     this.indexRepo = new IndexRepository(this.client);
 
     this.strategyComputation =
-      process.env.MOCK_STRATEGY_COMPUTATION.toLocaleLowerCase() === 'true'
+      process.env.MOCK_STRATEGY_COMPUTATION?.toLocaleLowerCase() === 'true'
         ? new StrategyComputationMock()
         : new StrategyComputation(worldConfig);
 

@@ -30,7 +30,7 @@ export interface CampaignUriDetails {
 export interface CampaignCreateDetails {
   title: string;
   description: string;
-  logo: any;
+  logoUrl: string;
   guardian: string;
   oracle: string;
   activationTime: number;

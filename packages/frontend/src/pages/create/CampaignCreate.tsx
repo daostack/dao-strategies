@@ -76,6 +76,7 @@ export interface ICampaignCreateProps {
 }
 
 export interface CampaignFormValues {
+  logoPreview: string | undefined;
   title: string;
   description: string;
   logo: File | undefined;
@@ -101,6 +102,7 @@ const initialValues: CampaignFormValues = {
   title: 'My Campaign',
   guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
   logo: undefined,
+  logoPreview: undefined,
   chainName: initChain.name,
   customAssetAddress: '', // '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
   hasCustomAsset: false,
@@ -735,7 +737,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               <Parameter label="Logo">
                 <CampaignIcon
                   iconSize="64px"
-                  src="https://img-cdn.inc.com/image/upload/w_1920,h_1080,c_fill/images/panoramic/GettyImages-1011930076_460470_i7oi1u.jpg"></CampaignIcon>
+                  src={formValues.logoPreview && formValues.logoPreview}></CampaignIcon>
               </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Campaign Name" text={formValues.title}></Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Description">

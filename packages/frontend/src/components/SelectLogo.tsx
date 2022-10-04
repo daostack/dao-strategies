@@ -1,6 +1,6 @@
 import { Box, Image, Text, FileInput, FormField, Grid, Heading, Layer } from "grommet"
 import { ChangeEvent, FC, useEffect, useReducer, useRef, useState } from "react";
-import { AppButton, IElement } from "./styles/BasicElements"
+import { AppButton, CampaignIcon, IElement } from "./styles/BasicElements"
 import { Cropper, ReactCropperElement } from "react-cropper";
 import { CampaignFormValues } from "../pages/create/CampaignCreate";
 import { Buffer } from 'buffer';
@@ -21,6 +21,7 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
     const [cropData, setCropData] = useState('');
     const imageRef = useRef<ReactCropperElement>(null);
     const [cropper, setCropper] = useState<Cropper>();
+    const logoFileInputRef = useRef<HTMLInputElement | null>(null);
     const [, forceUpdate] = useReducer((x) => x + 1, 0)
 
     const getCropData = () => {
@@ -45,6 +46,14 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
         getCropData();
     }
 
+    const resetFileInput = (): void => {
+        setCropData('');
+        if (logoFileInputRef.current) {
+            logoFileInputRef.current.value = '';
+            forceUpdate();
+        }
+    }
+
     /***
     * Converts a dataUrl base64 image string into a File byte array
     * dataUrl example:
@@ -67,25 +76,13 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
 
     const convertBase64FromCropToFile = async () => {
         if (cropData) {
-            campaignFormValues.logo = await base64ToFile(cropData, `croppedLogo.${getImageTypeFromBase64String(cropData)}`);;
-            // set the NEW CROPPED file to the fileinput, so its shown
-            const fileInput = document.querySelector('#logo-select-input');
-            if (campaignFormValues.logo && fileInput) {
-                (fileInput as HTMLInputElement).value = '';
-                var newFileList = new DataTransfer();
-                newFileList.items.add(campaignFormValues.logo);
-                (fileInput as HTMLInputElement).files = newFileList.files
-                forceUpdate() // due to the nature of useRef we need a force UI Update otherwise new file list wont be shown
-            }
+            campaignFormValues.logo = await base64ToFile(cropData, `croppedLogo.${getImageTypeFromBase64String(cropData)}`);
+            campaignFormValues.logoPreview = cropData;
             onValuesUpdated(campaignFormValues);
             setShowCropModal(false);
         }
     }
 
-    const renderFilename = (file: any): JSX.Element => {
-        console.log('renderFile ', file, ' ', `croppedLogo.${getImageTypeFromBase64String(cropData)}`);
-        return (<p>{cropData ? `croppedLogo.${getImageTypeFromBase64String(cropData)}` : file.name}</p>)
-    }
     useEffect(() => {
         convertBase64FromCropToFile();
     }, [cropData])
@@ -99,8 +96,8 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
                     <FileInput
                         name="logo"
                         id="logo-select-input"
+                        ref={logoFileInputRef}
                         multiple={false}
-                        renderFile={renderFilename}
                         onChange={handleSelectLogo}
                         accept="image/png, image/webp, image/jpeg"
                         messages={{
@@ -110,15 +107,11 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
                         style={{ width: 'fill', height: 'fill', minHeight: '15px', borderRadius: '50px' }} />
                 </Box>
                 ) : (
-                    <Box direction="column">
-                        <Image
-                            fit="cover"
-                            height="64px" width="64px"
-                            src={cropData}
-                            style={{ borderRadius: '100px' }}
-                        />
-                        <AppButton secondary>Remove</AppButton>
-                    </Box>)}
+                    <>
+                        <CampaignIcon src={cropData} />
+                        <AppButton alignSelf="start" onClick={() => { resetFileInput() }} secondary>Remove Logo</AppButton>
+                    </>
+                )}
             </FormField>
 
             {/*Crop Logo Part */}
