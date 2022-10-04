@@ -26,13 +26,18 @@ export interface ITwoColumns {
   children?: ReactNode | ReactNode[];
   grid?: GridExtendedProps;
   boxes?: BoxExtendedProps;
+  gap?: number;
+  line?: boolean;
 }
 
 export const TwoColumns: FC<ITwoColumns> = (props: ITwoColumns) => {
+  const gap = props.gap !== undefined ? props.gap : 78; // minus 2 of the line
+  const showLine = props.line !== undefined ? props.line : true;
+
   return (
     <Grid
       fill
-      columns={['1fr', '80px', '1fr']}
+      columns={['1fr', `${gap}px`, '1fr']}
       rows={['auto']}
       areas={[
         { name: 'left', start: [0, 0], end: [0, 0] },
@@ -44,12 +49,16 @@ export const TwoColumns: FC<ITwoColumns> = (props: ITwoColumns) => {
         {(props.children as React.ReactNode[])[0]}
       </Box>
       <Box gridArea="center" align="center">
-        <Box
-          style={{
-            height: '100%',
-            width: '2px',
-            backgroundColor: styleConstants.colors.lightGrayBorder,
-          }}></Box>
+        {showLine ? (
+          <Box
+            style={{
+              height: '100%',
+              width: '2px',
+              backgroundColor: styleConstants.colors.lightGrayBorder,
+            }}></Box>
+        ) : (
+          <></>
+        )}
       </Box>
       <Box gridArea="right" direction="column" {...props.boxes}>
         {(props.children as React.ReactNode[])[1]}
