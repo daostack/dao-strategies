@@ -58,13 +58,16 @@ export interface CampaignReadDetails
   valueLocked: number;
 }
 
-export interface BalancesObject {
-  [account: string]: string;
+export interface SharesObject {
+  [account: string]: {
+    amount: string;
+    address?: string;
+  };
 }
 
 export interface SharesRead {
   uri: string;
-  shares: BalancesObject;
+  shares: SharesObject;
   page: Page;
   details?: CampaignUriDetails;
 }

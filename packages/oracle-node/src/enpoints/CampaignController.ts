@@ -1,5 +1,4 @@
 import {
-  BalancesObject,
   CampaignUriDetails,
   CampaignCreateDetails,
   CampaignOnchainDetails,
@@ -90,7 +89,7 @@ export class CampaignController extends Controller {
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
-  ): Promise<BalancesObject> {
+  ): Promise<{ uri: string }> {
     if (loggedUser === undefined) {
       throw new Error('logged user expected but not found');
     }
