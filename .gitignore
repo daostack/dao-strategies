@@ -50,6 +50,9 @@ artifacts
 # localhost deployments
 packages/contracts/generated/deployments/localhost
 
+# oracle DB migrations
+packages/oracle-node/src/prisma/migrations/*
+
 
 # misc
 .DS_Store
