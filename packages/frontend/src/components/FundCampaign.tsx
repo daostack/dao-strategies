@@ -219,58 +219,59 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
           <AppHeading level={4} style={{ color: styleConstants.colors.lightGrayTextDarker }}>
             Funding History
           </AppHeading>
-          <Box style={{ marginTop: '40px' }}></Box>
-          {fundEvents ? (
-            fundEvents.map((fundEvent, ix) => {
-              const ts = new DateManager(fundEvent.timestamp);
-              const since = now ? `${ts.prettyDiff(now.getTime())} ago` : '';
-              const chain = ChainsDetails.chainOfId(chainId);
-              const exploreUrl = chain && chain.exploreTx ? chain.exploreTx(fundEvent.txHash) : undefined;
+          <Box fill style={{ overflowY: 'auto', marginTop: '40px' }}>
+            {fundEvents ? (
+              fundEvents.map((fundEvent, ix) => {
+                const ts = new DateManager(fundEvent.timestamp);
+                const since = now ? `${ts.prettyDiff(now.getTime())} ago` : '';
+                const chain = ChainsDetails.chainOfId(chainId);
+                const exploreUrl = chain && chain.exploreTx ? chain.exploreTx(fundEvent.txHash) : undefined;
 
-              return (
-                <Box align="stretch">
-                  {ix > 0 ? <HorizontalLine style={{ margin: '16px 0px' }}></HorizontalLine> : <></>}
-                  <Box
-                    direction="row"
-                    align="center"
-                    justify="between"
-                    style={{ fontSize: styleConstants.textFontSizes.xsmall }}>
-                    <AppLabel>Funding</AppLabel>
-                    <Box>
-                      {exploreUrl ? (
-                        <a
-                          style={{ color: styleConstants.colors.ligthGrayText }}
-                          href={exploreUrl}
-                          target="_blank"
-                          rel="noreferrer">
-                          {since}
-                        </a>
-                      ) : (
-                        since
-                      )}
+                return (
+                  <Box align="stretch" style={{ flexShrink: '0' }}>
+                    {ix > 0 ? <HorizontalLine style={{ margin: '16px 0px' }}></HorizontalLine> : <></>}
+                    <Box
+                      direction="row"
+                      align="center"
+                      justify="between"
+                      style={{ fontSize: styleConstants.textFontSizes.xsmall }}>
+                      <AppLabel>Funding</AppLabel>
+                      <Box>
+                        {exploreUrl ? (
+                          <a
+                            style={{ color: styleConstants.colors.ligthGrayText }}
+                            href={exploreUrl}
+                            target="_blank"
+                            rel="noreferrer">
+                            {since}
+                          </a>
+                        ) : (
+                          since
+                        )}
+                      </Box>
+                    </Box>
+                    <Box
+                      direction="row"
+                      align="center"
+                      justify="between"
+                      style={{ fontSize: styleConstants.textFontSizes.normalSmaller }}>
+                      <Box>
+                        <AssetBalance asset={fundEvent.asset}></AssetBalance>
+                      </Box>
+                      <Box>
+                        <Address
+                          chainId={chainId}
+                          address={fundEvent.funder}
+                          style={{ color: styleConstants.colors.ligthGrayText }}></Address>
+                      </Box>
                     </Box>
                   </Box>
-                  <Box
-                    direction="row"
-                    align="center"
-                    justify="between"
-                    style={{ fontSize: styleConstants.textFontSizes.normalSmaller }}>
-                    <Box>
-                      <AssetBalance asset={fundEvent.asset}></AssetBalance>
-                    </Box>
-                    <Box>
-                      <Address
-                        chainId={chainId}
-                        address={fundEvent.funder}
-                        style={{ color: styleConstants.colors.ligthGrayText }}></Address>
-                    </Box>
-                  </Box>
-                </Box>
-              );
-            })
-          ) : (
-            <></>
-          )}
+                );
+              })
+            ) : (
+              <></>
+            )}
+          </Box>
         </Box>
       </Box>
     </>
