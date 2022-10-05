@@ -4,7 +4,6 @@ import { Campaign } from '@prisma/client';
 export const toCampaignExternal = (campaign: Campaign): CampaignReadDetails => {
   const campaignExt: CampaignReadDetails = {
     ...campaign,
-    logoUrl: campaign.logoUrl,
     creator: campaign.creatorId,
     execDate: bigIntToNumber(campaign.execDate),
     strategyID: campaign.stratID,
