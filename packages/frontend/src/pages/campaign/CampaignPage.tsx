@@ -109,8 +109,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const details = (
     <AppCard style={{ paddingBottom: '18px' }}>
-      <Box direction="row" align="center" justify="start" style={{ marginBottom: '16px' }}>
-        <CampaignIcon width="32px" height="32" src={campaign?.logoUrl} />
+      <Box direction="row" align="center" justify="start" margin={{ right: 'medium' }}>
+        <CampaignIcon iconSize='48px' src={campaign?.logoUrl} />
         <Box>
           <AppHeading level="1">{campaign.title}</AppHeading>
         </Box>

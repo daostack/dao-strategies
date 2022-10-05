@@ -62,7 +62,6 @@ import { useNow } from '../../hooks/useNow';
 import { useUserError } from '../../hooks/useErrorContext';
 import { ethers } from 'ethers';
 import { SelectLogo } from '../../components/SelectLogo';
-import { toBase64 } from '../../utils/general';
 import { styleConstants, theme } from '../../components/styles/themes';
 import { HEADER_HEIGHT } from '../AppHeader';
 import { Parameter } from './parameter';
@@ -203,7 +202,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
       title: formValues.title,
-      logo: formValues.logo,
+      logoUrl: '',
       guardian: formValues.guardian,
       description: formValues.description,
       oracle,
