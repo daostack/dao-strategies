@@ -12,6 +12,7 @@ model Campaign {
   uri             String    @id
   title           String?  
   description     String?
+  logoUrl         String?
   creator         User?     @relation(fields: [creatorId], references: [address])
   creatorId       String?    
   nonce           Int

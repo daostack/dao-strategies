@@ -1,5 +1,5 @@
 import { ThemeType, Grommet } from 'grommet';
-import { createContext, FC, useContext, useState } from 'react';
+import { createContext, FC, useContext, useEffect, useState } from 'react';
 import { darkTheme, lightTheme } from './components/styles/themes';
 import { MainPage } from './pages/MainPage';
 

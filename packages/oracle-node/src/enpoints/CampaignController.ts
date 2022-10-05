@@ -128,6 +128,28 @@ export class CampaignController extends Controller {
     );
   }
 
+  async uploadLogo(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<void> {
+    const { logo } = request.files;
+    const { uri } = request.params;
+
+    if (!logo) {
+      throw new Error('no files uploaded or no input named "logo" found, cant process with upload to s3');
+    }
+    if (!uri) {
+      throw new Error('no uri specified, not able to create correct naming');
+    }
+    await this.manager.services.campaign.uploadLogoToS3(
+      logo,
+      uri as string, //uri is the campaignID
+      loggedUser
+    );
+  }
+
   async getFromAddress(
     request: Request,
     response: Response,

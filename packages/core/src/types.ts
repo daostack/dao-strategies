@@ -30,6 +30,7 @@ export interface CampaignUriDetails {
 export interface CampaignCreateDetails {
   title: string;
   description: string;
+  logoUrl: string;
   guardian: string;
   oracle: string;
   activationTime: number;
@@ -41,9 +42,10 @@ export interface CampaignCreateDetails {
   address: string;
 }
 
+
 export interface CampaignReadDetails
   extends CampaignCreateDetails,
-    CampaignUriDetails {
+  CampaignUriDetails {
   uri: string;
   title: string;
   description: string;

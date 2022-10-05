@@ -222,20 +222,6 @@ export const SelectValue: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   );
 };
 
-export const AppFileInput: FC = (props: IElement) => (
-  <Box fill justify="start">
-    <FileInput
-      onChange={(event, el: any) => {
-        const fileList = el.files;
-        for (let i = 0; i < fileList.length; i += 1) {
-          const file = fileList[i];
-          console.log(file.name);
-        }
-      }}
-    />
-  </Box>
-);
-
 export const HorizontalLine: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   return (
     <Box

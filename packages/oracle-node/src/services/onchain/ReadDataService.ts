@@ -46,7 +46,10 @@ export class ReadDataService {
     return blockNumber;
   }
 
-  async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
+  async getCampaignDetails(
+    address: string
+  ): Promise<CampaignOnchainDetails | null> {
+    if (!address) return null;
     const campaign = await this.campaignService.getFromAddress(address);
 
     const campaignContract = campaignProvider(
