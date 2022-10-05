@@ -33,6 +33,7 @@ import { FixedAdmin } from './fixed.admin';
 import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
+import { CampaignRewardsTime } from '../../components/CampaignRewardsTime';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -130,14 +131,15 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       )}
 
       <Box style={{ fontSize: styleConstants.textFontSizes.small }}>
-        {campaign.executed ? (
+        <CampaignRewardsTime alreadyExecuted={campaign.executed} execDate={campaign?.execDate} compactFormat={false} />
+        {/* {campaign.executed ? (
           <Box>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Box>
         ) : (
           <>
             Campaign to be executed on {new DateManager(campaign.execDate).toString()}
             <Countdown to-date={campaign?.execDate}></Countdown>
           </>
-        )}
+        )} */}
       </Box>
 
       <Box>

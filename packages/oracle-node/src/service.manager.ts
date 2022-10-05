@@ -60,6 +60,7 @@ export class ServiceManager {
 
     ContractsJson.chainIds().map((chainId: number) => {
       const config = chainConfig.get(chainId);
+      if (!config.privateKey) return;
       const provider = config.alchemyKey
         ? new providers.AlchemyProvider(config.chainName, config.alchemyKey)
         : new providers.JsonRpcProvider(config.url);
@@ -79,7 +80,7 @@ export class ServiceManager {
     this.indexRepo = new IndexRepository(this.client);
 
     this.strategyComputation =
-      process.env.MOCK_STRATEGY_COMPUTATION.toLocaleLowerCase() === 'true'
+      process.env.MOCK_STRATEGY_COMPUTATION?.toLocaleLowerCase() === 'true'
         ? new StrategyComputationMock()
         : new StrategyComputation(worldConfig);
 
