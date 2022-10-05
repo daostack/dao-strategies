@@ -38,6 +38,7 @@ import { ChainTag } from '../../components/Assets';
 export const CAMPAIGN_PAD_SIDES = 5;
 export const CAMPAIGN_GAP = 24;
 const PER_PAGE = 8;
+const DEBUG = true;
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -92,6 +93,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   };
 
   useEffect(() => {
+    if (DEBUG) console.log('Campaign Page updated', { campaign });
     getShares({ number: 0, perPage: PER_PAGE });
     getOtherDetails();
     checkClaimInfo();
@@ -231,22 +233,16 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const fundersTable = (
     <AppCard style={{ marginTop: '40px', padding: '24px 24px' }}>
-      {funders !== undefined ? (
-        <>
-          <Box direction="row" justify="between" align="center">
-            <AppHeading level="2" style={{ marginBottom: '24px' }}>
-              Funders
-            </AppHeading>
-            <Box style={{ height: '20px', width: '20px' }} onClick={() => getFunders(funders.page)}>
-              <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
-            </Box>
-          </Box>
+      <Box direction="row" justify="between" align="center">
+        <AppHeading level="2" style={{ marginBottom: '24px' }}>
+          Funders
+        </AppHeading>
+        <Box style={{ height: '20px', width: '20px' }} onClick={() => getFunders()}>
+          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+        </Box>
+      </Box>
 
-          <FundersTable funders={funders} updatePage={updatePage}></FundersTable>
-        </>
-      ) : (
-        <Spinner></Spinner>
-      )}
+      <FundersTable funders={funders} updatePage={updatePage} perPage={PER_PAGE}></FundersTable>
     </AppCard>
   );
 

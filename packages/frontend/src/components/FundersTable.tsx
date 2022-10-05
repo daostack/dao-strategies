@@ -1,7 +1,5 @@
 import { CampaignFundersRead, campaignInstance, Page } from '@dao-strategies/core';
-import { parseEther } from 'ethers/lib/utils';
 import { Box, Spinner } from 'grommet';
-import { StatusGood } from 'grommet-icons';
 import { FC } from 'react';
 import { useCampaignContext } from '../hooks/useCampaign';
 import { valueToString } from '../utils/general';
@@ -13,6 +11,7 @@ export interface FundersTableI extends IElement {
   funders?: CampaignFundersRead;
   updatePage: (page: Page) => void;
   invert?: boolean;
+  perPage: number; // needed to render the "loading" table of the correct size even if "shares" is undefined
 }
 
 export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
@@ -21,11 +20,7 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
   const widths = ['60%', '40%'];
 
   if (funders === undefined) {
-    return (
-      <Box fill justify="center" align="center">
-        <Spinner></Spinner>
-      </Box>
-    );
+    return <PagedTable loading perPage={props.perPage}></PagedTable>;
   }
 
   const data: any[] = funders.funders.map((funder) => {

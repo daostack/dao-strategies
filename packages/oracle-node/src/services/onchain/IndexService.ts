@@ -8,7 +8,7 @@ import {
   Page,
   TokenBalance,
 } from '@dao-strategies/core';
-import { FundEvent } from '@prisma/client';
+import { FundEvent, Prisma } from '@prisma/client';
 
 import { config } from '../../config';
 import { appLogger } from '../../logger';
@@ -64,11 +64,11 @@ export class IndexingService {
      * table, which will cache all the funding events of each user and store
      * their total USD value
      */
-    const update = async (address: string): Promise<string[]> => {
+    const update = async (campaignAddress: string): Promise<string[]> => {
       if (DEBUG)
         appLogger.debug(`IndexingService - updateCampaignIndex() - update`);
       const campaign = campaignProvider(
-        address,
+        campaignAddress,
         this.getProvider(chainId).provider
       );
 
@@ -90,8 +90,8 @@ export class IndexingService {
                 `IndexingService - addFundEvent funder: ${event.args.provider}, hash: ${hash}`
               );
 
-            const address = event.args.provider.toLocaleLowerCase();
-            funders.add(address);
+            const funderAddress = event.args.provider.toLocaleLowerCase();
+            funders.add(funderAddress);
 
             return this.indexRepo.addFundEvent({
               campaign: { connect: { uri } },
@@ -102,12 +102,12 @@ export class IndexingService {
                   where: {
                     campaignId_address: {
                       campaignId: uri,
-                      address,
+                      address: funderAddress,
                     },
                   },
                   create: {
                     campaign: { connect: { uri } },
-                    address,
+                    address: funderAddress,
                     value: 0,
                   },
                 },
@@ -130,6 +130,11 @@ export class IndexingService {
 
     try {
       const funders = await this.updating;
+
+      if (DEBUG)
+        appLogger.debug(
+          `IndexingService - Funders read ${JSON.stringify(funders)}`
+        );
       if (funders.length > 0) {
         /** update the cached CampaignFunder table if new funders were found */
         await this.updateTotalContributions(uri, funders);
@@ -146,11 +151,18 @@ export class IndexingService {
     uri: string,
     addresses?: string[]
   ): Promise<void> {
+    appLogger.debug(
+      `IndexingService - updateTotalContributions ${JSON.stringify(addresses)}`
+    );
     const chainId = await this.campaign.getChainId(uri);
 
     /** get FundEvents (all historic ones)*/
     const fundEvents = await this.indexRepo.getFundEvents(uri, addresses);
     const funders = new Map<string, FundEvent[]>();
+
+    appLogger.debug(
+      `IndexingService - fundEvents ${JSON.stringify(fundEvents)}`
+    );
 
     /** joing fund events of the same funder */
     fundEvents.forEach((event) => {
@@ -159,22 +171,29 @@ export class IndexingService {
       funders.set(funder, current.concat([event]));
     });
 
-    Array.from(funders.entries()).map(async ([funder, events]) => {
-      const assets = await Promise.all(
-        events.map(async (event): Promise<TokenBalance> => {
-          const asset = ChainsDetails.assetOfAddress(chainId, event.asset);
-          const price = await this.price.priceOf(chainId, asset.address);
-          return { ...asset, balance: event.amount, price };
-        })
-      );
+    await Promise.all(
+      Array.from(funders.entries()).map(async ([funder, events]) => {
+        const assets = await Promise.all(
+          events.map(async (event): Promise<TokenBalance> => {
+            const asset = ChainsDetails.assetOfAddress(chainId, event.asset);
+            const price = await this.price.priceOf(chainId, asset.address);
+            return { ...asset, balance: event.amount, price };
+          })
+        );
 
-      const totalValue = ChainsDetails.valueOfAssets(assets);
-      await this.indexRepo.upsertFunder({
-        campaignId: uri,
-        address: funder,
-        value: totalValue,
-      });
-    });
+        const totalValue = ChainsDetails.valueOfAssets(assets);
+
+        const newFunder: Prisma.CampaignFunderUncheckedCreateInput = {
+          campaignId: uri,
+          address: funder,
+          value: totalValue,
+        };
+        if (DEBUG)
+          appLogger.debug(`IndexService adding: ${JSON.stringify(newFunder)}`);
+
+        await this.indexRepo.upsertFunder(newFunder);
+      })
+    );
   }
 
   async updateTvlIndex(uri: string, atBlock: number): Promise<void> {

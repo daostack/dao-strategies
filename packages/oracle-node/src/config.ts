@@ -24,8 +24,8 @@ export const PRICE_UPDATE_PERIOD = +process.env.PRICE_UPDATE_PERIOD;
 
 export const config: ExecutionConfig = {
   world: worldConfig,
-  executionWatcher: { enabled: true, period: 10 },
-  republishWatcher: { enabled: true, period: 10 },
+  executionWatcher: { enabled: false, period: 10 },
+  republishWatcher: { enabled: false, period: 10 },
   republishTimeMargin: 5,
   fundersUpdatePeriod: 10,
   tvlUpdatePeriod: 10,

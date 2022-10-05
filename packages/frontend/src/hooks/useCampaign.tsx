@@ -109,7 +109,7 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
 
       const _funders = await response.json();
       console.log('setting funders', { _funders });
-      setFunders(Object.keys(_funders).length > 0 ? funders : undefined);
+      setFunders(Object.keys(_funders).length > 0 ? _funders : undefined);
     },
     [campaign]
   );

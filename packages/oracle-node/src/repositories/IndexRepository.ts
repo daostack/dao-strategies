@@ -92,32 +92,32 @@ export class IndexRepository {
   }
 
   async getFunders(uri: string, page: Page): Promise<CampaignFundersRead> {
-    const [funders, total] = await this.client.$transaction([
-      this.client.campaignFunder.findMany({
-        where: { campaign: { uri } },
-        orderBy: { value: 'desc' },
-        include: {
-          campaign: {
-            select: {
-              address: true,
-            },
-          },
-          events: true,
-        },
-        skip: page.number * page.perPage,
-        take: page.perPage,
-      }),
-      this.client.campaignFunder.count({
-        where: {
-          campaign: {
-            uri,
+    const funders = await this.client.campaignFunder.findMany({
+      where: { campaign: { uri } },
+      orderBy: { value: 'desc' },
+      include: {
+        campaign: {
+          select: {
+            address: true,
           },
         },
-      }),
-    ]);
+        events: true,
+      },
+      skip: page.number * page.perPage,
+      take: page.perPage,
+    });
 
-    page.total = total;
-    page.totalPages = Math.ceil(total / page.perPage);
+    const total = await this.client.campaignFunder.count({
+      where: {
+        campaign: {
+          uri,
+        },
+      },
+    });
+
+    const readPage = { ...page };
+    readPage.total = total;
+    readPage.totalPages = Math.ceil(total / page.perPage);
 
     return {
       uri,
@@ -138,7 +138,7 @@ export class IndexRepository {
           }),
         };
       }),
-      page,
+      page: readPage,
     };
   }
 
