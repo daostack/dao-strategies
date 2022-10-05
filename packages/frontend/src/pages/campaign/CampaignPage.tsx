@@ -45,7 +45,7 @@ export interface ICampaignPageProps {
 }
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
-  const [showFund, setShowFund] = useState<boolean>(true);
+  const [showFund, setShowFund] = useState<boolean>(false);
 
   const {
     isLoading,

@@ -4,6 +4,7 @@ import { FC } from 'react';
 import { useCampaignContext } from '../hooks/useCampaign';
 import { valueToString } from '../utils/general';
 import { Address } from './Address';
+import { AssetsValue } from './Assets';
 import { PagedTable, TableColumn } from './PagedTable';
 import { IElement } from './styles/BasicElements';
 
@@ -24,7 +25,7 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
   }
 
   const data: any[] = funders.funders.map((funder) => {
-    return [funder.value, funder.funder];
+    return [funder.assets, funder.funder];
   });
 
   const columns: TableColumn[] = [
@@ -41,13 +42,13 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
       return <>-</>;
     }
     const datum = {
-      amount: valueToString(data[rowIx][0], 2),
+      assets: data[rowIx][0],
       address: data[rowIx][1],
     };
 
     switch (colIx) {
       case 0:
-        return <>~${datum.amount}</>;
+        return <AssetsValue type="inline" assets={datum.assets}></AssetsValue>;
 
       case 1:
         return <Address chainId={campaign.chainId} address={datum.address}></Address>;

@@ -27,6 +27,7 @@ export const styleConstants = {
     buttonLightBorder: '#4ba66433',
     lightGrayBackground: '#0000000c',
     ligthGrayText: '#989BA0',
+    lightGrayTextDarker: '#575757',
     lightGrayBorder: '#F0EDED',
     headingDark: '#0E0F19',
     lessLightGrayBorder: '#E0E0E0',

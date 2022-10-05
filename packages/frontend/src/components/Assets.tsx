@@ -74,7 +74,7 @@ export const AssetBalanceRow: FC<IBalance> = (props: IBalance) => {
   return (
     <Box direction="row" style={{ width: '100%', ...props.style }} justify="between" align="center">
       <AssetBalance asset={props.asset}></AssetBalance>
-      <Box>~{assetValue(props.asset, 2)} usd</Box>
+      <Box style={{ fontWeight: '500' }}>${assetValue(props.asset, 2)}</Box>
     </Box>
   );
 };
@@ -199,24 +199,29 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
   })();
 
   /** If no preferred asset, then the USD value will be prioritized. */
-  if (type === 'card') {
-    return (
-      <AppTip
-        content={
-          <Box style={{ width: '300px', padding: '16px 16px 0px 16px' }}>
-            {props.assets ? (
-              props.assets.map((asset) => {
-                return asset.balance !== '0' ? (
-                  <AssetBalanceRow style={{ marginBottom: '16px' }} asset={asset}></AssetBalanceRow>
-                ) : (
-                  <></>
-                );
-              })
-            ) : (
-              <></>
-            )}
+
+  return (
+    <AppTip
+      dropContent={
+        <Box style={{ width: '300px', padding: '20px 20px 0px 20px' }}>
+          <Box direction="row" justify="between" style={{ margin: '4px 0px 20px 0px' }}>
+            <AppLabel>Funds Raised</AppLabel>
+            <AppLabel>Value</AppLabel>
           </Box>
-        }>
+          {props.assets ? (
+            props.assets.map((asset) => {
+              return asset.balance !== '0' ? (
+                <AssetBalanceRow style={{ marginBottom: '20px' }} asset={asset}></AssetBalanceRow>
+              ) : (
+                <></>
+              );
+            })
+          ) : (
+            <></>
+          )}
+        </Box>
+      }>
+      {type === 'card' ? (
         <Box
           style={{
             borderBottom: '2px dashed',
@@ -237,14 +242,12 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
             {secondaryString}
           </Box>
         </Box>
-      </AppTip>
-    );
-  } else {
-    return (
-      <span>
-        <b>{preferredString}</b>
-        {secondaryString}
-      </span>
-    );
-  }
+      ) : (
+        <span>
+          <b>{preferredString}</b>
+          {secondaryString}
+        </span>
+      )}
+    </AppTip>
+  );
 };

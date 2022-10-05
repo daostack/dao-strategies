@@ -37,6 +37,8 @@ interface IFundCampaign extends IElement {
 export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const [formValues, setFormValues] = useState<FundFormValues>(initialValues);
   const [funding, setFunding] = useState<boolean>(false);
+  const [approving, setApproving] = useState<boolean>(false);
+
   const { account, connect } = useLoggedUser();
   const { campaign, fundEvents, getFundEvents } = useCampaignContext();
   const { now } = useNow();
@@ -89,6 +91,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     let tx;
     const campaign = campaignInstance(props.address, signer);
     if (isNative) {
+      setFunding(true);
       tx = await campaign.fund(ethers.constants.AddressZero, 0, { value: ethers.utils.parseEther(formValues.amount) });
     } else {
       const token = erc20Instance(selectedAsset.address, signer);
@@ -97,14 +100,20 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
       const value = ethers.utils.parseUnits(formValues.amount, selectedAsset.decimals);
 
       if (approved.sub(value).lt(0)) {
+        setApproving(true);
         const tx = await token.approve(props.address, value.sub(approved));
-        await tx.wait();
+        try {
+          await tx.wait();
+        } catch (e) {
+          setApproving(false);
+        }
+        setApproving(false);
       }
 
+      setFunding(true);
       tx = await campaign.fund(selectedAsset.address, value);
     }
 
-    setFunding(true);
     const res = await tx.wait();
     console.log('funded', { res });
     setFunding(false);
@@ -114,8 +123,18 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   }, [isLogged, selectedAsset, signer, isNative, formValues.amount, account]);
 
   const balanceNum = balance ? +ethers.utils.formatUnits(balance.balance, balance.decimals) : undefined;
-  const disabled = funding || selectedAsset === undefined || +formValues.amount === 0;
+  const disabled = funding || approving || selectedAsset === undefined || +formValues.amount === 0;
   const notEnoughFunds = balanceNum !== undefined ? balanceNum < +formValues.amount : false;
+
+  const label = approving
+    ? `Approving Allowance...`
+    : funding
+    ? `Tx Pending...`
+    : isLogged
+    ? isNative
+      ? 'Fund'
+      : 'Approve & Fund'
+    : 'Connecto to Fund';
 
   /** campaign should always be defined if the fund dialog is shown */
   const chainId = campaign ? campaign.chainId : 0;
@@ -177,9 +196,9 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
             </Box>
 
             <AppButton
-              label={isLogged ? 'Fund Campaign' : 'Connect to fund'}
+              label={label}
               primary
-              disabled={disabled || notEnoughFunds}
+              disabled={disabled || notEnoughFunds || funding}
               onClick={() => fund()}
               style={{ marginTop: '20px' }}
             />
@@ -196,19 +215,10 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
           </Box>
         </AppForm>
 
-        {funding ? (
-          <Box justify="center" align="center" style={{ marginTop: '30px', alignSelf: 'center' }}>
-            Waiting for tx confirmation...
-            <br></br>
-            <br></br>
-            <Spinner></Spinner>
-          </Box>
-        ) : (
-          <></>
-        )}
-
         <Box style={{ width: '100%', marginTop: '80px' }}>
-          <AppHeading level={4}>Funding History</AppHeading>
+          <AppHeading level={4} style={{ color: styleConstants.colors.lightGrayTextDarker }}>
+            Funding History
+          </AppHeading>
           <Box style={{ marginTop: '40px' }}></Box>
           {fundEvents ? (
             fundEvents.map((fundEvent, ix) => {
