@@ -88,11 +88,11 @@ export class DateManager {
     if (diff < 60) {
       return diff + ' sec';
     } else if (diff < 60 * 60) {
-      return Math.ceil(diff / 60) + ' min';
+      return Math.floor(diff / 60) + ' min';
     } else if (diff < 60 * 60 * 24) {
-      return Math.ceil(diff / (60 * 60)) + ' hr';
+      return Math.floor(diff / (60 * 60)) + ' hr';
     } else {
-      return Math.ceil(diff / (60 * 60 * 24)) + ' days';
+      return Math.floor(diff / (60 * 60 * 24)) + ' days';
     }
   }
 

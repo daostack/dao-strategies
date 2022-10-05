@@ -1,14 +1,18 @@
 import { Asset, campaignInstance, ChainsDetails, erc20Instance } from '@dao-strategies/core';
 import { ethers } from 'ethers';
-import { Select, Box, FormField, TextInput, Spinner } from 'grommet';
+import { Select, Box, FormField, Spinner } from 'grommet';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { useSigner } from 'wagmi';
+
 import { useBalanceOf } from '../hooks/useBalanceOf';
 import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
+import { useNow } from '../hooks/useNow';
+import { DateManager } from '../utils/date.manager';
 import { valueToString } from '../utils/general';
-import { AssetIcon } from './Assets';
-import { AppForm, AppButton, IElement, AppInput } from './styles/BasicElements';
+import { Address } from './Address';
+import { AssetBalance, AssetIcon } from './Assets';
+import { AppForm, AppButton, IElement, AppInput, AppHeading, AppLabel, HorizontalLine } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
 
 interface FundFormValues {
@@ -34,7 +38,8 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const [formValues, setFormValues] = useState<FundFormValues>(initialValues);
   const [funding, setFunding] = useState<boolean>(false);
   const { account, connect } = useLoggedUser();
-  const { recentFunders, getFundEvents } = useCampaignContext();
+  const { campaign, fundEvents, getFundEvents } = useCampaignContext();
+  const { now } = useNow();
 
   const selectedAsset = props.assets.find((asset) => asset.id === formValues.asset);
   const isNative = selectedAsset ? ChainsDetails.isNative(selectedAsset) : false;
@@ -111,6 +116,9 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const balanceNum = balance ? +ethers.utils.formatUnits(balance.balance, balance.decimals) : undefined;
   const disabled = funding || selectedAsset === undefined || +formValues.amount === 0;
   const notEnoughFunds = balanceNum !== undefined ? balanceNum < +formValues.amount : false;
+
+  /** campaign should always be defined if the fund dialog is shown */
+  const chainId = campaign ? campaign.chainId : 0;
 
   const balanceStr =
     balance !== undefined && balanceNum !== undefined ? (
@@ -199,11 +207,56 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
           <></>
         )}
 
-        <Box>
-          <Box>Recent funders</Box>
-          {recentFunders ? (
-            recentFunders.map((funder) => {
-              return <Box>{funder.amount}</Box>;
+        <Box style={{ width: '100%', marginTop: '80px' }}>
+          <AppHeading level={4}>Funding History</AppHeading>
+          <Box style={{ marginTop: '40px' }}></Box>
+          {fundEvents ? (
+            fundEvents.map((fundEvent, ix) => {
+              const ts = new DateManager(fundEvent.timestamp);
+              const since = now ? `${ts.prettyDiff(now.getTime())} ago` : '';
+              const chain = ChainsDetails.chainOfId(chainId);
+              const exploreUrl = chain && chain.exploreTx ? chain.exploreTx(fundEvent.txHash) : undefined;
+
+              return (
+                <Box align="stretch">
+                  {ix > 0 ? <HorizontalLine style={{ margin: '16px 0px' }}></HorizontalLine> : <></>}
+                  <Box
+                    direction="row"
+                    align="center"
+                    justify="between"
+                    style={{ fontSize: styleConstants.textFontSizes.xsmall }}>
+                    <AppLabel>Funding</AppLabel>
+                    <Box>
+                      {exploreUrl ? (
+                        <a
+                          style={{ color: styleConstants.colors.ligthGrayText }}
+                          href={exploreUrl}
+                          target="_blank"
+                          rel="noreferrer">
+                          {since}
+                        </a>
+                      ) : (
+                        since
+                      )}
+                    </Box>
+                  </Box>
+                  <Box
+                    direction="row"
+                    align="center"
+                    justify="between"
+                    style={{ fontSize: styleConstants.textFontSizes.normalSmaller }}>
+                    <Box>
+                      <AssetBalance asset={fundEvent.asset}></AssetBalance>
+                    </Box>
+                    <Box>
+                      <Address
+                        chainId={chainId}
+                        address={fundEvent.funder}
+                        style={{ color: styleConstants.colors.ligthGrayText }}></Address>
+                    </Box>
+                  </Box>
+                </Box>
+              );
             })
           ) : (
             <></>

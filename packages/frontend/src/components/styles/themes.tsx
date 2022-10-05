@@ -7,10 +7,12 @@ export const styleConstants = {
     1: '28px',
     2: '24px',
     3: '20px',
+    4: '18px',
   },
   textFontSizes: {
     large: '18px',
     normal: '16px',
+    normalSmaller: '15px',
     small: '14px',
     xsmall: '12px',
   },

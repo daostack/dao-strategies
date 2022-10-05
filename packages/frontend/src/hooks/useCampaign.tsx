@@ -24,7 +24,7 @@ export type CampaignContextType = {
   getFunders: (page?: Page, force?: boolean) => Promise<void>;
   funders: CampaignFundersRead | undefined;
   getFundEvents: (force?: boolean) => Promise<void>;
-  recentFunders: FundEventRead[] | undefined;
+  fundEvents: FundEventRead[] | undefined;
 };
 
 const CampaignContextValue = createContext<CampaignContextType | undefined>(undefined);
@@ -42,7 +42,7 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
   const [shares, setShares] = useState<SharesRead>();
   const [funders, setFunders] = useState<CampaignFundersRead>();
   const [lastPage, setLastPage] = useState<Page>();
-  const [recentFunders, setRecentFunders] = useState<FundEventRead[]>();
+  const [fundEvents, setFundEvents] = useState<FundEventRead[]>();
   const [otherDetails, setOtherDetails] = useState<CampaignOnchainDetails>();
   const [claimInfo, setClaimInfo] = useState<CampaignClaimInfo>();
 
@@ -130,7 +130,7 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
       const _funders = await response.json();
 
       console.log('recent getFundEvents', _funders);
-      setRecentFunders(Object.keys(_funders).length > 0 ? _funders : undefined);
+      setFundEvents(Object.keys(_funders).length > 0 ? _funders : undefined);
     },
     [campaign]
   );
@@ -164,7 +164,7 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
         getFunders,
         funders,
         getFundEvents,
-        recentFunders,
+        fundEvents,
       }}>
       {props.children}
     </CampaignContextValue.Provider>

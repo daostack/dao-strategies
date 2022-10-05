@@ -20,6 +20,7 @@ import {
   FormFieldExtendedProps,
   FormField,
   SelectExtendedProps,
+  Tip,
 } from 'grommet';
 import { CircleQuestion, Close, FormDown, FormUp, IconProps } from 'grommet-icons';
 import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
@@ -496,6 +497,21 @@ export const NumberedRow: FC<INumberedRow> = (props: INumberedRow) => {
   );
 };
 
+export const AppLabel: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return (
+    <Box
+      style={{
+        textTransform: 'uppercase',
+        fontSize: '14px',
+        color: styleConstants.colors.ligthGrayText,
+        marginBottom: '12px',
+        fontWeight: '700',
+      }}>
+      {props.children}
+    </Box>
+  );
+};
+
 export interface IInfoProperty extends BoxExtendedProps {
   title: string;
 }
@@ -503,15 +519,7 @@ export interface IInfoProperty extends BoxExtendedProps {
 export const InfoProperty: FC<IInfoProperty> = (props: IInfoProperty) => {
   return (
     <Box style={{ ...props.style }}>
-      <Box
-        style={{
-          textTransform: 'uppercase',
-          fontSize: '14px',
-          color: styleConstants.colors.ligthGrayText,
-          marginBottom: '12px',
-        }}>
-        {props.title}
-      </Box>
+      <AppLabel></AppLabel>
       <Box>{props.children}</Box>
     </Box>
   );
@@ -628,3 +636,5 @@ export const RepoTag: FC<IRepoTag> = (props: IRepoTag) => {
     </AppTag>
   );
 };
+
+export const AppTip = Tip;

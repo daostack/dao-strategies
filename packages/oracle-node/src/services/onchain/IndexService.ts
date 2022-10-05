@@ -9,6 +9,7 @@ import {
   TokenBalance,
 } from '@dao-strategies/core';
 import { FundEvent, Prisma } from '@prisma/client';
+import { BigNumber } from 'ethers/lib/ethers';
 
 import { config } from '../../config';
 import { appLogger } from '../../logger';
@@ -20,7 +21,7 @@ import { PriceService } from '../PriceService';
 
 import { ReadDataService } from './ReadDataService';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export class IndexingService {
   private updating: Promise<string[]> | undefined;
@@ -85,6 +86,8 @@ export class IndexingService {
         events
           .map(async (event) => {
             const { hash } = await event.getTransaction();
+            const { timestamp } = await event.getBlock();
+
             if (DEBUG)
               appLogger.debug(
                 `IndexingService - addFundEvent funder: ${event.args.provider}, hash: ${hash}`
@@ -97,6 +100,7 @@ export class IndexingService {
               campaign: { connect: { uri } },
               amount: event.args.amount.toString(),
               blockNumber: event.blockNumber,
+              timestamp,
               funder: {
                 connectOrCreate: {
                   where: {
@@ -175,9 +179,11 @@ export class IndexingService {
       Array.from(funders.entries()).map(async ([funder, events]) => {
         const assets = await Promise.all(
           events.map(async (event): Promise<TokenBalance> => {
-            const asset = ChainsDetails.assetOfAddress(chainId, event.asset);
-            const price = await this.price.priceOf(chainId, asset.address);
-            return { ...asset, balance: event.amount, price };
+            return this.readDataService.tokenBalance(
+              chainId,
+              event.asset,
+              event.amount
+            );
           })
         );
 
@@ -266,11 +272,47 @@ export class IndexingService {
     if (DEBUG)
       appLogger.debug(
         `IndexingService - getCampaignFunders(): funders: ${JSON.stringify(
-          funders.funders.map((funder) => funder.funder)
+          funders.funders.map((funder) => funder)
         )}`
       );
 
-    return funders;
+    const chainId = await this.campaign.getChainId(uri);
+
+    const fundersRead = await Promise.all(
+      funders.funders.map(async (funder) => {
+        /** aggregate all the funded assets of a funder */
+        const funded = new Map<string, BigNumber>();
+        funder.events.forEach((event) => {
+          const amount = BigNumber.from(event.amount);
+          const has = funded.get(event.asset);
+          const cum = has ? has.add(amount) : amount;
+          funded.set(event.asset, cum);
+        });
+
+        const assets = await Promise.all(
+          Array.from(funded.entries()).map(([assetAddress, balance]) => {
+            return this.readDataService.tokenBalance(
+              chainId,
+              assetAddress,
+              balance.toString()
+            );
+          })
+        );
+
+        return {
+          funder: funder.address,
+          assets,
+          uri,
+          value: funder.value,
+        };
+      })
+    );
+
+    return {
+      uri,
+      funders: fundersRead,
+      page: funders.page,
+    };
   }
 
   async getCampaignFundEvents(
@@ -281,15 +323,27 @@ export class IndexingService {
     await this.checkFundersUpdate(uri, force);
 
     const events = await this.indexRepo.getFundEventsLatest(uri, n);
-    return events.map((event) => {
-      return {
-        amount: event.amount,
-        asset: event.asset,
-        blockNumber: bigIntToNumber(event.blockNumber),
-        funder: event.funderAddress,
-        txHash: event.hash,
-        uri,
-      };
-    });
+    const chainId = await this.campaign.getChainId(uri);
+
+    return Promise.all(
+      events.map(async (event) => {
+        const assetAddress = event.asset;
+
+        const balance = await this.readDataService.tokenBalance(
+          chainId,
+          assetAddress,
+          event.amount
+        );
+
+        return {
+          asset: balance,
+          blockNumber: bigIntToNumber(event.blockNumber),
+          timestamp: bigIntToNumber(event.timestamp),
+          funder: event.funderAddress,
+          txHash: event.hash,
+          uri,
+        };
+      })
+    );
   }
 }

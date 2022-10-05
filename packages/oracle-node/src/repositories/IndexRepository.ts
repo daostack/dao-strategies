@@ -3,7 +3,12 @@ import {
   CampaignFundersRead,
   Page,
 } from '@dao-strategies/core';
-import { FundEvent, Prisma, PrismaClient } from '@prisma/client';
+import {
+  CampaignFunder,
+  FundEvent,
+  Prisma,
+  PrismaClient,
+} from '@prisma/client';
 
 import { appLogger } from '../logger';
 
@@ -91,7 +96,19 @@ export class IndexRepository {
     });
   }
 
-  async getFunders(uri: string, page: Page): Promise<CampaignFundersRead> {
+  async getFunders(
+    uri: string,
+    page: Page
+  ): Promise<{
+    uri: string;
+    funders: (CampaignFunder & {
+      campaign: {
+        address: string;
+      };
+      events: FundEvent[];
+    })[];
+    page: Page;
+  }> {
     const funders = await this.client.campaignFunder.findMany({
       where: { campaign: { uri } },
       orderBy: { value: 'desc' },
@@ -121,23 +138,7 @@ export class IndexRepository {
 
     return {
       uri,
-      funders: funders.map((funder) => {
-        return {
-          uri,
-          funder: funder.address,
-          value: funder.value,
-          fundEvents: funder.events.map((event) => {
-            return {
-              uri,
-              funder: event.funderAddress,
-              asset: event.asset,
-              amount: event.amount,
-              blockNumber: bigIntToNumber(event.blockNumber),
-              txHash: event.hash,
-            };
-          }),
-        };
-      }),
+      funders,
       page: readPage,
     };
   }

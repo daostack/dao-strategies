@@ -15,6 +15,7 @@ const chainList: ChainAndAssets[] = [
   {
     chain: chain.localhost,
     exploreAddress: (address: string) => `${ETHERSCAN_URL}/address/${address}`,
+    exploreTx: (hash: string) => `${ETHERSCAN_URL}/tx/${hash}`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {

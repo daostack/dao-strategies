@@ -324,6 +324,17 @@ export class ReadDataService {
     return this.price.priceOf(chainId, address);
   }
 
+  /** Fill out the Asset details and the price from the asset address and amount */
+  async tokenBalance(
+    chainId: number,
+    address: string,
+    amount: string
+  ): Promise<TokenBalance> {
+    const asset = ChainsDetails.assetOfAddress(chainId, address);
+    const price = await this.price.priceOf(chainId, address);
+    return { ...asset, balance: amount, price };
+  }
+
   async getPublishInfo(address: string, chainId: number): Promise<PublishInfo> {
     return getCampaignPublishInfo(
       this.getProvider(chainId).provider,

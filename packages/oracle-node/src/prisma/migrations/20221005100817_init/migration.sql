@@ -99,6 +99,7 @@ CREATE TABLE "FundEvent" (
     "asset" TEXT NOT NULL,
     "amount" TEXT NOT NULL,
     "blockNumber" BIGINT NOT NULL,
+    "timestamp" BIGINT NOT NULL,
 
     CONSTRAINT "FundEvent_pkey" PRIMARY KEY ("hash")
 );
