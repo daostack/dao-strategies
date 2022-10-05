@@ -85,6 +85,7 @@ export interface ChainAndAssets {
   assets: Asset[];
   explorer?: string;
   exploreAddress?: (address: string) => string;
+  exploreTx?: (hash: string) => string;
 }
 
 /**
@@ -216,17 +217,17 @@ export interface LoggedUserDetails {
 export interface FundEventRead {
   uri: string;
   funder: string;
-  asset: string;
-  amount: string;
   blockNumber: number;
+  timestamp: number;
   txHash: string;
+  asset: TokenBalance;
 }
 
 export interface CampaignFunder {
   uri: string;
   funder: string;
   value: number;
-  fundEvents: FundEventRead[];
+  assets: TokenBalance[];
 }
 
 export interface CampaignFundersRead {

@@ -2973,6 +2973,7 @@ __metadata:
     nodemon: ^2.0.15
     octokit: ^1.7.1
     pg: ^8.4.0
+    prisma: ^4.4.0
     random: ^3.0.6
     reflect-metadata: ^0.1.13
     seedrandom: ^3.0.5
@@ -5216,6 +5217,13 @@ __metadata:
   version: 4.4.0-66.f352a33b70356f46311da8b00d83386dd9f145d6
   resolution: "@prisma/engines-version@npm:4.4.0-66.f352a33b70356f46311da8b00d83386dd9f145d6"
   checksum: 91ca927a69f53ffd05ee02b25666531997202642dbe92ae2c6df6a28a38726894e3728377c49d2327a323461d92f5b7eedae0795ab6ca50ed59ae28c2775b38a
+  languageName: node
+  linkType: hard
+
+"@prisma/engines@npm:4.4.0":
+  version: 4.4.0
+  resolution: "@prisma/engines@npm:4.4.0"
+  checksum: e5a62e6c905cbe325f8aa15afe698f8a0a47fe7fdc4d4affdc8df86fcdc6fdd2857ac498611217daf5f8304846a32e199d100165c748b4e8a959bbf0670507a1
   languageName: node
   linkType: hard
 
@@ -24126,6 +24134,18 @@ __metadata:
     ansi-styles: ^5.0.0
     react-is: ^18.0.0
   checksum: b2c6e77666716e55094f29dcbd92e431a1b8cc0a06cd41ec1a3c8a10e5e56bb1f2d7b5942f1d8f6a0f69912712f3edb4c41713926d60cbb89f2a41355d49e7a4
+  languageName: node
+  linkType: hard
+
+"prisma@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "prisma@npm:4.4.0"
+  dependencies:
+    "@prisma/engines": 4.4.0
+  bin:
+    prisma: build/index.js
+    prisma2: build/index.js
+  checksum: fb44f8b36d59c411711b2f5cecbe112a6487c387a7dd7ade350c73c0e9f821dfdb30cd6271c2f2b9b713fda3a31eec4b241c482754b26bfcb6df831ba521a58e
   languageName: node
   linkType: hard
 
