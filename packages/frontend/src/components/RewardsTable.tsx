@@ -6,12 +6,15 @@ import { StatusGood } from 'grommet-icons';
 import { FC, ReactNode } from 'react';
 import { valueToString } from '../utils/general';
 import { PagedTable, TableColumn } from './PagedTable';
-import { IElement } from './styles/BasicElements';
+import { AppTip, IElement } from './styles/BasicElements';
 import { AssetsValue } from './Assets';
 import { styleConstants } from './styles/themes';
+import { VerifiedIcon } from './VerifiedIcon';
+import { Address } from './Address';
 
 export interface RewardsTableI extends IElement {
   shares?: SharesRead;
+  chainId?: number;
   showReward?: boolean;
   raised?: TokenBalance[];
   updatePage: (page: Page) => void;
@@ -23,13 +26,14 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
   const shares = props.shares;
   const showReward = props.showReward !== undefined ? props.showReward : false;
   const widths = showReward ? ['40%', '20%', '40%'] : ['60%', '40%'];
+  const chainId = props.chainId;
 
   if (shares === undefined) {
     return <PagedTable loading perPage={props.perPage}></PagedTable>;
   }
 
-  const data: any[] = Object.entries(shares.shares).map(([address, share]) => {
-    const ratio = +ethers.utils.formatEther(share);
+  const data: any[] = Object.entries(shares.shares).map(([username, share]) => {
+    const ratio = +ethers.utils.formatEther(share.amount);
 
     let reward: ReactNode | undefined;
 
@@ -37,7 +41,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
       reward = <AssetsValue assets={props.raised} ratio={ratio} type="inline"></AssetsValue>;
     }
 
-    return [address, valueToString(ratio * 100, 1), reward, true, ''];
+    return [username, valueToString(ratio * 100, 1), reward, share.address, ''];
   });
 
   const columns: TableColumn[] = [
@@ -64,7 +68,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
       user: data[rowIx][0],
       percentage: data[rowIx][1],
       reward: data[rowIx][2],
-      badge: data[rowIx][3],
+      address: data[rowIx][3],
       info: data[rowIx][4],
     };
 
@@ -73,7 +77,18 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
         return (
           <>
             @{datum.user.split(':')[1]}
-            {datum.badge ? <StatusGood style={{ marginLeft: '6px' }} color="#5762D5"></StatusGood> : <></>}
+            {datum.address !== undefined ? (
+              <AppTip
+                dropContent={
+                  <Box style={{ padding: '12px 20px' }}>
+                    <Address chainId={chainId} address={datum.address}></Address>
+                  </Box>
+                }>
+                <VerifiedIcon style={{ marginLeft: '6px' }} color={styleConstants.colors.links}></VerifiedIcon>
+              </AppTip>
+            ) : (
+              <></>
+            )}
           </>
         );
 

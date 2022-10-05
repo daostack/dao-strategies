@@ -67,7 +67,7 @@ model CrossVerification {
 model Share {  
   @@id([campaignId, account])
   account         String
-  amount          BigInt        
+  amount          BigInt    // must be BigInt to be able to sort by amount
   campaign        Campaign  @relation(fields: [campaignId], references: [uri])
   campaignId      String
 }

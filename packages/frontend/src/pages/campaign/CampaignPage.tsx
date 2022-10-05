@@ -33,6 +33,7 @@ import { FixedAdmin } from './fixed.admin';
 import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
+import { chainId } from 'wagmi';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -219,6 +220,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             </AppHeading>
             <RewardsTable
               shares={shares}
+              chainId={campaign.chainId}
               showReward
               raised={otherDetails?.raised}
               updatePage={updatePage}

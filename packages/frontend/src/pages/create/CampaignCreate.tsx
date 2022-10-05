@@ -791,7 +791,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             {account !== undefined ? (
               <Box style={{ paddingRight: '16px' }}>
                 <Box style={{ marginBottom: '24px' }}>{shares !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
-                <RewardsTable invert shares={shares} updatePage={updatePage} perPage={PER_PAGE}></RewardsTable>
+                <RewardsTable
+                  invert
+                  shares={shares}
+                  chainId={chainId}
+                  updatePage={updatePage}
+                  perPage={PER_PAGE}></RewardsTable>
               </Box>
             ) : (
               <Box
