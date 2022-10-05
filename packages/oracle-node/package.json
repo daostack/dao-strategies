@@ -4,9 +4,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "prisma-migrate": "cd ./src &&  npx prisma migrate dev --name init && cd ..",
-    "prisma-reset": "rm -rf ./src/prisma/migrations && cd ./src &&  npx prisma migrate reset --force --preview-feature && npx prisma migrate dev --name init && cd ..",
-    "prisma-generate": "npx prisma generate --schema=./src/prisma/schema.prisma",
+    "prisma-migrate": "cd ./src &&  prisma migrate dev --name init && cd ..",
+    "prisma-reset": "rm -rf ./src/prisma/migrations && cd ./src &&  prisma migrate reset --force --preview-feature && prisma migrate dev --name init && cd ..",
+    "prisma-generate": "prisma generate --schema=./src/prisma/schema.prisma",
     "test": "jest test/main.test.ts",
     "reboot": "yarn prisma-reset && yarn start",
     "start": "nodemon src/server.ts",
@@ -51,6 +51,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
     "nodemon": "^2.0.15",
+    "prisma": "^4.4.0",
     "ts-node": "^10.8.1",
     "typescript": "4.5.2"
   }

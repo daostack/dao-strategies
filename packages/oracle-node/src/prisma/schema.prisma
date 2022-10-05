@@ -110,6 +110,7 @@ model FundEvent {
   asset           String
   amount          String
   blockNumber     BigInt
+  timestamp       BigInt
 }
 
 // For each campaign, it stores which was the latest block it indexed a given property of the campaign
