@@ -1,9 +1,8 @@
 import { CampaignReadDetails, ChainsDetails } from '@dao-strategies/core';
-import { Box, BoxExtendedProps, Spinner } from 'grommet';
+import { Box, BoxExtendedProps, Spinner, Text, Image } from 'grommet';
 import React from 'react';
-import { Address } from './Address';
-import { ChainTag } from './Assets';
-import { AppCard, AppHeading, AppTag, FixedHeightPar } from './styles/BasicElements';
+
+import { AppCard, AppHeading, AppTag, CampaignIcon, FixedHeightPar } from './styles/BasicElements';
 
 export interface ICampaignCard extends BoxExtendedProps {
   campaign?: CampaignReadDetails;
@@ -24,30 +23,30 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
 
   return (
     <AppCard {...props} ref={ref} style={{ ...props.style }}>
-      <Box direction="row" align="center" justify="between">
-        <AppHeading level="2" style={{ margin: '8px 0px 8px 0px' }}>
+      <Box direction="row" align="center" >
+        {/* <CampaignIcon iconSize='14px' src={campaign.logoUrl} /> */}
+        <Box pad={{ horizontal: 'small' }}>
+          <Image src="./images/welcome-bg-1.png" width="64px" height="64px" style={{ borderRadius: '50%', zIndex: 5 }}  ></Image>
+          <Image src="./images/Github.png" style={{ borderRadius: '50%', position: 'relative', right: '3px', bottom: '70px', zIndex: 10 }} width="24px" height="24px"></Image>
+        </Box>
+
+        <AppHeading level="2" style={{ margin: '8px', position: 'relative', top: '-25px', }}>
           {campaign.title}
         </AppHeading>
-        <Box direction="row" align="center">
+
+
+        {/* <Box direction="row" align="center">
           <ChainTag style={{ marginRight: '12px' }} chain={chain}></ChainTag>{' '}
           <Address address={campaign.address} chainId={campaign.chainId}></Address>
-        </Box>
-      </Box>
-
-      <Box direction="row" align="center" justify="between" style={{ margin: '8px 0px 8px 0px', fontWeight: 400 }}>
-        <Box direction="row">
-          Created by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.creatorId} chainId={campaign.chainId}></Address>
-        </Box>
-        <Box style={{ marginLeft: '16px' }} direction="row">
-          Guarded by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.guardian} chainId={campaign.chainId}></Address>
+        </Box> */}
+        <Box>
+          <Text>{campaign.description ? campaign.description : ''}</Text>
         </Box>
       </Box>
 
       <Box style={{ marginTop: '12px' }} direction="row">
         <FixedHeightPar style={{ margin: '0px 16px 0px 0px' }} content={<>{campaign.description}</>}></FixedHeightPar>
-        <AppTag style={{ flexShrink: 0 }}>~{campaign.valueLocked} USD</AppTag>
+        <AppTag style={{ flexShrink: 0 }}>$ {campaign.valueLocked ?? 2499} </AppTag>
       </Box>
     </AppCard>
   );
