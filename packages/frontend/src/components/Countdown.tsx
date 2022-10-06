@@ -38,7 +38,6 @@ export const Countdown: FC<CountdownI> = (props: CountdownI) => {
     <>
       <Box style={{ width: '100%', textAlign: 'start' }} justify="start" align="start" >
         {loading ? <Spinner></Spinner> : (<Box>
-
           {remaining !== undefined ? (
             <Box gap='10px' direction='row'>
               <FieldLabel label={props.text ?? ''} helpIconPosition={'left'} />
