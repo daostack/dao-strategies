@@ -9,6 +9,7 @@ import { FieldLabel } from '../pages/create/field.label';
 import { DateManager } from '../utils/date.manager';
 
 import { Countdown } from './Countdown';
+import { ENSProfile } from './ENSProfile';
 
 export interface CampaignRewardsTimeI {
   alreadyExecuted: boolean;
@@ -20,10 +21,11 @@ export const CampaignRewardsTime: FC<CampaignRewardsTimeI> = (props: CampaignRew
   const { now } = useNow();
 
   return (
-    <Box style={{ color: '#878787' }}>
+    <Box style={{ color: '#878787' }} direction='row' justify='between'>
       {alreadyExecuted
         ? (<FieldLabel helpIconPosition='left' help="true" label={`Campaign shares successfully distributed ${now?.intervalDuration(new Date(), execDate).days} days ago`}></FieldLabel>)
         : (<Countdown to-date={execDate} text='Shares distributed in:'>  </Countdown>)}
+      <ENSProfile text={'Created by:'} />
     </Box>
   )
 };
