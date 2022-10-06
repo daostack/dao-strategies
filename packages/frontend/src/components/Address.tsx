@@ -24,7 +24,7 @@ export const Address: FC<IAddress> = (props: IAddress) => {
     .toLowerCase()
     .slice(length - 5, length)}`;
 
-  const style: CSSProperties = { color: styleConstants.colors.links, textDecoration: 'none' };
+  const style: CSSProperties = { color: styleConstants.colors.links, textDecoration: 'none', ...props.style };
 
   return (
     <Box {...props}>
@@ -34,7 +34,7 @@ export const Address: FC<IAddress> = (props: IAddress) => {
             <Box style={style}>{addressStr}</Box>
           ) : (
             <a style={style} target="_blank" rel="noreferrer" href={exploreAddress(props.address)}>
-              {addressStr} <Link color={styleConstants.colors.links} style={{ height: '14px' }}></Link>
+              {addressStr}
             </a>
           )}
         </Box>

@@ -30,6 +30,7 @@ export interface CampaignUriDetails {
 export interface CampaignCreateDetails {
   title: string;
   description: string;
+  logoUrl: string;
   guardian: string;
   oracle: string;
   activationTime: number;
@@ -41,9 +42,10 @@ export interface CampaignCreateDetails {
   address: string;
 }
 
+
 export interface CampaignReadDetails
   extends CampaignCreateDetails,
-    CampaignUriDetails {
+  CampaignUriDetails {
   uri: string;
   title: string;
   description: string;
@@ -58,13 +60,16 @@ export interface CampaignReadDetails
   valueLocked: number;
 }
 
-export interface BalancesObject {
-  [account: string]: string;
+export interface SharesObject {
+  [account: string]: {
+    amount: string;
+    address?: string;
+  };
 }
 
 export interface SharesRead {
   uri: string;
-  shares: BalancesObject;
+  shares: SharesObject;
   page: Page;
   details?: CampaignUriDetails;
 }
@@ -83,6 +88,7 @@ export interface ChainAndAssets {
   assets: Asset[];
   explorer?: string;
   exploreAddress?: (address: string) => string;
+  exploreTx?: (hash: string) => string;
 }
 
 /**
@@ -214,17 +220,17 @@ export interface LoggedUserDetails {
 export interface FundEventRead {
   uri: string;
   funder: string;
-  asset: string;
-  amount: string;
   blockNumber: number;
+  timestamp: number;
   txHash: string;
+  asset: TokenBalance;
 }
 
 export interface CampaignFunder {
   uri: string;
   funder: string;
   value: number;
-  fundEvents: FundEventRead[];
+  assets: TokenBalance[];
 }
 
 export interface CampaignFundersRead {

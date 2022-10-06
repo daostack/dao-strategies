@@ -14,6 +14,7 @@ import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/date.manager';
 import { Page } from '@dao-strategies/core';
+import { toBase64 } from '../utils/general';
 
 /** The period string is parsed to derive the actual period. That's why
  * we need to use enums and maps to avoid using manual strings as keys
@@ -168,7 +169,8 @@ export const deployCampaign = async (
   campaignFactory: Typechain.CampaignFactory,
   uri: string | undefined,
   createDetails: CampaignCreateDetails,
-  details: CampaignUriDetails | undefined
+  details: CampaignUriDetails | undefined,
+  logo: File | undefined,
 ) => {
   let uriDefined;
   if (uri !== undefined) {
@@ -200,6 +202,7 @@ export const deployCampaign = async (
     createDetails.ACTIVE_DURATION,
     salt
   );
+
   const txReceipt = await ex.wait();
 
   if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
@@ -215,14 +218,14 @@ export const deployCampaign = async (
   createDetails.address = address;
 
   console.log('campaign contract deployed', { address });
-
+  console.warn('sending ', { createDetails })
   await registerCampaign(uriDefined, createDetails);
+  await registerCampaignLogo(logo, uriDefined);  //do we need to await this? Can we show local logo ?
   return address;
 };
 
 export const registerCampaign = async (uri: string, details: CampaignCreateDetails) => {
   /** a deployed campaign is registered in the backend */
-
   await fetch(ORACLE_NODE_URL + `/campaign/register/${uri}`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
@@ -230,6 +233,22 @@ export const registerCampaign = async (uri: string, details: CampaignCreateDetai
     credentials: 'include',
   });
 };
+
+const registerCampaignLogo = async (logo: File | undefined, uri: string): Promise<void> => {
+  // if no logo set, we can return
+  if (!logo) return;
+
+  const formData = new FormData();
+  console.log('what is logo ', logo, ' or ')
+  formData.append('logo', logo);
+
+  await fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
+    method: 'post',
+    body: formData,
+    credentials: 'include',
+  });
+
+}
 
 export const getCampaign = async (uri: string): Promise<CampaignReadDetails> => {
   const response = await fetch(ORACLE_NODE_URL + `/campaign/${uri}`, {

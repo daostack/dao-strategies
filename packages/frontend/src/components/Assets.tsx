@@ -1,6 +1,6 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Asset, ChainAndAssets, ChainsDetails, TokenBalance } from '@dao-strategies/core';
-import { AppHeading, AppTag, IElement } from './styles/BasicElements';
+import { AppHeading, AppLabel, AppTag, AppTip, IElement } from './styles/BasicElements';
 import { FC } from 'react';
 import { assetValue, formatEther, truncate } from '../utils/ethers';
 import { styleConstants } from './styles/themes';
@@ -59,16 +59,22 @@ interface IBalance extends BoxExtendedProps {
 export const AssetBalance: FC<IBalance> = (props: IBalance) => {
   if (props.asset === undefined) return <></>;
   return (
-    <Box direction="row" style={{ width: '100%', ...props.style }} justify="between" align="center">
-      <Box direction="row" align="center">
-        <Box style={{ textAlign: 'center', height: '24px', width: '24px' }}>
-          <img src={props.asset.icon} alt={props.asset.name} />
-        </Box>
-        <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{formatEther(props.asset.balance)}</Box>
-        <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
+    <Box direction="row" align="center" style={{ fontWeight: '500' }}>
+      <Box style={{ textAlign: 'center', height: '24px', width: '24px' }}>
+        <img src={props.asset.icon} alt={props.asset.name} />
       </Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{formatEther(props.asset.balance)}</Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
+    </Box>
+  );
+};
 
-      <Box>~{assetValue(props.asset, 2)} usd</Box>
+export const AssetBalanceRow: FC<IBalance> = (props: IBalance) => {
+  if (props.asset === undefined) return <></>;
+  return (
+    <Box direction="row" style={{ width: '100%', ...props.style }} justify="between" align="center">
+      <AssetBalance asset={props.asset}></AssetBalance>
+      <Box style={{ fontWeight: '500' }}>${assetValue(props.asset, 2)}</Box>
     </Box>
   );
 };
@@ -83,16 +89,9 @@ export const AssetsTable: FC<IAssetsTable> = (props: IAssetsTable) => {
   const showSummary = props.showSummary !== undefined ? props.showSummary : false;
   return (
     <>
-      <Box
-        direction="row"
-        justify="between"
-        style={{
-          textTransform: 'uppercase',
-          fontSize: '14px',
-          color: styleConstants.colors.ligthGrayText,
-        }}>
-        <Box>Your share</Box>
-        <Box>Value (USD)</Box>
+      <Box direction="row" justify="between">
+        <AppLabel>Your share</AppLabel>
+        <AppLabel>Value (USD)</AppLabel>
       </Box>
       <Box
         style={{
@@ -105,7 +104,7 @@ export const AssetsTable: FC<IAssetsTable> = (props: IAssetsTable) => {
         {props.assets ? (
           props.assets.map((asset) => {
             return asset.balance !== '0' ? (
-              <AssetBalance style={{ marginBottom: '24px' }} asset={asset}></AssetBalance>
+              <AssetBalanceRow style={{ marginBottom: '24px' }} asset={asset}></AssetBalanceRow>
             ) : (
               <></>
             );
@@ -200,35 +199,55 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
   })();
 
   /** If no preferred asset, then the USD value will be prioritized. */
-  if (type === 'card') {
-    return (
-      <Box
-        style={{
-          borderBottom: '2px dashed',
-          borderColor: styleConstants.colors.lightGrayBorder,
-          paddingBottom: '4px',
-          ...props.style,
-        }}>
+
+  return (
+    <AppTip
+      dropContent={
+        <Box style={{ width: '300px', padding: '20px 20px 0px 20px' }}>
+          <Box direction="row" justify="between" style={{ margin: '4px 0px 20px 0px' }}>
+            <AppLabel>Funds Raised</AppLabel>
+            <AppLabel>Value</AppLabel>
+          </Box>
+          {props.assets ? (
+            props.assets.map((asset) => {
+              return asset.balance !== '0' ? (
+                <AssetBalanceRow style={{ marginBottom: '20px' }} asset={asset}></AssetBalanceRow>
+              ) : (
+                <></>
+              );
+            })
+          ) : (
+            <></>
+          )}
+        </Box>
+      }>
+      {type === 'card' ? (
         <Box
-          direction="row"
-          justify="center"
           style={{
-            fontSize: '32px',
-            marginBottom: '6px',
+            borderBottom: '2px dashed',
+            borderColor: styleConstants.colors.lightGrayBorder,
+            paddingBottom: '4px',
+            ...props.style,
           }}>
-          {preferredString}
+          <Box
+            direction="row"
+            justify="center"
+            style={{
+              fontSize: '32px',
+              marginBottom: '6px',
+            }}>
+            {preferredString}
+          </Box>
+          <Box direction="row" justify="end">
+            {secondaryString}
+          </Box>
         </Box>
-        <Box direction="row" justify="end">
+      ) : (
+        <span>
+          <b>{preferredString}</b>
           {secondaryString}
-        </Box>
-      </Box>
-    );
-  } else {
-    return (
-      <span>
-        <b>{preferredString}</b>
-        {secondaryString}
-      </span>
-    );
-  }
+        </span>
+      )}
+    </AppTip>
+  );
 };

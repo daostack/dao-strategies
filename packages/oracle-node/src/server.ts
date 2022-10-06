@@ -1,4 +1,5 @@
 import bodyParser from 'body-parser';
+import fileUpload from 'express-fileupload'
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import Session from 'express-session';
@@ -101,6 +102,9 @@ app.use(
 
 /** JSON body parser */
 app.use(bodyParser.json());
+
+/** enable files upload */
+app.use(fileUpload({ debug: true }));
 
 /** Services instantiation */
 const manager = new ServiceManager(config);

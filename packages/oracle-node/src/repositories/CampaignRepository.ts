@@ -1,3 +1,4 @@
+import { SharesObject } from '@dao-strategies/core';
 import {
   CampaignCreateDetails,
   Balances,
@@ -5,7 +6,6 @@ import {
   bigIntToNumber,
   RootDetails,
   SharesRead,
-  BalancesObject,
   Page,
   VerificationIntent,
 } from '@dao-strategies/core';
@@ -35,7 +35,7 @@ export interface AddressShares {
 }
 
 export class CampaignRepository {
-  constructor(protected client: PrismaClient) {}
+  constructor(protected client: PrismaClient) { }
 
   async create(campaignDetails: Prisma.CampaignCreateInput): Promise<Campaign> {
     return this.client.campaign.create({
@@ -123,6 +123,13 @@ export class CampaignRepository {
     });
   }
 
+  async setLogoUrl(uri: string, value: string): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { logoUrl: value },
+    });
+  }
+
   async setRepublishDate(uri: string, date: number): Promise<void> {
     await this.client.campaign.update({
       where: { uri: uri },
@@ -130,20 +137,23 @@ export class CampaignRepository {
     });
   }
 
+  /** get the shares and approved payment address of a campaign */
   async getSharesPaginated(uri: string, page: Page): Promise<SharesRead> {
     const [sharesRead, total] = await this.client.$transaction([
-      this.client.share.findMany({
-        where: {
-          campaign: {
-            uri,
-          },
-        },
-        orderBy: {
-          amount: 'desc',
-        },
-        skip: page.number * page.perPage,
-        take: page.perPage,
-      }),
+      this.client.$queryRaw`
+      SELECT shares.account, crossver.to as address, shares.amount FROM
+        (
+          SELECT * FROM public."Share"
+          WHERE "campaignId" = ${uri}
+        ) as shares
+        LEFT JOIN
+          public."CrossVerification" as crossver
+        ON shares.account = "from"
+      WHERE crossver.intent = ${VerificationIntent.SEND_REWARDS}
+      OR crossver.intent ISNULL
+      ORDER BY amount DESC
+      OFFSET ${page.number * page.perPage}
+      LIMIT ${page.perPage}`,
       this.client.share.count({
         where: {
           campaign: {
@@ -153,9 +163,13 @@ export class CampaignRepository {
       }),
     ]);
 
-    const shares: BalancesObject = {};
-    sharesRead.forEach((share) => {
-      shares[share.account] = share.amount.toString();
+    const shares: SharesObject = {};
+    (sharesRead as AddressShares[]).forEach((share) => {
+      shares[share.account] = {
+        amount: share.amount.toString(),
+        address:
+          share.address !== null ? share.address.split(':')[1] : undefined,
+      };
     });
 
     page.total = total;

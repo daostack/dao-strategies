@@ -58,7 +58,7 @@ export class ServiceManager {
 
     this.providers = new Map();
 
-    ContractsJson.chainIds().map((chainId: number) => {
+    ContractsJson.chainIds().forEach((chainId: number) => {
       const config = chainConfig.get(chainId);
       if (!config.privateKey) return;
       const provider = config.alchemyKey

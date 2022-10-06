@@ -23,6 +23,13 @@ export const Routes: RouteConfig[] = [
   },
   {
     method: 'post',
+    route: '/campaign/uploadLogo/:uri',
+    controller: CampaignController,
+    action: 'uploadLogo',
+    protected: true,
+  },
+  {
+    method: 'post',
     route: '/campaign/sharesFromDetails',
     controller: CampaignController,
     action: 'sharesFromDetails',

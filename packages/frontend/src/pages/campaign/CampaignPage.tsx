@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Box, Spinner } from 'grommet';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { ChainsDetails, Page } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
@@ -11,6 +11,7 @@ import {
   AppCard,
   AppHeading,
   AppModal,
+  CampaignIcon,
   ExpansibleCard,
   ExpansiveParagraph,
   InfoProperty,
@@ -39,6 +40,7 @@ import { CampaignRewardsTime } from '../../components/CampaignRewardsTime';
 export const CAMPAIGN_PAD_SIDES = 5;
 export const CAMPAIGN_GAP = 24;
 const PER_PAGE = 8;
+const DEBUG = true;
 
 export interface ICampaignPageProps {
   dum?: any;
@@ -47,11 +49,20 @@ export interface ICampaignPageProps {
 export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [showFund, setShowFund] = useState<boolean>(false);
 
-  const { isLoading, campaign, getShares, shares, getOtherDetails, otherDetails, checkClaimInfo, funders, getFunders } =
-    useCampaignContext();
+  const {
+    isLoading,
+    campaign,
+    getShares,
+    shares,
+    getOtherDetails,
+    otherDetails,
+    checkClaimInfo,
+    funders,
+    getFunders,
+    getFundEvents,
+  } = useCampaignContext();
 
   const { user } = useLoggedUser();
-
   /** Things below are needed to keep the width of the admin button equal to the width of the Fund Campaign card */
   // react to window dimension changes
   const { w_width } = useWindowDimensions();
@@ -83,6 +94,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   };
 
   useEffect(() => {
+    if (DEBUG) console.log('Campaign Page updated', { campaign });
     getShares({ number: 0, perPage: PER_PAGE });
     getOtherDetails();
     checkClaimInfo();
@@ -90,6 +102,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
+
+  const fundedSuccess = async () => {
+    setShowFund(false);
+    getOtherDetails();
+    // force re-index funders
+    await getFunders(undefined, true);
+    getFundEvents();
+  };
 
   if (campaign === undefined || isLoading)
     return (
@@ -110,15 +130,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const details = (
     <AppCard style={{ paddingBottom: '18px' }}>
-      <Box direction="row" align="center" justify="start" style={{ marginBottom: '16px' }}>
-        <Box
-          style={{
-            backgroundColor: '#ccc',
-            height: '80px',
-            width: '80px',
-            borderRadius: '40px',
-            marginRight: '20px',
-          }}></Box>
+      <Box direction="row" align="center" justify="start" margin={{ right: 'medium' }}>
+        <CampaignIcon iconSize='48px' src={campaign?.logoUrl} />
         <Box>
           <AppHeading level="1">{campaign.title}</AppHeading>
         </Box>
@@ -201,6 +214,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             </AppHeading>
             <RewardsTable
               shares={shares}
+              chainId={campaign.chainId}
               showReward
               raised={otherDetails?.raised}
               updatePage={updatePage}
@@ -215,36 +229,23 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const fundersTable = (
     <AppCard style={{ marginTop: '40px', padding: '24px 24px' }}>
-      {funders !== undefined ? (
-        <>
-          <Box direction="row" justify="between" align="center">
-            <AppHeading level="2" style={{ marginBottom: '24px' }}>
-              Funders
-            </AppHeading>
-            <Box style={{ height: '20px', width: '20px' }} onClick={() => getFunders(funders.page)}>
-              <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
-            </Box>
-          </Box>
+      <Box direction="row" justify="between" align="center">
+        <AppHeading level="2" style={{ marginBottom: '24px' }}>
+          Funders
+        </AppHeading>
+        <Box style={{ height: '20px', width: '20px' }} onClick={() => getFunders()}>
+          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+        </Box>
+      </Box>
 
-          <FundersTable funders={funders} updatePage={updatePage}></FundersTable>
-        </>
-      ) : (
-        <Spinner></Spinner>
-      )}
+      <FundersTable funders={funders} updatePage={updatePage} perPage={PER_PAGE}></FundersTable>
     </AppCard>
   );
 
   const funds = (
     <>
       {showFund ? (
-        <AppModal
-          heading="Fund Campaign"
-          onClosed={() => setShowFund(false)}
-          onSuccess={() => {
-            setShowFund(false);
-            getOtherDetails();
-            getFunders(undefined, true);
-          }}>
+        <AppModal heading="Fund Campaign" onClosed={() => setShowFund(false)} onSuccess={fundedSuccess}>
           <FundCampaign
             assets={assets}
             defaultAsset={customAsset}

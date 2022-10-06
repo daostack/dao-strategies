@@ -1,5 +1,4 @@
 import {
-  BalancesObject,
   CampaignUriDetails,
   CampaignCreateDetails,
   CampaignOnchainDetails,
@@ -90,7 +89,7 @@ export class CampaignController extends Controller {
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
-  ): Promise<BalancesObject> {
+  ): Promise<{ uri: string }> {
     if (loggedUser === undefined) {
       throw new Error('logged user expected but not found');
     }
@@ -126,6 +125,28 @@ export class CampaignController extends Controller {
     await this.manager.execution.executeAndPublish(
       request.params.uri as string,
       now
+    );
+  }
+
+  async uploadLogo(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<void> {
+    const { logo } = request.files;
+    const { uri } = request.params;
+
+    if (!logo) {
+      throw new Error('no files uploaded or no input named "logo" found, cant process with upload to s3');
+    }
+    if (!uri) {
+      throw new Error('no uri specified, not able to create correct naming');
+    }
+    await this.manager.services.campaign.uploadLogoToS3(
+      logo,
+      uri as string, //uri is the campaignID
+      loggedUser
     );
   }
 
