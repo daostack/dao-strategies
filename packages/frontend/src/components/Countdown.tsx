@@ -5,7 +5,7 @@ import { FieldLabel } from '../pages/create/field.label';
 import { AppRemainingTime, IElement } from './styles/BasicElements';
 
 
-const DEBUG = true;
+const DEBUG = false;
 
 export interface CountdownI extends IElement {
   'to-date': number;
