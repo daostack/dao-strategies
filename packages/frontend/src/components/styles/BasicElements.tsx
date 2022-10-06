@@ -508,7 +508,7 @@ export interface IInfoProperty extends BoxExtendedProps {
 export const InfoProperty: FC<IInfoProperty> = (props: IInfoProperty) => {
   return (
     <Box style={{ ...props.style }}>
-      <AppLabel></AppLabel>
+      <AppLabel>{props.title}</AppLabel>
       <Box>{props.children}</Box>
     </Box>
   );
@@ -664,6 +664,7 @@ export const AppTip: FC<DropButtonExtendedProps> = (props: DropButtonExtendedPro
 
   return (
     <DropButton
+      {...props}
       open={open}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}

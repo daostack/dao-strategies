@@ -38,7 +38,7 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
     let reward: ReactNode | undefined;
 
     if (showReward && props.raised) {
-      reward = <AssetsValue assets={props.raised} ratio={ratio} type="inline"></AssetsValue>;
+      reward = <AssetsValue title="Reward" assets={props.raised} ratio={ratio} type="inline"></AssetsValue>;
     }
 
     return [username, valueToString(ratio * 100, 1), reward, share.address, ''];
