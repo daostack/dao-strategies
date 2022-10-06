@@ -1,5 +1,5 @@
 import bodyParser from 'body-parser';
-import fileUpload from 'express-fileupload'
+import fileUpload from 'express-fileupload';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import Session from 'express-session';
@@ -45,10 +45,15 @@ appLogger.info(
 
 /** CORS configuration */
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === 'production'
-      ? 'http://app.commonvalue.xyz.s3-website-eu-west-1.amazonaws.com'
-      : 'http://localhost:3000',
+  origin: ((env: string): any => {
+    switch (env) {
+      case 'production':
+        return 'http://app.commonvalue.xyz.s3-website-eu-west-1.amazonaws.com';
+      case 'test-prod':
+      default:
+        return 'http://localhost:3000';
+    }
+  })(process.env.NODE_ENV),
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   credentials: true,
 };
@@ -57,16 +62,21 @@ app.use(cors(corsOptions));
 
 app.set('trust proxy', 1);
 
-const cookieConfig =
-  process.env.NODE_ENV === 'production'
-    ? {
+const cookieConfig = ((env: string): any => {
+  switch (env) {
+    case 'production':
+      return {
         sameSite: 'none',
         secure: true, // if true only transmit cookie over https, only when frontend is also https ?
-      }
-    : {
+      };
+    case 'test-prod':
+    default:
+      return {
         sameSite: true,
         secure: false, // if true only transmit cookie over https, only when frontend is also https ?
       };
+  }
+})(process.env.NODE_ENV);
 
 app.use(
   Session({
