@@ -7,6 +7,7 @@ import { Asset, ChainAndAssets, TokenBalance } from '../types';
 import { ContractsJson } from './contracts.json';
 
 const ETHERSCAN_URL = 'https://etherscan.io';
+const GOERLI_ETHERSCAN_URL = 'https://goerli.etherscan.io';
 
 /** Single source of truth for the supported chains and assets. It is imported on the
  * frontend */
@@ -44,6 +45,9 @@ const chainList: ChainAndAssets[] = [
   },
   {
     chain: chain.goerli,
+    exploreAddress: (address: string) =>
+      `${GOERLI_ETHERSCAN_URL}/address/${address}`,
+    exploreTx: (hash: string) => `${GOERLI_ETHERSCAN_URL}/tx/${hash}`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {
