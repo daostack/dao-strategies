@@ -64,7 +64,9 @@ export const AssetBalance: FC<IBalance> = (props: IBalance) => {
       <Box style={{ textAlign: 'center', height: '24px', width: '24px' }}>
         <img src={props.asset.icon} alt={props.asset.name} />
       </Box>
-      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{formatEther(props.asset.balance)}</Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>
+        {ethers.utils.formatUnits(props.asset.balance, props.asset.decimals)}
+      </Box>
       <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
     </Box>
   );
@@ -172,16 +174,13 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
     .sort((a, b) => {
       const av = +ethers.utils.formatUnits(a.balance, a.decimals);
       const bv = +ethers.utils.formatUnits(b.balance, b.decimals);
-      return av > bv ? 1 : av === bv ? 0 : -1;
+      return av > bv ? -1 : av === bv ? 0 : 1;
     });
 
   const arrayToStr = (tokens: TokenBalance[]) => {
     /** only add tokens with nonzero balance */
     const filtered = tokens.filter((t) => t.balance !== '0');
-
-    /** sort them by balance */
-    const sorted = filtered;
-    return concatStrings(sorted.map((a) => balanceToStr(a)));
+    return concatStrings(filtered.map((a) => balanceToStr(a)));
   };
 
   const balanceToStr = (token: TokenBalance) => {

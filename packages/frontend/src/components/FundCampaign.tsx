@@ -71,23 +71,33 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
         const tx = await token.approve(props.address, value.sub(approved));
         try {
           await tx.wait();
+          setApproving(false);
         } catch (e) {
           setApproving(false);
         }
-        setApproving(false);
       }
 
       setSigning(true);
-      tx = await campaign.fund(selected.asset.address, value);
-      setSigning(false);
+      try {
+        tx = await campaign.fund(selected.asset.address, value);
+        setSigning(false);
+      } catch (e) {
+        setSigning(false);
+      }
     }
 
-    setFunding(true);
-    const res = await tx.wait();
-    console.log('funded', { res });
-    setFunding(false);
+    if (tx) {
+      setFunding(true);
+      try {
+        const res = await tx.wait();
+        console.log('funded', { res });
+        setFunding(false);
+        if (props.onSuccess !== undefined) props.onSuccess();
+      } catch (e) {
+        setFunding(false);
+      }
+    }
 
-    if (props.onSuccess !== undefined) props.onSuccess();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLogged, selected, signer, isNative, account]);
 
