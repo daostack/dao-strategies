@@ -28,6 +28,7 @@ interface IFundCampaign extends IElement {
 export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
   const [funding, setFunding] = useState<boolean>(false);
   const [approving, setApproving] = useState<boolean>(false);
+  const [signing, setSigning] = useState<boolean>(false);
 
   const [selected, setSelected] = useState<SelectedInputDetails>();
 
@@ -76,10 +77,12 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
         setApproving(false);
       }
 
-      setFunding(true);
+      setSigning(true);
       tx = await campaign.fund(selected.asset.address, value);
+      setSigning(false);
     }
 
+    setFunding(true);
     const res = await tx.wait();
     console.log('funded', { res });
     setFunding(false);
@@ -88,19 +91,36 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLogged, selected, signer, isNative, account]);
 
-  const label = approving
-    ? `Approving Allowance...`
-    : funding
-    ? `Tx Pending...`
-    : isLogged
-    ? isNative
-      ? 'Fund'
-      : 'Approve & Fund'
-    : 'Connecto to Fund';
+  const label = (() => {
+    if (approving) {
+      return `Approving Allowance...`;
+    }
+
+    if (signing) {
+      return `Waiting for tx approval...`;
+    }
+
+    if (funding) {
+      return `Tx Pending...`;
+    }
+
+    if (isLogged) {
+      if (isNative) {
+        return 'Fund';
+      } else {
+        return 'Approve & Fund';
+      }
+    } else {
+      return 'Connect to Fund';
+    }
+  })();
 
   /** campaign should always be defined if the fund dialog is shown */
   const chainId = campaign ? campaign.chainId : 0;
   const notEnoughFunds = selected?.status === 'not-enough-funds';
+  const zero = selected && selected.asset.balance === '0';
+
+  const disabled = zero || notEnoughFunds || funding || approving || signing;
 
   return (
     <>
@@ -113,7 +133,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
         <AppButton
           label={label}
           primary
-          disabled={notEnoughFunds || funding}
+          disabled={disabled}
           onClick={() => fund()}
           style={{ marginTop: '20px', width: '100%' }}
         />

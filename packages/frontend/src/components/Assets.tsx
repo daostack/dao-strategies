@@ -25,7 +25,7 @@ export const ChainTag: FC<ChainTagI> = (props: ChainTagI) => {
   );
 };
 
-interface IAsset extends IElement {
+interface IAsset extends BoxExtendedProps {
   asset?: Asset;
 }
 
@@ -35,19 +35,20 @@ export const AssetIcon: FC<IAsset> = (props: IAsset) => {
     <Box
       direction="row"
       align="center"
-      justify="center"
+      justify="start"
       style={{
         height: '40px',
-        width: '96px',
+        padding: '4px 12px',
         backgroundColor: '#fff',
         borderRadius: '20px',
         border: 'solid 1px',
         borderColor: styleConstants.colors.lightGrayBorder,
+        ...props.style,
       }}>
       <Box style={{ textAlign: 'center', height: '20px', width: '20px' }}>
         <img src={props.asset.icon} alt={props.asset.name} />
       </Box>
-      <Box style={{ textAlign: 'center' }}>{props.asset.name}</Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
     </Box>
   );
 };
@@ -166,36 +167,62 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
     })
     .reduce((total, reward) => total + reward, 0);
 
-  const raisedCustom = assets.filter((token) => token.price === undefined);
+  const raisedCustom = assets
+    .filter((token) => token.price === undefined)
+    .sort((a, b) => {
+      const av = +ethers.utils.formatUnits(a.balance, a.decimals);
+      const bv = +ethers.utils.formatUnits(b.balance, b.decimals);
+      return av > bv ? 1 : av === bv ? 0 : -1;
+    });
 
-  let hasCustom = false;
+  const arrayToStr = (tokens: TokenBalance[]) => {
+    /** only add tokens with nonzero balance */
+    const filtered = tokens.filter((t) => t.balance !== '0');
 
-  const customStr = raisedCustom
-    .map((token) => {
-      const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
-      if (raised > 0) {
-        hasCustom = true;
-      }
-      return `${valueToString(raised * ratio, 2)} ${token.name}`;
-    })
-    .reduce((total, reward) => total.concat(' ' + reward), '');
+    /** sort them by balance */
+    const sorted = filtered;
+    return concatStrings(sorted.map((a) => balanceToStr(a)));
+  };
 
-  const hasValue = rewardUSD > 0;
+  const balanceToStr = (token: TokenBalance) => {
+    const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
+    return `${valueToString(raised * ratio, 2)} ${token.name}`;
+  };
+
+  const concatStrings = (array: string[]) => {
+    return array.reduce((acc, el) => acc.concat(' ' + el), '');
+  };
 
   const { preferredString, secondaryString } = (() => {
+    const hasValue = rewardUSD > 0;
     const usdString = `$${valueToString(rewardUSD, 2)}`;
-    const tokensString = hasCustom ? ` ${hasValue ? '+ ' : ''}${customStr}` : '';
 
-    let preferredString = usdString;
-    let secondaryString = tokensString;
-
+    /** if preferred token is defined then it's always the primary */
     if (preferred) {
-      const value = +ethers.utils.formatUnits(preferred.balance, preferred.decimals);
-      preferredString = `${valueToString(value, 2)} ${preferred.name}`;
-      secondaryString = hasValue ? `+ ${usdString}` : '' + tokensString;
+      return {
+        preferredString: balanceToStr(preferred),
+        secondaryString: hasValue
+          ? `+ ${usdString}`
+          : '' + arrayToStr(raisedCustom.filter((a) => a.id !== preferred.id)),
+      };
     }
 
-    return { preferredString, secondaryString };
+    // else (no preferred)
+    if (hasValue) {
+      // if it has value, use the usd value as default
+      return {
+        preferredString: usdString,
+        secondaryString: arrayToStr(raisedCustom),
+      };
+    } else {
+      // if not, use the first token with non zero balance as primary
+      const nonZero = raisedCustom.find((a) => a.balance !== '0');
+      const primary = nonZero ? nonZero : raisedCustom[0];
+      return {
+        preferredString: balanceToStr(primary),
+        secondaryString: arrayToStr(raisedCustom.filter((a) => a.id !== primary.id)),
+      };
+    }
   })();
 
   /** If no preferred asset, then the USD value will be prioritized. */
@@ -238,14 +265,18 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
             }}>
             {preferredString}
           </Box>
-          <Box direction="row" justify="end">
-            {secondaryString}
-          </Box>
+          {secondaryString !== '' ? (
+            <Box direction="row" justify="end">
+              +{secondaryString}
+            </Box>
+          ) : (
+            <></>
+          )}
         </Box>
       ) : (
         <span>
           <b>{preferredString}</b>
-          {secondaryString}
+          {secondaryString !== '' ? ` + ${secondaryString}` : ''}
         </span>
       )}
     </AppTip>
