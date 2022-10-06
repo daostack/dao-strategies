@@ -34,7 +34,6 @@ import { FixedAdmin } from './fixed.admin';
 import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
-import { chainId } from 'wagmi';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -47,7 +46,7 @@ export interface ICampaignPageProps {
 }
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
-  const [showFund, setShowFund] = useState<boolean>(false);
+  const [showFund, setShowFund] = useState<boolean>(true);
 
   const {
     isLoading,
@@ -131,7 +130,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const details = (
     <AppCard style={{ paddingBottom: '18px' }}>
       <Box direction="row" align="center" justify="start" margin={{ right: 'medium' }}>
-        <CampaignIcon iconSize='48px' src={campaign?.logoUrl} />
+        <CampaignIcon iconSize="48px" src={campaign?.logoUrl} />
         <Box>
           <AppHeading level="1">{campaign.title}</AppHeading>
         </Box>

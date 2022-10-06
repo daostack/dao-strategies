@@ -636,11 +636,11 @@ export const AppTip: FC<DropButtonExtendedProps> = (props: DropButtonExtendedPro
   const timeout = 200;
 
   useEffect(() => {
-    console.log(`useEffect`, { hovering, hoveringDrop });
+    // console.log(`useEffect`, { hovering, hoveringDrop });
 
     if (hovering || hoveringDrop) {
       if (timer) {
-        console.log(`clearTimeout`, clearTimeout);
+        // console.log(`clearTimeout`, clearTimeout);
         clearTimeout(timer);
       }
 
@@ -649,7 +649,7 @@ export const AppTip: FC<DropButtonExtendedProps> = (props: DropButtonExtendedPro
 
     if (!hovering && !hoveringDrop) {
       if (timer) {
-        console.log(`clearTimeout`, clearTimeout);
+        // console.log(`clearTimeout`, clearTimeout);
         clearTimeout(timer);
       }
 
