@@ -13,7 +13,6 @@ import { Countdown } from './Countdown';
 export interface CampaignRewardsTimeI {
   alreadyExecuted: boolean;
   execDate: number;
-  compactFormat: boolean;
 }
 
 export const CampaignRewardsTime: FC<CampaignRewardsTimeI> = (props: CampaignRewardsTimeI) => {
@@ -26,12 +25,9 @@ export const CampaignRewardsTime: FC<CampaignRewardsTimeI> = (props: CampaignRew
         ? (<FieldLabel helpIconPosition='left' help="true" label={`Campaign shares successfully distributed ${now?.intervalDuration(new Date(), execDate).days} days ago`}></FieldLabel>)
         : (<Countdown to-date={execDate} text='Shares distributed in:'>  </Countdown>)}
     </Box>
-
-
   )
 };
 
 //Default prop values
 CampaignRewardsTime.defaultProps = {
-  compactFormat: false,
 }

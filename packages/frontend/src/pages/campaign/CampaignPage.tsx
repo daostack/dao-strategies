@@ -144,7 +144,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       )}
 
       <Box style={{ fontSize: styleConstants.textFontSizes.small }}>
-        <CampaignRewardsTime alreadyExecuted={campaign.executed} execDate={campaign?.execDate} compactFormat={false} />
+        <CampaignRewardsTime alreadyExecuted={campaign.executed} execDate={campaign?.execDate} />
         {/* {campaign.executed ? (
           <Box>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Box>
         ) : (
