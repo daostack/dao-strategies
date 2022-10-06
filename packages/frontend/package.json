@@ -42,6 +42,7 @@
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
+    "test-prod": "NODE_ENV=test-prod craco start",
     "deploy": "sh ./deploy.sh "
   },
   "eslintConfig": {

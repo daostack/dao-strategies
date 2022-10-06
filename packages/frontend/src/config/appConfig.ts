@@ -5,8 +5,15 @@ export const DEBUG = true;
  ****************************** */
 export const SUBGRAPH_URI = 'http://localhost:8000/subgraphs/name/dao-strategies/campaign';
 
-export const ORACLE_NODE_URL =
-  process.env.NODE_ENV === 'production' ? 'https://api.commonvalue.xyz' : 'http://localhost:3100';
+export const ORACLE_NODE_URL = ((env: string) => {
+  switch (env) {
+    case 'production':
+    case 'test-prod':
+      return 'https://api.commonvalue.xyz';
+    default:
+      return 'http://localhost:3100';
+  }
+})(process.env.NODE_ENV);
 
 export const DOMAIN = window.location.hostname;
 export const ORIGIN = window.location.origin;
