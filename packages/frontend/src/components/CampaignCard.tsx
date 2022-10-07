@@ -25,8 +25,8 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
   const getCampaignExecutionTime = () => {
     if (!now) return ''
 
-    if (campaign.executed) { return `Campaign shares distributed ${DateManager.intervalDuration(campaign.execDate, now?.getTime()).days} days ago` }
-    else { return `⏳ Due in ${DateManager.intervalDuration(campaign.execDate, now?.getTime()).days} days` }
+    if (campaign.executed) { return `Campaign shares distributed ${DateManager.intervalDuration(campaign.execDate, new Date()).days} days ago` }
+    else { return `⏳ Due in ${DateManager.intervalDuration(new Date(), campaign.execDate).days} days` }
   }
 
   const chain = ChainsDetails.chainOfId(campaign.chainId);
@@ -51,9 +51,7 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
         </Box>
       </Box>
 
-
-
-      {/* Campaign Description and found */}
+      {/* Campaign Description and funds */}
       <Box style={{ marginTop: '6px' }}>
         {campaign.description && (<FixedHeightPar style={{ margin: '0px 16px 0px 0px', color: '#575757', fontSize: '16px' }} content={<>{campaign.description}</>}></FixedHeightPar>)}
         <AppTag align='center' style={{ textAlign: 'center', minWidth: '150px', marginTop: '8px', color: '#0E0F19', fontWeight: '700', maxWidth: '180px' }}>$ {valueToString(campaign.valueLocked)} raised </AppTag>
