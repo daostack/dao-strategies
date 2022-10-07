@@ -26,7 +26,7 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
       <Box direction="row" align="center" >
         {/* <CampaignIcon iconSize='14px' src={campaign.logoUrl} /> */}
         <Box pad={{ horizontal: 'small' }}>
-          <Image src="./images/welcome-bg-1.png" width="64px" height="64px" style={{ borderRadius: '50%', zIndex: 5 }}  ></Image>
+          <CampaignIcon src="./images/welcome-bg-1.png" iconSize='64px'  ></CampaignIcon>
           <Image src="./images/Github.png" style={{ borderRadius: '50%', position: 'relative', right: '3px', bottom: '70px', zIndex: 10 }} width="24px" height="24px"></Image>
         </Box>
 
@@ -34,11 +34,6 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
           {campaign.title}
         </AppHeading>
 
-
-        {/* <Box direction="row" align="center">
-          <ChainTag style={{ marginRight: '12px' }} chain={chain}></ChainTag>{' '}
-          <Address address={campaign.address} chainId={campaign.chainId}></Address>
-        </Box> */}
         <Box>
           <Text>{campaign.description ? campaign.description : ''}</Text>
         </Box>
