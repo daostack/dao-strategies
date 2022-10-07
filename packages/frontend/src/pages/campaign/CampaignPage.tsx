@@ -34,6 +34,7 @@ import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
 import { CampaignStatus } from '../../components/CampaignStatus';
+import { RouteNames } from '../MainPage';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -130,7 +131,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const details = (
     <AppCard style={{ paddingBottom: '18px' }}>
       <Box direction="row" align="center" justify="start" margin={{ right: 'medium' }}>
-        <CampaignIcon iconSize="48px" src={campaign?.logoUrl} style={{ marginRight: '24px' }} />
+        <CampaignIcon iconSize="48px" src={campaign?.logoUrl} style={{ marginRight: '24px', flexShrink: '0' }} />
         <Box>
           <AppHeading level="1">{campaign.title}</AppHeading>
         </Box>
@@ -294,10 +295,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         paddingRight: `${CAMPAIGN_PAD_SIDES}vw`,
       }}>
       <Box style={{ margin: '50px 0px' }} direction="row" align="center">
-        <Link style={{ marginRight: '6px', textDecoration: 'none' }} to="/">
+        <Link style={{ marginRight: '6px', textDecoration: 'none' }} to={RouteNames.Campaigns}>
           Home
         </Link>{' '}
-        {'>'} {campaign.title}
+        {'>'} {campaign.title.length > 50 ? `${campaign.title.substr(0, 50)}...` : campaign.title}
       </Box>
 
       <Box

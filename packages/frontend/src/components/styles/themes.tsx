@@ -38,6 +38,7 @@ export const styleConstants = {
     highlightedLight: 'rgba(87, 98, 213, 0.02)',
     links: '#5762D5',
     scrollbar: '#4ba6637d',
+    tagLightGray: '#F3F3F3',
   },
 };
 

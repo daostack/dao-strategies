@@ -51,7 +51,7 @@ export interface CampaignReadDetails
   executed: boolean;
   published: boolean;
   creatorId: string;
-  valueLocked: number;
+  valueLocked?: number;
 }
 
 export interface SharesObject {

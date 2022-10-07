@@ -138,7 +138,7 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
           <Box style={{ position: 'relative' }}>
             <textarea
               style={{
-                backgroundColor: '#F3F3F3',
+                backgroundColor: styleConstants.colors.tagLightGray,
                 borderRadius: '20px',
                 padding: '16px 48px 16px 16px',
                 fontSize: '15px',
