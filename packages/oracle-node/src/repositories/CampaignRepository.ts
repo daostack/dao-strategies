@@ -8,6 +8,7 @@ import {
   SharesRead,
   Page,
   VerificationIntent,
+  getAddressStrict,
 } from '@dao-strategies/core';
 import {
   PrismaClient,
@@ -35,7 +36,7 @@ export interface AddressShares {
 }
 
 export class CampaignRepository {
-  constructor(protected client: PrismaClient) { }
+  constructor(protected client: PrismaClient) {}
 
   async create(campaignDetails: Prisma.CampaignCreateInput): Promise<Campaign> {
     return this.client.campaign.create({
@@ -47,14 +48,14 @@ export class CampaignRepository {
     return this.client.campaign.findUnique({ where: { uri } });
   }
 
-  async getFromAddress(address: string): Promise<Campaign> {
+  async getFromAddress(address: string): Promise<Campaign | undefined> {
     const res = await this.client.campaign.findFirst({
-      where: { address: address.toLowerCase() },
+      where: { address: getAddressStrict(address) },
       include: {
         creator: true,
       },
     });
-    return res;
+    return res !== null ? res : undefined;
   }
 
   async getChainId(uri: string): Promise<number> {
@@ -422,7 +423,7 @@ export class CampaignRepository {
     details: CampaignCreateDetails,
     by: string
   ): Promise<void> {
-    details.address = details.address.toLowerCase();
+    details.address = getAddressStrict(details.address);
     const update: Prisma.CampaignUpdateArgs = {
       where: { uri },
       data: {

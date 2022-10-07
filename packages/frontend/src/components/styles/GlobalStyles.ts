@@ -1,10 +1,24 @@
 import { createGlobalStyle } from 'styled-components';
+import { styleConstants } from './themes';
 
 export const GlobalStyles = createGlobalStyle`
   * {
     box-sizing: border-box;
     font-family: 'DM Sans', sans-serif;
+    scrollbar-color: transparent;
   }
+  *::-webkit-scrollbar {
+    width: 5px; /* Mostly for vertical scrollbars */
+    height: 5px; /* Mostly for horizontal scrollbars */
+  }
+  *::-webkit-scrollbar-thumb { /* Foreground */
+    border-radius: 10px;  
+    background: ${styleConstants.colors.scrollbar};
+  }
+  *::-webkit-scrollbar-track { /* Background */
+    background: #ffffff00;
+  }
+
   body {
     font-size: 1.15em;
     margin: 0;
@@ -39,5 +53,4 @@ export const GlobalStyles = createGlobalStyle`
   input[type=number] {
     -moz-appearance: textfield;
   }
-
 `;

@@ -48,7 +48,7 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
 
     switch (colIx) {
       case 0:
-        return <AssetsValue type="inline" assets={datum.assets}></AssetsValue>;
+        return <AssetsValue title="Funds Provided" type="inline" assets={datum.assets}></AssetsValue>;
 
       case 1:
         return <Address chainId={campaign.chainId} address={datum.address}></Address>;

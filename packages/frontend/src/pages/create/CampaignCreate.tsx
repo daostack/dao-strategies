@@ -98,16 +98,16 @@ export interface ProcessedFormValues {
 const initChain = ChainsDetails.chains()[0];
 
 const initialValues: CampaignFormValues = {
-  title: 'My Campaign',
-  guardian: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+  title: '',
+  guardian: '',
   logo: undefined,
   logoPreview: undefined,
   chainName: initChain.name,
-  customAssetAddress: '', // '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+  customAssetAddress: '',
   hasCustomAsset: false,
-  description: '', // 'A description',
+  description: '',
   strategyId: strategies.list()[0].info.id,
-  repositoryFullnames: [], //['pepoospina/js-uprtcl'],
+  repositoryFullnames: [],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
   customPeriodChoiceTo: '',
@@ -740,9 +740,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Box>
               {' '}
               <Parameter label="Logo">
-                <CampaignIcon
-                  iconSize="64px"
-                  src={formValues.logoPreview && formValues.logoPreview}></CampaignIcon>
+                <CampaignIcon iconSize="64px" src={formValues.logoPreview && formValues.logoPreview}></CampaignIcon>
               </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Campaign Name" text={formValues.title}></Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Description">

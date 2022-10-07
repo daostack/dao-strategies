@@ -1,14 +1,6 @@
 import { BigNumber } from 'ethers';
 
-import { Balances, BalancesFloat, BalancesObject, IDPlatform } from '../types';
-
-export const balancesToObject = (balances: Balances): BalancesObject => {
-  const balancesObject: BalancesObject = {};
-  balances.forEach(
-    (balance, account) => (balancesObject[account] = balance.toString())
-  );
-  return balancesObject;
-};
+import { Balances, BalancesFloat, IDPlatform } from '../types';
 
 const zerosStr = (n: number): string => {
   return '0'.repeat(n);

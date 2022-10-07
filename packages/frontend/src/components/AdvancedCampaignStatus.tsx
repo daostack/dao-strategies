@@ -8,7 +8,7 @@ import { useNow } from '../hooks/useNow';
 import { lockCampaign } from '../pages/campaign.support';
 import { Address } from './Address';
 
-import { AppButton, AppCard, AppHeading } from './styles/BasicElements';
+import { AppButton, AppCallout, AppCard, AppHeading, HorizontalLine } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
 
 interface IAdvancedCampaign {
@@ -83,22 +83,14 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
     locked,
   };
 
-  const cardsStyle: React.CSSProperties = { width: '100%', marginBottom: '24px' };
-
   return (
-    <Box align="center" justify="center" pad="medium">
-      <AppCard direction="row" align="center" style={cardsStyle}>
-        <AppHeading
-          level="2"
-          style={{
-            marginRight: '12px',
-          }}>
-          {info.nPending}
-        </AppHeading>
-        <Box> contributors have not yet set their payment address and cannot receive their reward (see list)</Box>
-      </AppCard>
-
-      <AppCard align="start" style={cardsStyle}>
+    <Box style={{ marginTop: '50px' }}>
+      <AppCard
+        align="start"
+        style={{
+          backgroundColor: styleConstants.colors.highlightedLight,
+          color: styleConstants.colors.ligthGrayText2,
+        }}>
         {info.candidateRoot ? (
           <>
             <AppHeading level="3" style={{ marginBottom: '16px' }}>
@@ -111,18 +103,40 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
             <AppButton label="See Update" style={{ alignSelf: 'center' }} primary />
           </>
         ) : (
-          <>
-            No updates currenly proposed by the oracle. Next update will be done in {info.timeToNextWindowStarts} (only
-            if some pending contributors set their payment address)
-          </>
+          <>No updates currenly proposed by the oracle. Next update can only be done in {info.timeToNextWindowStarts}</>
         )}
       </AppCard>
 
-      <AppCard style={cardsStyle}>
-        <AppHeading level="3" style={{ marginBottom: '16px' }}>
-          Advanced Actions
-        </AppHeading>
-        {!isLogged ? <AppButton onClick={() => connect()}>Connect Wallet</AppButton> : <></>}
+      <AppCard
+        style={{ marginTop: '16px', fontWeight: '500', backgroundColor: styleConstants.colors.highlightedLight }}>
+        <Box direction="row" align="center" justify="between" style={{ marginBottom: '32px' }}>
+          <Box>No of Campaign Receivers</Box>
+          <Box style={{ fontWeight: '700', fontSize: '20px' }}>{info.nReceivers}</Box>
+        </Box>
+        <Box direction="row" align="center" justify="between">
+          <Box>Pending Verification</Box>
+          <Box style={{ fontWeight: '700', fontSize: '20px' }}>{info.nPending}</Box>
+        </Box>
+      </AppCard>
+
+      <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
+
+      <AppHeading level="3" style={{ marginBottom: '16px' }}>
+        Advanced Actions
+      </AppHeading>
+
+      <Box direction="row">
+        Only the admin
+        {
+          <Address
+            address={campaign.guardian}
+            chainId={campaign.chainId}
+            style={{ margin: '0px 2px', display: 'inline' }}></Address>
+        }
+        has permissions to perform the following actions:
+      </Box>
+
+      <AppCard style={{}}>
         <Box direction="row" justify="between" align="center">
           <Box>{info.locked ? 'Unlock' : 'Lock'} the campaign</Box>
           <AppButton onClick={() => lock()}>{info.locked ? 'Unlock' : 'Lock'}</AppButton>
@@ -132,19 +146,9 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
           <Box>Cancel the campaign</Box>
           <AppButton>Cancel</AppButton>
         </Box>
-
-        {locking ? (
-          <Box>
-            Waiting for tx...<br></br>
-            <br></br>
-            <Spinner></Spinner>
-          </Box>
-        ) : (
-          <></>
-        )}
       </AppCard>
 
-      <AppCard style={cardsStyle}>
+      <AppCard style={{}}>
         <Box style={{ marginTop: '8px' }} direction="row">
           Created by:{' '}
           <Address style={{ marginLeft: '8px' }} address={campaign.creatorId} chainId={campaign.chainId}></Address>

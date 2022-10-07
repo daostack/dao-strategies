@@ -1,8 +1,7 @@
-import { ChainsDetails } from '@dao-strategies/core';
+import { ChainsDetails, getAddress } from '@dao-strategies/core';
 import { Box, BoxExtendedProps } from 'grommet';
-import { Link } from 'grommet-icons';
 import { CSSProperties, FC } from 'react';
-import { styleConstants, theme } from './styles/themes';
+import { styleConstants } from './styles/themes';
 
 interface IAddress extends BoxExtendedProps {
   address: string | null | undefined;
@@ -19,10 +18,8 @@ export const Address: FC<IAddress> = (props: IAddress) => {
 
   const exploreAddress = ChainsDetails.chainOfId(props.chainId)?.exploreAddress;
 
-  const length = props.address.length;
-  const addressStr = `${props.address.toLowerCase().slice(0, 5)}...${props.address
-    .toLowerCase()
-    .slice(length - 5, length)}`;
+  const address = getAddress(props.address);
+  const addressStr = address ? `${address.slice(0, 5)}...${address.slice(address.length - 5, address.length)}` : '';
 
   const style: CSSProperties = { color: styleConstants.colors.links, textDecoration: 'none', ...props.style };
 
