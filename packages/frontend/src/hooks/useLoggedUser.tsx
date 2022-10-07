@@ -1,4 +1,4 @@
-import { LoggedUserDetails, VerificationIntent } from '@dao-strategies/core';
+import { cmpAddresses, LoggedUserDetails, VerificationIntent } from '@dao-strategies/core';
 import { InjectedConnector } from '@wagmi/core';
 import { Signer } from 'ethers';
 import { ReactNode, createContext, useContext, FC, useState, useEffect } from 'react';
@@ -111,7 +111,7 @@ export const LoggedUserContext: FC<LoggedUserProviderProps> = (props) => {
    * signing the siwe) */
   const accountAddress =
     address !== undefined && user !== undefined
-      ? address?.toLowerCase() === user.address.toLowerCase()
+      ? cmpAddresses(address, user.address)
         ? address
         : undefined
       : undefined;

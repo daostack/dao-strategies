@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Box, Spinner } from 'grommet';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { ChainsDetails, Page } from '@dao-strategies/core';
+import { ChainsDetails, cmpAddresses, Page } from '@dao-strategies/core';
 
 import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
@@ -124,7 +124,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const customAsset =
     otherDetails && otherDetails.balances
-      ? otherDetails.balances.find((token) => token.address === campaign.customAssets[0])
+      ? otherDetails.balances.find((token) => cmpAddresses(token.address, campaign.customAssets[0]))
       : undefined;
 
   const details = (

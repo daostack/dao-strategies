@@ -81,7 +81,7 @@ export class CampaignService {
     protected strategyComputation: IStrategyComputation,
     protected sendTransactionService: SendTransactionService,
     protected config: CampaigServiceConfig
-  ) { }
+  ) {}
 
   setOnChainRead(_readData: ReadDataService): void {
     this.readDataService = _readData;
@@ -512,25 +512,24 @@ export class CampaignService {
     await this.campaignRepo.setDetails(uri, details, by);
   }
 
-  async uploadLogoToS3(
-    logo: any,
-    uri: string,
-    by: string
-  ): Promise<void> {
+  async uploadLogoToS3(logo: any, uri: string, by: string): Promise<void> {
     // check if eligable (if person who creates campaign is same that uploads logo)
     const campaign = await this.get(uri);
-    console.log('campaign.creatorId ', campaign.creatorId, ' BY ', by)
+    console.log('campaign.creatorId ', campaign.creatorId, ' BY ', by);
     if (campaign.creatorId !== by) {
-      throw new Error('campaign logo can only be set by campaign creator')
+      throw new Error('campaign logo can only be set by campaign creator');
     }
 
     // upload to s3 retrieve logo url
-    const logoUrl = await uploadLogoToS3(uri, this.timeService.now(), logo.data)
+    const logoUrl = await uploadLogoToS3(
+      uri,
+      this.timeService.now(),
+      logo.data
+    );
 
     // store logo url in campaigns row
-    await this.campaignRepo.setLogoUrl(uri, logoUrl)
+    await this.campaignRepo.setLogoUrl(uri, logoUrl);
   }
-
 
   setExecuted(uri: string): Promise<void> {
     return this.campaignRepo.setExecuted(uri, true);

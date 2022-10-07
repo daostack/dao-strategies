@@ -1,7 +1,7 @@
 import { Chain, chain } from '@wagmi/core';
 import { ethers } from 'ethers';
 
-import { BNToFloat } from '../support';
+import { BNToFloat, cmpAddresses } from '../support';
 import { Asset, ChainAndAssets, TokenBalance } from '../types';
 
 import { ContractsJson } from './contracts.json';
@@ -125,7 +125,7 @@ export class ChainsDetails {
     address: string
   ): Asset | undefined => {
     const assets = this.chainAssets(chainId);
-    const entry = assets.find((asset) => asset.address === address);
+    const entry = assets.find((asset) => cmpAddresses(asset.address, address));
     return entry;
   };
 
@@ -137,7 +137,7 @@ export class ChainsDetails {
   };
 
   static isNative = (asset: Asset): boolean => {
-    return asset.address === ethers.constants.AddressZero;
+    return cmpAddresses(asset.address, ethers.constants.AddressZero);
   };
 
   static valueOfAssets(balances: TokenBalance[]): number {

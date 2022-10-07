@@ -1,3 +1,4 @@
+import { getAddress } from '@dao-strategies/core';
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
 import cors from 'cors';
@@ -127,8 +128,9 @@ Routes.forEach((route) => {
     route.route,
     async (req: Request, res: Response, next: Function) => {
       try {
-        const loggedUser: string | undefined =
-          req.session?.siwe?.address.toLowerCase();
+        const loggedUser: string | undefined = getAddress(
+          req.session?.siwe?.address
+        );
         if (route.protected) {
           if (loggedUser === undefined) {
             throw new Error(

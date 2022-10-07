@@ -24,11 +24,13 @@ import {
   TipProps,
   DropButton,
   DropButtonExtendedProps,
+  LayerExtendedProps,
 } from 'grommet';
-import { CircleQuestion, Close, FormDown, FormUp, IconProps } from 'grommet-icons';
+import { CircleQuestion, Close, FormDown, FormUp, IconProps, Validate } from 'grommet-icons';
 import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { GITHUB_DOMAINS } from '../../config/appConfig';
+import { VerifiedIcon } from '../VerifiedIcon';
 import { styleConstants, theme } from './themes';
 
 export interface IElement {
@@ -234,19 +236,35 @@ export const HorizontalLine: FC<BoxExtendedProps> = (props: BoxExtendedProps) =>
   );
 };
 
-export const AppCallout: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+export interface IAppCallout extends BoxExtendedProps {
+  _type?: 'normal' | 'success';
+  noIcon?: boolean;
+}
+
+export const AppCallout: FC<IAppCallout> = (props: IAppCallout) => {
+  const type = props._type ? props._type : 'normal';
+  const showIcon = props.noIcon !== undefined ? !props.noIcon : true;
+
+  const color = type === 'normal' ? styleConstants.colors.lightGrayBackground : styleConstants.colors.primaryLight;
   return (
     <Box
       direction="row"
       align="center"
       style={{
-        backgroundColor: styleConstants.colors.lightGrayBackground,
+        backgroundColor: color,
         fontSize: styleConstants.textFontSizes.small,
         borderRadius: '8px',
         padding: '14.5px 14.5px',
         ...props.style,
       }}>
-      <CircleQuestion style={{ marginRight: '20px' }}></CircleQuestion>
+      {showIcon ? (
+        <Box style={{ marginRight: '20px' }}>
+          {type === 'normal' ? <CircleQuestion></CircleQuestion> : <Validate></Validate>}
+        </Box>
+      ) : (
+        <></>
+      )}
+
       {props.children}
     </Box>
   );
@@ -258,7 +276,6 @@ const cardStyle: React.CSSProperties = {
   borderColor: styleConstants.colors.lightGrayBorder,
   padding: '16px 24px',
   borderRadius: '8px',
-  minHeight: '122px',
 };
 
 interface AppCardProps extends BoxExtendedProps {}
@@ -427,7 +444,7 @@ export const FixedHeightPar: FC<IFixedHeightPar> = (props: IFixedHeightPar) => {
   );
 };
 
-interface INumberedRow extends IElement {
+interface INumberedRow extends BoxExtendedProps {
   number: number;
   text: React.ReactNode;
   disabled?: boolean;
@@ -436,20 +453,7 @@ interface INumberedRow extends IElement {
 
 export const NumberedRow: FC<INumberedRow> = (props: INumberedRow) => {
   return (
-    <Box direction="row" style={{ position: 'relative' }}>
-      {props.disabled ? (
-        <Box
-          fill
-          style={{
-            zIndex: '2',
-            backgroundColor: 'rgba(153, 156, 154, 0.4)',
-            position: 'absolute',
-            top: '0',
-            left: '0',
-          }}></Box>
-      ) : (
-        <></>
-      )}
+    <Box direction="row" style={{ ...props.style }}>
       <Box style={{ width: '28px', marginRight: '24px' }}>
         <Box
           style={{
@@ -472,7 +476,7 @@ export const NumberedRow: FC<INumberedRow> = (props: INumberedRow) => {
             <Box
               fill
               style={{
-                width: '1.5px',
+                width: '1px',
                 backgroundColor: '#ccc',
               }}></Box>
           )}
@@ -514,7 +518,7 @@ export const InfoProperty: FC<IInfoProperty> = (props: IInfoProperty) => {
   );
 };
 
-export interface IAppModal extends BoxExtendedProps {
+export interface IAppModal extends LayerExtendedProps {
   heading: string;
   onClosed?: () => void;
   onSuccess?: () => void;
@@ -533,13 +537,19 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
   };
 
   return (
-    <Layer style={{ ...props.style }} position="right" onEsc={() => close()} onClickOutside={() => close()}>
-      <Box style={{ padding: '5vh 2.5vw', height: '100vh', width: '550px' }}>
-        <Box style={{ marginBottom: '20px' }} onClick={() => close()}>
-          <Close style={{ height: '12px', width: '12px' }}></Close>
+    <Layer {...props} style={{ ...props.style }} position="right" onEsc={() => close()} onClickOutside={() => close()}>
+      <Box style={{ paddingTop: '5vh', height: '100vh', width: '550px', flexShrink: '0' }}>
+        <Box style={{ padding: '0 2.5vw', flexShrink: '0' }}>
+          <Box
+            direction="row"
+            style={{ marginBottom: '20px', padding: '4px 0px' }}
+            onClick={() => close()}
+            align="center">
+            <Close style={{ height: '12px', width: '12px' }}></Close>
+          </Box>
+          <AppHeading level="2">{props.heading}</AppHeading>
         </Box>
-        <AppHeading level="2">{props.heading}</AppHeading>
-        {child}
+        <div style={{ overflowY: 'auto', padding: '0 2.5vw' }}>{child}</div>
       </Box>
     </Layer>
   );

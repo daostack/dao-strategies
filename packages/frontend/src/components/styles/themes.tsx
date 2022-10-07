@@ -27,6 +27,7 @@ export const styleConstants = {
     buttonLightBorder: '#4ba66433',
     lightGrayBackground: '#0000000c',
     ligthGrayText: '#989BA0',
+    ligthGrayText2: '#878787',
     lightGrayTextDarker: '#575757',
     lightGrayBorder: '#F0EDED',
     headingDark: '#0E0F19',
@@ -34,8 +35,9 @@ export const styleConstants = {
     alertText: '#EF3E36',
     cardBackground: '#FFFFFF',
     whiteElements: '#FFFFFF',
-    highlightedLight: '#FBFDFC',
+    highlightedLight: 'rgba(87, 98, 213, 0.02)',
     links: '#5762D5',
+    scrollbar: '#4ba6637d',
   },
 };
 
