@@ -2,6 +2,7 @@ import { Box, Spinner } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 import { useNow } from '../hooks/useNow';
 import { FieldLabel } from '../pages/create/field.label';
+import { DateManager } from '../utils/date.manager';
 import { AppRemainingTime, IElement } from './styles/BasicElements';
 
 
@@ -23,9 +24,8 @@ export const Countdown: FC<CountdownI> = (props: CountdownI) => {
   useEffect(() => {
     const getRem = () => {
       if (DEBUG) console.log('Countdown - Interval', { now });
-      if (!now) setRemaining(undefined);
-
-      setRemaining(now?.intervalDuration(new Date(), execDate))
+      if (!now) { setRemaining(undefined); }
+      else setRemaining(DateManager.intervalDuration(now.getTimeUpdated(), execDate))
     };
     getRem();
     const interval = setInterval(getRem, 1000);

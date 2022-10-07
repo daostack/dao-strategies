@@ -430,11 +430,19 @@ export interface IFixedHeightPar extends BoxExtendedProps {
 }
 
 export const FixedHeightPar: FC<IFixedHeightPar> = (props: IFixedHeightPar) => {
-  const [showGradient, setShowGradient] = useState<boolean>(true);
-
+  const [showGradient, setShowGradient] = useState<boolean>(false);
+  const container = useRef<HTMLDivElement>(null);
+  const paragraph = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (container !== null && paragraph !== null && container.current !== null && paragraph.current !== null) {
+      if (container.current.clientHeight < paragraph.current.scrollHeight) {
+        setShowGradient(true);
+      }
+    }
+  }, [container, paragraph]);
   return (
-    <Box style={{ height: '50px', overflow: 'hidden', position: 'relative', ...props.style }}>
-      {props.content}
+    <Box ref={container} style={{ height: '50px', overflow: 'hidden', position: 'relative', ...props.style }}>
+      <Box ref={paragraph}>{props.content}</Box>
       {showGradient ? (
         <Box
           direction="row"

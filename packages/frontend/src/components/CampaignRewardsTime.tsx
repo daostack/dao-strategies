@@ -23,7 +23,11 @@ export const CampaignRewardsTime: FC<CampaignRewardsTimeI> = (props: CampaignRew
   return (
     <Box style={{ color: '#878787' }} direction='row' justify='between'>
       {alreadyExecuted
-        ? (<FieldLabel helpIconPosition='left' help="true" label={`Campaign shares successfully distributed ${now?.intervalDuration(new Date(), execDate).days} days ago`}></FieldLabel>)
+        ? (now ? (
+          <FieldLabel helpIconPosition='left'
+            help="true"
+            label={`Campaign shares successfully distributed ${DateManager.intervalDuration(now.getTime(), execDate).days} days ago`}>
+          </FieldLabel>) : (<></>))
         : (<Countdown to-date={execDate} text='Shares distributed in:'>  </Countdown>)}
       <ENSProfile text={'Created by:'} />
     </Box>

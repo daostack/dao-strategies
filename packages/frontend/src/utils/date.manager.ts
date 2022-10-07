@@ -9,9 +9,11 @@ export class DateManager {
   private date: Date;
   /** difference between frontend and backend time */
   private bias: number = 0;
+  private localTimeZero: number;
 
   /** input date is in seconds if provided */
   constructor(date?: DateManager | Date | number | string, utc: boolean = false) {
+    this.localTimeZero = Date.now();
     if (typeof date === 'number') {
       this.date = new Date(date * 1000);
     } else if (typeof date === 'string') {
@@ -68,6 +70,11 @@ export class DateManager {
     return Math.floor(this.date.getTime() / 1000) + this.bias;
   }
 
+  /* Used for showing countdown, with this func it gives a new value */
+  getTimeUpdated(): number {
+    return this.getTime() + Date.now() - this.localTimeZero
+  }
+
   /** updates to the latest device date (keeping the bias) */
   refresh(): void {
     this.date = new Date();
@@ -83,9 +90,9 @@ export class DateManager {
     return this;
   }
 
-  intervalDuration(startDate: Date | number, endDate: Date | number): Duration {
+  static intervalDuration(startDate: Date | number, endDate: Date | number): Duration {
     return intervalToDuration({
-      start: startDate, // this.date is not working because it always responds with the "same" duration object so values inside the duration dont change
+      start: startDate,
       end: endDate,
     })
   }
