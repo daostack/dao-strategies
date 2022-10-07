@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "5": {
     "goerli": {
       "name": "goerli",
@@ -979,6 +980,8 @@
       }
     }
   },
+=======
+>>>>>>> feature/logoUpload
   "1337": {
     "localhost": {
       "name": "localhost",

@@ -38,8 +38,7 @@ interface BigInt {
 const app = express();
 
 appLogger.info(
-  `Running in ${
-    process.env.NODE_ENV !== undefined ? process.env.NODE_ENV : 'default(dev)'
+  `Running in ${process.env.NODE_ENV !== undefined ? process.env.NODE_ENV : 'default(dev)'
   } mode`
 );
 

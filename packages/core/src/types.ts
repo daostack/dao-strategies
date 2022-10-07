@@ -42,9 +42,10 @@ export interface CampaignCreateDetails {
   address: string;
 }
 
+
 export interface CampaignReadDetails
   extends CampaignCreateDetails,
-    CampaignUriDetails {
+  CampaignUriDetails {
   uri: string;
   address: string;
   registered: boolean;

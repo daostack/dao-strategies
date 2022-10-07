@@ -734,7 +734,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Box>
               {' '}
               <Parameter label="Logo">
-                <CampaignIcon iconSize="64px" src={formValues.logoPreview && formValues.logoPreview}></CampaignIcon>
+                <CampaignIcon
+                  iconSize="64px"
+                  src={formValues.logoPreview && formValues.logoPreview}></CampaignIcon>
               </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Campaign Name" text={formValues.title}></Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Description">
