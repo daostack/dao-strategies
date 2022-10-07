@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Box, Spinner } from 'grommet';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { ChainsDetails, cmpAddresses, Page } from '@dao-strategies/core';
-
-import { Countdown } from '../../components/Countdown';
 import { RewardsTable } from '../../components/RewardsTable';
+
 import {
   AppButton,
   AppCallout,
@@ -145,14 +144,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
       <Box style={{ fontSize: styleConstants.textFontSizes.small }}>
         <CampaignRewardsTime alreadyExecuted={campaign.executed} execDate={campaign?.execDate} />
-        {/* {campaign.executed ? (
-          <Box>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Box>
-        ) : (
-          <>
-            Campaign to be executed on {new DateManager(campaign.execDate).toString()}
-            <Countdown to-date={campaign?.execDate}></Countdown>
-          </>
-        )} */}
       </Box>
 
       <Box>

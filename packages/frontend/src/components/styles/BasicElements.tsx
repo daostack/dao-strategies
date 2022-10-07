@@ -7,7 +7,6 @@ import {
   Box,
   ButtonExtendedProps,
   Select,
-  FileInput,
   BoxExtendedProps,
   Layer,
   Heading,
@@ -20,8 +19,6 @@ import {
   FormFieldExtendedProps,
   FormField,
   SelectExtendedProps,
-  Tip,
-  TipProps,
   DropButton,
   DropButtonExtendedProps,
   LayerExtendedProps,
@@ -30,8 +27,8 @@ import { CircleQuestion, Close, FormDown, FormUp, IconProps, Validate } from 'gr
 import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { GITHUB_DOMAINS } from '../../config/appConfig';
-import { VerifiedIcon } from '../VerifiedIcon';
-import { styleConstants, theme } from './themes';
+import { HelpDrop } from '../../pages/create/field.label';
+import { styleConstants } from './themes';
 
 export interface IElement {
   onClick?: () => void;
@@ -195,29 +192,33 @@ export const AppRemainingTime: FC<IAppRemainingTime> = (props: IAppRemainingTime
   const { compactFormat, remainingTime } = props;
 
   const remainignTimeUI = (): JSX.Element => {
-    if (compactFormat) return (<Box direction='row' gap='2px'>
-      <strong>{remainingTime.days}</strong> <span> days</span>
-    </Box>)
-    else return (
-      <Box gap='10px' direction='row'>
-        <Box direction='row' gap='2px'>
+    if (compactFormat)
+      return (
+        <Box direction="row" gap="2px">
           <strong>{remainingTime.days}</strong> <span> days</span>
         </Box>
-        <Box direction='row' gap='2px'>
-          <strong>{remainingTime.hours}</strong> <span> hours</span>
+      );
+    else
+      return (
+        <Box gap="10px" direction="row">
+          <Box direction="row" gap="2px">
+            <strong>{remainingTime.days}</strong> <span> days</span>
+          </Box>
+          <Box direction="row" gap="2px">
+            <strong>{remainingTime.hours}</strong> <span> hours</span>
+          </Box>
+          <Box direction="row" gap="2px">
+            <strong>{remainingTime.minutes}</strong> <span> minutes</span>
+          </Box>
+          <Box direction="row" gap="2px">
+            <strong>{remainingTime.seconds}</strong> <span> seconds</span>
+          </Box>
         </Box>
-        <Box direction='row' gap='2px'>
-          <strong>{remainingTime.minutes}</strong> <span> minutes</span>
-        </Box>
-        <Box direction='row' gap='2px'>
-          <strong>{remainingTime.seconds}</strong> <span> seconds</span>
-        </Box>
-      </Box>)
-  }
-
+      );
+  };
 
   return remainignTimeUI();
-}
+};
 
 export const AppSelect: FC<SelectExtendedProps> = (props: SelectExtendedProps) => {
   return (
@@ -309,7 +310,7 @@ const cardStyle: React.CSSProperties = {
   borderRadius: '8px',
 };
 
-interface AppCardProps extends BoxExtendedProps { }
+interface AppCardProps extends BoxExtendedProps {}
 
 export const AppCard = React.forwardRef<HTMLDivElement, AppCardProps>((props, ref) => {
   return (
@@ -370,10 +371,11 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
             bottom: '0',
             height: '60px',
             cursor: 'pointer',
-            background: `${expanded
-              ? 'none'
-              : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
-              }`,
+            background: `${
+              expanded
+                ? 'none'
+                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
+            }`,
           }}>
           <AppButton inline>{expanded ? 'Show-less' : 'Show-more'}</AppButton>
         </div>
@@ -383,7 +385,48 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
     </Box>
   );
 };
+type Position = 'left' | 'right';
 
+interface IHelpTip {
+  helpIconPosition: Position;
+  helpText: string | ReactElement;
+  children: React.ReactNode;
+}
+
+export const HelpTip: FC<IHelpTip> = (props: IHelpTip): JSX.Element => {
+  const { helpIconPosition = 'right', helpText, children } = props;
+  const helpIcon = (
+    <DropButton
+      style={{ marginLeft: '9px', marginRight: '9px' }}
+      dropContent={<HelpDrop>{helpText}</HelpDrop>}
+      dropProps={
+        { margin: '10px', align: { bottom: 'top' }, style: { borderRadius: '20px', maxWidth: '280px' } } as any
+      }>
+      <Box justify="center" style={{ overflow: 'hidden' }}>
+        <CircleQuestion style={{ height: '13.33px', width: '13.33px' }}></CircleQuestion>
+      </Box>
+    </DropButton>
+  );
+
+  function isHelpIconRight(arg: string): arg is Position {
+    return arg === 'right';
+  }
+  return (
+    <>
+      {isHelpIconRight(helpIconPosition) ? (
+        <>
+          <Box>{children}</Box>
+          {helpIcon}
+        </>
+      ) : (
+        <>
+          {helpIcon}
+          <Box>{children}</Box>
+        </>
+      )}
+    </>
+  );
+};
 interface IExpansibleCard extends BoxExtendedProps {
   hiddenPart: React.ReactElement | React.ReactElement[];
   padding?: number[];
@@ -447,11 +490,19 @@ export interface IFixedHeightPar extends BoxExtendedProps {
 }
 
 export const FixedHeightPar: FC<IFixedHeightPar> = (props: IFixedHeightPar) => {
-  const [showGradient, setShowGradient] = useState<boolean>(true);
-
+  const [showGradient, setShowGradient] = useState<boolean>(false);
+  const container = useRef<HTMLDivElement>(null);
+  const paragraph = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (container !== null && paragraph !== null && container.current !== null && paragraph.current !== null) {
+      if (container.current.clientHeight < paragraph.current.scrollHeight) {
+        setShowGradient(true);
+      }
+    }
+  }, [container, paragraph]);
   return (
-    <Box style={{ height: '50px', overflow: 'hidden', position: 'relative', ...props.style }}>
-      {props.content}
+    <Box ref={container} style={{ height: '50px', overflow: 'hidden', position: 'relative', ...props.style }}>
+      <Box ref={paragraph}>{props.content}</Box>
       {showGradient ? (
         <Box
           direction="row"

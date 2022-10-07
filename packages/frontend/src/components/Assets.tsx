@@ -184,7 +184,8 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
     return concatStrings(filtered.map((a) => balanceToStr(a)));
   };
 
-  const balanceToStr = (token: TokenBalance) => {
+  const balanceToStr = (token: TokenBalance): string => {
+    if (!token) return ''
     const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
     return `${valueToString(raised * ratio, 2)} ${token.name}`;
   };

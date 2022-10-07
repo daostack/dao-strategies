@@ -2,8 +2,8 @@ import { Box, Spinner } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 import { useNow } from '../hooks/useNow';
 import { FieldLabel } from '../pages/create/field.label';
-import { AppRemainingTime, IElement } from './styles/BasicElements';
-
+import { DateManager } from '../utils/date.manager';
+import { AppRemainingTime, HelpTip, IElement } from './styles/BasicElements';
 
 const DEBUG = false;
 
@@ -19,13 +19,12 @@ export const Countdown: FC<CountdownI> = (props: CountdownI) => {
 
   if (DEBUG) console.log('Countdown', { props, now });
 
-
   useEffect(() => {
     const getRem = () => {
       if (DEBUG) console.log('Countdown - Interval', { now });
-      if (!now) setRemaining(undefined);
-
-      setRemaining(now?.intervalDuration(new Date(), execDate))
+      if (!now) {
+        setRemaining(undefined);
+      } else setRemaining(DateManager.intervalDuration(now.getTimeUpdated(), execDate));
     };
     getRem();
     const interval = setInterval(getRem, 1000);
@@ -36,17 +35,23 @@ export const Countdown: FC<CountdownI> = (props: CountdownI) => {
 
   return (
     <>
-      <Box style={{ width: '100%', textAlign: 'start' }} justify="start" align="start" >
-        {loading ? <Spinner></Spinner> : (<Box>
-          {remaining !== undefined ? (
-            <Box gap='10px' direction='row'>
-              <FieldLabel label={props.text ?? ''} helpIconPosition={'left'} />
-              <AppRemainingTime compactFormat={false} remainingTime={remaining} />
-            </Box>
-          ) : ''}
-        </Box>)
-        }
-
+      <Box style={{ width: '100%', textAlign: 'start' }} justify="start" align="start">
+        {loading ? (
+          <Spinner></Spinner>
+        ) : (
+          <Box>
+            {remaining !== undefined ? (
+              <Box gap="10px" direction="row">
+                <HelpTip helpIconPosition={'left'} helpText={'Have a llookg'}>
+                  {props.text ?? ''}
+                </HelpTip>
+                <AppRemainingTime compactFormat={false} remainingTime={remaining} />
+              </Box>
+            ) : (
+              ''
+            )}
+          </Box>
+        )}
       </Box>
     </>
   );
