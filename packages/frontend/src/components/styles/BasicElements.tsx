@@ -27,7 +27,6 @@ import { CircleQuestion, Close, FormDown, FormUp, IconProps, Validate } from 'gr
 import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { GITHUB_DOMAINS } from '../../config/appConfig';
-import { HelpDrop } from '../../pages/create/field.label';
 import { styleConstants } from './themes';
 
 export interface IElement {
@@ -385,45 +384,42 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
     </Box>
   );
 };
-type Position = 'left' | 'right';
 
-interface IHelpTip {
-  helpIconPosition: Position;
-  helpText: string | ReactElement;
-  children: React.ReactNode;
+export const HelpDrop: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  return <Box style={{ padding: '21px 16px', fontSize: '12px' }}>{props.children}</Box>;
+};
+
+interface IHelpTip extends BoxExtendedProps {
+  content: string | ReactElement;
+  iconSize?: string;
 }
 
-export const HelpTip: FC<IHelpTip> = (props: IHelpTip): JSX.Element => {
-  const { helpIconPosition = 'right', helpText, children } = props;
-  const helpIcon = (
-    <DropButton
-      style={{ marginLeft: '9px', marginRight: '9px' }}
-      dropContent={<HelpDrop>{helpText}</HelpDrop>}
-      dropProps={
-        { margin: '10px', align: { bottom: 'top' }, style: { borderRadius: '20px', maxWidth: '280px' } } as any
-      }>
-      <Box justify="center" style={{ overflow: 'hidden' }}>
-        <CircleQuestion style={{ height: '13.33px', width: '13.33px' }}></CircleQuestion>
-      </Box>
-    </DropButton>
-  );
+export const HelpTip: FC<IHelpTip> = (props: IHelpTip) => {
+  const { content } = props;
 
-  function isHelpIconRight(arg: string): arg is Position {
-    return arg === 'right';
+  const size = props.iconSize || '13.33px';
+  const reg = new RegExp('(\\d+\\s?)(\\w+)');
+  const parts = reg.exec(size);
+
+  if (parts === null) {
+    throw new Error(`size wrong`);
   }
+
+  const value = +parts[1];
+  const units = parts[2];
+
   return (
     <>
-      {isHelpIconRight(helpIconPosition) ? (
-        <>
-          <Box>{children}</Box>
-          {helpIcon}
-        </>
-      ) : (
-        <>
-          {helpIcon}
-          <Box>{children}</Box>
-        </>
-      )}
+      <DropButton
+        style={{ ...props.style }}
+        dropContent={<HelpDrop>{content}</HelpDrop>}
+        dropProps={
+          { margin: '10px', align: { bottom: 'top' }, style: { borderRadius: '20px', maxWidth: '280px' } } as any
+        }>
+        <Box justify="center" style={{ overflow: 'hidden' }}>
+          <CircleQuestion style={{ height: `${value}${units}`, width: `${value}${units}` }}></CircleQuestion>
+        </Box>
+      </DropButton>
     </>
   );
 };
@@ -659,6 +655,8 @@ export const CampaignIcon: FC<ICampaignIcon> = (props: ICampaignIcon) => {
         width: `${value}${units}`,
         borderRadius: `${value / 2}${units}`,
         overflow: 'hidden',
+        border: '1px solid',
+        ...props.style,
       }}>
       <Image fit="cover" src={props.src}></Image>
     </Box>

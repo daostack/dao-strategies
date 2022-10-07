@@ -12,7 +12,7 @@ export interface IFixedAdmin extends BoxExtendedProps {
 }
 
 export const FixedAdmin: FC<IFixedAdmin> = (props: IFixedAdmin) => {
-  const [showGuardianControl, setShowGuardianControl] = useState<boolean>(true);
+  const [showGuardianControl, setShowGuardianControl] = useState<boolean>(false);
 
   return showGuardianControl ? (
     <AppModal heading="Advanced Status" onClosed={() => setShowGuardianControl(false)}>

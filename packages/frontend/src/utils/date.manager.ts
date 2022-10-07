@@ -98,6 +98,9 @@ export class DateManager {
   }
 
   prettyDiff(to: number) {
+
+    
+
     // TODO
     const diff = Math.abs(this.getTime() - to);
     if (diff < 60) {

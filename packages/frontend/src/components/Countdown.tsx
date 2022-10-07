@@ -1,21 +1,20 @@
-import { Box, Spinner } from 'grommet';
+import { Box, BoxExtendedProps } from 'grommet';
 import { FC, useEffect, useState } from 'react';
 import { useNow } from '../hooks/useNow';
-import { FieldLabel } from '../pages/create/field.label';
 import { DateManager } from '../utils/date.manager';
-import { AppRemainingTime, HelpTip, IElement } from './styles/BasicElements';
+import { AppRemainingTime } from './styles/BasicElements';
 
 const DEBUG = false;
 
-export interface CountdownI extends IElement {
-  'to-date': number;
+export interface CountdownI extends BoxExtendedProps {
+  toDate: number;
   text?: string;
 }
 
 export const Countdown: FC<CountdownI> = (props: CountdownI) => {
   const [remaining, setRemaining] = useState<Duration | undefined>(undefined);
   const { now } = useNow();
-  const execDate = new Date(props['to-date'] * 1000);
+  const execDate = new DateManager(props.toDate);
 
   if (DEBUG) console.log('Countdown', { props, now });
 
@@ -24,34 +23,19 @@ export const Countdown: FC<CountdownI> = (props: CountdownI) => {
       if (DEBUG) console.log('Countdown - Interval', { now });
       if (!now) {
         setRemaining(undefined);
-      } else setRemaining(DateManager.intervalDuration(now.getTimeUpdated(), execDate));
+      } else setRemaining(DateManager.intervalDuration(now.getTimeUpdated(), execDate.getTime()));
     };
+
     getRem();
     const interval = setInterval(getRem, 1000);
+
     return () => clearInterval(interval);
   }, [now, props]);
 
-  const loading = now === undefined;
-
   return (
     <>
-      <Box style={{ width: '100%', textAlign: 'start' }} justify="start" align="start">
-        {loading ? (
-          <Spinner></Spinner>
-        ) : (
-          <Box>
-            {remaining !== undefined ? (
-              <Box gap="10px" direction="row">
-                <HelpTip helpIconPosition={'left'} helpText={'Have a llookg'}>
-                  {props.text ?? ''}
-                </HelpTip>
-                <AppRemainingTime compactFormat={false} remainingTime={remaining} />
-              </Box>
-            ) : (
-              ''
-            )}
-          </Box>
-        )}
+      <Box style={{ textAlign: 'start', ...props.style }} justify="start" align="start">
+        {remaining !== undefined ? <AppRemainingTime compactFormat={false} remainingTime={remaining} /> : <></>}
       </Box>
     </>
   );

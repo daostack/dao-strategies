@@ -42,16 +42,15 @@ export interface CampaignCreateDetails {
   address: string;
 }
 
-
 export interface CampaignReadDetails
   extends CampaignCreateDetails,
-  CampaignUriDetails {
+    CampaignUriDetails {
   uri: string;
   address: string;
   registered: boolean;
   executed: boolean;
   published: boolean;
-  creatorId: string | null;
+  creatorId: string;
   valueLocked: number;
 }
 
@@ -82,6 +81,7 @@ export interface ChainAndAssets {
   chain: Chain;
   assets: Asset[];
   explorer?: string;
+  exploreEns?: (ens: string) => string;
   exploreAddress?: (address: string) => string;
   exploreTx?: (hash: string) => string;
 }

@@ -17,6 +17,7 @@ const chainList: ChainAndAssets[] = [
     chain: chain.localhost,
     exploreAddress: (address: string) => `${ETHERSCAN_URL}/address/${address}`,
     exploreTx: (hash: string) => `${ETHERSCAN_URL}/tx/${hash}`,
+    exploreEns: (ens: string) => `https://app.ens.domains/name/${ens}/details`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {
@@ -48,6 +49,7 @@ const chainList: ChainAndAssets[] = [
     exploreAddress: (address: string) =>
       `${GOERLI_ETHERSCAN_URL}/address/${address}`,
     exploreTx: (hash: string) => `${GOERLI_ETHERSCAN_URL}/tx/${hash}`,
+    exploreEns: (ens: string) => `https://app.ens.domains/name/${ens}/details`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {

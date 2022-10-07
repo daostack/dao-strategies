@@ -33,7 +33,7 @@ import { FixedAdmin } from './fixed.admin';
 import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
-import { CampaignRewardsTime } from '../../components/CampaignRewardsTime';
+import { CampaignStatus } from '../../components/CampaignStatus';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -130,24 +130,20 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const details = (
     <AppCard style={{ paddingBottom: '18px' }}>
       <Box direction="row" align="center" justify="start" margin={{ right: 'medium' }}>
-        <CampaignIcon iconSize="48px" src={campaign?.logoUrl} />
+        <CampaignIcon iconSize="48px" src={campaign?.logoUrl} style={{ marginRight: '24px' }} />
         <Box>
           <AppHeading level="1">{campaign.title}</AppHeading>
         </Box>
       </Box>
 
-      {otherDetails?.publishInfo?.status.locked ? (
-        <AppCallout style={{ marginBottom: '16px' }}>Campaign locked</AppCallout>
-      ) : (
-        <></>
-      )}
-
-      <Box style={{ fontSize: styleConstants.textFontSizes.small }}>
-        <CampaignRewardsTime alreadyExecuted={campaign.executed} execDate={campaign?.execDate} />
-      </Box>
+      <CampaignStatus style={{ marginTop: '18.5px' }} />
 
       <Box>
-        <ExpansiveParagraph maxHeight={120}>{campaign.description}</ExpansiveParagraph>
+        {campaign.description !== '' ? (
+          <ExpansiveParagraph maxHeight={120}>{campaign.description}</ExpansiveParagraph>
+        ) : (
+          <></>
+        )}
       </Box>
     </AppCard>
   );
