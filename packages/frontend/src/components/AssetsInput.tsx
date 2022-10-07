@@ -86,11 +86,14 @@ export const AssetsInput: FC<IAssetsInput> = (props: IAssetsInput) => {
 
   const balanceComp =
     balance !== undefined && balanceNum !== undefined ? (
-      <Box direction="row" align="center" style={{ color: styleConstants.colors.ligthGrayText }}>
+      <Box direction="row" align="start" style={{ color: styleConstants.colors.ligthGrayText }}>
         Balance:
-        <Box style={{ marginLeft: '8px', textDecoration: 'underline' }}>{`${valueToString(balanceNum)} ${
-          balance.name
-        }`}</Box>
+        <Box
+          style={{
+            marginLeft: '8px',
+            borderBottom: 'solid 1px',
+            borderColor: styleConstants.colors.ligthGrayText,
+          }}>{`${valueToString(balanceNum)} ${balance.name}`}</Box>
       </Box>
     ) : (
       '--'

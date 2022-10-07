@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Box, Spinner } from 'grommet';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { ChainsDetails, Page } from '@dao-strategies/core';
+import { FC, useEffect, useRef, useState } from 'react';
+import { ChainsDetails, cmpAddresses, Page } from '@dao-strategies/core';
 import { RewardsTable } from '../../components/RewardsTable';
+
 import {
   AppButton,
   AppCallout,
@@ -45,7 +46,7 @@ export interface ICampaignPageProps {
 }
 
 export const CampaignPage: FC<ICampaignPageProps> = () => {
-  const [showFund, setShowFund] = useState<boolean>(true);
+  const [showFund, setShowFund] = useState<boolean>(false);
 
   const {
     isLoading,
@@ -123,7 +124,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   const customAsset =
     otherDetails && otherDetails.balances
-      ? otherDetails.balances.find((token) => token.address === campaign.customAssets[0])
+      ? otherDetails.balances.find((token) => cmpAddresses(token.address, campaign.customAssets[0]))
       : undefined;
 
   const details = (
@@ -143,14 +144,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
       <Box style={{ fontSize: styleConstants.textFontSizes.small }}>
         <CampaignRewardsTime alreadyExecuted={campaign.executed} execDate={campaign?.execDate} />
-        {/* {campaign.executed ? (
-          <Box>Rewards succesfully computed on {new DateManager(campaign.execDate).toString()}!</Box>
-        ) : (
-          <>
-            Campaign to be executed on {new DateManager(campaign.execDate).toString()}
-            <Countdown to-date={campaign?.execDate}></Countdown>
-          </>
-        )} */}
       </Box>
 
       <Box>

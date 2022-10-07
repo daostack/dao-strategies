@@ -1,4 +1,4 @@
-import { CampaignUriDetails } from '@dao-strategies/core';
+import { CampaignUriDetails, getAddressStrict } from '@dao-strategies/core';
 import { BigNumber, Contract, ContractInterface, ethers } from 'ethers';
 import { Response } from 'express';
 import { CID } from 'multiformats';
@@ -328,8 +328,10 @@ describe('start', () => {
           root: await campaignContract.shares(),
         };
 
-        expect(read.guardian.toLowerCase()).toBe(guardian.toLowerCase());
-        expect(read.oracle.toLowerCase()).toBe(oracle.toLowerCase());
+        expect(getAddressStrict(read.guardian)).toBe(
+          getAddressStrict(guardian)
+        );
+        expect(getAddressStrict(read.oracle)).toBe(getAddressStrict(oracle));
         expect(read.root.sharesMerkleRoot).toBe(ZERO_BYTES32);
         expect(read.root.totalShares.eq(BigNumber.from(0))).toBe(true);
         expect(ethers.utils.arrayify(read.uri)).toStrictEqual(

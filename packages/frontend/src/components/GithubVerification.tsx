@@ -5,10 +5,11 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 
-import { AppButton, AppInput, IElement, NumberedRow } from './styles/BasicElements';
+import { AppButton, AppCallout, AppInput, HorizontalLine, IElement, NumberedRow } from './styles/BasicElements';
 import { useDebounce } from 'use-debounce';
 import { GithubProfileCard } from './GithubProfileCard';
 import { Copy } from 'grommet-icons';
+import { styleConstants } from './styles/themes';
 
 export interface IVerificationProps extends IElement {
   onClose: () => void;
@@ -113,83 +114,118 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
   };
 
   return (
-    <>
-      <Box pad="large">
-        <Box style={{ paddingBottom: '40px' }}>
-          <Heading size="small">Set the payment address for a Github account</Heading>
-          <Text style={{ padding: '0px 12px' }}>
-            This step is done from Github to prove that it's done by the legitimate owner of that Github account.
-          </Text>
-        </Box>
-        <NumberedRow disabled={status < 0} number={1} text={<>Enter the github handle below.</>}>
-          <Box>
-            <AppInput value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></AppInput>
-          </Box>
-        </NumberedRow>
-        <NumberedRow
-          disabled={status < 1}
-          number={2}
-          text={
-            <>
-              Create a <b>public</b> gist on Github with the following content.
-            </>
-          }>
-          <Box>
-            <Box style={{ position: 'relative' }}>
-              <TextArea
-                disabled
-                resize={false}
-                style={{ height: '120px', fontSize: '14px', fontFamily: 'monospace' }}
-                value={text}></TextArea>
-              <Box
-                onClick={() => copyText()}
-                justify="center"
-                align="center"
-                style={{
-                  width: '60px',
-                  height: '36px',
-                  position: 'absolute',
-                  bottom: '10px',
-                  right: '10px',
-                  cursor: 'pointer',
-                  borderRadius: '6px',
-                  backgroundColor: '#cccccc53',
-                }}>
-                {!copied ? <Copy></Copy> : <Text style={{ fontSize: '12px' }}>copied!</Text>}
-              </Box>
-            </Box>
-            <AppButton onClick={goToGithub} style={{ marginTop: '10px' }} primary>
-              Open Github in a new tab
-            </AppButton>
-          </Box>
-        </NumberedRow>
+    <Box style={{ marginTop: '40px' }}>
+      <Box>This step is done from Github to prove that it's done by the legitimate owner of that Github account.</Box>
 
+      <NumberedRow
+        style={{ marginTop: '30px' }}
+        disabled={status < 0}
+        number={1}
+        text={<>Enter the github handle below:</>}>
         <Box>
-          <GithubProfileCard style={{ marginTop: '16px' }} profile={githubProfile}></GithubProfileCard>
-          {status >= 1 ? (
-            <Box style={{ margin: '12px 0px' }}>
-              {verification === undefined ? (
-                <>
-                  Please click below once the gist has been created
-                  <AppButton onClick={() => checkGist()} primary>
-                    Check gist {readingGists ? <Spinner></Spinner> : <></>}
-                  </AppButton>
-                </>
+          <AppInput value={handle} onChange={(e) => handleChanged(e)} placeholder="github handle"></AppInput>
+        </Box>
+      </NumberedRow>
+      <NumberedRow
+        disabled={status < 1}
+        number={2}
+        text={
+          <>
+            Create a <b>public</b> gist on Github with the following content:
+          </>
+        }>
+        <Box>
+          <Box style={{ position: 'relative' }}>
+            <textarea
+              style={{
+                backgroundColor: '#F3F3F3',
+                borderRadius: '20px',
+                padding: '16px 48px 16px 16px',
+                fontSize: '15px',
+                fontWeight: '500',
+                height: '150px',
+                border: 'none',
+                resize: 'none',
+              }}
+              value={text}
+              disabled></textarea>
+            <Box
+              onClick={() => copyText()}
+              justify="center"
+              align="center"
+              style={{
+                width: '60px',
+                height: '36px',
+                position: 'absolute',
+                bottom: '10px',
+                right: '10px',
+                cursor: 'pointer',
+                borderRadius: '12px',
+                backgroundColor: '#cccccc53',
+              }}>
+              {!copied ? (
+                <Copy color={styleConstants.colors.primary}></Copy>
               ) : (
-                <>
-                  Gist found! rewards received by this user will be sent to:
-                  <AppInput style={{ marginBottom: '12px' }} value={verification ? verification.to : ''}></AppInput>
-                  <AppButton onClick={() => close()} primary>
-                    Close
-                  </AppButton>
-                </>
+                <Text style={{ fontSize: '12px' }}>copied!</Text>
               )}
             </Box>
-          ) : (
-            <></>
-          )}
+          </Box>
+          <AppButton _type="slim" onClick={goToGithub} style={{ marginTop: '10px' }} primary>
+            Create Gist
+          </AppButton>
         </Box>
+      </NumberedRow>
+
+      <NumberedRow disabled={status < 2} number={3} text={<>Confirm the Gist has been created and is public.</>}>
+        <GithubProfileCard style={{ marginTop: '16px' }} profile={githubProfile}></GithubProfileCard>
+        {status >= 1 ? (
+          <Box style={{ margin: '12px 0px' }}>
+            <AppButton
+              disabled={verification !== undefined || readingGists}
+              onClick={() => checkGist()}
+              primary
+              _type="slim"
+              label={
+                verification === undefined ? (
+                  readingGists ? (
+                    <>Looking for the Gist...</>
+                  ) : (
+                    <>Check Gist</>
+                  )
+                ) : (
+                  <>Gist verified!</>
+                )
+              }
+            />
+          </Box>
+        ) : (
+          <></>
+        )}
+      </NumberedRow>
+
+      <Box style={{ width: '100%', margin: '20px 0px 80px 0px' }} justify="center">
+        {verification !== undefined ? (
+          <Box>
+            <AppCallout _type="success" style={{ fontSize: styleConstants.textFontSizes.normal, marginBottom: '20px' }}>
+              <Box>
+                <span>
+                  Gist found! All rewards received by <b>@{verification.from}</b> will be sent to:
+                </span>
+
+                <Box style={{ margin: '12px 0px 0px 0px' }} align="center">
+                  <b>{verification.to.split(':')[1]}</b>
+                </Box>
+              </Box>
+            </AppCallout>
+
+            <AppButton onClick={() => close()} primary>
+              Close
+            </AppButton>
+          </Box>
+        ) : (
+          <></>
+        )}
       </Box>
-    </>
+    </Box>
   );
 };

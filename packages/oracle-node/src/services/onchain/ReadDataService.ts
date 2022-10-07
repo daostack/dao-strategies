@@ -12,6 +12,7 @@ import {
   erc20Provider,
   Asset,
   erc20Instance,
+  cmpAddresses,
 } from '@dao-strategies/core';
 import { Campaign } from '@prisma/client';
 import { BigNumber, ethers } from 'ethers';
@@ -356,7 +357,7 @@ export class ReadDataService {
 
     let get: Promise<BigNumber>;
 
-    if (assetAddress === ethers.constants.AddressZero) {
+    if (cmpAddresses(assetAddress, ethers.constants.AddressZero)) {
       get = provider.getBalance(account);
     } else {
       const contract = erc20Provider(assetAddress, provider);

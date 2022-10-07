@@ -141,6 +141,7 @@ export const AssetsTable: FC<IAssetsTable> = (props: IAssetsTable) => {
 };
 
 export interface IAssetsValue extends BoxExtendedProps {
+  title: string;
   assets?: TokenBalance[];
   preferred?: string;
   ratio?: number;
@@ -193,7 +194,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
     return array.reduce((acc, el) => acc.concat(' ' + el), '');
   };
 
-  const { preferredString, secondaryString } = (() => {
+  const { preferredString, secondaryString, has } = (() => {
     const hasValue = rewardUSD > 0;
     const usdString = `$${valueToString(rewardUSD, 2)}`;
 
@@ -204,6 +205,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
         secondaryString: hasValue
           ? `+ ${usdString}`
           : '' + arrayToStr(raisedCustom.filter((a) => a.id !== preferred.id)),
+        has: true,
       };
     }
 
@@ -213,15 +215,26 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
       return {
         preferredString: usdString,
         secondaryString: arrayToStr(raisedCustom),
+        has: true,
       };
     } else {
       // if not, use the first token with non zero balance as primary
       const nonZero = raisedCustom.find((a) => a.balance !== '0');
-      const primary = nonZero ? nonZero : raisedCustom[0];
-      return {
-        preferredString: balanceToStr(primary),
-        secondaryString: arrayToStr(raisedCustom.filter((a) => a.id !== primary.id)),
-      };
+
+      if (nonZero) {
+        return {
+          preferredString: balanceToStr(nonZero),
+          secondaryString: arrayToStr(raisedCustom.filter((a) => a.id !== nonZero.id)),
+          has: true,
+        };
+      } else {
+        // there is not value
+        return {
+          preferredString: usdString,
+          secondaryString: '',
+          has: false,
+        };
+      }
     }
   })();
 
@@ -229,10 +242,11 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
 
   return (
     <AppTip
+      disabled={!has}
       dropContent={
         <Box style={{ width: '300px', padding: '20px 20px 0px 20px' }}>
           <Box direction="row" justify="between" style={{ margin: '4px 0px 20px 0px' }}>
-            <AppLabel>Funds Raised</AppLabel>
+            <AppLabel>{props.title}</AppLabel>
             <AppLabel>Value</AppLabel>
           </Box>
           {props.assets ? (
@@ -262,6 +276,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
             style={{
               fontSize: '32px',
               marginBottom: '6px',
+              textAlign: 'center',
             }}>
             {preferredString}
           </Box>

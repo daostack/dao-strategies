@@ -10,8 +10,8 @@ import {
   CampaignReadDetails,
   TokenBalance,
   FundEventRead,
+  getAddressStrict
 } from '@dao-strategies/core';
-import { FundEvent } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
 import { ServiceManager } from '../service.manager';
@@ -157,7 +157,7 @@ export class CampaignController extends Controller {
     loggedUser: string | undefined
   ): Promise<CampaignReadDetails> {
     /* eslint-disable */
-    const address = request.params.address.toLowerCase() as string;
+    const address = getAddressStrict(request.params.address);
     /** update TVL everytime a user request the campaign object */
     await this.manager.services.indexingService.checkTvlUpdate(address);
 
@@ -190,7 +190,7 @@ export class CampaignController extends Controller {
   ): Promise<CampaignOnchainDetails> {
     /* eslint-disable */
     return this.manager.services.readDataService.getCampaignDetails(
-      request.params.address.toLowerCase() as string
+      getAddressStrict(request.params.address)
     );
     /* eslint-enable */
   }
@@ -203,8 +203,8 @@ export class CampaignController extends Controller {
   ): Promise<CampaignClaimInfo | undefined> {
     /* eslint-disable */
     return this.manager.services.readDataService.getClaimInfo(
-      request.params.address.toLowerCase() as string,
-      request.params.account.toLowerCase() as string
+      getAddressStrict(request.params.address),
+      getAddressStrict(request.params.account)
     );
     /* eslint-enable */
   }

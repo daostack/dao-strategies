@@ -13,7 +13,16 @@ import { valueToString } from '../utils/general';
 import { Address } from './Address';
 import { AssetBalance, AssetIcon } from './Assets';
 import { AssetsInput, SelectedInputDetails } from './AssetsInput';
-import { AppForm, AppButton, IElement, AppInput, AppHeading, AppLabel, HorizontalLine } from './styles/BasicElements';
+import {
+  AppForm,
+  AppButton,
+  IElement,
+  AppInput,
+  AppHeading,
+  AppLabel,
+  HorizontalLine,
+  AppCallout,
+} from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
 
 interface IFundCampaign extends IElement {
@@ -67,9 +76,9 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
       const approved = await token.allowance(account, props.address);
 
       if (approved.sub(value).lt(0)) {
-        setApproving(true);
-        const tx = await token.approve(props.address, value.sub(approved));
         try {
+          setApproving(true);
+          const tx = await token.approve(props.address, value.sub(approved));
           await tx.wait();
           setApproving(false);
         } catch (e) {
@@ -132,6 +141,58 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
 
   const disabled = zero || notEnoughFunds || funding || approving || signing;
 
+  const funds = fundEvents ? (
+    fundEvents.map((fundEvent, ix) => {
+      const ts = new DateManager(fundEvent.timestamp);
+      const since = now ? `${ts.prettyDiff(now.getTime())} ago` : '';
+      const chain = ChainsDetails.chainOfId(chainId);
+      const exploreUrl = chain && chain.exploreTx ? chain.exploreTx(fundEvent.txHash) : undefined;
+
+      return (
+        <Box align="stretch" style={{ flexShrink: '0' }}>
+          {ix > 0 ? <HorizontalLine style={{ margin: '16px 0px' }}></HorizontalLine> : <></>}
+          <Box
+            direction="row"
+            align="center"
+            justify="between"
+            style={{ fontSize: styleConstants.textFontSizes.xsmall }}>
+            <AppLabel>Funding</AppLabel>
+            <Box>
+              {exploreUrl ? (
+                <a
+                  style={{ color: styleConstants.colors.ligthGrayText }}
+                  href={exploreUrl}
+                  target="_blank"
+                  rel="noreferrer">
+                  {since}
+                </a>
+              ) : (
+                since
+              )}
+            </Box>
+          </Box>
+          <Box
+            direction="row"
+            align="center"
+            justify="between"
+            style={{ fontSize: styleConstants.textFontSizes.normalSmaller }}>
+            <Box>
+              <AssetBalance asset={fundEvent.asset}></AssetBalance>
+            </Box>
+            <Box>
+              <Address
+                chainId={chainId}
+                address={fundEvent.funder}
+                style={{ color: styleConstants.colors.ligthGrayText }}></Address>
+            </Box>
+          </Box>
+        </Box>
+      );
+    })
+  ) : (
+    <></>
+  );
+
   return (
     <>
       <Box style={{ width: '100%', ...props.style }} direction="column" align="start">
@@ -141,7 +202,11 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
           chainId={props.chainId}
           onAssetSelected={(details) => setSelected(details)}></AssetsInput>
         <AppButton
-          label={label}
+          label={
+            <Box direction="row" align="center" justify="center">
+              {label} {disabled ? <Spinner></Spinner> : <></>}
+            </Box>
+          }
           primary
           disabled={disabled}
           onClick={() => fund()}
@@ -162,57 +227,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
             Funding History
           </AppHeading>
           <Box fill style={{ overflowY: 'auto', marginTop: '40px' }}>
-            {fundEvents ? (
-              fundEvents.map((fundEvent, ix) => {
-                const ts = new DateManager(fundEvent.timestamp);
-                const since = now ? `${ts.prettyDiff(now.getTime())} ago` : '';
-                const chain = ChainsDetails.chainOfId(chainId);
-                const exploreUrl = chain && chain.exploreTx ? chain.exploreTx(fundEvent.txHash) : undefined;
-
-                return (
-                  <Box align="stretch" style={{ flexShrink: '0' }}>
-                    {ix > 0 ? <HorizontalLine style={{ margin: '16px 0px' }}></HorizontalLine> : <></>}
-                    <Box
-                      direction="row"
-                      align="center"
-                      justify="between"
-                      style={{ fontSize: styleConstants.textFontSizes.xsmall }}>
-                      <AppLabel>Funding</AppLabel>
-                      <Box>
-                        {exploreUrl ? (
-                          <a
-                            style={{ color: styleConstants.colors.ligthGrayText }}
-                            href={exploreUrl}
-                            target="_blank"
-                            rel="noreferrer">
-                            {since}
-                          </a>
-                        ) : (
-                          since
-                        )}
-                      </Box>
-                    </Box>
-                    <Box
-                      direction="row"
-                      align="center"
-                      justify="between"
-                      style={{ fontSize: styleConstants.textFontSizes.normalSmaller }}>
-                      <Box>
-                        <AssetBalance asset={fundEvent.asset}></AssetBalance>
-                      </Box>
-                      <Box>
-                        <Address
-                          chainId={chainId}
-                          address={fundEvent.funder}
-                          style={{ color: styleConstants.colors.ligthGrayText }}></Address>
-                      </Box>
-                    </Box>
-                  </Box>
-                );
-              })
-            ) : (
-              <></>
-            )}
+            {fundEvents ? funds : <AppCallout>This campaign has not yet been funded</AppCallout>}
           </Box>
         </Box>
       </Box>

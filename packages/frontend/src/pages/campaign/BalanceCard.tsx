@@ -29,6 +29,7 @@ export const BalanceCard = React.forwardRef<HTMLDivElement, BalanceCardProps>((p
       {props.subtitle ? props.subtitle : <></>}
 
       <AssetsValue
+        title={props.title}
         style={{ margin: '16px 0px 24px 0px' }}
         assets={props.assets}
         preferred={props.preferred}
