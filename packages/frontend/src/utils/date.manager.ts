@@ -1,5 +1,6 @@
 import { TimeDetails } from '@dao-strategies/core';
 import add from 'date-fns/add';
+import intervalToDuration from 'date-fns/intervalToDuration';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 
 /** time wrapper to handle time-related operations (works in seconds and not ms, synchronized
@@ -82,17 +83,24 @@ export class DateManager {
     return this;
   }
 
+  intervalDuration(startDate: Date | number, endDate: Date | number): Duration {
+    return intervalToDuration({
+      start: startDate, // this.date is not working because it always responds with the "same" duration object so values inside the duration dont change
+      end: endDate,
+    })
+  }
+
   prettyDiff(to: number) {
     // TODO
     const diff = Math.abs(this.getTime() - to);
     if (diff < 60) {
       return diff + ' sec';
     } else if (diff < 60 * 60) {
-      return Math.floor(diff / 60) + ' min';
+      return Math.ceil(diff / 60) + ' min';
     } else if (diff < 60 * 60 * 24) {
-      return Math.floor(diff / (60 * 60)) + ' hr';
+      return Math.ceil(diff / (60 * 60)) + ' hr';
     } else {
-      return Math.floor(diff / (60 * 60 * 24)) + ' days';
+      return Math.ceil(diff / (60 * 60 * 24)) + ' days';
     }
   }
 

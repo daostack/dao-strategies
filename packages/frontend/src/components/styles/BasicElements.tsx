@@ -187,6 +187,37 @@ export const AppTextArea: FC<TextAreaProps> = (props: TextAreaProps) => {
       }}></TextArea>
   );
 };
+export interface IAppRemainingTime {
+  compactFormat: boolean;
+  remainingTime: Duration;
+}
+export const AppRemainingTime: FC<IAppRemainingTime> = (props: IAppRemainingTime) => {
+  const { compactFormat, remainingTime } = props;
+
+  const remainignTimeUI = (): JSX.Element => {
+    if (compactFormat) return (<Box direction='row' gap='2px'>
+      <strong>{remainingTime.days}</strong> <span> days</span>
+    </Box>)
+    else return (
+      <Box gap='10px' direction='row'>
+        <Box direction='row' gap='2px'>
+          <strong>{remainingTime.days}</strong> <span> days</span>
+        </Box>
+        <Box direction='row' gap='2px'>
+          <strong>{remainingTime.hours}</strong> <span> hours</span>
+        </Box>
+        <Box direction='row' gap='2px'>
+          <strong>{remainingTime.minutes}</strong> <span> minutes</span>
+        </Box>
+        <Box direction='row' gap='2px'>
+          <strong>{remainingTime.seconds}</strong> <span> seconds</span>
+        </Box>
+      </Box>)
+  }
+
+
+  return remainignTimeUI();
+}
 
 export const AppSelect: FC<SelectExtendedProps> = (props: SelectExtendedProps) => {
   return (
@@ -278,7 +309,7 @@ const cardStyle: React.CSSProperties = {
   borderRadius: '8px',
 };
 
-interface AppCardProps extends BoxExtendedProps {}
+interface AppCardProps extends BoxExtendedProps { }
 
 export const AppCard = React.forwardRef<HTMLDivElement, AppCardProps>((props, ref) => {
   return (
@@ -339,11 +370,10 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
             bottom: '0',
             height: '60px',
             cursor: 'pointer',
-            background: `${
-              expanded
-                ? 'none'
-                : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
-            }`,
+            background: `${expanded
+              ? 'none'
+              : 'linear-gradient(to bottom, rgb(255, 255, 255, 0), rgb(255, 255, 255, 1), rgb(255, 255, 255, 1))'
+              }`,
           }}>
           <AppButton inline>{expanded ? 'Show-less' : 'Show-more'}</AppButton>
         </div>
