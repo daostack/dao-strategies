@@ -34,7 +34,6 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
         <AppButton
           onClick={() => navigate(RouteNames.Create)}
           icon={<Add></Add>}
-          className="hide-mobile" //hide create button on mobile
           style={{ marginRight: '16px' }}
           _type="slim"
           label="Create"
