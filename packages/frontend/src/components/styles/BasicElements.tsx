@@ -388,12 +388,27 @@ export const HelpTip: FC<IHelpTip> = (props: IHelpTip): JSX.Element => {
     </Box>
   </DropButton>)
 
+  function isHelpIconRight(arg: string): arg is Position {
+    return arg === 'right';
+  }
   return (
     <>
-      {helpIcon}
-      <Box>
-        {children}
-      </Box>
+      {isHelpIconRight(helpIconPosition) ? (
+        <>
+          <Box>
+            {children}
+          </Box>
+          {helpIcon}
+        </>
+      ) : (
+        <>
+          {helpIcon}
+          <Box>
+            {children}
+          </Box>
+        </>
+      )}
+
     </>
   )
 
