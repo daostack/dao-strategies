@@ -24,7 +24,7 @@ export const ENSProfile: FC<ENSProfileI> = (props: ENSProfileI) => {
       {isConnected ? (
         <>
           <Box direction='row' gap='4px' justify="end" align="end">
-            {text && (<FieldLabel label={text} helpIconPosition={'left'} ></FieldLabel>)}
+            {text && (<FieldLabel label={text}  ></FieldLabel>)}
             {isLoading ? <Spinner></Spinner> : returnENSOrAddress()}
           </Box>
         </>

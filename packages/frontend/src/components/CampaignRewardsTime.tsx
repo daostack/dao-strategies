@@ -10,6 +10,7 @@ import { DateManager } from '../utils/date.manager';
 
 import { Countdown } from './Countdown';
 import { ENSProfile } from './ENSProfile';
+import { HelpTip } from './styles/BasicElements';
 
 export interface CampaignRewardsTimeI {
   alreadyExecuted: boolean;
@@ -24,10 +25,9 @@ export const CampaignRewardsTime: FC<CampaignRewardsTimeI> = (props: CampaignRew
     <Box style={{ color: '#878787' }} direction='row' justify='between'>
       {alreadyExecuted
         ? (now ? (
-          <FieldLabel helpIconPosition='left'
-            help="true"
-            label={`Campaign shares successfully distributed ${DateManager.intervalDuration(now.getTime(), execDate).days} days ago`}>
-          </FieldLabel>) : (<></>))
+          <HelpTip helpIconPosition={'left'} helpText={'Help'} >
+            <Text>`Campaign shares successfully distributed ${DateManager.intervalDuration(now.getTime(), execDate).days} days ago`</Text>
+          </HelpTip>) : (<></>))
         : (<Countdown to-date={execDate} text='Shares distributed in:'>  </Countdown>)}
       <ENSProfile text={'Created by:'} />
     </Box>

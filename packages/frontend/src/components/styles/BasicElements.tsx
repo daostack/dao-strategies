@@ -29,6 +29,7 @@ import { CircleQuestion, Close, FormDown, FormUp, IconProps } from 'grommet-icon
 import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { GITHUB_DOMAINS } from '../../config/appConfig';
+import { HelpDrop } from '../../pages/create/field.label';
 import { styleConstants, theme } from './themes';
 
 export interface IElement {
@@ -366,7 +367,37 @@ export const ExpansiveParagraph: FC<IExpansibleParagraph> = (props: IExpansibleP
     </Box>
   );
 };
+type Position = 'left' | 'right';
 
+interface IHelpTip {
+  helpIconPosition: Position,
+  helpText: string | ReactElement;
+  children: React.ReactNode;
+}
+
+export const HelpTip: FC<IHelpTip> = (props: IHelpTip): JSX.Element => {
+  const { helpIconPosition = 'right', helpText, children } = props;
+  const helpIcon = (<DropButton
+    style={{ marginLeft: '9px', marginRight: '9px' }}
+    dropContent={<HelpDrop>{helpText}</HelpDrop>}
+    dropProps={
+      { margin: '10px', align: { bottom: 'top' }, style: { borderRadius: '20px', maxWidth: '280px' } } as any
+    }>
+    <Box justify="center" style={{ overflow: 'hidden' }}>
+      <CircleQuestion style={{ height: '13.33px', width: '13.33px' }}></CircleQuestion>
+    </Box>
+  </DropButton>)
+
+  return (
+    <>
+      {helpIcon}
+      <Box>
+        {children}
+      </Box>
+    </>
+  )
+
+};
 interface IExpansibleCard extends BoxExtendedProps {
   hiddenPart: React.ReactElement | React.ReactElement[];
   padding?: number[];

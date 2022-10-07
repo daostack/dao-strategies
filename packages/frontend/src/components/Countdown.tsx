@@ -3,7 +3,7 @@ import { FC, useEffect, useState } from 'react';
 import { useNow } from '../hooks/useNow';
 import { FieldLabel } from '../pages/create/field.label';
 import { DateManager } from '../utils/date.manager';
-import { AppRemainingTime, IElement } from './styles/BasicElements';
+import { AppRemainingTime, HelpTip, IElement } from './styles/BasicElements';
 
 
 const DEBUG = false;
@@ -40,7 +40,7 @@ export const Countdown: FC<CountdownI> = (props: CountdownI) => {
         {loading ? <Spinner></Spinner> : (<Box>
           {remaining !== undefined ? (
             <Box gap='10px' direction='row'>
-              <FieldLabel label={props.text ?? ''} helpIconPosition={'left'} />
+              <HelpTip helpIconPosition={'left'} helpText={'Have a llookg'}>{props.text ?? ''}</HelpTip>
               <AppRemainingTime compactFormat={false} remainingTime={remaining} />
             </Box>
           ) : ''}

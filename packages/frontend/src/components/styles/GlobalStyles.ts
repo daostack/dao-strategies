@@ -40,4 +40,11 @@ export const GlobalStyles = createGlobalStyle`
     -moz-appearance: textfield;
   }
 
+
+  @media (min-width: 576px) { 
+    .hide-mobile{
+     display:none
+   }
+  
+
 `;
