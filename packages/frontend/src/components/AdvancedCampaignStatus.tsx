@@ -148,7 +148,8 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
             chainId={campaign.chainId}
             method="setLock"
             params={[true]}
-            value={'0'}></TransactionCalldata>
+            value={'0'}
+            approvedAccount={campaign.guardian}></TransactionCalldata>
         </AppAccordionPanel>
 
         <AppAccordionPanel
