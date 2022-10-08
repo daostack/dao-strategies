@@ -132,6 +132,8 @@ export interface CampaignClaimInfo {
   executed: boolean;
   /** true if the campaign was already published  */
   published: boolean;
+  /** claims that in principle will be avaialable if the root is correctly updated */
+  inPp?: { shares?: string; assets?: TokenBalance[] };
   /** current claim info */
   current?: TreeClaimInfo;
   /** pending claim info */
