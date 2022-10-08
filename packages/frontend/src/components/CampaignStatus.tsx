@@ -49,7 +49,11 @@ export const CampaignStatus: FC<CampaignStatusI> = (props: CampaignStatusI) => {
 
   return (
     <Box
-      style={{ color: '#878787', fontSize: styleConstants.textFontSizes.small, ...props.style }}
+      style={{
+        color: styleConstants.colors.ligthGrayText2,
+        fontSize: styleConstants.textFontSizes.small,
+        ...props.style,
+      }}
       direction="row"
       justify="between">
       {status}

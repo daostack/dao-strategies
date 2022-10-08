@@ -92,7 +92,7 @@ export const AssetsTable: FC<IAssetsTable> = (props: IAssetsTable) => {
   const showSummary = props.showSummary !== undefined ? props.showSummary : false;
   return (
     <>
-      <Box direction="row" justify="between">
+      <Box direction="row" justify="between" style={{ marginBottom: '12px' }}>
         <AppLabel>Your share</AppLabel>
         <AppLabel>Value (USD)</AppLabel>
       </Box>
@@ -185,7 +185,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
   };
 
   const balanceToStr = (token: TokenBalance): string => {
-    if (!token) return ''
+    if (!token) return '';
     const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
     return `${valueToString(raised * ratio, 2)} ${token.name}`;
   };
@@ -245,7 +245,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
       disabled={!has}
       dropContent={
         <Box style={{ width: '300px', padding: '20px 20px 0px 20px' }}>
-          <Box direction="row" justify="between" style={{ margin: '4px 0px 20px 0px' }}>
+          <Box direction="row" justify="between" style={{ margin: '4px 0px 32px 0px' }}>
             <AppLabel>{props.title}</AppLabel>
             <AppLabel>Value</AppLabel>
           </Box>

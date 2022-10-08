@@ -27,9 +27,9 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
     if (!now) return '';
 
     if (campaign.executed) {
-      return `Campaign shares distributed ${DateManager.intervalDuration(campaign.execDate, new Date()).days} days ago`;
+      return `Campaign shares distributed ${now.prettyDiff(campaign.execDate)} ago`;
     } else {
-      return `⏳ Due in ${DateManager.intervalDuration(new Date(), campaign.execDate).days} days`;
+      return `⏳ Due in ${now.prettyDiff(campaign.execDate)}`;
     }
   };
 

@@ -22,11 +22,16 @@ import {
   DropButton,
   DropButtonExtendedProps,
   LayerExtendedProps,
+  Accordion,
+  AccordionPanel,
+  AccordionPanelExtendedProps,
+  AccordionExtendedProps,
 } from 'grommet';
-import { CircleQuestion, Close, FormDown, FormUp, IconProps, Validate } from 'grommet-icons';
-import React, { FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
+import { CircleQuestion, Clone, Close, FormDown, FormUp, IconProps, StatusGood, Validate } from 'grommet-icons';
+import React, { CSSProperties, FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { GITHUB_DOMAINS } from '../../config/appConfig';
+import { useCopyToClipboard } from '../../hooks/useCopyToClipboad';
 import { styleConstants } from './themes';
 
 export interface IElement {
@@ -285,7 +290,7 @@ export const AppCallout: FC<IAppCallout> = (props: IAppCallout) => {
         backgroundColor: color,
         fontSize: styleConstants.textFontSizes.small,
         borderRadius: '8px',
-        padding: '14.5px 14.5px',
+        padding: '14.5px 28px 14.5px 14.5px',
         ...props.style,
       }}>
       {showIcon ? (
@@ -390,7 +395,7 @@ export const HelpDrop: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
 };
 
 interface IHelpTip extends BoxExtendedProps {
-  content: string | ReactElement;
+  content: ReactNode;
   iconSize?: string;
 }
 
@@ -574,8 +579,8 @@ export const AppLabel: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
         textTransform: 'uppercase',
         fontSize: '14px',
         color: styleConstants.colors.ligthGrayText,
-        marginBottom: '12px',
         fontWeight: '700',
+        ...props.style,
       }}>
       {props.children}
     </Box>
@@ -589,7 +594,7 @@ export interface IInfoProperty extends BoxExtendedProps {
 export const InfoProperty: FC<IInfoProperty> = (props: IInfoProperty) => {
   return (
     <Box style={{ ...props.style }}>
-      <AppLabel>{props.title}</AppLabel>
+      <AppLabel style={{ marginBottom: '12px' }}>{props.title}</AppLabel>
       <Box>{props.children}</Box>
     </Box>
   );
@@ -773,5 +778,159 @@ export const AppTip: FC<DropButtonExtendedProps> = (props: DropButtonExtendedPro
       }>
       {props.children}
     </DropButton>
+  );
+};
+
+/** forward an active property to know if panel is expanded (active is Context in grommet and we don't have
+ * access to it here.) */
+export const AppAccordion: FC<AccordionExtendedProps> = (props: AccordionExtendedProps) => {
+  const [activeIx, setActiveIx] = useState<number>();
+
+  if (props.children === null || props.children === undefined) {
+    return <></>;
+  }
+
+  const children = props.children as ReactElement[];
+
+  return (
+    <Accordion
+      {...props}
+      onActive={(_ix) => {
+        if (_ix && _ix.length > 0) {
+          setActiveIx(_ix[0]);
+        } else {
+          setActiveIx(undefined);
+        }
+      }}>
+      {children.map((child, ix) => {
+        return React.cloneElement(child, { active: activeIx !== undefined && activeIx === ix });
+      })}
+    </Accordion>
+  );
+};
+
+export interface IAppAccordionPanel extends AccordionPanelExtendedProps {
+  active?: boolean;
+  subtitle: string;
+}
+
+export const AppAccordionPanel: FC<IAppAccordionPanel> = (props: IAppAccordionPanel) => {
+  const headingBasicStyle: CSSProperties = {
+    color: styleConstants.colors.headingDark,
+    padding: '12px 6px',
+  };
+
+  const headingStyle: CSSProperties = props.active
+    ? {
+        ...headingBasicStyle,
+
+        borderTop: '1px solid',
+        borderLeft: '1px solid',
+        borderRight: '1px solid',
+        borderTopColor: styleConstants.colors.lightGrayBorder2,
+        borderLeftColor: styleConstants.colors.lightGrayBorder2,
+        borderRightColor: styleConstants.colors.lightGrayBorder2,
+        borderTopLeftRadius: '8px',
+        borderTopRightRadius: '8px',
+      }
+    : {
+        ...headingBasicStyle,
+
+        border: '1px solid',
+        borderColor: styleConstants.colors.lightGrayBorder2,
+        borderRadius: '8px',
+      };
+
+  const dropBasicStyle: CSSProperties = {
+    color: styleConstants.colors.headingDark,
+    padding: '0px 12px 12px 12px', // Accordion panel has a hardcoded padding of 6px on the title
+  };
+
+  const dropStyle: CSSProperties = props.active
+    ? {
+        ...dropBasicStyle,
+        borderBottom: '1px solid',
+        borderLeft: '1px solid',
+        borderRight: '1px solid',
+        borderBottomColor: styleConstants.colors.lightGrayBorder2,
+        borderLeftColor: styleConstants.colors.lightGrayBorder2,
+        borderRightColor: styleConstants.colors.lightGrayBorder2,
+        borderBottomLeftRadius: '8px',
+        borderBottomRightRadius: '8px',
+      }
+    : {
+        ...headingBasicStyle,
+        border: '1px solid',
+        borderColor: styleConstants.colors.lightGrayBorder2,
+        borderRadius: '8px',
+      };
+
+  return (
+    <AccordionPanel
+      {...props}
+      style={{
+        ...headingStyle,
+        ...props.style,
+      }}>
+      <Box
+        style={{
+          ...dropStyle,
+        }}>
+        <Box
+          style={{
+            fontSize: styleConstants.textFontSizes.small,
+            fontWeight: '500',
+            color: styleConstants.colors.ligthGrayText2,
+          }}>
+          {props.subtitle}
+        </Box>
+        <HorizontalLine style={{ margin: '16px 0px' }}></HorizontalLine>
+        {props.children}
+      </Box>
+    </AccordionPanel>
+  );
+};
+
+export interface IBytesInfo extends BoxExtendedProps {
+  label: ReactNode;
+  help?: ReactNode;
+  bytes: string;
+}
+
+export const BytesInfo: FC<IBytesInfo> = (props: IBytesInfo) => {
+  const { copied, copy } = useCopyToClipboard();
+
+  return (
+    <Box direction="row" justify="between" align="start" style={{ ...props.style }}>
+      <Box direction="row" align="center" style={{ flexShrink: '0', marginRight: '12px' }}>
+        <AppLabel style={{ fontSize: styleConstants.textFontSizes.xsmall, marginRight: '10.5px' }}>
+          {props.label}:
+        </AppLabel>
+        {props.help ? <HelpTip iconSize="15px" content={props.help} /> : <></>}
+      </Box>
+      <Box
+        direction="row"
+        align="center"
+        style={{
+          maxWidth: '244px',
+        }}>
+        <Box
+          style={{
+            wordWrap: 'break-word',
+            textAlign: 'right',
+            fontSize: styleConstants.textFontSizes.small,
+            fontWeight: '500',
+          }}>
+          {props.bytes}
+        </Box>
+        <Box style={{ padding: '0px 16px' }} onClick={() => copy(props.bytes)}>
+          {copied ? (
+            <StatusGood color={styleConstants.colors.links}> </StatusGood>
+          ) : (
+            <Clone color={styleConstants.colors.links}></Clone>
+          )}
+        </Box>
+      </Box>
+    </Box>
   );
 };
