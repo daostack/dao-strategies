@@ -142,7 +142,20 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
       </Box>
 
       <AppAccordion style={{}}>
-        <AppAccordionPanel label={'Cancel Pending merkleroot'} subtitle={'Description of the Admin action'}>
+        <AppAccordionPanel label={'Cancel Pending Merkle Root'} subtitle={'Description of the Admin action'}>
+          <TransactionCalldata
+            address={campaign.address}
+            chainId={campaign.chainId}
+            method="challenge"
+            params={[0]}
+            value={'0'}
+            approvedAccount={campaign.guardian}></TransactionCalldata>
+        </AppAccordionPanel>
+
+        <AppAccordionPanel
+          label={'Lock Campaign'}
+          subtitle={'Lock the campaign to prevent further updates from the Oracle.'}
+          style={{ marginTop: '16px' }}>
           <TransactionCalldata
             address={campaign.address}
             chainId={campaign.chainId}
@@ -153,27 +166,18 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
         </AppAccordionPanel>
 
         <AppAccordionPanel
-          label={'Lock Campaign'}
-          subtitle={'Description of the Admin action'}
+          label={'Cancel Campaign'}
+          subtitle={'Cancel campaign and enable funds withdraws from funders.'}
           style={{ marginTop: '16px' }}>
-          <Box>Cancel the campaign</Box>
-          <AppButton>Cancel</AppButton>
+          <TransactionCalldata
+            address={campaign.address}
+            chainId={campaign.chainId}
+            method="challenge"
+            params={[2]}
+            value={'0'}
+            approvedAccount={campaign.guardian}></TransactionCalldata>
         </AppAccordionPanel>
       </AppAccordion>
-
-      <AppCard style={{ marginTop: '24px' }}>
-        <Box style={{ marginTop: '8px' }} direction="row">
-          Created by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.creatorId} chainId={campaign.chainId}></Address>
-        </Box>
-        <Box direction="row">
-          Guarded by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.guardian} chainId={campaign.chainId}></Address>
-        </Box>
-        <Box direction="row">
-          Oracle: <Address style={{ marginLeft: '8px' }} address={campaign.oracle} chainId={campaign.chainId}></Address>
-        </Box>
-      </AppCard>
 
       {/* <AppButton secondary label="Refresh" onClick={() => refresh()} /> */}
     </Box>

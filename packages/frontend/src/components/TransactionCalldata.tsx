@@ -1,4 +1,5 @@
 import { campaignInstance, campaignProvider, ChainsDetails, cmpAddresses } from '@dao-strategies/core';
+import { BigNumber } from 'ethers';
 import { Box, BoxExtendedProps } from 'grommet';
 import { StatusGood } from 'grommet-icons';
 import { FC, useState } from 'react';
@@ -11,7 +12,7 @@ export interface ITransactionCalldata extends BoxExtendedProps {
   address: string;
   chainId: number;
   method: 'setLock' | 'challenge';
-  params: (string | boolean)[];
+  params: (string | boolean | number | BigNumber)[];
   value: string;
   approvedAccount?: string; // if defined, the transaction can be sent with the current signer
 }
@@ -29,7 +30,7 @@ export const TransactionCalldata: FC<ITransactionCalldata> = (props: ITransactio
   const instance = campaignProvider(address, provider);
   const calldata = (instance.interface.encodeFunctionData as any)(props.method, props.params);
 
-  const concatEls = (array: (string | boolean)[]) => {
+  const concatEls = (array: (string | boolean | number | BigNumber)[]) => {
     return array.reduce((acc: string, el) => acc.concat(el.toString()), '');
   };
 
