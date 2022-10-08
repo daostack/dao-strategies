@@ -307,24 +307,28 @@ export class CampaignRepository {
     return shares;
   }
 
-  async getSharesOfAddress(
+  /**
+   * Returns the shares of and address "in principle", this is, assuming the
+   * update merkle root process will go on as it should.
+   */
+  async getSharesOfAddressInPp(
     uri: string,
     address: string
-  ): Promise<Share[] | null> {
-    const result = await this.client.$queryRaw`
-      SELECT account, address, amount FROM 
+  ): Promise<Share[] | undefined> {
+    const res = await this.client.$queryRaw`
+      SELECT shares.account, crossver.to as address, shares.amount FROM 
       (
         SELECT * FROM public."Share" 
         WHERE "campaignId" = ${uri}
       ) as shares
       LEFT JOIN 
-      public."User" 
-      ON shares.account = "verifiedGithub"
-      WHERE address = ${address}
+        public."CrossVerification" as crossver
+      ON shares.account = "from"
+	    WHERE crossver.to = ${address}
     `;
 
     /** one address can be the target of multiple accounts */
-    return result as Share[];
+    return res === null ? undefined : (res as Share[]);
   }
 
   /** campaigns whose execution date is older and has not been executed */

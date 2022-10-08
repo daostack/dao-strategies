@@ -19,6 +19,7 @@ import {
   Share,
 } from '@prisma/client';
 import { ethers } from 'ethers';
+import { BigNumber } from 'ethers/lib/ethers';
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
@@ -488,8 +489,21 @@ export class CampaignService {
     return sharesToAddresses;
   }
 
-  getSharesOfAddress(uri: string, address: string): Promise<Share[] | null> {
-    return this.campaignRepo.getSharesOfAddress(uri, address);
+  /** sum all the shares of a given address */
+  async getSharesOfAddressInPp(
+    uri: string,
+    address: string
+  ): Promise<string | undefined> {
+    const shares = await this.campaignRepo.getSharesOfAddressInPp(uri, address);
+    if (!shares) {
+      return undefined;
+    }
+
+    const sum = shares.reduce<BigNumber>((acc, share) => {
+      return acc.add(BigNumber.from(share.amount));
+    }, BigNumber.from(0));
+
+    return sum.toString();
   }
 
   async setShares(uri: string, shares: Balances): Promise<void> {

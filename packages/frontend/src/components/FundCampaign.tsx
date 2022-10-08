@@ -156,7 +156,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
             align="center"
             justify="between"
             style={{ fontSize: styleConstants.textFontSizes.xsmall }}>
-            <AppLabel>Funding</AppLabel>
+            <AppLabel style={{ marginBottom: '12px' }}>Funding</AppLabel>
             <Box>
               {exploreUrl ? (
                 <a

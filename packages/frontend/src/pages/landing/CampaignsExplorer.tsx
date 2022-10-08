@@ -1,8 +1,8 @@
-import { Box, BoxExtendedProps, Text } from 'grommet';
+import { Box, BoxExtendedProps, Spinner, Text } from 'grommet';
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CampaignCard } from '../../components/CampaignCard';
-import { AppInput } from '../../components/styles/BasicElements';
+import { AppCallout } from '../../components/styles/BasicElements';
 import { ResponsiveGrid, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 
 import { useCampaigns } from '../../hooks/useCampaigns';
@@ -39,26 +39,29 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
   return (
     <ViewportContainer>
       <Box fill style={{ padding: '16px 32px', marginTop: HEADER_HEIGHT, maxWidth: MAX_WIDTH, ...props.style }}>
-        {/* <Box direction="row" style={{}}>
-          <Box>Explore Campaigns</Box>
-          <AppInput style={{ maxWidth: '350px' }} placeholder="search"></AppInput>
-        </Box> */}
-
-        <ResponsiveGrid columnsAt={columns} rowsAt={rows} gap="small" pad={{ vertical: '30px' }}>
-          {campaigns ? (
-            campaigns.map((campaign) => {
-              console.log({ campaignClicked });
-              return (
-                <CampaignCard
-                  onClick={() => campaignClicked(campaign.address)}
-                  key={campaign.address}
-                  campaign={campaign}></CampaignCard>
-              );
-            })
+        {campaigns ? (
+          campaigns.length > 0 ? (
+            <ResponsiveGrid columnsAt={columns} rowsAt={rows} gap="3.5vw" pad={{ vertical: '30px' }}>
+              {campaigns.map((campaign) => {
+                console.log({ campaignClicked });
+                return (
+                  <CampaignCard
+                    onClick={() => campaignClicked(campaign.address)}
+                    key={campaign.address}
+                    campaign={campaign}></CampaignCard>
+                );
+              })}
+            </ResponsiveGrid>
           ) : (
-            <></>
-          )}
-        </ResponsiveGrid>
+            <Box fill justify="center" align="center">
+              <AppCallout>No campaigns found</AppCallout>
+            </Box>
+          )
+        ) : (
+          <Box fill justify="center" align="center">
+            <Spinner></Spinner>loading...
+          </Box>
+        )}
       </Box>
     </ViewportContainer>
   );

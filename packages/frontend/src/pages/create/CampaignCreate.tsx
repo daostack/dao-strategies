@@ -517,7 +517,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         name="chainName"
         label={
           <FieldLabel
-            helpIconPosition="right"
             label="Select Network"
             required
             help="The campaign funds will be controlled by a contract deployed on this network."></FieldLabel>
@@ -530,7 +529,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         name="hasCustomAsset"
         label={
           <FieldLabel
-            helpIconPosition="right"
             label="Reward Token"
             help="If you want the campaign to raise funds on a special ERC-20 token, please add it here. By default, campaigns can be funded with the native token and popular stable-coins of each network."></FieldLabel>
         }
@@ -556,7 +554,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         name="guardian"
         label={
           <FieldLabel
-            helpIconPosition="right"
             label="Add the Admin address"
             required
             help='The campaign "Admin" can review the results of the campaign (published by the oracle) before they are effective and revert them if these are not satisfactory. This means that funds are, ultimately, not under the control of the oracle.'></FieldLabel>
@@ -586,7 +583,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           name="strategyId"
           label={
             <FieldLabel
-              helpIconPosition="right"
               label="Select a rule-set"
               help="The campaign will compute a list of shareholders based on programmed rules. These are programmatic rules that can fetch data from web2 and web3 protocols."></FieldLabel>
           }>
@@ -645,7 +641,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                   <FieldLabel
                     style={{ marginBottom: '8px' }}
                     label="Add Github repositories"
-                    helpIconPosition="right"
                     help="The campaign will compute a list of shareholders based on programmed rules. These are programmatic rules that can fetch data from web2 and web3 protocols."></FieldLabel>
                 }
                 <Box style={{ fontWeight: 'normal', fontSize: '13px' }}>

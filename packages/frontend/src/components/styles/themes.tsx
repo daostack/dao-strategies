@@ -30,6 +30,7 @@ export const styleConstants = {
     ligthGrayText2: '#878787',
     lightGrayTextDarker: '#575757',
     lightGrayBorder: '#F0EDED',
+    lightGrayBorder2: '#E7E7E7',
     headingDark: '#0E0F19',
     lessLightGrayBorder: '#E0E0E0',
     alertText: '#EF3E36',
@@ -38,6 +39,7 @@ export const styleConstants = {
     highlightedLight: 'rgba(87, 98, 213, 0.02)',
     links: '#5762D5',
     scrollbar: '#4ba6637d',
+    tagLightGray: '#F3F3F3',
   },
 };
 
@@ -168,6 +170,15 @@ const extension: ThemeType = {
   tip: {
     content: {
       background: '#FFFFFF',
+    },
+  },
+  accordion: {
+    icons: {
+      color: styleConstants.colors.ligthGrayText2,
+    },
+    border: false,
+    panel: {
+      border: false,
     },
   },
 };

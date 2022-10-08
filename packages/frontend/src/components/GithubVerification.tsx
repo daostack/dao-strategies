@@ -8,8 +8,9 @@ import { useLoggedUser } from '../hooks/useLoggedUser';
 import { AppButton, AppCallout, AppInput, HorizontalLine, IElement, NumberedRow } from './styles/BasicElements';
 import { useDebounce } from 'use-debounce';
 import { GithubProfileCard } from './GithubProfileCard';
-import { Copy } from 'grommet-icons';
+import { Clone, Copy, StatusGood } from 'grommet-icons';
 import { styleConstants } from './styles/themes';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboad';
 
 export interface IVerificationProps extends IElement {
   onClose: () => void;
@@ -29,13 +30,11 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
   const [checkingHandle, setCheckingHandle] = useState<boolean>(true);
   const [githubProfile, setGithubProfile] = useState<GithubProfile>();
 
-  const [copied, setCopied] = useState<boolean>(false);
+  const { copied, copy } = useCopyToClipboard();
   const [gistClicked, setGistClicked] = useState<boolean>(false);
 
   const [readingGists, setReadingGists] = useState<boolean>(false);
   const [verification, setVerification] = useState<Verification>();
-
-  const verified = verification !== undefined;
 
   const checkHandle = () => {
     setCheckingHandle(true);
@@ -99,16 +98,6 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
 
   const text = getGithubGistContent('all', user ? user.address : '', VerificationIntent.SEND_REWARDS);
 
-  const copyText = useCallback(() => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const close = async () => {
     props.onClose();
   };
@@ -138,7 +127,7 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
           <Box style={{ position: 'relative' }}>
             <textarea
               style={{
-                backgroundColor: '#F3F3F3',
+                backgroundColor: styleConstants.colors.tagLightGray,
                 borderRadius: '20px',
                 padding: '16px 48px 16px 16px',
                 fontSize: '15px',
@@ -150,7 +139,7 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
               value={text}
               disabled></textarea>
             <Box
-              onClick={() => copyText()}
+              onClick={() => copy(text)}
               justify="center"
               align="center"
               style={{
@@ -163,10 +152,10 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
                 borderRadius: '12px',
                 backgroundColor: '#cccccc53',
               }}>
-              {!copied ? (
-                <Copy color={styleConstants.colors.primary}></Copy>
+              {copied ? (
+                <StatusGood color={styleConstants.colors.links}> </StatusGood>
               ) : (
-                <Text style={{ fontSize: '12px' }}>copied!</Text>
+                <Clone color={styleConstants.colors.links}></Clone>
               )}
             </Box>
           </Box>
