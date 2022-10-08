@@ -145,6 +145,7 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
         <AppAccordionPanel label={'Cancel Pending merkleroot'} subtitle={'Description of the Admin action'}>
           <TransactionCalldata
             address={campaign.address}
+            chainId={campaign.chainId}
             method="setLock"
             params={[true]}
             value={'0'}></TransactionCalldata>

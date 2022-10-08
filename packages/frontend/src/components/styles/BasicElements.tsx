@@ -895,11 +895,24 @@ export interface IBytesInfo extends BoxExtendedProps {
   label: ReactNode;
   sublabel?: ReactNode;
   help?: ReactNode;
-  bytes: string;
+  bytes: ReactNode;
+  bytesText?: string;
 }
 
 export const BytesInfo: FC<IBytesInfo> = (props: IBytesInfo) => {
   const { copied, copy } = useCopyToClipboard();
+
+  let bytesText: string;
+  if (typeof props.bytes !== 'string') {
+    if (props.bytesText === undefined) {
+      console.warn(`bytesText must be provided if the bytes props is not a simple string`);
+      return <></>;
+    }
+
+    bytesText = props.bytesText;
+  } else {
+    bytesText = props.bytes;
+  }
 
   return (
     <Box direction="row" justify="between" align="start" style={{ ...props.style }}>
@@ -938,7 +951,7 @@ export const BytesInfo: FC<IBytesInfo> = (props: IBytesInfo) => {
           }}>
           {props.bytes}
         </Box>
-        <Box style={{ padding: '0px 16px' }} onClick={() => copy(props.bytes)}>
+        <Box style={{ padding: '0px 16px' }} onClick={() => copy(bytesText)}>
           {copied ? (
             <StatusGood color={styleConstants.colors.links}> </StatusGood>
           ) : (
