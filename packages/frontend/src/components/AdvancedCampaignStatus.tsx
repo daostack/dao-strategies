@@ -21,6 +21,7 @@ import {
   HorizontalLine,
 } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
+import { TransactionCalldata } from './TransactionCalldata';
 
 interface IAdvancedCampaign {
   campaignAddress: string;
@@ -142,15 +143,11 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
 
       <AppAccordion style={{}}>
         <AppAccordionPanel label={'Cancel Pending merkleroot'} subtitle={'Description of the Admin action'}>
-          <BytesInfo
-            label="Contract address"
-            help="This is the campaign\'s address"
-            bytes={campaign.address}
-            style={{ marginBottom: '24px' }}></BytesInfo>
-          <BytesInfo
-            label="Call-data"
-            help="This call-data will call the lock method on the contract with the lock parameter set as true"
-            bytes={campaign.address}></BytesInfo>
+          <TransactionCalldata
+            address={campaign.address}
+            method="setLock"
+            params={[true]}
+            value={'0'}></TransactionCalldata>
         </AppAccordionPanel>
 
         <AppAccordionPanel

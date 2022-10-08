@@ -893,6 +893,7 @@ export const AppAccordionPanel: FC<IAppAccordionPanel> = (props: IAppAccordionPa
 
 export interface IBytesInfo extends BoxExtendedProps {
   label: ReactNode;
+  sublabel?: ReactNode;
   help?: ReactNode;
   bytes: string;
 }
@@ -902,11 +903,25 @@ export const BytesInfo: FC<IBytesInfo> = (props: IBytesInfo) => {
 
   return (
     <Box direction="row" justify="between" align="start" style={{ ...props.style }}>
-      <Box direction="row" align="center" style={{ flexShrink: '0', marginRight: '12px' }}>
-        <AppLabel style={{ fontSize: styleConstants.textFontSizes.xsmall, marginRight: '10.5px' }}>
-          {props.label}:
-        </AppLabel>
-        {props.help ? <HelpTip iconSize="15px" content={props.help} /> : <></>}
+      <Box style={{ flexShrink: '0', marginRight: '12px' }}>
+        <Box direction="row" align="center">
+          <AppLabel style={{ fontSize: styleConstants.textFontSizes.xsmall, marginRight: '10.5px' }}>
+            {props.label}
+          </AppLabel>
+          {props.help ? <HelpTip iconSize="15px" content={props.help} /> : <></>}
+        </Box>
+        {props.sublabel ? (
+          <Box
+            style={{
+              fontSize: styleConstants.textFontSizes.xsmall,
+              fontWeight: '500',
+              color: styleConstants.colors.ligthGrayText2,
+            }}>
+            {props.sublabel}
+          </Box>
+        ) : (
+          <></>
+        )}
       </Box>
       <Box
         direction="row"
