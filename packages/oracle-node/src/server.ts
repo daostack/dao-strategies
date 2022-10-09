@@ -66,11 +66,11 @@ app.set('trust proxy', 1);
 const cookieConfig = ((env: string): any => {
   switch (env) {
     case 'production':
+    case 'test-prod':
       return {
         sameSite: 'none',
         secure: true, // if true only transmit cookie over https, only when frontend is also https ?
       };
-    case 'test-prod':
     default:
       return {
         sameSite: true,
