@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Campaign
@@ -153,34 +152,12 @@ contract Campaign is Initializable, ReentrancyGuard {
         bytes32[] calldata proof,
         address[] calldata assets,
         address target
-    ) external {
+    ) external nonReentrant {
         verifyShares(account, share, proof);
 
         for (uint8 ix = 0; ix < assets.length; ix++) {
             _claim(account, share, assets[ix], msg.sender, target);
         }
-    }
-
-    /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
-    function _claim(
-        address account,
-        uint256 share,
-        address asset,
-        address sender,
-        address target
-    ) private {
-        uint256 reward = rewardsAvailableToClaimer(account, share, asset);
-
-        claimed[asset][account] += reward;
-        totalClaimed[asset] += reward;
-
-        if (sender == account && target != address(0)) {
-            transferAssetOut(target, reward, asset);
-        } else {
-            transferAssetOut(account, reward, asset);
-        }
-
-        emit Claim(account, share, reward, asset);
     }
 
     /** Guardian can challenge, with 3 possible actions:
@@ -211,7 +188,7 @@ contract Campaign is Initializable, ReentrancyGuard {
     }
 
     /** asset providers can withdraw their assets only in case the campaign was cancelled by the guardian */
-    function withdrawAssets(address account, address asset) external {
+    function withdrawAssets(address account, address asset) external nonReentrant {
         if (withdrawAllowed()) {
             uint256 amount = providers[asset][account];
             if (amount == 0) {
@@ -319,6 +296,28 @@ contract Campaign is Initializable, ReentrancyGuard {
     /***************
     INTERNAL FUNCTIONS
     ***************/
+
+    /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
+    function _claim(
+        address account,
+        uint256 share,
+        address asset,
+        address sender,
+        address target
+    ) internal {
+        uint256 reward = rewardsAvailableToClaimer(account, share, asset);
+
+        claimed[asset][account] += reward;
+        totalClaimed[asset] += reward;
+
+        if (sender == account && target != address(0)) {
+            transferAssetOut(target, reward, asset);
+        } else {
+            transferAssetOut(account, reward, asset);
+        }
+
+        emit Claim(account, share, reward, asset);
+    }
 
     function _fund(
         uint256 amount,
