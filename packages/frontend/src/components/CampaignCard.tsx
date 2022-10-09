@@ -1,16 +1,20 @@
 import { CampaignReadDetails, ChainsDetails } from '@dao-strategies/core';
-import { Box, BoxExtendedProps, Spinner } from 'grommet';
+import { Box, BoxExtendedProps, Spinner, Text, Image } from 'grommet';
 import React from 'react';
-import { Address } from './Address';
-import { ChainTag } from './Assets';
-import { AppCard, AppHeading, AppTag, FixedHeightPar } from './styles/BasicElements';
+import { useNow } from '../hooks/useNow';
+import { DateManager } from '../utils/date.manager';
+import { valueToString } from '../utils/general';
+
+import { AppCard, AppHeading, AppTag, CampaignIcon, FixedHeightPar } from './styles/BasicElements';
+import { styleConstants } from './styles/themes';
 
 export interface ICampaignCard extends BoxExtendedProps {
   campaign?: CampaignReadDetails;
 }
 
 export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((props, ref) => {
-  const campaign = props.campaign;
+  const campaign = props.campaign as CampaignReadDetails;
+  const { now } = useNow();
 
   if (!campaign) {
     return (
@@ -19,35 +23,76 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
       </Box>
     );
   }
+  const getCampaignExecutionTime = () => {
+    if (!now) return '';
 
-  const chain = ChainsDetails.chainOfId(campaign.chainId);
+    if (campaign.executed) {
+      return `Campaign shares distributed ${now.prettyDiff(campaign.execDate)} ago`;
+    } else {
+      return `⏳ Due in ${now.prettyDiff(campaign.execDate)}`;
+    }
+  };
 
   return (
     <AppCard {...props} ref={ref} style={{ ...props.style }}>
-      <Box direction="row" align="center" justify="between">
-        <AppHeading level="2" style={{ margin: '8px 0px 8px 0px' }}>
-          {campaign.title}
-        </AppHeading>
-        <Box direction="row" align="center">
-          <ChainTag style={{ marginRight: '12px' }} chain={chain}></ChainTag>{' '}
-          <Address address={campaign.address} chainId={campaign.chainId}></Address>
+      {/* Header with Logo and Campaigns Name */}
+      <Box direction="row" align="start" margin={{ vertical: '0px' }}>
+        <Box
+          style={{ minWidth: '55px', position: 'relative', flexShrink: '0', marginRight: '16px' }}
+          alignContent="start"
+          align="start">
+          <CampaignIcon src={campaign.logoUrl || './images/welcome-bg-1.png'} iconSize="64px"></CampaignIcon>
+          <Box
+            justify="center"
+            align="center"
+            style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              backgroundColor: '#ffffff',
+              position: 'absolute',
+              left: '-1px',
+              top: '-1px',
+              zIndex: 10,
+            }}>
+            <Image src="./images/Github.png" style={{ borderRadius: '50%' }} width="20px" height="20px"></Image>
+          </Box>
+        </Box>
+
+        <Box>
+          <AppHeading level={2} style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+            {campaign.title}
+          </AppHeading>
+
+          <Text style={{ color: styleConstants.colors.lightGrayTextDarker, fontSize: '14px', lineHeight: '20px' }}>
+            {getCampaignExecutionTime()}
+          </Text>
         </Box>
       </Box>
 
-      <Box direction="row" align="center" justify="between" style={{ margin: '8px 0px 8px 0px', fontWeight: 400 }}>
-        <Box direction="row">
-          Created by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.creatorId} chainId={campaign.chainId}></Address>
-        </Box>
-        <Box style={{ marginLeft: '16px' }} direction="row">
-          Guarded by:{' '}
-          <Address style={{ marginLeft: '8px' }} address={campaign.guardian} chainId={campaign.chainId}></Address>
-        </Box>
-      </Box>
-
-      <Box style={{ marginTop: '12px' }} direction="row">
-        <FixedHeightPar style={{ margin: '0px 16px 0px 0px' }} content={<>{campaign.description}</>}></FixedHeightPar>
-        <AppTag style={{ flexShrink: 0 }}>~{campaign.valueLocked} USD</AppTag>
+      {/* Campaign Description and funds */}
+      <Box style={{ marginTop: '6px' }}>
+        {campaign.description && (
+          <FixedHeightPar
+            style={{ margin: '0px 16px 0px 0px', color: styleConstants.colors.lightGrayTextDarker, fontSize: '16px' }}
+            content={<>{campaign.description}</>}></FixedHeightPar>
+        )}
+        {campaign.valueLocked !== undefined && campaign.valueLocked > 0 ? (
+          <AppTag
+            align="center"
+            style={{
+              fontFamily: 'Raleway',
+              marginTop: '16px',
+              color: styleConstants.colors.headingDark,
+              fontWeight: '700',
+              backgroundColor: styleConstants.colors.tagLightGray,
+              width: 'fit-content',
+            }}>
+            ${valueToString(campaign.valueLocked, 0)} raised
+          </AppTag>
+        ) : (
+          <></>
+        )}
       </Box>
     </AppCard>
   );

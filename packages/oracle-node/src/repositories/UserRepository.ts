@@ -1,4 +1,4 @@
-import { VerificationIntent } from '@dao-strategies/core';
+import { getAddressStrict, VerificationIntent } from '@dao-strategies/core';
 import { PrismaClient, Prisma, User, CrossVerification } from '@prisma/client';
 
 export class UserRepository {
@@ -56,7 +56,7 @@ export class UserRepository {
     return this.client.crossVerification.findMany({
       where: {
         to: {
-          endsWith: address.toLocaleLowerCase(),
+          endsWith: getAddressStrict(address),
         },
       },
     });

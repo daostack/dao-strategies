@@ -1,5 +1,4 @@
 import {
-  BalancesObject,
   CampaignUriDetails,
   CampaignCreateDetails,
   CampaignOnchainDetails,
@@ -11,8 +10,8 @@ import {
   CampaignReadDetails,
   TokenBalance,
   FundEventRead,
+  getAddressStrict
 } from '@dao-strategies/core';
-import { FundEvent } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 
 import { ServiceManager } from '../service.manager';
@@ -90,7 +89,7 @@ export class CampaignController extends Controller {
     response: Response,
     next: NextFunction,
     loggedUser: string | undefined
-  ): Promise<BalancesObject> {
+  ): Promise<{ uri: string }> {
     if (loggedUser === undefined) {
       throw new Error('logged user expected but not found');
     }
@@ -129,6 +128,28 @@ export class CampaignController extends Controller {
     );
   }
 
+  async uploadLogo(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+    loggedUser: string | undefined
+  ): Promise<void> {
+    const { logo } = request.files;
+    const { uri } = request.params;
+
+    if (!logo) {
+      throw new Error('no files uploaded or no input named "logo" found, cant process with upload to s3');
+    }
+    if (!uri) {
+      throw new Error('no uri specified, not able to create correct naming');
+    }
+    await this.manager.services.campaign.uploadLogoToS3(
+      logo,
+      uri as string, //uri is the campaignID
+      loggedUser
+    );
+  }
+
   async getFromAddress(
     request: Request,
     response: Response,
@@ -136,7 +157,7 @@ export class CampaignController extends Controller {
     loggedUser: string | undefined
   ): Promise<CampaignReadDetails> {
     /* eslint-disable */
-    const address = request.params.address.toLowerCase() as string;
+    const address = getAddressStrict(request.params.address);
     /** update TVL everytime a user request the campaign object */
     await this.manager.services.indexingService.checkTvlUpdate(address);
 
@@ -169,7 +190,7 @@ export class CampaignController extends Controller {
   ): Promise<CampaignOnchainDetails> {
     /* eslint-disable */
     return this.manager.services.readDataService.getCampaignDetails(
-      request.params.address.toLowerCase() as string
+      getAddressStrict(request.params.address)
     );
     /* eslint-enable */
   }
@@ -182,8 +203,8 @@ export class CampaignController extends Controller {
   ): Promise<CampaignClaimInfo | undefined> {
     /* eslint-disable */
     return this.manager.services.readDataService.getClaimInfo(
-      request.params.address.toLowerCase() as string,
-      request.params.account.toLowerCase() as string
+      getAddressStrict(request.params.address),
+      getAddressStrict(request.params.account)
     );
     /* eslint-enable */
   }

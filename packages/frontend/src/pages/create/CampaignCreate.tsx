@@ -61,6 +61,7 @@ import { FormStatus, getButtonActions } from './buttons.actions';
 import { useNow } from '../../hooks/useNow';
 import { useUserError } from '../../hooks/useErrorContext';
 import { ethers } from 'ethers';
+import { SelectLogo } from '../../components/SelectLogo';
 import { styleConstants, theme } from '../../components/styles/themes';
 import { HEADER_HEIGHT } from '../AppHeader';
 import { Parameter } from './parameter';
@@ -74,8 +75,10 @@ export interface ICampaignCreateProps {
 }
 
 export interface CampaignFormValues {
+  logoPreview: string | undefined;
   title: string;
   description: string;
+  logo: File | undefined;
   customAssetAddress: string;
   hasCustomAsset: boolean;
   chainName: string;
@@ -95,14 +98,16 @@ export interface ProcessedFormValues {
 const initChain = ChainsDetails.chains()[0];
 
 const initialValues: CampaignFormValues = {
-  title: '', // 'sample',
-  guardian: '', // '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
+  title: '',
+  guardian: '',
+  logo: undefined,
+  logoPreview: undefined,
   chainName: initChain.name,
-  customAssetAddress: '', // '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+  customAssetAddress: '',
   hasCustomAsset: false,
-  description: '', // 'A description',
+  description: '',
   strategyId: strategies.list()[0].info.id,
-  repositoryFullnames: [], //['pepoospina/js-uprtcl'],
+  repositoryFullnames: [],
   livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
   customPeriodChoiceFrom: '',
   customPeriodChoiceTo: '',
@@ -197,6 +202,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     /** the address is not yet known */
     const otherDetails: CampaignCreateDetails = {
       title: formValues.title,
+      logoUrl: '',
       guardian: formValues.guardian,
       description: formValues.description,
       oracle,
@@ -217,8 +223,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     /** if the campaign was not simulated it must be created first */
     try {
       setCreating(true);
-      const campaignAddress = await deployCampaign(campaignFactory, shares.uri, otherDetails, finalDetails);
-
+      const campaignAddress = await deployCampaign(
+        campaignFactory,
+        shares.uri,
+        otherDetails,
+        finalDetails,
+        formValues.logo
+      );
       setCreating(false);
       navigate(RouteNames.Campaign(campaignAddress));
     } catch (e) {
@@ -241,7 +252,6 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   /** single wrapper of setFormValues to detect details changes */
   const setFormValues = (nextFormValues: CampaignFormValues) => {
     if (formValues === undefined) return;
-
     const oldDetails = strategyDetails(formValues, now, account);
 
     /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
@@ -501,6 +511,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <AppTextArea placeholder="" name="description"></AppTextArea>
       </AppFormField>
 
+      <SelectLogo onValuesUpdated={onValuesUpdated} campaignFormValues={formValues} />
+
       <AppFormField
         name="chainName"
         label={
@@ -722,9 +734,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Box>
               {' '}
               <Parameter label="Logo">
-                <CampaignIcon
-                  iconSize="64px"
-                  src="https://img-cdn.inc.com/image/upload/w_1920,h_1080,c_fill/images/panoramic/GettyImages-1011930076_460470_i7oi1u.jpg"></CampaignIcon>
+                <CampaignIcon iconSize="64px" src={formValues.logoPreview && formValues.logoPreview}></CampaignIcon>
               </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Campaign Name" text={formValues.title}></Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Description">
@@ -791,7 +801,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             {account !== undefined ? (
               <Box style={{ paddingRight: '16px' }}>
                 <Box style={{ marginBottom: '24px' }}>{shares !== undefined ? <Text>{simulationText}</Text> : ''}</Box>
-                <RewardsTable invert shares={shares} updatePage={updatePage} perPage={PER_PAGE}></RewardsTable>
+                <RewardsTable
+                  invert
+                  shares={shares}
+                  chainId={chainId}
+                  updatePage={updatePage}
+                  perPage={PER_PAGE}></RewardsTable>
               </Box>
             ) : (
               <Box

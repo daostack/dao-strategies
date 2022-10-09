@@ -30,6 +30,7 @@ export interface CampaignUriDetails {
 export interface CampaignCreateDetails {
   title: string;
   description: string;
+  logoUrl: string;
   guardian: string;
   oracle: string;
   activationTime: number;
@@ -45,26 +46,24 @@ export interface CampaignReadDetails
   extends CampaignCreateDetails,
     CampaignUriDetails {
   uri: string;
-  title: string;
-  description: string;
-  guardian: string;
-  oracle: string;
-  chainId: number;
   address: string;
   registered: boolean;
   executed: boolean;
   published: boolean;
-  creatorId: string | null;
-  valueLocked: number;
+  creatorId: string;
+  valueLocked?: number;
 }
 
-export interface BalancesObject {
-  [account: string]: string;
+export interface SharesObject {
+  [account: string]: {
+    amount: string;
+    address?: string;
+  };
 }
 
 export interface SharesRead {
   uri: string;
-  shares: BalancesObject;
+  shares: SharesObject;
   page: Page;
   details?: CampaignUriDetails;
 }
@@ -82,7 +81,9 @@ export interface ChainAndAssets {
   chain: Chain;
   assets: Asset[];
   explorer?: string;
+  exploreEns?: (ens: string) => string;
   exploreAddress?: (address: string) => string;
+  exploreTx?: (hash: string) => string;
 }
 
 /**
@@ -131,6 +132,8 @@ export interface CampaignClaimInfo {
   executed: boolean;
   /** true if the campaign was already published  */
   published: boolean;
+  /** claims that in principle will be avaialable if the root is correctly updated */
+  inPp?: { shares?: string; assets?: TokenBalance[] };
   /** current claim info */
   current?: TreeClaimInfo;
   /** pending claim info */
@@ -214,17 +217,17 @@ export interface LoggedUserDetails {
 export interface FundEventRead {
   uri: string;
   funder: string;
-  asset: string;
-  amount: string;
   blockNumber: number;
+  timestamp: number;
   txHash: string;
+  asset: TokenBalance;
 }
 
 export interface CampaignFunder {
   uri: string;
   funder: string;
   value: number;
-  fundEvents: FundEventRead[];
+  assets: TokenBalance[];
 }
 
 export interface CampaignFundersRead {

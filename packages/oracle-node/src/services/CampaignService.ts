@@ -19,10 +19,11 @@ import {
   Share,
 } from '@prisma/client';
 import { ethers } from 'ethers';
-
+import { BigNumber } from 'ethers/lib/ethers';
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
+import { uploadLogoToS3 } from '../utils/awsClient';
 
 import { campaignToUriDetails } from './CampaignUri';
 import { IndexingService } from './onchain/IndexService';
@@ -488,8 +489,21 @@ export class CampaignService {
     return sharesToAddresses;
   }
 
-  getSharesOfAddress(uri: string, address: string): Promise<Share[] | null> {
-    return this.campaignRepo.getSharesOfAddress(uri, address);
+  /** sum all the shares of a given address */
+  async getSharesOfAddressInPp(
+    uri: string,
+    address: string
+  ): Promise<string | undefined> {
+    const shares = await this.campaignRepo.getSharesOfAddressInPp(uri, address);
+    if (!shares) {
+      return undefined;
+    }
+
+    const sum = shares.reduce<BigNumber>((acc, share) => {
+      return acc.add(BigNumber.from(share.amount));
+    }, BigNumber.from(0));
+
+    return sum.toString();
   }
 
   async setShares(uri: string, shares: Balances): Promise<void> {
@@ -510,6 +524,25 @@ export class CampaignService {
     by: string
   ): Promise<void> {
     await this.campaignRepo.setDetails(uri, details, by);
+  }
+
+  async uploadLogoToS3(logo: any, uri: string, by: string): Promise<void> {
+    // check if eligable (if person who creates campaign is same that uploads logo)
+    const campaign = await this.get(uri);
+    console.log('campaign.creatorId ', campaign.creatorId, ' BY ', by);
+    if (campaign.creatorId !== by) {
+      throw new Error('campaign logo can only be set by campaign creator');
+    }
+
+    // upload to s3 retrieve logo url
+    const logoUrl = await uploadLogoToS3(
+      uri,
+      this.timeService.now(),
+      logo.data
+    );
+
+    // store logo url in campaigns row
+    await this.campaignRepo.setLogoUrl(uri, logoUrl);
   }
 
   setExecuted(uri: string): Promise<void> {

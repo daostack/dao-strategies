@@ -25,10 +25,11 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
 
   const right = (
     <Box direction="row" align="center">
-      <Box style={{ marginRight: '24px' }} direction="row" align="center">
+      {/* Currently not working, so we hide it for now
+       <Box style={{ marginRight: '24px' }} direction="row" align="center">
         <CheckBox toggle onChange={(event) => setTheme(event.target.checked)}></CheckBox>
         <Moon style={{ marginLeft: '6px' }}></Moon>
-      </Box>
+      </Box> */}
       {location.pathname === RouteNames.Campaigns ? (
         <AppButton
           onClick={() => navigate(RouteNames.Create)}
