@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 
 import { COINGECKO_URL } from '../config';
 import { appLogger } from '../logger';
+import { awaitWithTimeout } from '../utils/utils';
 
 import { TimeService } from './TimeService';
 
@@ -168,7 +169,11 @@ export class PriceService {
     };
 
     try {
-      assetPrice = await get;
+      assetPrice = await awaitWithTimeout<AssetPrice>(
+        get,
+        2000,
+        new Error(`Timeout getting price from coingecko`)
+      );
     } catch (e) {
       this.getting.delete(unique);
     }

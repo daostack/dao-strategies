@@ -3,7 +3,7 @@ import { Logout } from 'grommet-icons';
 import { FC, ReactNode, useState } from 'react';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { GithubVerification } from './GithubVerification';
-import { AppButton } from './styles/BasicElements';
+import { AppButton, AppModal } from './styles/BasicElements';
 
 const imageAndText = (url: string | ReactNode, text: string) => {
   return (
@@ -51,9 +51,9 @@ export const LoggedUser: FC = () => {
   return (
     <>
       {showLinkGithub ? (
-        <Layer onEsc={() => setShowLinkGithub(false)} onClickOutside={() => setShowLinkGithub(false)}>
+        <AppModal heading="Set the payment address for a Github account" onClosed={() => setShowLinkGithub(false)}>
           <GithubVerification onClose={() => setShowLinkGithub(false)}></GithubVerification>
-        </Layer>
+        </AppModal>
       ) : (
         <></>
       )}

@@ -1,6 +1,6 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Asset, ChainAndAssets, ChainsDetails, TokenBalance } from '@dao-strategies/core';
-import { AppHeading, AppTag, IElement } from './styles/BasicElements';
+import { AppHeading, AppLabel, AppTag, AppTip, IElement } from './styles/BasicElements';
 import { FC } from 'react';
 import { assetValue, formatEther, truncate } from '../utils/ethers';
 import { styleConstants } from './styles/themes';
@@ -25,7 +25,7 @@ export const ChainTag: FC<ChainTagI> = (props: ChainTagI) => {
   );
 };
 
-interface IAsset extends IElement {
+interface IAsset extends BoxExtendedProps {
   asset?: Asset;
 }
 
@@ -35,19 +35,20 @@ export const AssetIcon: FC<IAsset> = (props: IAsset) => {
     <Box
       direction="row"
       align="center"
-      justify="center"
+      justify="start"
       style={{
         height: '40px',
-        width: '96px',
+        padding: '4px 12px',
         backgroundColor: '#fff',
         borderRadius: '20px',
         border: 'solid 1px',
         borderColor: styleConstants.colors.lightGrayBorder,
+        ...props.style,
       }}>
       <Box style={{ textAlign: 'center', height: '20px', width: '20px' }}>
         <img src={props.asset.icon} alt={props.asset.name} />
       </Box>
-      <Box style={{ textAlign: 'center' }}>{props.asset.name}</Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
     </Box>
   );
 };
@@ -59,16 +60,24 @@ interface IBalance extends BoxExtendedProps {
 export const AssetBalance: FC<IBalance> = (props: IBalance) => {
   if (props.asset === undefined) return <></>;
   return (
-    <Box direction="row" style={{ width: '100%', ...props.style }} justify="between" align="center">
-      <Box direction="row" align="center">
-        <Box style={{ textAlign: 'center', height: '24px', width: '24px' }}>
-          <img src={props.asset.icon} alt={props.asset.name} />
-        </Box>
-        <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{formatEther(props.asset.balance)}</Box>
-        <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
+    <Box direction="row" align="center" style={{ fontWeight: '500' }}>
+      <Box style={{ textAlign: 'center', height: '24px', width: '24px' }}>
+        <img src={props.asset.icon} alt={props.asset.name} />
       </Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>
+        {ethers.utils.formatUnits(props.asset.balance, props.asset.decimals)}
+      </Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
+    </Box>
+  );
+};
 
-      <Box>~{assetValue(props.asset, 2)} usd</Box>
+export const AssetBalanceRow: FC<IBalance> = (props: IBalance) => {
+  if (props.asset === undefined) return <></>;
+  return (
+    <Box direction="row" style={{ width: '100%', ...props.style }} justify="between" align="center">
+      <AssetBalance asset={props.asset}></AssetBalance>
+      <Box style={{ fontWeight: '500' }}>${assetValue(props.asset, 2)}</Box>
     </Box>
   );
 };
@@ -83,16 +92,9 @@ export const AssetsTable: FC<IAssetsTable> = (props: IAssetsTable) => {
   const showSummary = props.showSummary !== undefined ? props.showSummary : false;
   return (
     <>
-      <Box
-        direction="row"
-        justify="between"
-        style={{
-          textTransform: 'uppercase',
-          fontSize: '14px',
-          color: styleConstants.colors.ligthGrayText,
-        }}>
-        <Box>Your share</Box>
-        <Box>Value (USD)</Box>
+      <Box direction="row" justify="between" style={{ marginBottom: '12px' }}>
+        <AppLabel>Your share</AppLabel>
+        <AppLabel>Value (USD)</AppLabel>
       </Box>
       <Box
         style={{
@@ -105,7 +107,7 @@ export const AssetsTable: FC<IAssetsTable> = (props: IAssetsTable) => {
         {props.assets ? (
           props.assets.map((asset) => {
             return asset.balance !== '0' ? (
-              <AssetBalance style={{ marginBottom: '24px' }} asset={asset}></AssetBalance>
+              <AssetBalanceRow style={{ marginBottom: '24px' }} asset={asset}></AssetBalanceRow>
             ) : (
               <></>
             );
@@ -139,6 +141,7 @@ export const AssetsTable: FC<IAssetsTable> = (props: IAssetsTable) => {
 };
 
 export interface IAssetsValue extends BoxExtendedProps {
+  title: string;
   assets?: TokenBalance[];
   preferred?: string;
   ratio?: number;
@@ -167,68 +170,130 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
     })
     .reduce((total, reward) => total + reward, 0);
 
-  const raisedCustom = assets.filter((token) => token.price === undefined);
+  const raisedCustom = assets
+    .filter((token) => token.price === undefined)
+    .sort((a, b) => {
+      const av = +ethers.utils.formatUnits(a.balance, a.decimals);
+      const bv = +ethers.utils.formatUnits(b.balance, b.decimals);
+      return av > bv ? -1 : av === bv ? 0 : 1;
+    });
 
-  let hasCustom = false;
+  const arrayToStr = (tokens: TokenBalance[]) => {
+    /** only add tokens with nonzero balance */
+    const filtered = tokens.filter((t) => t.balance !== '0');
+    return concatStrings(filtered.map((a) => balanceToStr(a)));
+  };
 
-  const customStr = raisedCustom
-    .map((token) => {
-      const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
-      if (raised > 0) {
-        hasCustom = true;
-      }
-      return `${valueToString(raised * ratio, 2)} ${token.name}`;
-    })
-    .reduce((total, reward) => total.concat(' ' + reward), '');
+  const balanceToStr = (token: TokenBalance): string => {
+    if (!token) return '';
+    const raised = +ethers.utils.formatUnits(token.balance, token.decimals);
+    return `${valueToString(raised * ratio, 2)} ${token.name}`;
+  };
 
-  const hasValue = rewardUSD > 0;
+  const concatStrings = (array: string[]) => {
+    return array.reduce((acc, el) => acc.concat(' ' + el), '');
+  };
 
-  const { preferredString, secondaryString } = (() => {
+  const { preferredString, secondaryString, has } = (() => {
+    const hasValue = rewardUSD > 0;
     const usdString = `$${valueToString(rewardUSD, 2)}`;
-    const tokensString = hasCustom ? ` ${hasValue ? '+ ' : ''}${customStr}` : '';
 
-    let preferredString = usdString;
-    let secondaryString = tokensString;
-
+    /** if preferred token is defined then it's always the primary */
     if (preferred) {
-      const value = +ethers.utils.formatUnits(preferred.balance, preferred.decimals);
-      preferredString = `${valueToString(value, 2)} ${preferred.name}`;
-      secondaryString = hasValue ? `+ ${usdString}` : '' + tokensString;
+      return {
+        preferredString: balanceToStr(preferred),
+        secondaryString: hasValue
+          ? `+ ${usdString}`
+          : '' + arrayToStr(raisedCustom.filter((a) => a.id !== preferred.id)),
+        has: true,
+      };
     }
 
-    return { preferredString, secondaryString };
+    // else (no preferred)
+    if (hasValue) {
+      // if it has value, use the usd value as default
+      return {
+        preferredString: usdString,
+        secondaryString: arrayToStr(raisedCustom),
+        has: true,
+      };
+    } else {
+      // if not, use the first token with non zero balance as primary
+      const nonZero = raisedCustom.find((a) => a.balance !== '0');
+
+      if (nonZero) {
+        return {
+          preferredString: balanceToStr(nonZero),
+          secondaryString: arrayToStr(raisedCustom.filter((a) => a.id !== nonZero.id)),
+          has: true,
+        };
+      } else {
+        // there is not value
+        return {
+          preferredString: usdString,
+          secondaryString: '',
+          has: false,
+        };
+      }
+    }
   })();
 
   /** If no preferred asset, then the USD value will be prioritized. */
-  if (type === 'card') {
-    return (
-      <Box
-        style={{
-          borderBottom: '2px dashed',
-          borderColor: styleConstants.colors.lightGrayBorder,
-          paddingBottom: '4px',
-          ...props.style,
-        }}>
+
+  return (
+    <AppTip
+      disabled={!has}
+      dropContent={
+        <Box style={{ width: '300px', padding: '20px 20px 0px 20px' }}>
+          <Box direction="row" justify="between" style={{ margin: '4px 0px 32px 0px' }}>
+            <AppLabel>{props.title}</AppLabel>
+            <AppLabel>Value</AppLabel>
+          </Box>
+          {props.assets ? (
+            props.assets.map((asset) => {
+              return asset.balance !== '0' ? (
+                <AssetBalanceRow style={{ marginBottom: '20px' }} asset={asset}></AssetBalanceRow>
+              ) : (
+                <></>
+              );
+            })
+          ) : (
+            <></>
+          )}
+        </Box>
+      }>
+      {type === 'card' ? (
         <Box
-          direction="row"
-          justify="center"
           style={{
-            fontSize: '32px',
-            marginBottom: '6px',
+            borderBottom: '2px dashed',
+            borderColor: styleConstants.colors.lightGrayBorder,
+            paddingBottom: '4px',
+            ...props.style,
           }}>
-          {preferredString}
+          <Box
+            direction="row"
+            justify="center"
+            style={{
+              fontSize: '32px',
+              marginBottom: '6px',
+              textAlign: 'center',
+            }}>
+            {preferredString}
+          </Box>
+          {secondaryString !== '' ? (
+            <Box direction="row" justify="end">
+              +{secondaryString}
+            </Box>
+          ) : (
+            <></>
+          )}
         </Box>
-        <Box direction="row" justify="end">
-          {secondaryString}
-        </Box>
-      </Box>
-    );
-  } else {
-    return (
-      <span>
-        <b>{preferredString}</b>
-        {secondaryString}
-      </span>
-    );
-  }
+      ) : (
+        <span>
+          <b>{preferredString}</b>
+          {secondaryString !== '' ? ` + ${secondaryString}` : ''}
+        </span>
+      )}
+    </AppTip>
+  );
 };

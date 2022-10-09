@@ -1,3 +1,4 @@
+import { SharesObject } from '@dao-strategies/core';
 import {
   CampaignCreateDetails,
   Balances,
@@ -5,9 +6,9 @@ import {
   bigIntToNumber,
   RootDetails,
   SharesRead,
-  BalancesObject,
   Page,
   VerificationIntent,
+  getAddressStrict,
 } from '@dao-strategies/core';
 import {
   PrismaClient,
@@ -47,14 +48,14 @@ export class CampaignRepository {
     return this.client.campaign.findUnique({ where: { uri } });
   }
 
-  async getFromAddress(address: string): Promise<Campaign> {
+  async getFromAddress(address: string): Promise<Campaign | undefined> {
     const res = await this.client.campaign.findFirst({
-      where: { address: address.toLowerCase() },
+      where: { address: getAddressStrict(address) },
       include: {
         creator: true,
       },
     });
-    return res;
+    return res !== null ? res : undefined;
   }
 
   async getChainId(uri: string): Promise<number> {
@@ -123,6 +124,13 @@ export class CampaignRepository {
     });
   }
 
+  async setLogoUrl(uri: string, value: string): Promise<void> {
+    await this.client.campaign.update({
+      where: { uri: uri },
+      data: { logoUrl: value },
+    });
+  }
+
   async setRepublishDate(uri: string, date: number): Promise<void> {
     await this.client.campaign.update({
       where: { uri: uri },
@@ -130,20 +138,23 @@ export class CampaignRepository {
     });
   }
 
+  /** get the shares and approved payment address of a campaign */
   async getSharesPaginated(uri: string, page: Page): Promise<SharesRead> {
     const [sharesRead, total] = await this.client.$transaction([
-      this.client.share.findMany({
-        where: {
-          campaign: {
-            uri,
-          },
-        },
-        orderBy: {
-          amount: 'desc',
-        },
-        skip: page.number * page.perPage,
-        take: page.perPage,
-      }),
+      this.client.$queryRaw`
+      SELECT shares.account, crossver.to as address, shares.amount FROM
+        (
+          SELECT * FROM public."Share"
+          WHERE "campaignId" = ${uri}
+        ) as shares
+        LEFT JOIN
+          public."CrossVerification" as crossver
+        ON shares.account = "from"
+      WHERE crossver.intent = ${VerificationIntent.SEND_REWARDS}
+      OR crossver.intent ISNULL
+      ORDER BY amount DESC
+      OFFSET ${page.number * page.perPage}
+      LIMIT ${page.perPage}`,
       this.client.share.count({
         where: {
           campaign: {
@@ -153,9 +164,13 @@ export class CampaignRepository {
       }),
     ]);
 
-    const shares: BalancesObject = {};
-    sharesRead.forEach((share) => {
-      shares[share.account] = share.amount.toString();
+    const shares: SharesObject = {};
+    (sharesRead as AddressShares[]).forEach((share) => {
+      shares[share.account] = {
+        amount: share.amount.toString(),
+        address:
+          share.address !== null ? share.address.split(':')[1] : undefined,
+      };
     });
 
     page.total = total;
@@ -292,24 +307,28 @@ export class CampaignRepository {
     return shares;
   }
 
-  async getSharesOfAddress(
+  /**
+   * Returns the shares of and address "in principle", this is, assuming the
+   * update merkle root process will go on as it should.
+   */
+  async getSharesOfAddressInPp(
     uri: string,
     address: string
-  ): Promise<Share[] | null> {
-    const result = await this.client.$queryRaw`
-      SELECT account, address, amount FROM 
+  ): Promise<Share[] | undefined> {
+    const res = await this.client.$queryRaw`
+      SELECT shares.account, crossver.to as address, shares.amount FROM 
       (
         SELECT * FROM public."Share" 
         WHERE "campaignId" = ${uri}
       ) as shares
       LEFT JOIN 
-      public."User" 
-      ON shares.account = "verifiedGithub"
-      WHERE address = ${address}
+        public."CrossVerification" as crossver
+      ON shares.account = "from"
+	    WHERE crossver.to = ${address}
     `;
 
     /** one address can be the target of multiple accounts */
-    return result as Share[];
+    return res === null ? undefined : (res as Share[]);
   }
 
   /** campaigns whose execution date is older and has not been executed */
@@ -408,7 +427,7 @@ export class CampaignRepository {
     details: CampaignCreateDetails,
     by: string
   ): Promise<void> {
-    details.address = details.address.toLowerCase();
+    details.address = getAddressStrict(details.address);
     const update: Prisma.CampaignUpdateArgs = {
       where: { uri },
       data: {

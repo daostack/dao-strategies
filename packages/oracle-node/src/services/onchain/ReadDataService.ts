@@ -11,7 +11,7 @@ import {
   bigNumberToNumber,
   erc20Provider,
   Asset,
-  erc20Instance,
+  cmpAddresses,
 } from '@dao-strategies/core';
 import { Campaign } from '@prisma/client';
 import { BigNumber, ethers } from 'ethers';
@@ -40,23 +40,16 @@ export class ReadDataService {
   }
 
   async getBlockNumber(chainId: number): Promise<number> {
-    /* eslint-disable */
-    /**
-     * Something is weird here. the Provider interface in ethers
-     * exposes an asyn method to the the blocknumber but it
-     * is not found and runtime. While the blocknumber is there
-     * to be directly read
-     */
-    const anyProvider = this.providers.get(chainId).provider as any;
-    const blockNumber =
-      anyProvider.blockNumber !== undefined
-        ? (anyProvider.blockNumber as number)
-        : await anyProvider.getBlockNumber();
+    const blockNumber = await this.providers
+      .get(chainId)
+      .provider.getBlockNumber();
     return blockNumber;
-    /* eslint-enable */
   }
 
-  async getCampaignDetails(address: string): Promise<CampaignOnchainDetails> {
+  async getCampaignDetails(
+    address: string
+  ): Promise<CampaignOnchainDetails | null> {
+    if (!address) return null;
     const campaign = await this.campaignService.getFromAddress(address);
 
     const campaignContract = campaignProvider(
@@ -220,6 +213,44 @@ export class ReadDataService {
     );
   }
 
+  /**
+   * based on a given amount of shares, compute the avaialble rewards reading the campaign
+   * balances
+   */
+  async getBalanceOfAssets(
+    shares: string,
+    address: string,
+    chainId: number,
+    assets: Asset[],
+    customAssets: string[],
+    campaignContract: Typechain.Campaign
+  ): Promise<TokenBalance[]> {
+    const tokens = await Promise.all(
+      assets.map(async (asset): Promise<TokenBalance> => {
+        const amount = await campaignContract.rewardsAvailableToClaimer(
+          address,
+          shares,
+          asset.address
+        );
+        const price = await this.priceOf(chainId, asset.address);
+        return {
+          ...asset,
+          balance: amount.toString(),
+          price: price,
+        };
+      })
+    );
+
+    const custom = await this.getCustomRewardsAvailable(
+      customAssets,
+      chainId,
+      address,
+      shares,
+      campaignContract
+    );
+
+    return tokens.concat(custom);
+  }
   /** get the shares (and fill the assets) for a given merkle root of a given campaign */
   async getTreeClaimInfo(
     uri: string,
@@ -242,29 +273,12 @@ export class ReadDataService {
       await campaignContract.verifyShares(address, leaf.balance, leaf.proof);
     }
 
-    const assets = ChainsDetails.chainAssets(chainId);
-
-    const tokens = await Promise.all(
-      assets.map(async (asset): Promise<TokenBalance> => {
-        const amount = await campaignContract.rewardsAvailableToClaimer(
-          address,
-          leaf.balance,
-          asset.address
-        );
-        const price = await this.priceOf(chainId, asset.address);
-        return {
-          ...asset,
-          balance: amount.toString(),
-          price: price,
-        };
-      })
-    );
-
-    const custom = await this.getCustomRewardsAvailable(
-      customAssets,
-      chainId,
-      address,
+    const assets = await this.getBalanceOfAssets(
       leaf.balance,
+      address,
+      chainId,
+      ChainsDetails.chainAssets(chainId),
+      customAssets,
       campaignContract
     );
 
@@ -273,14 +287,39 @@ export class ReadDataService {
       address,
       present: true,
       shares: leaf.balance.toString(),
-      assets: tokens.concat(custom),
+      assets,
       proof: leaf.proof,
     };
   }
 
+  /** gets the claim info assuming the merkle root update will go on as planned */
+  async getClaimInfoInPp(
+    uri: string,
+    address: string,
+    campaignContract: Typechain.Campaign,
+    chainId: number,
+    customAssets: string[]
+  ): Promise<{ shares: string; assets?: TokenBalance[] }> {
+    const shares = await this.campaignService.getSharesOfAddressInPp(
+      uri,
+      address
+    );
+
+    const assets = await this.getBalanceOfAssets(
+      shares,
+      address,
+      chainId,
+      ChainsDetails.chainAssets(chainId),
+      customAssets,
+      campaignContract
+    );
+
+    return { shares, assets };
+  }
+
   async getClaimInfo(
     campaignAddress: string,
-    address: string
+    claimerAddress: string
   ): Promise<CampaignClaimInfo | undefined> {
     const campaign = await this.campaignService.getFromAddress(campaignAddress);
 
@@ -296,7 +335,7 @@ export class ReadDataService {
     const currentClaim = await this.getTreeClaimInfo(
       campaign.uri,
       currentRoot,
-      address,
+      claimerAddress,
       campaignContract,
       campaign.chainId,
       campaign.customAssets,
@@ -313,7 +352,7 @@ export class ReadDataService {
         pendingClaim = await this.getTreeClaimInfo(
           campaign.uri,
           pendingRoot,
-          address,
+          claimerAddress,
           campaignContract,
           campaign.chainId,
           campaign.customAssets
@@ -321,9 +360,19 @@ export class ReadDataService {
       }
     }
 
+    /** check if the address was set as the payment address of an account */
+    const claimInPp = await this.getClaimInfoInPp(
+      campaign.uri,
+      claimerAddress,
+      campaignContract,
+      campaign.chainId,
+      campaign.customAssets
+    );
+
     return {
       executed: campaign.executed,
       published: campaign.published,
+      inPp: claimInPp,
       current: currentClaim,
       pending: pendingClaim,
       activationTime: bigNumberToNumber(activationTime),
@@ -332,6 +381,17 @@ export class ReadDataService {
 
   async priceOf(chainId: number, address: string): Promise<number | undefined> {
     return this.price.priceOf(chainId, address);
+  }
+
+  /** Fill out the Asset details and the price from the asset address and amount */
+  async tokenBalance(
+    chainId: number,
+    address: string,
+    amount: string
+  ): Promise<TokenBalance> {
+    const asset = ChainsDetails.assetOfAddress(chainId, address);
+    const price = await this.price.priceOf(chainId, address);
+    return { ...asset, balance: amount, price };
   }
 
   async getPublishInfo(address: string, chainId: number): Promise<PublishInfo> {
@@ -352,7 +412,7 @@ export class ReadDataService {
 
     let get: Promise<BigNumber>;
 
-    if (assetAddress === ethers.constants.AddressZero) {
+    if (cmpAddresses(assetAddress, ethers.constants.AddressZero)) {
       get = provider.getBalance(account);
     } else {
       const contract = erc20Provider(assetAddress, provider);

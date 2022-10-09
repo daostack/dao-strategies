@@ -1,12 +1,13 @@
 import { Chain, chain } from '@wagmi/core';
 import { ethers } from 'ethers';
 
-import { BNToFloat } from '../support';
+import { BNToFloat, cmpAddresses } from '../support';
 import { Asset, ChainAndAssets, TokenBalance } from '../types';
 
 import { ContractsJson } from './contracts.json';
 
 const ETHERSCAN_URL = 'https://etherscan.io';
+const GOERLI_ETHERSCAN_URL = 'https://goerli.etherscan.io';
 
 /** Single source of truth for the supported chains and assets. It is imported on the
  * frontend */
@@ -15,6 +16,8 @@ const chainList: ChainAndAssets[] = [
   {
     chain: chain.localhost,
     exploreAddress: (address: string) => `${ETHERSCAN_URL}/address/${address}`,
+    exploreTx: (hash: string) => `${ETHERSCAN_URL}/tx/${hash}`,
+    exploreEns: (ens: string) => `https://app.ens.domains/name/${ens}/details`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {
@@ -43,6 +46,10 @@ const chainList: ChainAndAssets[] = [
   },
   {
     chain: chain.goerli,
+    exploreAddress: (address: string) =>
+      `${GOERLI_ETHERSCAN_URL}/address/${address}`,
+    exploreTx: (hash: string) => `${GOERLI_ETHERSCAN_URL}/tx/${hash}`,
+    exploreEns: (ens: string) => `https://app.ens.domains/name/${ens}/details`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {
@@ -120,7 +127,7 @@ export class ChainsDetails {
     address: string
   ): Asset | undefined => {
     const assets = this.chainAssets(chainId);
-    const entry = assets.find((asset) => asset.address === address);
+    const entry = assets.find((asset) => cmpAddresses(asset.address, address));
     return entry;
   };
 
@@ -132,7 +139,7 @@ export class ChainsDetails {
   };
 
   static isNative = (asset: Asset): boolean => {
-    return asset.address === ethers.constants.AddressZero;
+    return cmpAddresses(asset.address, ethers.constants.AddressZero);
   };
 
   static valueOfAssets(balances: TokenBalance[]): number {

@@ -1,4 +1,6 @@
+import { getAddress } from '@dao-strategies/core';
 import bodyParser from 'body-parser';
+import fileUpload from 'express-fileupload';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import Session from 'express-session';
@@ -37,17 +39,21 @@ interface BigInt {
 const app = express();
 
 appLogger.info(
-  `Running in ${
-    process.env.NODE_ENV !== undefined ? process.env.NODE_ENV : 'default(dev)'
+  `Running in ${process.env.NODE_ENV !== undefined ? process.env.NODE_ENV : 'default(dev)'
   } mode`
 );
 
 /** CORS configuration */
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === 'production'
-      ? 'http://app.commonvalue.xyz.s3-website-eu-west-1.amazonaws.com'
-      : 'http://localhost:3000',
+  origin: ((env: string): any => {
+    switch (env) {
+      case 'production':
+        return 'http://app.commonvalue.xyz.s3-website-eu-west-1.amazonaws.com';
+      case 'test-prod':
+      default:
+        return 'http://localhost:3000';
+    }
+  })(process.env.NODE_ENV),
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   credentials: true,
 };
@@ -56,16 +62,21 @@ app.use(cors(corsOptions));
 
 app.set('trust proxy', 1);
 
-const cookieConfig =
-  process.env.NODE_ENV === 'production'
-    ? {
+const cookieConfig = ((env: string): any => {
+  switch (env) {
+    case 'production':
+      return {
         sameSite: 'none',
         secure: true, // if true only transmit cookie over https, only when frontend is also https ?
-      }
-    : {
+      };
+    case 'test-prod':
+    default:
+      return {
         sameSite: true,
         secure: false, // if true only transmit cookie over https, only when frontend is also https ?
       };
+  }
+})(process.env.NODE_ENV);
 
 app.use(
   Session({
@@ -102,6 +113,9 @@ app.use(
 /** JSON body parser */
 app.use(bodyParser.json());
 
+/** enable files upload */
+app.use(fileUpload({ debug: true }));
+
 /** Services instantiation */
 const manager = new ServiceManager(config);
 
@@ -113,8 +127,9 @@ Routes.forEach((route) => {
     route.route,
     async (req: Request, res: Response, next: Function) => {
       try {
-        const loggedUser: string | undefined =
-          req.session?.siwe?.address.toLowerCase();
+        const loggedUser: string | undefined = getAddress(
+          req.session?.siwe?.address
+        );
         if (route.protected) {
           if (loggedUser === undefined) {
             throw new Error(

@@ -5,7 +5,7 @@
       "chainId": "5",
       "contracts": {
         "Campaign": {
-          "address": "0x812c7EAd2f2607481152B0b352ec3b03030a00E9",
+          "address": "0xDA64a337E4ff8d9Cca96506cd2fF6eF87205D0Df",
           "abi": [
             {
               "inputs": [
@@ -781,7 +781,7 @@
           ]
         },
         "CampaignFactory": {
-          "address": "0xd8b25219E1b6133b129393141805c324bEEa701A",
+          "address": "0xAB34Fc4139aB313768CCc77f2ef80e293d7630aD",
           "abi": [
             {
               "inputs": [
