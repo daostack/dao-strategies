@@ -40,7 +40,7 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
           style={{ minWidth: '55px', position: 'relative', flexShrink: '0', marginRight: '16px' }}
           alignContent="start"
           align="start">
-          <CampaignIcon src={campaign.logoUrl || './images/welcome-bg-1.png'} iconSize="64px"></CampaignIcon>
+          <CampaignIcon src={campaign.logoUrl} iconSize="64px"></CampaignIcon>
           <Box
             justify="center"
             align="center"

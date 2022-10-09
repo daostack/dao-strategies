@@ -69,6 +69,7 @@ import { Address } from '../../components/Address';
 import { StrategySelector } from './strategy.selector';
 import { DateManager } from '../../utils/date.manager';
 import { FieldLabel } from './field.label';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 export interface ICampaignCreateProps {
   dum?: any;
@@ -133,6 +134,7 @@ const initialValues: CampaignFormValues =
       };
 
 const MORE_SOON = 'MORE_SOON';
+const CREATE_FORM_KEY = 'CREATE_FORM_KEY';
 const PER_PAGE = 8;
 const DEBUG = true;
 
@@ -163,7 +165,16 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const [simulating, setSimulating] = useState<boolean>(false);
   const [deploying, setDeploying] = useState<boolean>(false);
 
+  const [storedForm, setStoredForm] = useLocalStorage(CREATE_FORM_KEY, undefined, 0);
+
   const chainId = ChainsDetails.chainOfName(formValues.chainName)?.chain.id;
+
+  const checkStoredValues = () => {
+    /** use stored form if found */
+    if (storedForm) {
+      onValuesUpdated(storedForm);
+    }
+  };
 
   /** initialize the chainId with the currently connected chainId */
   useEffect(() => {
@@ -177,6 +188,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         setFormValues({ ...formValues, chainName: ChainsDetails.chains()[0].name });
       }
     }
+
+    checkStoredValues();
   }, []);
 
   const campaignFactory = useCampaignFactory(chainId);
@@ -251,6 +264,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         formValues.logo
       );
       setCreating(false);
+      setStoredForm(undefined);
       navigate(RouteNames.Campaign(campaignAddress));
     } catch (e) {
       showError('Error creating campaign');
@@ -286,6 +300,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       }
     }
 
+    setStoredForm(nextFormValues);
     setFormValuesState(nextFormValues);
   };
 
@@ -322,8 +337,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     setFormValues(values);
   };
 
-  const validate = (values: CampaignFormValues = formValues): string[] => {
-    if (DEBUG) console.log('CampaignCreate - validate()');
+  const validate = (values: CampaignFormValues): string[] => {
+    const detailsValidate = strategyDetails(values, now, account);
+
+    if (DEBUG) console.log('CampaignCreate - validate()', { values, detailsValidate });
     const errors: string[] = [];
 
     if (values.title === '') errors.push('title cannot be empty');
@@ -343,6 +360,14 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         values.customPeriodChoiceTo === undefined)
     )
       errors.push(`custom period not specificed`);
+
+    if (detailsValidate) {
+      if (detailsValidate.strategyParams.timeRange.start >= detailsValidate.strategyParams.timeRange.end) {
+        errors.push(`The end of the live period cannot be after its start`);
+      }
+    }
+
+    if (DEBUG) console.log('CampaignCreate - validate()', { values, detailsValidate, errors });
 
     setValidated(true);
     setErrors(errors);
@@ -431,7 +456,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   const setAccountAsGuardian = useCallback(() => {
     if (account !== undefined) {
-      setFormValues({ ...formValues, guardian: account });
+      onValuesUpdated({ ...formValues, guardian: account });
     }
   }, [formValues, account]);
 
@@ -467,12 +492,16 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     };
   }, [pageIx, periodType, isLogged, simulating, shares, creating, deploying, errors.length, chain, chainId]);
 
+  const validateFormValues = useCallback(() => {
+    return validate(formValues);
+  }, [formValues]);
+
   const { rightText, rightAction, rightDisabled } = getButtonActions(status, pageIx, {
     connect,
     create,
     setPageIx,
     simulate: firstSimulate,
-    validate,
+    validate: validateFormValues,
     switchNetwork: switchNetworkCall,
   });
 

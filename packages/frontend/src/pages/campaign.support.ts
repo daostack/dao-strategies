@@ -82,19 +82,17 @@ export const strategyDetails = (
 };
 
 /** Derive the start and end timestamps from the form string values */
-export const getStartEnd = (values: CampaignFormValues, today: DateManager): [number, number] => {
+export const getStartEnd = (values: CampaignFormValues, now: DateManager): [number, number] => {
   if (values.livePeriodChoice === periodOptions.get(PeriodKeys.custom)) {
     if (values.customPeriodChoiceFrom === '' || values.customPeriodChoiceTo === '') {
       return [0, 0];
     }
 
     let from = DateManager.from(
-      values.customPeriodChoiceFrom === SET_FROM_NOW ? today : values.customPeriodChoiceFrom,
+      values.customPeriodChoiceFrom === SET_FROM_NOW ? now : values.customPeriodChoiceFrom,
       true
     );
     let to = DateManager.from(values.customPeriodChoiceTo, true);
-
-    to = to.addDays(1);
 
     return [from.getTime(), to.getTime()];
   } else {
@@ -104,8 +102,8 @@ export const getStartEnd = (values: CampaignFormValues, today: DateManager): [nu
     if (parts[0] === 'Last') livePeriod = -1 * livePeriod;
 
     return livePeriod < 0
-      ? [today.clone().addMonths(livePeriod).getTime(), today.getTime()]
-      : [today.getTime(), today.clone().addMonths(livePeriod).getTime()];
+      ? [now.clone().addMonths(livePeriod).getTime(), now.getTime()]
+      : [now.getTime(), now.clone().addMonths(livePeriod).getTime()];
   }
 };
 
