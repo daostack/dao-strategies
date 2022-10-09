@@ -71,7 +71,7 @@ export class DateManager {
   }
 
   /* Used for showing countdown, with this func it gives a new value */
-  getTimeUpdated(): number {
+  getTimeDynamic(): number {
     return this.getTime() + Date.now() - this.localTimeZero;
   }
 

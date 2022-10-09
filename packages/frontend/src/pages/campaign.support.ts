@@ -96,7 +96,9 @@ export const getStartEnd = (values: CampaignFormValues, today: DateManager): [nu
 
     to = to.addDays(1);
 
-    return [from.getTime(), to.getTime()];
+    // return [from.getTime(), to.getTime()];
+    console.error('Overwritting endtime!');
+    return [from.getTime(), from.getTime() + 5 * 60];
   } else {
     const parts = values.livePeriodChoice.split(' ');
     let livePeriod = +parts[1];
@@ -170,7 +172,7 @@ export const deployCampaign = async (
   uri: string | undefined,
   createDetails: CampaignCreateDetails,
   details: CampaignUriDetails | undefined,
-  logo: File | undefined,
+  logo: File | undefined
 ) => {
   let uriDefined;
   if (uri !== undefined) {
@@ -218,9 +220,9 @@ export const deployCampaign = async (
   createDetails.address = address;
 
   console.log('campaign contract deployed', { address });
-  console.warn('sending ', { createDetails })
+  console.warn('sending ', { createDetails });
   await registerCampaign(uriDefined, createDetails);
-  await registerCampaignLogo(logo, uriDefined);  //do we need to await this? Can we show local logo ?
+  await registerCampaignLogo(logo, uriDefined); //do we need to await this? Can we show local logo ?
   return address;
 };
 
@@ -239,7 +241,7 @@ const registerCampaignLogo = async (logo: File | undefined, uri: string): Promis
   if (!logo) return;
 
   const formData = new FormData();
-  console.log('what is logo ', logo, ' or ')
+  console.log('what is logo ', logo, ' or ');
   formData.append('logo', logo);
 
   await fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
@@ -247,8 +249,7 @@ const registerCampaignLogo = async (logo: File | undefined, uri: string): Promis
     body: formData,
     credentials: 'include',
   });
-
-}
+};
 
 export const getCampaign = async (uri: string): Promise<CampaignReadDetails> => {
   const response = await fetch(ORACLE_NODE_URL + `/campaign/${uri}`, {

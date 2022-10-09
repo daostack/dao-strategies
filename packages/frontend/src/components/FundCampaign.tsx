@@ -4,25 +4,14 @@ import { Select, Box, FormField, Spinner } from 'grommet';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { useSigner } from 'wagmi';
 
-import { useBalanceOf } from '../hooks/useBalanceOf';
 import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
-import { useNow } from '../hooks/useNow';
+import { useNowContext } from '../hooks/useNow';
 import { DateManager } from '../utils/date.manager';
-import { valueToString } from '../utils/general';
 import { Address } from './Address';
 import { AssetBalance, AssetIcon } from './Assets';
 import { AssetsInput, SelectedInputDetails } from './AssetsInput';
-import {
-  AppForm,
-  AppButton,
-  IElement,
-  AppInput,
-  AppHeading,
-  AppLabel,
-  HorizontalLine,
-  AppCallout,
-} from './styles/BasicElements';
+import { AppButton, IElement, AppHeading, AppLabel, HorizontalLine, AppCallout } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
 
 interface IFundCampaign extends IElement {
@@ -43,7 +32,7 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
 
   const { account, connect } = useLoggedUser();
   const { campaign, fundEvents, getFundEvents } = useCampaignContext();
-  const { now } = useNow();
+  const { now } = useNowContext();
 
   const isNative = selected ? ChainsDetails.isNative(selected.asset) : false;
 
@@ -110,6 +99,11 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLogged, selected, signer, isNative, account]);
 
+  /** campaign should always be defined if the fund dialog is shown */
+  const zero = selected && selected.asset.balance === '0';
+  const chainId = campaign ? campaign.chainId : 0;
+  const notEnoughFunds = selected?.status === 'not-enough-funds';
+
   const label = (() => {
     if (approving) {
       return `Approving Allowance...`;
@@ -124,27 +118,26 @@ export const FundCampaign: FC<IFundCampaign> = (props: IFundCampaign) => {
     }
 
     if (isLogged) {
-      if (isNative) {
-        return 'Fund';
+      if (!zero) {
+        if (isNative) {
+          return 'Fund';
+        } else {
+          return 'Approve & Fund';
+        }
       } else {
-        return 'Approve & Fund';
+        return 'Chose the amount to fund';
       }
     } else {
       return 'Connect to Fund';
     }
   })();
 
-  /** campaign should always be defined if the fund dialog is shown */
-  const chainId = campaign ? campaign.chainId : 0;
-  const notEnoughFunds = selected?.status === 'not-enough-funds';
-  const zero = selected && selected.asset.balance === '0';
-
-  const disabled = zero || notEnoughFunds || funding || approving || signing;
+  const disabled = (zero && isLogged) || notEnoughFunds || funding || approving || signing;
 
   const funds = fundEvents ? (
     fundEvents.map((fundEvent, ix) => {
       const ts = new DateManager(fundEvent.timestamp);
-      const since = now ? `${ts.prettyDiff(now.getTime())} ago` : '';
+      const since = now ? `${ts.prettyDiff(now.getTimeDynamic())} ago` : '';
       const chain = ChainsDetails.chainOfId(chainId);
       const exploreUrl = chain && chain.exploreTx ? chain.exploreTx(fundEvent.txHash) : undefined;
 

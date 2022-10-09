@@ -161,7 +161,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
                 <RepoTag repo={`${repo.owner}/${repo.repo}`} key={ix} style={{ marginBottom: '6px' }} />
               ))}
             </InfoProperty>
-            <InfoProperty style={{ marginTop: '36px' }} title="Guardian Address">
+            <InfoProperty style={{ marginTop: '36px' }} title="Admin">
               <Address address={campaign.guardian} chainId={campaign.chainId}></Address>
             </InfoProperty>
           </Box>

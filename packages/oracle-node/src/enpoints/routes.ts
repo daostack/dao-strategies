@@ -11,6 +11,7 @@ export interface RouteConfig {
   controller: new (manager: ServiceManager) => Controller;
   action: string;
   protected: boolean;
+  file?: boolean;
 }
 
 export const Routes: RouteConfig[] = [
@@ -27,6 +28,7 @@ export const Routes: RouteConfig[] = [
     controller: CampaignController,
     action: 'uploadLogo',
     protected: true,
+    file: true,
   },
   {
     method: 'post',

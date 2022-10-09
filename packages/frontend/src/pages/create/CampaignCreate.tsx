@@ -58,7 +58,7 @@ import { AddCircle, FormPreviousLink, FormTrash, StatusCritical } from 'grommet-
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
 import { FormStatus, getButtonActions } from './buttons.actions';
-import { useNow } from '../../hooks/useNow';
+import { useNowContext } from '../../hooks/useNow';
 import { useUserError } from '../../hooks/useErrorContext';
 import { ethers } from 'ethers';
 import { SelectLogo } from '../../components/SelectLogo';
@@ -97,22 +97,40 @@ export interface ProcessedFormValues {
 
 const initChain = ChainsDetails.chains()[0];
 
-const initialValues: CampaignFormValues = {
-  title: '',
-  guardian: '',
-  logo: undefined,
-  logoPreview: undefined,
-  chainName: initChain.name,
-  customAssetAddress: '',
-  hasCustomAsset: false,
-  description: '',
-  strategyId: strategies.list()[0].info.id,
-  repositoryFullnames: [],
-  livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
-  customPeriodChoiceFrom: '',
-  customPeriodChoiceTo: '',
-  reactionsConfig: ReactionConfig.PRS_AND_REACTS,
-};
+const initialValues: CampaignFormValues =
+  process.env.NODE_ENV === 'production'
+    ? {
+        title: '',
+        guardian: '',
+        logo: undefined,
+        logoPreview: undefined,
+        chainName: initChain.name,
+        customAssetAddress: '',
+        hasCustomAsset: false,
+        description: '',
+        strategyId: strategies.list()[0].info.id,
+        repositoryFullnames: [],
+        livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
+        customPeriodChoiceFrom: '',
+        customPeriodChoiceTo: '',
+        reactionsConfig: ReactionConfig.PRS_AND_REACTS,
+      }
+    : {
+        title: 'Sample Campaign',
+        guardian: '',
+        logo: undefined,
+        logoPreview: undefined,
+        chainName: initChain.name,
+        customAssetAddress: '',
+        hasCustomAsset: false,
+        description: 'My sample campaign description',
+        strategyId: strategies.list()[0].info.id,
+        repositoryFullnames: ['gershido/test-github-api'],
+        livePeriodChoice: periodOptions.get(PeriodKeys.last3Months) as string,
+        customPeriodChoiceFrom: '',
+        customPeriodChoiceTo: '',
+        reactionsConfig: ReactionConfig.PRS_AND_REACTS,
+      };
 
 const MORE_SOON = 'MORE_SOON';
 const PER_PAGE = 8;
@@ -122,7 +140,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, chain, switchNetwork, connect } = useLoggedUser();
   const { showError } = useUserError();
 
-  const { now } = useNow();
+  const { now, reset: resetNow } = useNowContext();
   const [pageIx, setPageIx] = useState<number>(0);
 
   const { checking, checkExist, getValidName, validRepo, isValid } = useGithubSearch();
@@ -149,6 +167,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   /** initialize the chainId with the currently connected chainId */
   useEffect(() => {
+    resetNow();
+
     if (chain !== undefined) {
       const connectedChainName = ChainsDetails.chainOfId(chain.id)?.chain.name;
       if (connectedChainName !== undefined) {

@@ -37,7 +37,7 @@ export interface ExecutionConfig {
 export class ExecuteService {
   executionCicle: NodeJS.Timer;
   republishCicle: NodeJS.Timer;
-  schedulled: Set<string> = new Set();
+  schedulled: Map<string, Promise<void>> = new Map();
   executing: Map<string, Promise<void>> = new Map();
   publishing: Map<string, Promise<void>> = new Map();
 
@@ -104,29 +104,39 @@ export class ExecuteService {
   async scheduleExecute(uri: string, now: number): Promise<void> {
     /** don't schedule an already schedulled task */
     if (this.schedulled.has(uri)) {
-      return;
+      return this.schedulled.get(uri);
     }
 
-    const campaign = await this.services.campaign.get(uri);
+    const schedule = async (): Promise<void> => {
+      const campaign = await this.services.campaign.get(uri);
+      const delay = bigIntToNumber(campaign.execDate) - now;
 
-    this.schedulled.add(campaign.uri);
+      const callback = async (): Promise<void> => {
+        appLogger.info(`Running execution of ${campaign.uri}`);
+        await this.execute(campaign.uri, now + delay);
+        await this.publish(campaign.uri);
+        this.schedulled.delete(campaign.uri);
+      };
 
-    const delay = bigIntToNumber(campaign.execDate) - now;
-
-    const callback = async (): Promise<void> => {
-      await this.execute(campaign.uri, now + delay);
-      await this.publish(campaign.uri);
-      this.schedulled.delete(campaign.uri);
+      appLogger.info(
+        `Preparing execution of ${campaign.uri} in ${delay} seconds`
+      );
+      setTimeout(
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        callback,
+        delay * 1000
+      );
     };
 
-    appLogger.info(
-      `Preparing execution of ${campaign.uri} in ${delay} seconds`
-    );
-    setTimeout(
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      callback,
-      delay * 1000
-    );
+    try {
+      const runSchedule = schedule();
+      this.schedulled.set(uri, runSchedule);
+      await runSchedule;
+    } catch (e) {
+      this.schedulled.delete(uri);
+    }
+
+    this.schedulled.delete(uri);
   }
 
   /**
@@ -143,6 +153,7 @@ export class ExecuteService {
     /** reentrancy protection */
     const executing = this.executing.get(uri);
     if (executing !== undefined) {
+      appLogger.info(`execute reentered ${uri}`);
       return executing;
     }
 
@@ -151,6 +162,9 @@ export class ExecuteService {
 
       if (campaign.executed || campaign.execDate > now) {
         /** campaign not ready to be executed */
+        appLogger.info(
+          `campaign not ready to be executed now: ${now}, execData: ${campaign.execDate}, executed: ${campaign.executed}`
+        );
         return;
       }
 
@@ -177,7 +191,12 @@ export class ExecuteService {
     })();
 
     this.executing.set(uri, _execute);
-    await _execute;
+    try {
+      await _execute;
+      this.executing.delete(uri);
+    } catch (e) {
+      this.executing.delete(uri);
+    }
   }
 
   async publish(uri: string): Promise<void> {
