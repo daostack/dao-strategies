@@ -300,8 +300,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
     /** auto-set start and end dates */
     if (
-      formValues.livePeriodChoice === periodOptions.get(PeriodKeys.custom) &&
-      values.livePeriodChoice !== periodOptions.get(PeriodKeys.custom)
+      values.livePeriodChoice === periodOptions.get(PeriodKeys.custom) &&
+      formValues.livePeriodChoice !== periodOptions.get(PeriodKeys.custom)
     ) {
       if (values.customPeriodChoiceFrom === '' && now !== undefined) {
         values.customPeriodChoiceFrom = now.toString();
