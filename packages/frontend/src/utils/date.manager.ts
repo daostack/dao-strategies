@@ -13,7 +13,7 @@ export class DateManager {
 
   /** input date is in seconds if provided */
   constructor(date?: DateManager | Date | number | string, utc: boolean = false) {
-    this.localTimeZero = Date.now();
+    this.localTimeZero = Date.now() / 1000;
     if (typeof date === 'number') {
       this.date = new Date(date * 1000);
     } else if (typeof date === 'string') {
@@ -66,13 +66,14 @@ export class DateManager {
     return new DateManager(new Date(this.date));
   }
 
+  /** get's time in seconds (includes the bias) */
   getTime(): number {
     return Math.floor(this.date.getTime() / 1000) + this.bias;
   }
 
-  /* Used for showing countdown, with this func it gives a new value */
+  /* Returns the dynamic time. Similar to Date.now() but in seconds and including the bias. */
   getTimeDynamic(): number {
-    return this.getTime() + Date.now() - this.localTimeZero;
+    return this.getTime() + Date.now() / 1000 - this.localTimeZero;
   }
 
   /** updates to the latest device date (keeping the bias) */
@@ -90,10 +91,10 @@ export class DateManager {
     return this;
   }
 
-  static intervalDuration(startDate: Date | number, endDate: Date | number): Duration {
+  static intervalDuration(startDate: number, endDate: number): Duration {
     return intervalToDuration({
-      start: startDate,
-      end: endDate,
+      start: startDate * 1000,
+      end: endDate * 1000,
     });
   }
 

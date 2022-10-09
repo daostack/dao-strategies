@@ -4,7 +4,7 @@ import { useNowContext } from '../hooks/useNow';
 import { DateManager } from '../utils/date.manager';
 import { AppRemainingTime } from './styles/BasicElements';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface CountdownI extends BoxExtendedProps {
   toDate: number;
@@ -24,7 +24,9 @@ export const Countdown: FC<CountdownI> = (props: CountdownI) => {
       if (!now) {
         setRemaining(undefined);
       } else {
-        setRemaining(DateManager.intervalDuration(now.getTimeDynamic(), execDate.getTime()));
+        const duration = DateManager.intervalDuration(now.getTimeDynamic(), execDate.getTime());
+        if (DEBUG) console.log('duration: ', { duration });
+        setRemaining(duration);
       }
     };
 
