@@ -96,9 +96,7 @@ export const getStartEnd = (values: CampaignFormValues, today: DateManager): [nu
 
     to = to.addDays(1);
 
-    // return [from.getTime(), to.getTime()];
-    console.error('Overwritting endtime!');
-    return [from.getTime(), from.getTime() + 5 * 60];
+    return [from.getTime(), to.getTime()];
   } else {
     const parts = values.livePeriodChoice.split(' ');
     let livePeriod = +parts[1];
