@@ -1,7 +1,7 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { FC } from 'react';
 import { useCampaignContext } from '../hooks/useCampaign';
-import { useNow } from '../hooks/useNow';
+import { useNowContext } from '../hooks/useNow';
 import { Address } from './Address';
 
 import { Countdown } from './Countdown';
@@ -12,7 +12,7 @@ export interface CampaignStatusI extends BoxExtendedProps {}
 
 export const CampaignStatus: FC<CampaignStatusI> = (props: CampaignStatusI) => {
   const { campaign } = useCampaignContext();
-  const { now } = useNow();
+  const { now } = useNowContext();
 
   if (!campaign || !now) {
     return <></>;
@@ -31,7 +31,7 @@ export const CampaignStatus: FC<CampaignStatusI> = (props: CampaignStatusI) => {
   );
 
   const status = (
-    <Box direction="row" style={{ flexGrow: '1' }}>
+    <Box direction="row" style={{ flexGrow: '1', paddingRight: '40px' }}>
       {campaign.executed ? (
         <Box direction="row" align="center">
           {tip} Campaign shares successfully distributed {now.prettyDiff(campaign.execDate)} ago

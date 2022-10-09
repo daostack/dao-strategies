@@ -39,7 +39,7 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
   return (
     <ViewportContainer>
       <Box fill style={{ padding: '16px 32px', marginTop: HEADER_HEIGHT, maxWidth: MAX_WIDTH, ...props.style }}>
-        {campaigns ? (
+        {campaigns !== undefined ? (
           campaigns.length > 0 ? (
             <ResponsiveGrid columnsAt={columns} rowsAt={rows} gap="3.5vw" pad={{ vertical: '30px' }}>
               {campaigns.map((campaign) => {

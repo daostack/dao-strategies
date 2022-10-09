@@ -22,9 +22,9 @@ export class DateManager {
          * the string is interpreted as UTC in the UX, but the Date constructure interprets it as local string.
          * So we need to shift the local time offset.
          */
-        const temp = new Date(date);
-        temp.getTimezoneOffset();
-        this.date = new Date(temp.getTime() - temp.getTimezoneOffset() * 60 * 1000);
+        this.date = new Date(date);
+        // temp.getTimezoneOffset();
+        // this.date = new Date(temp.getTime() - temp.getTimezoneOffset() * 60 * 1000);
       } else {
         this.date = new Date(date);
       }
@@ -71,7 +71,7 @@ export class DateManager {
   }
 
   /* Used for showing countdown, with this func it gives a new value */
-  getTimeUpdated(): number {
+  getTimeDynamic(): number {
     return this.getTime() + Date.now() - this.localTimeZero;
   }
 

@@ -6,7 +6,7 @@ import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { claimRewards } from '../pages/campaign.support';
 
-import { useNow } from '../hooks/useNow';
+import { useNowContext } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { truncate } from '../utils/ethers';
 
@@ -34,7 +34,7 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
   const [showClaim, setShowClaim] = useState<boolean>(false);
   const [hasTargetAddress, setHasTargetAddress] = useState<boolean>(false);
 
-  const { now } = useNow();
+  const { now } = useNowContext();
   const { user, account, githubAccount } = useLoggedUser();
 
   const campaignInstance = useCampaignInstance(props.campaignAddress);

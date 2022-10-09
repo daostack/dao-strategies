@@ -39,7 +39,8 @@ interface BigInt {
 const app = express();
 
 appLogger.info(
-  `Running in ${process.env.NODE_ENV !== undefined ? process.env.NODE_ENV : 'default(dev)'
+  `Running in ${
+    process.env.NODE_ENV !== undefined ? process.env.NODE_ENV : 'default(dev)'
   } mode`
 );
 
@@ -113,18 +114,25 @@ app.use(
 /** JSON body parser */
 app.use(bodyParser.json());
 
-/** enable files upload */
-app.use(fileUpload({ debug: true }));
+const fileUploadOptions = {
+  debug: process.env.NODE_ENV !== 'production',
+  fileSize: 2e6,
+};
 
-/** Services instantiation */
+/** Services instantiation (globally reused, we don's support hot loading the services) */
 const manager = new ServiceManager(config);
 
 /** --------------------- */
+
+const nop = (req: any, res: any, next: any): any => {
+  return next();
+};
 
 /** Register routes */
 Routes.forEach((route) => {
   (app as any)[route.method](
     route.route,
+    route.file ? fileUpload(fileUploadOptions) : nop,
     async (req: Request, res: Response, next: Function) => {
       try {
         const loggedUser: string | undefined = getAddress(
@@ -146,8 +154,6 @@ Routes.forEach((route) => {
       } catch (error) {
         console.error(error);
         throw error;
-        appLogger.error(error.message);
-        next(error);
       }
     }
   );
