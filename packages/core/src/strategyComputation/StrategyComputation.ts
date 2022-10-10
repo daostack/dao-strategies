@@ -1,4 +1,4 @@
-import { hashObject } from '../campaigns';
+import { hashOfObject } from '../campaigns';
 import { strategies } from '../strategies';
 import { normalizeShares, renameIds } from '../support';
 import { Balances } from '../types';
@@ -13,8 +13,8 @@ export class StrategyComputation implements IStrategyComputation {
   private running: Map<string, Promise<Balances>> = new Map();
 
   async getUnique(strategyId: string, params: any): Promise<string> {
-    const hash = await hashObject(params);
-    return `${strategyId}-${hash.digest.toString()}`;
+    const hash = await hashOfObject(params);
+    return `${strategyId}-${hash}`;
   }
 
   constructor(config: WorldConfig) {
@@ -23,6 +23,7 @@ export class StrategyComputation implements IStrategyComputation {
 
   async runStrategy(strategyId: string, params: any): Promise<Balances> {
     const unique = await this.getUnique(strategyId, params);
+    console.log('runStrategy', { unique, strategyId, params });
 
     const running = this.running.get(unique);
     if (running) {

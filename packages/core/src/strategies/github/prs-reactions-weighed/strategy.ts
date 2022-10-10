@@ -160,6 +160,8 @@ export const strategyFunc: StrategyFunc = async (
     })
   );
 
+  if (DEBUG) console.log('points', { points: JSON.stringify(points) });
+
   /** once all prs for all repos have been processed, fill the contributors scores,
    * in sequence
    */
@@ -176,6 +178,8 @@ export const strategyFunc: StrategyFunc = async (
       }
     }
   }
+
+  if (DEBUG) console.log('points', { pointsPerContributor });
 
   const scores = new Map();
   for (const [contributor, points] of pointsPerContributor.entries()) {

@@ -388,8 +388,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const simulate = useMemo(() => {
     return async (_page: Page): Promise<void> => {
       if (details === undefined) throw new Error();
-      const shares = await sharesFromDetails(details, _page);
-      setShares(shares);
+      try {
+        const shares = await sharesFromDetails(details, _page);
+        setShares(shares);
+      } catch (e) {
+        console.error(e);
+        setShares(undefined);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details]);
@@ -848,6 +853,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <Box>
               <Parameter label="Rule-set">
                 <StrategySelector strategy={selectedStrategy}></StrategySelector>
+              </Parameter>
+              <Parameter style={{ marginTop: '40px' }} label="Count contribution scores using">
+                {reactionConfigOptions.get(formValues.reactionsConfig)}
               </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Github Repositories">
                 {formValues.repositoryFullnames.map((name) => {
