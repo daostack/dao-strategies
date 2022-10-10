@@ -60,11 +60,11 @@ export async function getPrsInRepo(
       const numPages: number = Number(numPagesReg[1]);
       if (DEBUG) console.log('numPages', { numPages, repo });
 
-      const reqs = [];
-      reqs.push(firstReq);
+      const reqs: Array<Promise<PullRequestListData>> = [];
+      reqs.push(Promise.resolve(firstReq.data));
 
       for (let i = 2; i < numPages; i++) {
-        reqs.push(async () => {
+        const getPage = (async (): Promise<PullRequestListData> => {
           if (DEBUG)
             console.log('rest.pulls.list - getting...', { repo, page: i });
 
@@ -79,27 +79,26 @@ export async function getPrsInRepo(
             console.log('rest.pulls.list - done...', {
               repo,
               page: i,
-              prs,
+              prs: prs.data.map((pr) => pr.number),
             });
 
-          return prs;
-        });
+          return prs.data;
+        })();
+        reqs.push(getPage);
       }
 
       await Promise.all(reqs).then((responses) => {
         for (const response of responses) {
-          /* eslint-disable */
-          for (const pull of (response as any).data) {
+          for (const pull of response) {
             if (filter !== undefined) {
               // filter pull requests
               if (filter(pull)) {
-                (allPulls as any).push(pull);
+                allPulls.push(pull);
               }
             } else {
-              (allPulls as any).push(pull);
+              allPulls.push(pull);
             }
           }
-          /* eslint-enable */
         }
       });
     } else {

@@ -41,12 +41,14 @@ import {
   AppFormField,
   AppHeading,
   AppInput,
+  AppLabel,
   AppSelect,
   AppTag,
   AppTextArea,
   CampaignIcon,
   ExpansiveParagraph,
   HorizontalLine,
+  InfoProperty,
   RepoTag,
   SelectRow,
   SelectValue,
@@ -183,9 +185,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (chain !== undefined) {
       const connectedChainName = ChainsDetails.chainOfId(chain.id)?.chain.name;
       if (connectedChainName !== undefined) {
-        setFormValues({ ...formValues, chainName: connectedChainName });
+        onValuesUpdated({ ...formValues, chainName: connectedChainName });
       } else {
-        setFormValues({ ...formValues, chainName: ChainsDetails.chains()[0].name });
+        onValuesUpdated({ ...formValues, chainName: ChainsDetails.chains()[0].name });
       }
     }
 
@@ -283,31 +285,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     };
   };
 
-  /** single wrapper of setFormValues to detect details changes */
-  const setFormValues = (nextFormValues: CampaignFormValues) => {
-    if (formValues === undefined) return;
-    const oldDetails = strategyDetails(formValues, now, account);
-
-    /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
-    if (oldDetails !== undefined && shares !== undefined) {
-      const nextDetails = strategyDetails(nextFormValues, now, account);
-      if (nextDetails !== undefined) {
-        const currentUri = getCampaignUri(oldDetails);
-        const nextUri = getCampaignUri(nextDetails);
-        if (nextUri !== currentUri) {
-          setShares(undefined);
-        }
-      }
-    }
-
-    setStoredForm(nextFormValues);
-    setFormValuesState(nextFormValues);
-  };
-
   /** Hook called everytime any field in the form is updated, it keeps the formValues state in synch */
   const onValuesUpdated = (values: CampaignFormValues) => {
-    if (DEBUG) console.log('CampaignCreate - onValuesUpdated()', { values });
-
     /** ignore some cases */
     if (values.strategyId === MORE_SOON) {
       return;
@@ -334,7 +313,26 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       // validate every change after the first time
       validate(values);
     }
-    setFormValues(values);
+
+    const oldDetails = strategyDetails(formValues, now, account);
+    /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
+    if (oldDetails !== undefined && shares !== undefined) {
+      const nextDetails = strategyDetails(values, now, account);
+      if (nextDetails !== undefined) {
+        const currentUri = getCampaignUri(oldDetails);
+        const nextUri = getCampaignUri(nextDetails);
+        if (nextUri !== currentUri) {
+          setShares(undefined);
+        }
+      }
+    }
+
+    const details = strategyDetails(values, now, account);
+    if (DEBUG)
+      console.log('CampaignCreate - onValuesUpdated()', { values, oldValues: formValues, details, oldDetails });
+
+    setStoredForm(values);
+    setFormValuesState(values);
   };
 
   const validate = (values: CampaignFormValues): string[] => {
@@ -445,7 +443,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     (repo: string) => {
       const ix = formValues.repositoryFullnames.indexOf(repo);
       formValues.repositoryFullnames.splice(ix, 1);
-      setFormValues({ ...formValues });
+      onValuesUpdated({ ...formValues });
     },
     [formValues]
   );
@@ -463,11 +461,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const setFromNow = useCallback(() => {
     if (formValues.customPeriodChoiceFrom !== SET_FROM_NOW) {
       if (now !== undefined) {
-        setFormValues({ ...formValues, customPeriodChoiceFrom: SET_FROM_NOW });
+        onValuesUpdated({ ...formValues, customPeriodChoiceFrom: SET_FROM_NOW });
       }
     } else {
       if (now !== undefined) {
-        setFormValues({ ...formValues, customPeriodChoiceFrom: now.toString() });
+        onValuesUpdated({ ...formValues, customPeriodChoiceFrom: now.toString() });
       }
     }
   }, [formValues, now]);
@@ -859,12 +857,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             </Box>
             <Box>
               <Parameter label="Contribution Period">
-                <Box justify="start" direction="row">
-                  <Box style={{ width: '60px' }}>From:</Box>
+                <Box justify="start" direction="column">
+                  <AppLabel style={{}}>From:</AppLabel>
                   <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.start).toString()}</Box>
                 </Box>
-                <Box justify="start" direction="row">
-                  <Box style={{ width: '60px' }}>To: </Box>
+                <Box justify="start" direction="column" style={{ marginTop: '16px' }}>
+                  <AppLabel style={{}}>To: </AppLabel>
                   <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.end).toString()}</Box>
                 </Box>
               </Parameter>

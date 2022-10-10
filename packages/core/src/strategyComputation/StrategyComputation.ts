@@ -47,6 +47,7 @@ export class StrategyComputation implements IStrategyComputation {
       return res;
     } catch (e) {
       this.running.delete(unique);
+      console.error(e);
       throw new Error(`Error running ${strategyId}`);
     }
   }

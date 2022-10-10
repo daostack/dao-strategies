@@ -1,6 +1,8 @@
 import { TimeDetails } from '@dao-strategies/core';
 import add from 'date-fns/add';
+import endOfDay from 'date-fns/endOfDay';
 import intervalToDuration from 'date-fns/intervalToDuration';
+import startOfDay from 'date-fns/startOfDay';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 
 /** time wrapper to handle time-related operations (works in seconds and not ms, synchronized
@@ -91,6 +93,18 @@ export class DateManager {
     return this;
   }
 
+  startOfDay(): DateManager {
+    const start = startOfDay(this.date);
+    this.date = start;
+    return this;
+  }
+
+  endOfDay(): DateManager {
+    const start = endOfDay(this.date);
+    this.date = start;
+    return this;
+  }
+
   static intervalDuration(startDate: number, endDate: number): Duration {
     return intervalToDuration({
       start: startDate * 1000,
@@ -113,6 +127,6 @@ export class DateManager {
   }
 
   toString(): string {
-    return this.date.toUTCString();
+    return this.date.toString();
   }
 }

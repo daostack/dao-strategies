@@ -88,7 +88,7 @@ export const getStartEnd = (values: CampaignFormValues, now: DateManager): [numb
     );
     let to = DateManager.from(values.customPeriodChoiceTo, true);
 
-    return [from.getTime(), to.getTime()];
+    return [from.startOfDay().getTime(), to.endOfDay().getTime()];
   } else {
     const parts = values.livePeriodChoice.split(' ');
     let livePeriod = +parts[1];
