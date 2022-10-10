@@ -55,6 +55,11 @@ model User {
   created         Campaign[]
 } 
 
+model ApprovedUsers {
+  address         String    @id
+} 
+
+
 // A table that stores the verified link between a user from a given platform to a user of another platform
 // with a given intent. 
 model CrossVerification {

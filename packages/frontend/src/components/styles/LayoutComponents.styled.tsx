@@ -28,16 +28,20 @@ export interface ITwoColumns {
   boxes?: BoxExtendedProps;
   gap?: number;
   line?: boolean;
+  frs?: number[];
 }
 
 export const TwoColumns: FC<ITwoColumns> = (props: ITwoColumns) => {
   const gap = props.gap !== undefined ? props.gap : 78; // minus 2 of the line
   const showLine = props.line !== undefined ? props.line : true;
+  const frs = props.frs || [1, 1];
+
+  const colWidths = [`${frs[0]}fr`, `${frs[1]}fr`];
 
   return (
     <Grid
       fill
-      columns={['1fr', `${gap}px`, '1fr']}
+      columns={[colWidths[0], `${gap}px`, colWidths[1]]}
       rows={['auto']}
       areas={[
         { name: 'left', start: [0, 0], end: [0, 0] },

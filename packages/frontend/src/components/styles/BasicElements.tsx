@@ -663,7 +663,7 @@ export const CampaignIcon: FC<ICampaignIcon> = (props: ICampaignIcon) => {
         border: '1px solid',
         ...props.style,
       }}>
-      <Image fit="cover" src={props.src}></Image>
+      <Image fit="cover" src={props.src || '/images/welcome-bg-1.png'}></Image>
     </Box>
   );
 };

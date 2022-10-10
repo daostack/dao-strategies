@@ -8,6 +8,7 @@ import { GlobalStyles } from './components/styles/GlobalStyles';
 import { ErrorContext } from './hooks/useErrorContext';
 import { ThemedApp } from './ThemedApp';
 import { ALCHEMY_GOERLI_KEY } from './config/appConfig';
+import { NowContext } from './hooks/useNow';
 
 export const LOCALHOST_CHAIN_ID = 3177;
 
@@ -23,10 +24,12 @@ function App() {
     <div className="App">
       <ErrorContext>
         <WagmiConfig client={client}>
-          <LoggedUserContext>
-            <GlobalStyles />
-            <ThemedApp></ThemedApp>
-          </LoggedUserContext>
+          <NowContext>
+            <LoggedUserContext>
+              <GlobalStyles />
+              <ThemedApp></ThemedApp>
+            </LoggedUserContext>
+          </NowContext>
         </WagmiConfig>
       </ErrorContext>
     </div>

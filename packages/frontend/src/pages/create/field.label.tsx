@@ -14,7 +14,7 @@ export const FieldLabel: FC<IFieldLabel> = (props: IFieldLabel) => {
 
   return (
     <Box direction="row" align="center" style={{ ...props.style }}>
-      <Box>
+      <Box style={{ marginRight: '4px' }}>
         <span>
           {required ? <span style={{ color: 'red', marginRight: '4px' }}>*</span> : <></>}
           {props.label}

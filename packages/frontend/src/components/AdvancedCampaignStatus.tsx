@@ -4,7 +4,7 @@ import { FC, useCallback, useState } from 'react';
 import { useCampaignContext } from '../hooks/useCampaign';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { useLoggedUser } from '../hooks/useLoggedUser';
-import { useNow } from '../hooks/useNow';
+import { useNowContext } from '../hooks/useNow';
 import { lockCampaign } from '../pages/campaign.support';
 import { Address } from './Address';
 
@@ -12,12 +12,8 @@ import {
   AppAccordion,
   AppAccordionPanel,
   AppButton,
-  AppCallout,
   AppCard,
   AppHeading,
-  AppLabel,
-  BytesInfo,
-  HelpTip,
   HorizontalLine,
 } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
@@ -31,11 +27,11 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
   const { campaign, otherDetails, shares, getOtherDetails } = useCampaignContext();
   const [locking, setLocking] = useState<boolean>(false);
 
-  const { account, connect } = useLoggedUser();
+  const { account } = useLoggedUser();
 
   const campaignInstance = useCampaignInstance(props.campaignAddress);
 
-  const { now } = useNow();
+  const { now } = useNowContext();
 
   const locked = otherDetails?.publishInfo?.status.locked !== undefined && otherDetails?.publishInfo?.status.locked;
 
