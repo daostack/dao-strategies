@@ -116,7 +116,7 @@ export class DateManager {
     // TODO
     const diff = Math.abs(this.getTime() - to);
     if (diff < 60) {
-      return diff + ' sec';
+      return Math.ceil(diff) + ' sec';
     } else if (diff < 60 * 60) {
       return Math.ceil(diff / 60) + ' min';
     } else if (diff < 60 * 60 * 24) {
