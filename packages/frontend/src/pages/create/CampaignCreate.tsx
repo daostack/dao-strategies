@@ -715,7 +715,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                   <FieldLabel
                     style={{ marginBottom: '8px' }}
                     label="Add Github repositories"
-                    help="The campaign will compute a list of shareholders based on programmed rules. These are programmatic rules that can fetch data from web2 and web3 protocols."></FieldLabel>
+                    help="Pull-requests made to any of these repositories (can be more than one) will count towards receiving shares on this campaign."></FieldLabel>
                 }
                 <Box style={{ fontWeight: 'normal', fontSize: '13px' }}>
                   Use the format 'user/repo' or paste the link to the repo.
@@ -759,7 +759,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </Box>
 
         <Box>
-          <AppFormField name="livePeriodChoice" label="Live period">
+          <AppFormField
+            name="livePeriodChoice"
+            label={
+              <FieldLabel
+                label="Set the Contribution Period"
+                help="Pull-requests that are merged within this time period will count towards receiving shares on this campaign."></FieldLabel>
+            }>
             <AppSelect name="livePeriodChoice" options={Array.from(periodOptions.values())}></AppSelect>
           </AppFormField>
 
@@ -852,7 +858,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               </Parameter>
             </Box>
             <Box>
-              <Parameter label="Live Period">
+              <Parameter label="Contribution Period">
                 <Box justify="start" direction="row">
                   <Box style={{ width: '60px' }}>From:</Box>
                   <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.start).toString()}</Box>

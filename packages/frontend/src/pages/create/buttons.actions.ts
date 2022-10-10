@@ -29,6 +29,7 @@ export interface Actions {
 }
 
 const DEPLOY_CAMPAIGN_TEXT = 'Deploy Campaign';
+const COMPUTING_SHARES_TEXT = `Computing shares`;
 
 export const getButtonActions = (
   status: FormStatus,
@@ -81,9 +82,15 @@ export const getButtonActions = (
         if (status.canSimulate) {
           /** can simulate */
           if (status.mustSimulate) {
-            /** should simulate, was not simulated, can simualte and must simulate */
-            rightText = 'Calculate shares';
-            rightAction = () => actions.simulate();
+            if (!status.isSimulating) {
+              /** should simulate, was not simulated, can simualte and must simulate */
+              rightText = 'Calculate shares';
+              rightAction = () => actions.simulate();
+            } else {
+              rightText = COMPUTING_SHARES_TEXT;
+              rightAction = () => actions.simulate();
+              rightDisabled = true;
+            }
           } else {
             /** should simulate, was not simulated, can simualte but does not must simulate */
             rightText = DEPLOY_CAMPAIGN_TEXT;
@@ -113,6 +120,10 @@ export const getButtonActions = (
           /** should simulate, was simulated, can create */
           rightText = DEPLOY_CAMPAIGN_TEXT;
           rightAction = () => actions.create();
+        } else if (status.isSimulating) {
+          rightText = COMPUTING_SHARES_TEXT;
+          rightAction = () => actions.simulate();
+          rightDisabled = true;
         } else {
           /** should simulate, was simulated, cannot create */
           rightText = `Connect Wallet to Deploy`;
@@ -124,7 +135,7 @@ export const getButtonActions = (
 
   /** overwrite */
   if (status.isSimulating) {
-    rightText = `Computing shares`;
+    rightText = COMPUTING_SHARES_TEXT;
     rightAction = () => {};
   }
 

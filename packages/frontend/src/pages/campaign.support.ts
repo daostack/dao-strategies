@@ -48,8 +48,8 @@ export enum PeriodType {
 
 export const reactionConfigOptions: Map<ReactionConfig, string> = new Map();
 
-reactionConfigOptions.set(ReactionConfig.PRS_AND_REACTS, 'Both Pull Requests & Reactions');
-reactionConfigOptions.set(ReactionConfig.ONLY_PRS, 'Only Pull Requests');
+reactionConfigOptions.set(ReactionConfig.PRS_AND_REACTS, 'Both Pull-Requests & Reactions');
+reactionConfigOptions.set(ReactionConfig.ONLY_PRS, 'Only Pull-Requests');
 reactionConfigOptions.set(ReactionConfig.ONLY_REACTS, 'Only Reactions');
 
 export const strategyDetails = (
