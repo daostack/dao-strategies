@@ -660,9 +660,34 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </AppFormField>
       </Box>
 
-      <TwoColumns line={false} gap={40}>
+      <TwoColumns line={false} gap={20} frs={[0.8, 1.2]}>
         <Box>
-          <AppFormField name="reactionsConfig" label="Count contribution scores using">
+          <AppFormField
+            name="reactionsConfig"
+            label={
+              <FieldLabel
+                label="Count contribution scores using"
+                help={
+                  <Box>
+                    <ul style={{ padding: '0px 0px 0px 16px' }}>
+                      <li>
+                        <b>{reactionConfigOptions.get(ReactionConfig.ONLY_PRS)}</b>: Each merged pull-request gives one
+                        point.
+                      </li>
+                      <li style={{ marginTop: '10px' }}>
+                        <b>{reactionConfigOptions.get(ReactionConfig.ONLY_REACTS)}</b>: Each reaction to a merged
+                        pull-request given by a previous contributor opf the reposiotry gives one point. One
+                        pull-request can give more than one points.
+                      </li>
+                      <li style={{ marginTop: '10px' }}>
+                        <b>{reactionConfigOptions.get(ReactionConfig.PRS_AND_REACTS)}</b>: Each reaction to a merged
+                        pull-request given by a previous repository contributor gives one point. One pull-request can
+                        give more than one points.
+                      </li>
+                    </ul>
+                  </Box>
+                }></FieldLabel>
+            }>
             <AppSelect
               name="reactionsConfig"
               options={Array.from(reactionConfigOptions.keys())}
