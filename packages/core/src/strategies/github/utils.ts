@@ -11,6 +11,8 @@ type ReactionsListData =
 type ContributorsListData =
   RestEndpointMethodTypes['repos']['listContributors']['response']['data'];
 
+const DEBUG = true;
+
 export async function repoAvailable(
   world: World,
   repo: { owner: string; repo: string }
@@ -56,23 +58,38 @@ export async function getPrsInRepo(
     );
     if (numPagesReg !== undefined && numPagesReg != null) {
       const numPages: number = Number(numPagesReg[1]);
-      console.log('Num Pages:', numPages);
-      const reqs = [];
-      reqs.push(firstReq);
+      if (DEBUG) console.log('numPages', { numPages, repo });
+
+      const reqs: Array<Promise<PullRequestListData>> = [];
+      reqs.push(Promise.resolve(firstReq.data));
+
       for (let i = 2; i < numPages; i++) {
-        reqs.push(
-          world.github.rest.pulls.list({
+        const getPage = (async (): Promise<PullRequestListData> => {
+          if (DEBUG)
+            console.log('rest.pulls.list - getting...', { repo, page: i });
+
+          const prs = await world.github.rest.pulls.list({
             ...repo,
             state: 'all',
             per_page: 100,
             page: i,
-          })
-        );
+          });
+
+          if (DEBUG)
+            console.log('rest.pulls.list - done...', {
+              repo,
+              page: i,
+              prs: prs.data.map((pr) => pr.number),
+            });
+
+          return prs.data;
+        })();
+        reqs.push(getPage);
       }
 
       await Promise.all(reqs).then((responses) => {
         for (const response of responses) {
-          for (const pull of response.data) {
+          for (const pull of response) {
             if (filter !== undefined) {
               // filter pull requests
               if (filter(pull)) {
@@ -106,11 +123,19 @@ export async function getRepoContributors(
   );
 
   // iterate through each response
+  if (DEBUG) console.log('getRepoContributors - getting...', { repo });
+
   for await (const { data: contibutors } of iterator) {
     for (const contibutor of contibutors) {
       allContributors.push(contibutor);
     }
   }
+
+  if (DEBUG)
+    console.log('getRepoContributors - done...', {
+      repo,
+      n: allContributors.length,
+    });
 
   return allContributors;
 }

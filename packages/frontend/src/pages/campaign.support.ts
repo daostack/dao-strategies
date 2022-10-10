@@ -4,9 +4,9 @@ import {
   CampaignCreateDetails,
   CampaignReadDetails,
   CampaignUriDetails,
-  ChainsDetails,
   Typechain,
   SharesRead,
+  ReactionConfig,
 } from '@dao-strategies/core';
 import { ethers } from 'ethers';
 
@@ -14,7 +14,6 @@ import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/date.manager';
 import { Page } from '@dao-strategies/core';
-import { toBase64 } from '../utils/general';
 
 /** The period string is parsed to derive the actual period. That's why
  * we need to use enums and maps to avoid using manual strings as keys
@@ -47,16 +46,10 @@ export enum PeriodType {
   future = 'future',
 }
 
-export enum ReactionConfig {
-  PRS_AND_REACTS = 'PRS_AND_REACTS',
-  ONLY_PRS = 'ONLY_PRS',
-  ONLY_REACTS = 'ONLY_REACTS',
-}
-
 export const reactionConfigOptions: Map<ReactionConfig, string> = new Map();
 
-reactionConfigOptions.set(ReactionConfig.PRS_AND_REACTS, 'Both Pull Requests & Reactions');
-reactionConfigOptions.set(ReactionConfig.ONLY_PRS, 'Only Pull Requests');
+reactionConfigOptions.set(ReactionConfig.PRS_AND_REACTS, 'Both Pull-Requests & Reactions');
+reactionConfigOptions.set(ReactionConfig.ONLY_PRS, 'Only Pull-Requests');
 reactionConfigOptions.set(ReactionConfig.ONLY_REACTS, 'Only Reactions');
 
 export const strategyDetails = (
@@ -77,26 +70,25 @@ export const strategyDetails = (
     strategyParams: {
       repositories: repos,
       timeRange: { start, end },
+      reactionsConfig: values.reactionsConfig,
     },
   };
 };
 
 /** Derive the start and end timestamps from the form string values */
-export const getStartEnd = (values: CampaignFormValues, today: DateManager): [number, number] => {
+export const getStartEnd = (values: CampaignFormValues, now: DateManager): [number, number] => {
   if (values.livePeriodChoice === periodOptions.get(PeriodKeys.custom)) {
     if (values.customPeriodChoiceFrom === '' || values.customPeriodChoiceTo === '') {
       return [0, 0];
     }
 
     let from = DateManager.from(
-      values.customPeriodChoiceFrom === SET_FROM_NOW ? today : values.customPeriodChoiceFrom,
+      values.customPeriodChoiceFrom === SET_FROM_NOW ? now : values.customPeriodChoiceFrom,
       true
     );
     let to = DateManager.from(values.customPeriodChoiceTo, true);
 
-    to = to.addDays(1);
-
-    return [from.getTime(), to.getTime()];
+    return [from.startOfDay().getTime(), to.endOfDay().getTime()];
   } else {
     const parts = values.livePeriodChoice.split(' ');
     let livePeriod = +parts[1];
@@ -104,8 +96,8 @@ export const getStartEnd = (values: CampaignFormValues, today: DateManager): [nu
     if (parts[0] === 'Last') livePeriod = -1 * livePeriod;
 
     return livePeriod < 0
-      ? [today.clone().addMonths(livePeriod).getTime(), today.getTime()]
-      : [today.getTime(), today.clone().addMonths(livePeriod).getTime()];
+      ? [now.clone().addMonths(livePeriod).getTime(), now.getTime()]
+      : [now.getTime(), now.clone().addMonths(livePeriod).getTime()];
   }
 };
 
@@ -170,7 +162,7 @@ export const deployCampaign = async (
   uri: string | undefined,
   createDetails: CampaignCreateDetails,
   details: CampaignUriDetails | undefined,
-  logo: File | undefined,
+  logo: File | undefined
 ) => {
   let uriDefined;
   if (uri !== undefined) {
@@ -218,9 +210,9 @@ export const deployCampaign = async (
   createDetails.address = address;
 
   console.log('campaign contract deployed', { address });
-  console.warn('sending ', { createDetails })
+  console.warn('sending ', { createDetails });
   await registerCampaign(uriDefined, createDetails);
-  await registerCampaignLogo(logo, uriDefined);  //do we need to await this? Can we show local logo ?
+  await registerCampaignLogo(logo, uriDefined); //do we need to await this? Can we show local logo ?
   return address;
 };
 
@@ -239,7 +231,7 @@ const registerCampaignLogo = async (logo: File | undefined, uri: string): Promis
   if (!logo) return;
 
   const formData = new FormData();
-  console.log('what is logo ', logo, ' or ')
+  console.log('what is logo ', logo, ' or ');
   formData.append('logo', logo);
 
   await fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
@@ -247,8 +239,7 @@ const registerCampaignLogo = async (logo: File | undefined, uri: string): Promis
     body: formData,
     credentials: 'include',
   });
-
-}
+};
 
 export const getCampaign = async (uri: string): Promise<CampaignReadDetails> => {
   const response = await fetch(ORACLE_NODE_URL + `/campaign/${uri}`, {

@@ -1,8 +1,7 @@
-import { CampaignReadDetails, ChainsDetails } from '@dao-strategies/core';
+import { CampaignReadDetails } from '@dao-strategies/core';
 import { Box, BoxExtendedProps, Spinner, Text, Image } from 'grommet';
 import React from 'react';
-import { useNow } from '../hooks/useNow';
-import { DateManager } from '../utils/date.manager';
+import { useNowContext } from '../hooks/useNow';
 import { valueToString } from '../utils/general';
 
 import { AppCard, AppHeading, AppTag, CampaignIcon, FixedHeightPar } from './styles/BasicElements';
@@ -14,7 +13,7 @@ export interface ICampaignCard extends BoxExtendedProps {
 
 export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((props, ref) => {
   const campaign = props.campaign as CampaignReadDetails;
-  const { now } = useNow();
+  const { now } = useNowContext();
 
   if (!campaign) {
     return (
@@ -41,7 +40,7 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
           style={{ minWidth: '55px', position: 'relative', flexShrink: '0', marginRight: '16px' }}
           alignContent="start"
           align="start">
-          <CampaignIcon src={campaign.logoUrl || './images/welcome-bg-1.png'} iconSize="64px"></CampaignIcon>
+          <CampaignIcon src={campaign.logoUrl} iconSize="64px"></CampaignIcon>
           <Box
             justify="center"
             align="center"

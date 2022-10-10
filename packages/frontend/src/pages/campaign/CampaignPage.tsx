@@ -35,6 +35,7 @@ import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
 import { CampaignStatus } from '../../components/CampaignStatus';
 import { RouteNames } from '../MainPage';
+import { reactionConfigOptions } from '../campaign.support';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -161,8 +162,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
                 <RepoTag repo={`${repo.owner}/${repo.repo}`} key={ix} style={{ marginBottom: '6px' }} />
               ))}
             </InfoProperty>
-            <InfoProperty style={{ marginTop: '36px' }} title="Guardian Address">
+            <InfoProperty style={{ marginTop: '36px' }} title="Admin">
               <Address address={campaign.guardian} chainId={campaign.chainId}></Address>
+            </InfoProperty>
+            <InfoProperty style={{ marginTop: '36px' }} title="Reactions Config">
+              {reactionConfigOptions.get(campaign.strategyParams.reactionsConfig)}
             </InfoProperty>
           </Box>
           <Box>
@@ -193,26 +197,23 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const contributors_table = (
-    <>
-      {shares !== undefined ? (
-        <>
-          <AppCard style={{ marginTop: '52px', padding: '24px 24px' }}>
-            <AppHeading level="2" style={{ marginBottom: '24px' }}>
-              Contributors board
-            </AppHeading>
-            <RewardsTable
-              shares={shares}
-              chainId={campaign.chainId}
-              showReward
-              raised={otherDetails?.raised}
-              updatePage={updatePage}
-              perPage={PER_PAGE}></RewardsTable>
-          </AppCard>
-        </>
-      ) : (
-        <Spinner></Spinner>
-      )}
-    </>
+    <AppCard style={{ marginTop: '52px', padding: '24px 24px' }}>
+      <Box direction="row" justify="between" align="center">
+        <AppHeading level="2" style={{ marginBottom: '24px' }}>
+          Contributors board
+        </AppHeading>
+        <Box style={{ height: '20px', width: '20px' }} onClick={() => getShares()}>
+          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+        </Box>
+      </Box>
+      <RewardsTable
+        shares={shares}
+        chainId={campaign.chainId}
+        showReward
+        raised={otherDetails?.raised}
+        updatePage={updatePage}
+        perPage={PER_PAGE}></RewardsTable>
+    </AppCard>
   );
 
   const fundersTable = (

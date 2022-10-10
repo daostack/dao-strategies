@@ -39,6 +39,7 @@ export class ServiceManager {
 
   public strategyComputation: IStrategyComputation;
 
+  private userService: UserService;
   private timeService: TimeService;
   private sendTransactionService: SendTransactionService;
   private readDataService: ReadDataService;
@@ -89,9 +90,15 @@ export class ServiceManager {
 
     this.socialApi = new SocialApiService(config.world.GITHUB_TOKEN);
 
+    this.userService = new UserService(
+      this.userRepo,
+      config.world.GITHUB_TOKEN
+    );
+
     this.campaignService = new CampaignService(
       this.campaignRepo,
       this.timeService,
+      this.userService,
       this.strategyComputation,
       this.sendTransactionService,
       { republishTimeMargin: config.republishTimeMargin }
@@ -123,7 +130,7 @@ export class ServiceManager {
 
     this.services = {
       campaign: this.campaignService,
-      user: new UserService(this.userRepo, config.world.GITHUB_TOKEN),
+      user: this.userService,
       time: this.timeService,
       sendTransaction: this.sendTransactionService,
       socialApi: this.socialApi,

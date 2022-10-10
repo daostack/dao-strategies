@@ -1,6 +1,8 @@
 import { TimeDetails } from '@dao-strategies/core';
 import add from 'date-fns/add';
+import endOfDay from 'date-fns/endOfDay';
 import intervalToDuration from 'date-fns/intervalToDuration';
+import startOfDay from 'date-fns/startOfDay';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 
 /** time wrapper to handle time-related operations (works in seconds and not ms, synchronized
@@ -13,7 +15,7 @@ export class DateManager {
 
   /** input date is in seconds if provided */
   constructor(date?: DateManager | Date | number | string, utc: boolean = false) {
-    this.localTimeZero = Date.now();
+    this.localTimeZero = Date.now() / 1000;
     if (typeof date === 'number') {
       this.date = new Date(date * 1000);
     } else if (typeof date === 'string') {
@@ -22,9 +24,9 @@ export class DateManager {
          * the string is interpreted as UTC in the UX, but the Date constructure interprets it as local string.
          * So we need to shift the local time offset.
          */
-        const temp = new Date(date);
-        temp.getTimezoneOffset();
-        this.date = new Date(temp.getTime() - temp.getTimezoneOffset() * 60 * 1000);
+        this.date = new Date(date);
+        // temp.getTimezoneOffset();
+        // this.date = new Date(temp.getTime() - temp.getTimezoneOffset() * 60 * 1000);
       } else {
         this.date = new Date(date);
       }
@@ -66,13 +68,14 @@ export class DateManager {
     return new DateManager(new Date(this.date));
   }
 
+  /** get's time in seconds (includes the bias) */
   getTime(): number {
     return Math.floor(this.date.getTime() / 1000) + this.bias;
   }
 
-  /* Used for showing countdown, with this func it gives a new value */
-  getTimeUpdated(): number {
-    return this.getTime() + Date.now() - this.localTimeZero;
+  /* Returns the dynamic time. Similar to Date.now() but in seconds and including the bias. */
+  getTimeDynamic(): number {
+    return this.getTime() + Date.now() / 1000 - this.localTimeZero;
   }
 
   /** updates to the latest device date (keeping the bias) */
@@ -90,10 +93,22 @@ export class DateManager {
     return this;
   }
 
-  static intervalDuration(startDate: Date | number, endDate: Date | number): Duration {
+  startOfDay(): DateManager {
+    const start = startOfDay(this.date);
+    this.date = start;
+    return this;
+  }
+
+  endOfDay(): DateManager {
+    const start = endOfDay(this.date);
+    this.date = start;
+    return this;
+  }
+
+  static intervalDuration(startDate: number, endDate: number): Duration {
     return intervalToDuration({
-      start: startDate,
-      end: endDate,
+      start: startDate * 1000,
+      end: endDate * 1000,
     });
   }
 
@@ -101,7 +116,7 @@ export class DateManager {
     // TODO
     const diff = Math.abs(this.getTime() - to);
     if (diff < 60) {
-      return diff + ' sec';
+      return Math.ceil(diff) + ' sec';
     } else if (diff < 60 * 60) {
       return Math.ceil(diff / 60) + ' min';
     } else if (diff < 60 * 60 * 24) {
@@ -112,6 +127,6 @@ export class DateManager {
   }
 
   toString(): string {
-    return this.date.toUTCString();
+    return this.date.toString();
   }
 }

@@ -1,7 +1,8 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { FC } from 'react';
 import { useCampaignContext } from '../hooks/useCampaign';
-import { useNow } from '../hooks/useNow';
+import { useNowContext } from '../hooks/useNow';
+import { DateManager } from '../utils/date.manager';
 import { Address } from './Address';
 
 import { Countdown } from './Countdown';
@@ -12,7 +13,7 @@ export interface CampaignStatusI extends BoxExtendedProps {}
 
 export const CampaignStatus: FC<CampaignStatusI> = (props: CampaignStatusI) => {
   const { campaign } = useCampaignContext();
-  const { now } = useNow();
+  const { now } = useNowContext();
 
   if (!campaign || !now) {
     return <></>;
@@ -31,7 +32,7 @@ export const CampaignStatus: FC<CampaignStatusI> = (props: CampaignStatusI) => {
   );
 
   const status = (
-    <Box direction="row" style={{ flexGrow: '1' }}>
+    <Box direction="row" style={{ flexGrow: '1', paddingRight: '40px' }}>
       {campaign.executed ? (
         <Box direction="row" align="center">
           {tip} Campaign shares successfully distributed {now.prettyDiff(campaign.execDate)} ago
@@ -39,9 +40,9 @@ export const CampaignStatus: FC<CampaignStatusI> = (props: CampaignStatusI) => {
       ) : (
         <div>
           <Box direction="row" align="center" style={{ float: 'left', marginRight: '6px' }}>
-            {tip} Shares distributed in:
+            {tip} Shares will be distributed in{' '}
+            <b style={{ marginLeft: '4px' }}>{DateManager.from(campaign.execDate).prettyDiff(now.getTimeDynamic())}</b>
           </Box>
-          <Countdown toDate={campaign.execDate} style={{ float: 'left' }}></Countdown>
         </div>
       )}
     </Box>
