@@ -30,7 +30,7 @@ export const MainPage: FC = () => {
           <Route path={RouteNames.Create} element={<CampaignCreate />}></Route>
           <Route path={`${RouteNames.CampaignBase}/:campaignAddress`} element={<CampaignContextW />}></Route>
         </Routes>
-        <MainPageFooter></MainPageFooter>
+        {/* <MainPageFooter></MainPageFooter> */}
       </BrowserRouter>
     </QueryClientProvider>
   );

@@ -1,3 +1,4 @@
+
 import { Box, CheckBox } from 'grommet';
 import { Add, Moon } from 'grommet-icons';
 import React, { FC } from 'react';
@@ -9,7 +10,7 @@ import { styleConstants } from '../components/styles/themes';
 import { useThemeContext } from '../ThemedApp';
 import { RouteNames } from './MainPage';
 
-export const HEADER_HEIGHT = 96;
+export const HEADER_HEIGHT = 66;
 export const MAX_WIDTH = 1200;
 
 export interface IMainPageHeaderProps {
@@ -21,7 +22,25 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const left = <Logo onClick={() => navigate(RouteNames.Base)}></Logo>;
+  const left = <>
+    <Box direction='row'>
+      <Logo onClick={() => navigate(RouteNames.Base)}></Logo>
+
+      <Box align='center' justify='center'
+        pad={{ horizontal: '10px' }}
+        margin={{ left: '16px', vertical: '12px' }}
+        style={{ fontWeight: 500, minWidth: '31px', color: styleConstants.colors.whiteElements }}
+        background='#5762D5'>
+        Beta
+      </Box>
+
+      <Box align='center' justify='center' direction='row' gap='20px' style={{ fontWeight: 500 }} margin={{ left: '48px' }}>
+        <a>Explore Campaigns</a>
+        <a>Docs</a>
+      </Box>
+    </Box>
+
+  </>;
 
   const right = (
     <Box direction="row" align="center">
@@ -51,9 +70,6 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
         position: 'absolute',
         width: '100vw',
         height: `${HEADER_HEIGHT}px`,
-
-        backgroundColor: styleConstants.colors.whiteElements,
-        boxShadow: '0px 1.63701px 24.5552px rgba(0, 0, 0, 0.08)',
       }}
       direction="row"
       justify="center">

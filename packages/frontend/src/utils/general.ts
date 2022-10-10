@@ -1,3 +1,4 @@
+
 export function toTimestamp(date: string): number {
   return Math.round(new Date(date).getTime() / 1000);
 }
@@ -14,5 +15,3 @@ export const toBase64 = async (file: File): Promise<string | undefined> => {
   });
   return result_base64?.toString();
 }
-
-
