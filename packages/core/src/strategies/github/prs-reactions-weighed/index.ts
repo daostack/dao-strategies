@@ -1,7 +1,7 @@
 import { Strategy } from '../../../types';
 
 import { strategyInfo } from './info';
-import { Params as ThisParams, strategyFunc } from './strategy';
+import { Params as ThisParams, strategyFunc, ReactionConfig } from './strategy';
 
 export const strategy: Strategy = {
   func: strategyFunc,
@@ -9,3 +9,4 @@ export const strategy: Strategy = {
 };
 
 export type Params = ThisParams;
+export { ReactionConfig };

@@ -35,6 +35,7 @@ import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
 import { CampaignStatus } from '../../components/CampaignStatus';
 import { RouteNames } from '../MainPage';
+import { reactionConfigOptions } from '../campaign.support';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -164,6 +165,9 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
             <InfoProperty style={{ marginTop: '36px' }} title="Admin">
               <Address address={campaign.guardian} chainId={campaign.chainId}></Address>
             </InfoProperty>
+            <InfoProperty style={{ marginTop: '36px' }} title="Reactions Config">
+              {reactionConfigOptions.get(campaign.strategyParams.reactionsConfig)}
+            </InfoProperty>
           </Box>
           <Box>
             <InfoProperty title="Contribution Period">
@@ -197,9 +201,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       {shares !== undefined ? (
         <>
           <AppCard style={{ marginTop: '52px', padding: '24px 24px' }}>
-            <AppHeading level="2" style={{ marginBottom: '24px' }}>
-              Contributors board
-            </AppHeading>
+            <Box direction="row" justify="between" align="center">
+              <AppHeading level="2" style={{ marginBottom: '24px' }}>
+                Contributors board
+              </AppHeading>
+              <Box style={{ height: '20px', width: '20px' }} onClick={() => getShares()}>
+                <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+              </Box>
+            </Box>
             <RewardsTable
               shares={shares}
               chainId={campaign.chainId}

@@ -9,6 +9,7 @@ import {
   SharesRead,
   Page,
   strategies,
+  ReactionConfig,
 } from '@dao-strategies/core';
 
 import { useCampaignFactory } from '../../hooks/useContracts';
@@ -22,7 +23,6 @@ import {
   sharesFromDetails,
   SET_FROM_NOW,
   reactionConfigOptions,
-  ReactionConfig,
 } from '../campaign.support';
 import {
   ACTIVATION_PERIOD,

@@ -4,9 +4,9 @@ import {
   CampaignCreateDetails,
   CampaignReadDetails,
   CampaignUriDetails,
-  ChainsDetails,
   Typechain,
   SharesRead,
+  ReactionConfig,
 } from '@dao-strategies/core';
 import { ethers } from 'ethers';
 
@@ -14,7 +14,6 @@ import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/date.manager';
 import { Page } from '@dao-strategies/core';
-import { toBase64 } from '../utils/general';
 
 /** The period string is parsed to derive the actual period. That's why
  * we need to use enums and maps to avoid using manual strings as keys
@@ -47,12 +46,6 @@ export enum PeriodType {
   future = 'future',
 }
 
-export enum ReactionConfig {
-  PRS_AND_REACTS = 'PRS_AND_REACTS',
-  ONLY_PRS = 'ONLY_PRS',
-  ONLY_REACTS = 'ONLY_REACTS',
-}
-
 export const reactionConfigOptions: Map<ReactionConfig, string> = new Map();
 
 reactionConfigOptions.set(ReactionConfig.PRS_AND_REACTS, 'Both Pull Requests & Reactions');
@@ -77,6 +70,7 @@ export const strategyDetails = (
     strategyParams: {
       repositories: repos,
       timeRange: { start, end },
+      reactionsConfig: values.reactionsConfig,
     },
   };
 };
