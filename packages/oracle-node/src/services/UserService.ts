@@ -1,4 +1,4 @@
-import { Verification } from '@dao-strategies/core';
+import { getAddressStrict, Verification } from '@dao-strategies/core';
 import { VerificationIntent, LoggedUserDetails } from '@dao-strategies/core';
 import { CrossVerification, Prisma, User } from '@prisma/client';
 
@@ -19,11 +19,11 @@ export class UserService {
   }
 
   async exist(address: string): Promise<boolean> {
-    return this.userRepo.exist(address.toLowerCase());
+    return this.userRepo.exist(getAddressStrict(address));
   }
 
   async get(address: string): Promise<User | undefined> {
-    return this.userRepo.get(address.toLowerCase());
+    return this.userRepo.get(getAddressStrict(address));
   }
 
   async getVerified(address: string): Promise<LoggedUserDetails | undefined> {
@@ -65,7 +65,7 @@ export class UserService {
 
     if (!exist) {
       const createData: Prisma.UserCreateInput = {
-        address: details.address.toLowerCase(),
+        address: getAddressStrict(details.address),
       };
 
       return this.create(createData);

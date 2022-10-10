@@ -1,17 +1,18 @@
 import { CampaignFundersRead, campaignInstance, Page } from '@dao-strategies/core';
-import { parseEther } from 'ethers/lib/utils';
 import { Box, Spinner } from 'grommet';
-import { StatusGood } from 'grommet-icons';
 import { FC } from 'react';
 import { useCampaignContext } from '../hooks/useCampaign';
 import { valueToString } from '../utils/general';
 import { Address } from './Address';
+import { AssetsValue } from './Assets';
 import { PagedTable, TableColumn } from './PagedTable';
 import { IElement } from './styles/BasicElements';
 
 export interface FundersTableI extends IElement {
   funders?: CampaignFundersRead;
   updatePage: (page: Page) => void;
+  invert?: boolean;
+  perPage: number; // needed to render the "loading" table of the correct size even if "shares" is undefined
 }
 
 export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
@@ -20,15 +21,11 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
   const widths = ['60%', '40%'];
 
   if (funders === undefined) {
-    return (
-      <Box fill justify="center" align="center">
-        <Spinner></Spinner>
-      </Box>
-    );
+    return <PagedTable loading perPage={props.perPage}></PagedTable>;
   }
 
   const data: any[] = funders.funders.map((funder) => {
-    return [funder.value, funder.funder];
+    return [funder.assets, funder.funder];
   });
 
   const columns: TableColumn[] = [
@@ -42,16 +39,16 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
 
   const row = (rowIx: number, colIx: number) => {
     if (rowIx >= data.length) {
-      return <></>;
+      return <>-</>;
     }
     const datum = {
-      amount: valueToString(data[rowIx][0], 2),
+      assets: data[rowIx][0],
       address: data[rowIx][1],
     };
 
     switch (colIx) {
       case 0:
-        return <>~${datum.amount}</>;
+        return <AssetsValue title="Funds Provided" type="inline" assets={datum.assets}></AssetsValue>;
 
       case 1:
         return <Address chainId={campaign.chainId} address={datum.address}></Address>;
@@ -61,5 +58,13 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
     }
   };
 
-  return <PagedTable page={funders.page} columns={columns} rows={row} updatePage={props.updatePage}></PagedTable>;
+  return (
+    <PagedTable
+      invert={props.invert}
+      style={{ ...props.style }}
+      page={funders.page}
+      columns={columns}
+      rows={row}
+      updatePage={props.updatePage}></PagedTable>
+  );
 };

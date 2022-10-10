@@ -14,6 +14,7 @@ import { ORACLE_NODE_URL } from '../config/appConfig';
 import { CampaignFormValues } from './create/CampaignCreate';
 import { DateManager } from '../utils/date.manager';
 import { Page } from '@dao-strategies/core';
+import { toBase64 } from '../utils/general';
 
 /** The period string is parsed to derive the actual period. That's why
  * we need to use enums and maps to avoid using manual strings as keys
@@ -38,11 +39,25 @@ periodOptions.set(PeriodKeys.next3Months, `${NEXT} 3 months`);
 periodOptions.set(PeriodKeys.next6Months, `${NEXT} 6 months`);
 periodOptions.set(PeriodKeys.custom, CUSTOM);
 
+export const SET_FROM_NOW = 'SET_FROM_NOW';
+
 export enum PeriodType {
   retroactive = 'retroactive',
   ongoing = 'ongoing',
   future = 'future',
 }
+
+export enum ReactionConfig {
+  PRS_AND_REACTS = 'PRS_AND_REACTS',
+  ONLY_PRS = 'ONLY_PRS',
+  ONLY_REACTS = 'ONLY_REACTS',
+}
+
+export const reactionConfigOptions: Map<ReactionConfig, string> = new Map();
+
+reactionConfigOptions.set(ReactionConfig.PRS_AND_REACTS, 'Both Pull Requests & Reactions');
+reactionConfigOptions.set(ReactionConfig.ONLY_PRS, 'Only Pull Requests');
+reactionConfigOptions.set(ReactionConfig.ONLY_REACTS, 'Only Reactions');
 
 export const strategyDetails = (
   values: CampaignFormValues,
@@ -58,7 +73,7 @@ export const strategyDetails = (
     creator: account !== undefined ? account : '',
     nonce: 0,
     execDate: end,
-    strategyID: 'GH_PRS_REACTIONS_WEIGHED',
+    strategyID: values.strategyId,
     strategyParams: {
       repositories: repos,
       timeRange: { start, end },
@@ -67,13 +82,17 @@ export const strategyDetails = (
 };
 
 /** Derive the start and end timestamps from the form string values */
-export const getStartEnd = (values: CampaignFormValues, today: DateManager): [number, number] => {
+export const getStartEnd = (values: CampaignFormValues, now: DateManager): [number, number] => {
   if (values.livePeriodChoice === periodOptions.get(PeriodKeys.custom)) {
-    let from = new DateManager(new Date(values.customPeriodChoiceFrom));
-    let to = new DateManager(new Date(values.customPeriodChoiceFrom));
+    if (values.customPeriodChoiceFrom === '' || values.customPeriodChoiceTo === '') {
+      return [0, 0];
+    }
 
-    from = from.setTimeOfDay('00:00:00');
-    to = to.setTimeOfDay('00:00:00').addDays(1);
+    let from = DateManager.from(
+      values.customPeriodChoiceFrom === SET_FROM_NOW ? now : values.customPeriodChoiceFrom,
+      true
+    );
+    let to = DateManager.from(values.customPeriodChoiceTo, true);
 
     return [from.getTime(), to.getTime()];
   } else {
@@ -83,8 +102,8 @@ export const getStartEnd = (values: CampaignFormValues, today: DateManager): [nu
     if (parts[0] === 'Last') livePeriod = -1 * livePeriod;
 
     return livePeriod < 0
-      ? [today.clone().addMonths(livePeriod).getTime(), today.getTime()]
-      : [today.getTime(), today.clone().addMonths(livePeriod).getTime()];
+      ? [now.clone().addMonths(livePeriod).getTime(), now.getTime()]
+      : [now.getTime(), now.clone().addMonths(livePeriod).getTime()];
   }
 };
 
@@ -148,7 +167,8 @@ export const deployCampaign = async (
   campaignFactory: Typechain.CampaignFactory,
   uri: string | undefined,
   createDetails: CampaignCreateDetails,
-  details: CampaignUriDetails | undefined
+  details: CampaignUriDetails | undefined,
+  logo: File | undefined
 ) => {
   let uriDefined;
   if (uri !== undefined) {
@@ -168,6 +188,8 @@ export const deployCampaign = async (
   const uriHex = ethers.utils.hexlify(uriCid.multihash.digest);
   const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(Date.now().toString())); // uriHex;
 
+  console.log(`campaignFactory.createCampaign`, { uriHex, createDetails });
+
   const ex = await campaignFactory.createCampaign(
     uriHex,
     createDetails.guardian,
@@ -178,6 +200,7 @@ export const deployCampaign = async (
     createDetails.ACTIVE_DURATION,
     salt
   );
+
   const txReceipt = await ex.wait();
 
   if (txReceipt.events === undefined) throw new Error('txReceipt.events undefined');
@@ -193,18 +216,33 @@ export const deployCampaign = async (
   createDetails.address = address;
 
   console.log('campaign contract deployed', { address });
-
+  console.warn('sending ', { createDetails });
   await registerCampaign(uriDefined, createDetails);
+  await registerCampaignLogo(logo, uriDefined); //do we need to await this? Can we show local logo ?
   return address;
 };
 
 export const registerCampaign = async (uri: string, details: CampaignCreateDetails) => {
   /** a deployed campaign is registered in the backend */
-
   await fetch(ORACLE_NODE_URL + `/campaign/register/${uri}`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(details),
+    credentials: 'include',
+  });
+};
+
+const registerCampaignLogo = async (logo: File | undefined, uri: string): Promise<void> => {
+  // if no logo set, we can return
+  if (!logo) return;
+
+  const formData = new FormData();
+  console.log('what is logo ', logo, ' or ');
+  formData.append('logo', logo);
+
+  await fetch(ORACLE_NODE_URL + `/campaign/uploadLogo/${uri}`, {
+    method: 'post',
+    body: formData,
     credentials: 'include',
   });
 };

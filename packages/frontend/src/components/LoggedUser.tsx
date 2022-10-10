@@ -3,7 +3,7 @@ import { Logout } from 'grommet-icons';
 import { FC, ReactNode, useState } from 'react';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { GithubVerification } from './GithubVerification';
-import { AppButton } from './styles/BasicElements';
+import { AppButton, AppModal } from './styles/BasicElements';
 
 const imageAndText = (url: string | ReactNode, text: string) => {
   return (
@@ -22,7 +22,7 @@ export const LoggedUser: FC = () => {
 
   if (account === undefined) {
     return (
-      <AppButton primary onClick={connect}>
+      <AppButton _type="slim" primary onClick={connect}>
         Connect Wallet
       </AppButton>
     );
@@ -31,13 +31,14 @@ export const LoggedUser: FC = () => {
   const option = (key: number) => {
     switch (key) {
       case 0:
-        return githubAccount ? (
-          <Box pad="small">{imageAndText('/images/Github.png', `linked from @${githubAccount.split(':')[1]}`)}</Box>
-        ) : (
+        return (
           <Box onClick={() => setShowLinkGithub(true)} pad="small">
-            {imageAndText('/images/Github.png', 'link account')}
+            {githubAccount
+              ? imageAndText('/images/Github.png', `linked from @${githubAccount.split(':')[1]}`)
+              : imageAndText('/images/Github.png', 'link account')}
           </Box>
         );
+
       case 1:
         return (
           <Box onClick={() => startLogout()} pad="small">
@@ -50,9 +51,9 @@ export const LoggedUser: FC = () => {
   return (
     <>
       {showLinkGithub ? (
-        <Layer onEsc={() => setShowLinkGithub(false)} onClickOutside={() => setShowLinkGithub(false)}>
+        <AppModal heading="Set the payment address for a Github account" onClosed={() => setShowLinkGithub(false)}>
           <GithubVerification onClose={() => setShowLinkGithub(false)}></GithubVerification>
-        </Layer>
+        </AppModal>
       ) : (
         <></>
       )}

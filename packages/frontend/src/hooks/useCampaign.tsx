@@ -6,6 +6,7 @@ import {
   SharesRead,
   CampaignFundersRead,
   Page,
+  FundEventRead,
 } from '@dao-strategies/core';
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
@@ -20,8 +21,10 @@ export type CampaignContextType = {
   otherDetails: CampaignOnchainDetails | undefined;
   checkClaimInfo: () => Promise<void>;
   claimInfo: CampaignClaimInfo | undefined;
-  getFunders: (page: Page) => Promise<void>;
+  getFunders: (page?: Page, force?: boolean) => Promise<void>;
   funders: CampaignFundersRead | undefined;
+  getFundEvents: (force?: boolean) => Promise<void>;
+  fundEvents: FundEventRead[] | undefined;
 };
 
 const CampaignContextValue = createContext<CampaignContextType | undefined>(undefined);
@@ -38,6 +41,8 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
 
   const [shares, setShares] = useState<SharesRead>();
   const [funders, setFunders] = useState<CampaignFundersRead>();
+  const [lastPage, setLastPage] = useState<Page>();
+  const [fundEvents, setFundEvents] = useState<FundEventRead[]>();
   const [otherDetails, setOtherDetails] = useState<CampaignOnchainDetails>();
   const [claimInfo, setClaimInfo] = useState<CampaignClaimInfo>();
 
@@ -82,20 +87,50 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
   }, [campaign, user]);
 
   const getFunders = useCallback(
-    async (page: Page): Promise<void> => {
+    async (page?: Page, force?: boolean): Promise<void> => {
       console.log('checking funders');
+
+      const _page = page === undefined ? lastPage : page;
+
+      if (!_page) {
+        throw Error(`Page undefined`);
+      }
+
+      setLastPage(_page);
 
       if (!campaign) return;
 
       const response = await fetch(ORACLE_NODE_URL + `/campaign/funders/${campaign.uri}`, {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page }),
+        body: JSON.stringify({ page: _page, force }),
         credentials: 'include',
       });
 
-      const funders = await response.json();
-      setFunders(Object.keys(funders).length > 0 ? funders : undefined);
+      const _funders = await response.json();
+      console.log('setting funders', { _funders });
+      setFunders(Object.keys(_funders).length > 0 ? _funders : undefined);
+    },
+    [campaign]
+  );
+
+  const getFundEvents = useCallback(
+    async (force?: boolean): Promise<void> => {
+      console.log('checking getFundEvents', { force });
+
+      if (!campaign) return;
+
+      const response = await fetch(ORACLE_NODE_URL + `/campaign/fundEvents/${campaign.uri}`, {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number: 10, force }),
+        credentials: 'include',
+      });
+
+      const _funders = await response.json();
+
+      console.log('recent getFundEvents', _funders);
+      setFundEvents(Object.keys(_funders).length > 0 ? _funders : undefined);
     },
     [campaign]
   );
@@ -128,6 +163,8 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
         claimInfo,
         getFunders,
         funders,
+        getFundEvents,
+        fundEvents,
       }}>
       {props.children}
     </CampaignContextValue.Provider>

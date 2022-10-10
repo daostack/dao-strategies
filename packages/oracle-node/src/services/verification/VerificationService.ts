@@ -1,6 +1,10 @@
 import { CrossVerification } from '@prisma/client';
 import { Octokit } from 'octokit';
-import { VerificationIntent, isSendRewards } from '@dao-strategies/core';
+import {
+  VerificationIntent,
+  isSendRewards,
+  getAddressStrict,
+} from '@dao-strategies/core';
 
 export class VerificationService {
   protected octokit: Octokit;
@@ -30,9 +34,9 @@ export class VerificationService {
         if (sendRewards) {
           found = {
             from: `github:${github_username}`,
-            to: `ethereum-${
-              sendRewards.params.chain
-            }:${sendRewards.params.address.toLowerCase()}`,
+            to: `ethereum-${sendRewards.params.chain}:${getAddressStrict(
+              sendRewards.params.address
+            )}`,
             intent: VerificationIntent.SEND_REWARDS,
             proof: gist.html_url,
           };

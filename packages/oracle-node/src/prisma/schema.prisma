@@ -5,12 +5,14 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["orderByNulls"]
 }
 
 model Campaign {
   uri             String    @id
   title           String?  
   description     String?
+  logoUrl         String?
   creator         User?     @relation(fields: [creatorId], references: [address])
   creatorId       String?    
   nonce           Int
@@ -66,7 +68,7 @@ model CrossVerification {
 model Share {  
   @@id([campaignId, account])
   account         String
-  amount          BigInt        
+  amount          BigInt    // must be BigInt to be able to sort by amount
   campaign        Campaign  @relation(fields: [campaignId], references: [uri])
   campaignId      String
 }
@@ -104,11 +106,12 @@ model FundEvent {
   hash            String          @id
   campaign        Campaign        @relation(fields: [campaignId], references: [uri])
   campaignId      String
-  funder          CampaignFunder? @relation(fields: [campaignId, funderAddress], references: [campaignId, address])
+  funder          CampaignFunder  @relation(fields: [campaignId, funderAddress], references: [campaignId, address])
   funderAddress   String
   asset           String
   amount          String
   blockNumber     BigInt
+  timestamp       BigInt
 }
 
 // For each campaign, it stores which was the latest block it indexed a given property of the campaign

@@ -1,66 +1,41 @@
 import { TokenBalance } from '@dao-strategies/core';
 import { Box, BoxExtendedProps, Tip } from 'grommet';
-import { FC, ReactElement } from 'react';
-import { AssetBalance, AssetsTable } from '../../components/Assets';
+import React, { useMemo } from 'react';
+import { ReactElement } from 'react';
 import { AppCard } from '../../components/styles/BasicElements';
 import { styleConstants } from '../../components/styles/themes';
+import { AssetsValue } from '../../components/Assets';
 
 interface BalanceCardProps extends BoxExtendedProps {
   title: string;
   subtitle?: ReactElement;
-  value: string;
-  symbol?: string;
-  coin?: string;
   assets?: TokenBalance[];
+  preferred?: string;
   action?: ReactElement;
 }
 
-export const BalanceCard: FC<BalanceCardProps> = (props: BalanceCardProps) => {
+export const BalanceCard = React.forwardRef<HTMLDivElement, BalanceCardProps>((props, ref) => {
   return (
-    <AppCard align="center" style={{ ...props.style }}>
+    <AppCard ref={ref} align="center" style={{ ...props.style }}>
       <Box
         style={{
           textTransform: 'uppercase',
           fontWeight: '700',
+          fontSize: styleConstants.textFontSizes.small,
           color: styleConstants.colors.ligthGrayText,
         }}>
         {props.title}
       </Box>
       {props.subtitle ? props.subtitle : <></>}
-      <Tip
-        content={
-          <Box style={{ width: '300px', padding: '16px 16px 0px 16px' }}>
-            {props.assets ? (
-              props.assets.map((asset) => {
-                return asset.balance !== '0' ? (
-                  <AssetBalance style={{ marginBottom: '16px' }} asset={asset}></AssetBalance>
-                ) : (
-                  <></>
-                );
-              })
-            ) : (
-              <></>
-            )}
-          </Box>
-        }>
-        <Box
-          style={{
-            margin: '16px 0px 24px 0px',
-            fontSize: '32px',
-            borderBottom: '2px dashed',
-            borderColor: styleConstants.colors.lightGrayBorder,
-            paddingBottom: '4px',
-          }}>
-          {props.value !== '0' ? (
-            <>
-              {props.symbol} {props.value} {props.coin}
-            </>
-          ) : (
-            '--'
-          )}
-        </Box>
-      </Tip>
+
+      <AssetsValue
+        title={props.title}
+        style={{ margin: '16px 0px 24px 0px' }}
+        assets={props.assets}
+        preferred={props.preferred}
+        type="card"></AssetsValue>
+
       {props.action !== undefined ? props.action : <></>}
     </AppCard>
   );
-};
+});

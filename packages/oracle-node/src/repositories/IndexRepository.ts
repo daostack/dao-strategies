@@ -3,7 +3,12 @@ import {
   CampaignFundersRead,
   Page,
 } from '@dao-strategies/core';
-import { FundEvent, Prisma, PrismaClient } from '@prisma/client';
+import {
+  CampaignFunder,
+  FundEvent,
+  Prisma,
+  PrismaClient,
+} from '@prisma/client';
 
 import { appLogger } from '../logger';
 
@@ -91,54 +96,50 @@ export class IndexRepository {
     });
   }
 
-  async getFunders(uri: string, page: Page): Promise<CampaignFundersRead> {
-    const [funders, total] = await this.client.$transaction([
-      this.client.campaignFunder.findMany({
-        where: { campaign: { uri } },
-        orderBy: { value: 'desc' },
-        include: {
-          campaign: {
-            select: {
-              address: true,
-            },
+  async getFunders(
+    uri: string,
+    page: Page
+  ): Promise<{
+    uri: string;
+    funders: (CampaignFunder & {
+      campaign: {
+        address: string;
+      };
+      events: FundEvent[];
+    })[];
+    page: Page;
+  }> {
+    const funders = await this.client.campaignFunder.findMany({
+      where: { campaign: { uri } },
+      orderBy: { value: 'desc' },
+      include: {
+        campaign: {
+          select: {
+            address: true,
           },
-          events: true,
         },
-        skip: page.number * page.perPage,
-        take: page.perPage,
-      }),
-      this.client.campaignFunder.count({
-        where: {
-          campaign: {
-            uri,
-          },
-        },
-      }),
-    ]);
+        events: true,
+      },
+      skip: page.number * page.perPage,
+      take: page.perPage,
+    });
 
-    page.total = total;
-    page.totalPages = Math.ceil(total / page.perPage);
+    const total = await this.client.campaignFunder.count({
+      where: {
+        campaign: {
+          uri,
+        },
+      },
+    });
+
+    const readPage = { ...page };
+    readPage.total = total;
+    readPage.totalPages = Math.ceil(total / page.perPage);
 
     return {
       uri,
-      funders: funders.map((funder) => {
-        return {
-          uri,
-          funder: funder.address,
-          value: funder.value,
-          fundEvents: funder.events.map((event) => {
-            return {
-              uri,
-              funder: event.funderAddress,
-              asset: event.asset,
-              amount: event.amount,
-              blockNumber: bigIntToNumber(event.blockNumber),
-              txHash: event.hash,
-            };
-          }),
-        };
-      }),
-      page,
+      funders,
+      page: readPage,
     };
   }
 
@@ -159,6 +160,7 @@ export class IndexRepository {
     await this.client.campaignFunder.create({ data });
   }
 
+  /** get ALL fund events */
   getFundEvents(uri: string, addresses?: string[]): Promise<FundEvent[]> {
     if (addresses !== undefined && addresses.length > 0) {
       return addresses.length > 1
@@ -184,6 +186,19 @@ export class IndexRepository {
         },
       });
     }
+  }
+
+  async getFundEventsLatest(uri: string, n: number): Promise<FundEvent[]> {
+    return this.client.fundEvent.findMany({
+      where: {
+        campaignId: uri,
+      },
+      orderBy: {
+        blockNumber: 'desc',
+      },
+      skip: 0,
+      take: n,
+    });
   }
 
   async upsertFunder(

@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 
 import { COINGECKO_URL } from '../config';
 import { appLogger } from '../logger';
+import { awaitWithTimeout } from '../utils/utils';
 
 import { TimeService } from './TimeService';
 
@@ -96,40 +97,59 @@ export class PriceService {
       return undefined;
     }
 
-    const assetId = ((): string => {
-      switch (asset.id) {
+    const coingeckoName = ((id: string): string => {
+      switch (id) {
         case 'ether':
           return 'ethereum';
         case 'dai':
           return 'dai';
         case 'usdc':
           return 'usd-coin';
+        default:
+          return undefined;
       }
-    })();
+    })(asset.id);
+
+    if (coingeckoName === undefined) {
+      return undefined;
+    }
 
     const vs = 'usd';
 
     get = new Promise<AssetPrice>((resolve, reject) => {
       /* eslint-disable */
       void fetch(
-        `${COINGECKO_URL}/simple/price?ids=${assetId}&vs_currencies=${vs}`,
+        `${COINGECKO_URL}/simple/price?ids=${coingeckoName}&vs_currencies=${vs}`,
         {
           method: 'get',
           headers: { 'Content-Type': 'application/json' },
         }
       ).then((response) => {
-        response.json().then((result) => {
-          if (result.status && result.status.error_code) {
+        response
+          .json()
+          .then((result) => {
+            if (result.status && result.status.error_code) {
+              this.getting.delete(unique);
+              reject(new Error(result.status.error_message));
+            }
+
+            const price =
+              result[coingeckoName] === undefined ||
+              result[coingeckoName][vs] === undefined
+                ? 0
+                : result[coingeckoName][vs];
+
+            resolve({
+              address,
+              chainId,
+              lastUpdated: BigInt(now),
+              price,
+            });
+          })
+          .catch((e) => {
             this.getting.delete(unique);
-            reject(new Error(result.status.error_message));
-          }
-          resolve({
-            address,
-            chainId,
-            lastUpdated: BigInt(now),
-            price: result[assetId][vs],
+            reject(e);
           });
-        });
         /* eslint-enable */
       });
     });
@@ -140,27 +160,48 @@ export class PriceService {
     appLogger.info(
       `Getting asset price from coingecko - chainId:${chainId}, address:${address}`
     );
-    const assetPrice = await get;
+
+    let assetPrice = {
+      address,
+      chainId,
+      lastUpdated: BigInt(now),
+      price: 0,
+    };
+
+    try {
+      assetPrice = await awaitWithTimeout<AssetPrice>(
+        get,
+        2000,
+        new Error(`Timeout getting price from coingecko`)
+      );
+    } catch (e) {
+      this.getting.delete(unique);
+    }
 
     if (DEBUG)
       appLogger.debug(
         `setting price on DB ${JSON.stringify(assetPrice)} ${unique}`
       );
-    await this.client.assetPrice.upsert({
-      where: {
-        chainId_address: {
-          address,
-          chainId,
+
+    try {
+      await this.client.assetPrice.upsert({
+        where: {
+          chainId_address: {
+            address,
+            chainId,
+          },
         },
-      },
-      create: {
-        ...assetPrice,
-      },
-      update: {
-        price: assetPrice.price,
-        lastUpdated: assetPrice.lastUpdated,
-      },
-    });
+        create: {
+          ...assetPrice,
+        },
+        update: {
+          price: assetPrice.price,
+          lastUpdated: assetPrice.lastUpdated,
+        },
+      });
+    } catch (e) {
+      this.getting.delete(unique);
+    }
 
     this.getting.delete(unique);
     if (DEBUG) appLogger.debug(`returning price from CG ${unique}`);

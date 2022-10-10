@@ -1,9 +1,8 @@
-import { Strategy } from '../../types';
+import { StrategiesMap } from '../strategies.map';
 
 import { strategy as GH_PRS_REACTIONS_WEIGHED } from './prs-reactions-weighed/index';
 
-export type GH_STRATEGY_ID = 'GH_PRS_REACTIONS_WEIGHED';
+const github_strategies = new StrategiesMap();
+github_strategies.addStrategy(GH_PRS_REACTIONS_WEIGHED);
 
-export const github_strategies: Record<GH_STRATEGY_ID, Strategy> = {
-  GH_PRS_REACTIONS_WEIGHED: GH_PRS_REACTIONS_WEIGHED,
-};
+export { github_strategies };

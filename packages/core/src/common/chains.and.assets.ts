@@ -1,12 +1,13 @@
 import { Chain, chain } from '@wagmi/core';
 import { ethers } from 'ethers';
 
-import { BNToFloat } from '../support';
+import { BNToFloat, cmpAddresses } from '../support';
 import { Asset, ChainAndAssets, TokenBalance } from '../types';
 
 import { ContractsJson } from './contracts.json';
 
 const ETHERSCAN_URL = 'https://etherscan.io';
+const GOERLI_ETHERSCAN_URL = 'https://goerli.etherscan.io';
 
 /** Single source of truth for the supported chains and assets. It is imported on the
  * frontend */
@@ -15,6 +16,8 @@ const chainList: ChainAndAssets[] = [
   {
     chain: chain.localhost,
     exploreAddress: (address: string) => `${ETHERSCAN_URL}/address/${address}`,
+    exploreTx: (hash: string) => `${ETHERSCAN_URL}/tx/${hash}`,
+    exploreEns: (ens: string) => `https://app.ens.domains/name/${ens}/details`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {
@@ -26,15 +29,15 @@ const chainList: ChainAndAssets[] = [
       },
       // {
       //   id: 'dai',
-      //   address: ContractsJson.jsonOfChain().contracts.TestErc20.address,
+      //   address: ContractsJson.jsonOfChain(chain.localhost.id).contracts.TestErc20.address,
       //   name: 'DAI',
       //   icon: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png',
       //   decimals: 18,
       // },
       {
         id: 'usdc',
-        address: ContractsJson.jsonOfChain().contracts.TestErc20_02
-          .address as string,
+        address: ContractsJson.jsonOfChain(chain.localhost.id).contracts
+          .TestErc20_02.address as string,
         name: 'USDC',
         icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=022',
         decimals: 18,
@@ -42,27 +45,31 @@ const chainList: ChainAndAssets[] = [
     ],
   },
   {
-    chain: chain.mainnet,
+    chain: chain.goerli,
+    exploreAddress: (address: string) =>
+      `${GOERLI_ETHERSCAN_URL}/address/${address}`,
+    exploreTx: (hash: string) => `${GOERLI_ETHERSCAN_URL}/tx/${hash}`,
+    exploreEns: (ens: string) => `https://app.ens.domains/name/${ens}/details`,
     chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
     assets: [
       {
         id: 'ether',
         address: ethers.constants.AddressZero,
-        name: 'Ether',
+        name: 'Gorli-Ether',
         icon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
         decimals: 18,
       },
       {
-        id: 'dai',
-        address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-        name: 'DAI',
+        id: 'weenus',
+        address: '0xaFF4481D10270F50f203E0763e2597776068CBc5',
+        name: 'Weenus',
         icon: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png',
         decimals: 18,
       },
       {
-        id: 'usdc',
-        address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        name: 'USDC',
+        id: 'xeeuns',
+        address: '0x022E292b44B5a146F2e8ee36Ff44D3dd863C915c',
+        name: 'Xeenus',
         icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=022',
         decimals: 6,
       },
@@ -76,13 +83,23 @@ export enum SupportedChains {
 }
 
 export class ChainsDetails {
-  static chains(): Chain[] {
-    return chainList.map((chainAndAsset) => chainAndAsset.chain);
+  static chainsAndAssets(includeIds?: number[]): ChainAndAssets[] {
+    return chainList
+      .map((chainAndAsset) => {
+        return includeIds === undefined ||
+          includeIds.includes(chainAndAsset.chain.id)
+          ? chainAndAsset
+          : undefined;
+      })
+      .filter((chain) => chain !== undefined) as ChainAndAssets[];
+  }
+
+  static chains(includeIds?: number[]): Chain[] {
+    return ChainsDetails.chainsAndAssets(includeIds).map((c) => c.chain);
   }
 
   static chainOfId(id: number): ChainAndAssets | undefined {
     const entry = chainList.find((chain) => chain.chain.id === id);
-    if (entry === undefined) throw new Error(`chain with id ${id} not found`);
     return entry;
   }
 
@@ -110,7 +127,7 @@ export class ChainsDetails {
     address: string
   ): Asset | undefined => {
     const assets = this.chainAssets(chainId);
-    const entry = assets.find((asset) => asset.address === address);
+    const entry = assets.find((asset) => cmpAddresses(asset.address, address));
     return entry;
   };
 
@@ -122,7 +139,7 @@ export class ChainsDetails {
   };
 
   static isNative = (asset: Asset): boolean => {
-    return asset.address === ethers.constants.AddressZero;
+    return cmpAddresses(asset.address, ethers.constants.AddressZero);
   };
 
   static valueOfAssets(balances: TokenBalance[]): number {

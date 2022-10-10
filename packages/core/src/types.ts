@@ -1,7 +1,6 @@
 import { Chain } from '@wagmi/core';
 import { BigNumber } from 'ethers';
 
-import { Strategy_ID } from './strategies';
 import { World, WorldConfig } from './world/World';
 
 export type BalancesFloat = Map<string, number>;
@@ -23,7 +22,7 @@ export interface CampaignUriDetails {
   creator: string;
   nonce: number;
   execDate: number;
-  strategyID: Strategy_ID;
+  strategyID: string;
   strategyParams: Record<string, any>;
 }
 
@@ -31,6 +30,7 @@ export interface CampaignUriDetails {
 export interface CampaignCreateDetails {
   title: string;
   description: string;
+  logoUrl: string;
   guardian: string;
   oracle: string;
   activationTime: number;
@@ -46,26 +46,24 @@ export interface CampaignReadDetails
   extends CampaignCreateDetails,
     CampaignUriDetails {
   uri: string;
-  title: string;
-  description: string;
-  guardian: string;
-  oracle: string;
-  chainId: number;
   address: string;
   registered: boolean;
   executed: boolean;
   published: boolean;
-  creatorId: string | null;
-  valueLocked: number;
+  creatorId: string;
+  valueLocked?: number;
 }
 
-export interface BalancesObject {
-  [account: string]: string;
+export interface SharesObject {
+  [account: string]: {
+    amount: string;
+    address?: string;
+  };
 }
 
 export interface SharesRead {
   uri: string;
-  shares: BalancesObject;
+  shares: SharesObject;
   page: Page;
   details?: CampaignUriDetails;
 }
@@ -83,7 +81,9 @@ export interface ChainAndAssets {
   chain: Chain;
   assets: Asset[];
   explorer?: string;
+  exploreEns?: (ens: string) => string;
   exploreAddress?: (address: string) => string;
+  exploreTx?: (hash: string) => string;
 }
 
 /**
@@ -132,6 +132,8 @@ export interface CampaignClaimInfo {
   executed: boolean;
   /** true if the campaign was already published  */
   published: boolean;
+  /** claims that in principle will be avaialable if the root is correctly updated */
+  inPp?: { shares?: string; assets?: TokenBalance[] };
   /** current claim info */
   current?: TreeClaimInfo;
   /** pending claim info */
@@ -168,20 +170,25 @@ export interface PublishInfo {
   };
 }
 
+export type IDPlatform = 'github' | 'twitter';
+
 export type StrategyFunc = (
   world: World,
   params: any
 ) => Promise<BalancesFloat>;
 
 export type StrategyInfo<P = any> = {
+  id: string;
+  icon?: string;
   name: string;
   description: string;
   example_params: P;
+  platform: IDPlatform;
 };
 
 export type Strategy = {
-  strategyFunc: StrategyFunc;
-  strategyInfo: StrategyInfo;
+  func: StrategyFunc;
+  info: StrategyInfo;
 };
 
 export type { WorldConfig };
@@ -210,17 +217,17 @@ export interface LoggedUserDetails {
 export interface FundEventRead {
   uri: string;
   funder: string;
-  asset: string;
-  amount: string;
   blockNumber: number;
+  timestamp: number;
   txHash: string;
+  asset: TokenBalance;
 }
 
 export interface CampaignFunder {
   uri: string;
   funder: string;
   value: number;
-  fundEvents: FundEventRead[];
+  assets: TokenBalance[];
 }
 
 export interface CampaignFundersRead {

@@ -6,14 +6,13 @@ import { useCampaignContext } from '../hooks/useCampaign';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { claimRewards } from '../pages/campaign.support';
 
-import { useNow } from '../hooks/useNow';
+import { useNowContext } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { truncate } from '../utils/ethers';
 
-import { AppButton, AppInput, AppModal, AppTag, IElement } from './styles/BasicElements';
-import { AssetBalance, AssetsTable, ChainTag } from './Assets';
+import { AppButton, AppInput, AppModal, IElement } from './styles/BasicElements';
+import { AssetsTable, ChainTag } from './Assets';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
-import { styleConstants } from './styles/themes';
 
 interface IParams extends IElement {
   campaignAddress: string;
@@ -35,7 +34,7 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
   const [showClaim, setShowClaim] = useState<boolean>(false);
   const [hasTargetAddress, setHasTargetAddress] = useState<boolean>(false);
 
-  const { now } = useNow();
+  const { now } = useNowContext();
   const { user, account, githubAccount } = useLoggedUser();
 
   const campaignInstance = useCampaignInstance(props.campaignAddress);
@@ -87,8 +86,6 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         : '0';
   }
 
-  const chain = ChainsDetails.chainOfId(campaign.chainId);
-
   return (
     <>
       {status.canClaim && showClaim ? (
@@ -114,13 +111,6 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
       <BalanceCard
         style={{ padding: '24px', ...props.style }}
         title="My Rewards"
-        subtitle={
-          <>
-            <ChainTag style={{ margin: '18px 0px' }} chain={chain}></ChainTag>
-          </>
-        }
-        value={claimValue}
-        symbol="$"
         assets={status.claim?.assets}
         action={
           canClaim ? (

@@ -4,11 +4,20 @@ import { FC, useCallback, useState } from 'react';
 import { useCampaignContext } from '../hooks/useCampaign';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { useLoggedUser } from '../hooks/useLoggedUser';
-import { useNow } from '../hooks/useNow';
+import { useNowContext } from '../hooks/useNow';
 import { lockCampaign } from '../pages/campaign.support';
+import { Address } from './Address';
 
-import { AppButton, AppCard } from './styles/BasicElements';
+import {
+  AppAccordion,
+  AppAccordionPanel,
+  AppButton,
+  AppCard,
+  AppHeading,
+  HorizontalLine,
+} from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
+import { TransactionCalldata } from './TransactionCalldata';
 
 interface IAdvancedCampaign {
   campaignAddress: string;
@@ -18,11 +27,11 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
   const { campaign, otherDetails, shares, getOtherDetails } = useCampaignContext();
   const [locking, setLocking] = useState<boolean>(false);
 
-  const { account, connect } = useLoggedUser();
+  const { account } = useLoggedUser();
 
   const campaignInstance = useCampaignInstance(props.campaignAddress);
 
-  const { now } = useNow();
+  const { now } = useNowContext();
 
   const locked = otherDetails?.publishInfo?.status.locked !== undefined && otherDetails?.publishInfo?.status.locked;
 
@@ -67,87 +76,106 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
     nReceivers,
     nPending: nReceivers - nLeafs,
     isProposeWindowActive: otherDetails.publishInfo.status.isProposeWindowActive,
-    timeToNextWindowStarts: otherDetails.publishInfo.derived
-      ? otherDetails.publishInfo.derived.nextWindowStarts > now.getTime()
-        ? otherDetails.publishInfo.derived.nextWindowStarts - now.getTime()
-        : 0
-      : 0,
-    timeToNextWindowEnds: otherDetails.publishInfo.derived
-      ? otherDetails.publishInfo.derived.nextWindowEnds > now.getTime()
-        ? otherDetails.publishInfo.derived.nextWindowEnds - now.getTime()
-        : 0
-      : 0,
+    nextWindowStarts: otherDetails.publishInfo.derived ? otherDetails.publishInfo.derived.nextWindowStarts : 0,
+    nextWindowEnds: otherDetails.publishInfo.derived ? otherDetails.publishInfo.derived.nextWindowEnds : 0,
     candidateRoot: hasPending ? otherDetails.publishInfo.status.pendingRoot : undefined,
-    timeToActive: otherDetails.publishInfo.status.activationTime - now.getTime(),
+    activeTime: otherDetails.publishInfo.status.activationTime,
     locked,
   };
 
-  const cardsStyle: React.CSSProperties = { width: '100%', minHeight: 'auto', marginBottom: '24px' };
-
   return (
-    <Box align="center" justify="center" pad="medium">
-      <AppCard direction="row" align="center" style={cardsStyle}>
-        <Box
-          style={{
-            fontSize: styleConstants.headingFontSizes[1],
-            fontWeight: '700',
-            marginRight: '12px',
-            flexShrink: '0',
-          }}>
-          {info.nPending}
-        </Box>
-        <Box> contributors have not yet set their payment address and cannot receive their reward (see list)</Box>
-      </AppCard>
-
-      <AppCard align="start" style={cardsStyle}>
+    <Box style={{ marginTop: '50px' }}>
+      <AppCard
+        align="start"
+        style={{
+          backgroundColor: styleConstants.colors.highlightedLight,
+          color: styleConstants.colors.ligthGrayText2,
+        }}>
         {info.candidateRoot ? (
           <>
-            <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', marginBottom: '16px' }}>
+            <AppHeading level="3" style={{ marginBottom: '16px' }}>
               New update proposed by the oracle!
-            </Box>
+            </AppHeading>
             <Box style={{ marginBottom: '16px' }}>
               The payment address for another {'N'} contributors has been proposed by the oracle. Will be active in{' '}
-              {info.timeToActive}
+              {now.prettyDiff(info.activeTime)}
             </Box>
-            <AppButton style={{ alignSelf: 'center' }} primary>
-              See Update
-            </AppButton>
+            <AppButton label="See Update" style={{ alignSelf: 'center' }} primary />
           </>
         ) : (
           <>
-            No updates currenly proposed by the oracle. Next update will be done in {info.timeToNextWindowStarts} (only
-            if some pending contributors set their payment address)
+            No updates currenly proposed by the oracle. Next update will be done in{' '}
+            {now ? now.prettyDiff(info.nextWindowStarts) : ''}
           </>
         )}
       </AppCard>
 
-      <AppCard style={cardsStyle}>
-        <Box style={{ fontSize: styleConstants.headingFontSizes[2], fontWeight: '700', marginBottom: '16px' }}>
-          Advanced Actions
+      <AppCard
+        style={{ marginTop: '16px', fontWeight: '500', backgroundColor: styleConstants.colors.highlightedLight }}>
+        <Box direction="row" align="center" justify="between" style={{ marginBottom: '32px' }}>
+          <Box>No of Campaign Receivers</Box>
+          <Box style={{ fontWeight: '700', fontSize: '20px' }}>{info.nReceivers}</Box>
         </Box>
-        {!isLogged ? <AppButton onClick={() => connect()}>Connect Wallet</AppButton> : <></>}
-        <Box direction="row" justify="between" align="center">
-          <Box>{info.locked ? 'Unlock' : 'Lock'} the campaign</Box>
-          <AppButton onClick={() => lock()}>{info.locked ? 'Unlock' : 'Lock'}</AppButton>
+        <Box direction="row" align="center" justify="between">
+          <Box>Pending Verification</Box>
+          <Box style={{ fontWeight: '700', fontSize: '20px' }}>{info.nPending}</Box>
         </Box>
-
-        <Box direction="row" justify="between" align="center">
-          <Box>Cancel the campaign</Box>
-          <AppButton>Cancel</AppButton>
-        </Box>
-
-        {locking ? (
-          <Box>
-            Waiting for tx...<br></br>
-            <br></br>
-            <Spinner></Spinner>
-          </Box>
-        ) : (
-          <></>
-        )}
       </AppCard>
 
-      <AppButton onClick={() => refresh()}>Refresh</AppButton>
+      <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
+
+      <AppHeading level="3" style={{ marginBottom: '16px' }}>
+        Advanced Actions
+      </AppHeading>
+
+      <Box direction="row" style={{ marginBottom: '24px' }}>
+        Only the admin has permissions to perform the following actions:
+        {/* I wanted o add a link to the admin address but it breaks the paragraph. Googled it without luck
+          ({<Address
+          address={campaign.guardian}
+          chainId={campaign.chainId}
+          style={{ margin: '0px 2px', display: 'inline' }}></Address>})  */}
+      </Box>
+
+      <AppAccordion style={{}}>
+        <AppAccordionPanel label={'Cancel Pending Merkle Root'} subtitle={'Description of the Admin action'}>
+          <TransactionCalldata
+            address={campaign.address}
+            chainId={campaign.chainId}
+            method="challenge"
+            params={[0]}
+            value={'0'}
+            approvedAccount={campaign.guardian}></TransactionCalldata>
+        </AppAccordionPanel>
+
+        <AppAccordionPanel
+          label={'Lock Campaign'}
+          subtitle={'Lock the campaign to prevent further updates from the Oracle.'}
+          style={{ marginTop: '16px' }}>
+          <TransactionCalldata
+            address={campaign.address}
+            chainId={campaign.chainId}
+            method="setLock"
+            params={[true]}
+            value={'0'}
+            approvedAccount={campaign.guardian}></TransactionCalldata>
+        </AppAccordionPanel>
+
+        <AppAccordionPanel
+          label={'Cancel Campaign'}
+          subtitle={'Cancel campaign and enable funds withdraws from funders.'}
+          style={{ marginTop: '16px' }}>
+          <TransactionCalldata
+            address={campaign.address}
+            chainId={campaign.chainId}
+            method="challenge"
+            params={[2]}
+            value={'0'}
+            approvedAccount={campaign.guardian}></TransactionCalldata>
+        </AppAccordionPanel>
+      </AppAccordion>
+
+      {/* <AppButton secondary label="Refresh" onClick={() => refresh()} /> */}
     </Box>
   );
 };

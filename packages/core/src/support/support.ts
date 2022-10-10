@@ -1,14 +1,6 @@
 import { BigNumber } from 'ethers';
 
-import { Balances, BalancesFloat, BalancesObject } from '../types';
-
-export const balancesToObject = (balances: Balances): BalancesObject => {
-  const balancesObject: BalancesObject = {};
-  balances.forEach(
-    (balance, account) => (balancesObject[account] = balance.toString())
-  );
-  return balancesObject;
-};
+import { Balances, BalancesFloat, IDPlatform } from '../types';
 
 const zerosStr = (n: number): string => {
   return '0'.repeat(n);
@@ -93,6 +85,17 @@ export const normalizeShares = (balancesFloat: BalancesFloat): Balances => {
   }
 
   return balances;
+};
+
+export const renameIds = (
+  balances: Balances,
+  platform: IDPlatform
+): Balances => {
+  const renamed: Balances = new Map();
+  balances.forEach((amount, account) => {
+    renamed.set(`${platform}:${account}`, amount);
+  });
+  return renamed;
 };
 
 export const bigIntToNumber = (

@@ -1,7 +1,7 @@
 import { Page } from '@dao-strategies/core';
-import { BoxExtendedProps, Box } from 'grommet';
+import { BoxExtendedProps, Box, Spinner } from 'grommet';
 import { FormNext, FormPrevious } from 'grommet-icons';
-import { FC } from 'react';
+import { FC, useCallback } from 'react';
 import { styleConstants } from './styles/themes';
 
 export interface IPageNumber extends BoxExtendedProps {
@@ -32,49 +32,76 @@ export const PageNumber: FC<IPageNumber> = (props: IPageNumber) => {
 };
 
 export interface TableColumn {
-  title: string;
+  title: string | React.ReactNode;
   width?: string;
   show?: boolean;
   align?: 'start' | 'end' | 'center';
 }
 
 export interface PagedTableI extends BoxExtendedProps {
-  page: Page;
-  columns: TableColumn[];
-  rows: (row: number, column: number) => React.ReactElement;
-  updatePage: (page: Page) => void;
+  loading?: boolean;
+  perPage?: number;
+  page?: Page;
+  columns?: TableColumn[];
+  rows?: (row: number, column: number) => React.ReactElement;
+  updatePage?: (page: Page) => void;
+  invert?: boolean;
 }
 
 export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
   const page = props.page;
+  const loading = props.loading !== undefined ? props.loading : false;
 
-  const hasNext = page.totalPages !== undefined && page.number < page.totalPages - 1;
-  const hasPrev = page.totalPages !== undefined && page.number > 0;
-
-  const nextPage = () => {
-    if (hasNext) {
-      props.updatePage({ ...page, number: page.number + 1 });
+  const nextPage = useCallback(() => {
+    if (page && props.updatePage) {
+      const hasNext = page.totalPages !== undefined && page.number < page.totalPages - 1;
+      if (hasNext) {
+        props.updatePage({ ...page, number: page.number + 1 });
+      }
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, props.updatePage]);
 
-  const prevPage = () => {
-    if (hasPrev) {
-      props.updatePage({ ...page, number: page.number - 1 });
+  const prevPage = useCallback(() => {
+    if (page && props.updatePage) {
+      const hasPrev = page.totalPages !== undefined && page.number > 0;
+      if (hasPrev) {
+        props.updatePage({ ...page, number: page.number - 1 });
+      }
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, props.updatePage]);
 
-  const setPage = (number: number) => {
-    if (page.totalPages !== undefined && number <= page.totalPages) {
-      props.updatePage({ ...page, number });
-    }
-  };
+  const setPage = useCallback(
+    (number: number) => {
+      if (page && props.updatePage) {
+        if (page.totalPages !== undefined && number <= page.totalPages) {
+          props.updatePage({ ...page, number });
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [page]
+  );
 
-  if (props.columns === undefined) {
-    return <></>;
-  }
+  const invert = props.invert !== undefined ? props.invert : false;
+  const rowColor = invert ? styleConstants.colors.cardBackground : styleConstants.colors.highlightedLight;
+  const backgroundColor = invert ? styleConstants.colors.highlightedLight : styleConstants.colors.cardBackground;
+
+  const perPage = page ? page.perPage : props.perPage;
 
   return (
-    <Box style={{ width: '100%', userSelect: 'none', ...props.style }}>
+    <Box
+      style={{
+        width: '100%',
+        userSelect: 'none',
+        padding: '24px 16px',
+        border: '1px solid',
+        borderColor: styleConstants.colors.lightGrayBorder,
+        borderRadius: '8px',
+        backgroundColor: backgroundColor,
+        ...props.style,
+      }}>
       <Box
         direction="row"
         style={{
@@ -83,21 +110,30 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
           fontSize: '12px',
           fontWeight: '700',
           marginBottom: '26px',
-          padding: '10px 36px',
+          padding: '0px 24px',
+          color: styleConstants.colors.ligthGrayText,
         }}>
-        {props.columns.map((column) => {
-          const show = column.show === undefined ? true : column.show;
-          return show ? (
-            <Box direction="row" justify={column.align || 'center'} style={{ width: column.width }}>
-              {column.title}
-            </Box>
-          ) : (
-            <></>
-          );
-        })}
+        {!props.loading && props.columns ? (
+          props.columns.map((column, colIx) => {
+            const show = column.show === undefined ? true : column.show;
+            return show ? (
+              <Box
+                key={colIx}
+                direction="row"
+                justify={column.align || 'center'}
+                style={{ width: column.width, textAlign: column.align ? column.align : 'center' }}>
+                {column.title}
+              </Box>
+            ) : (
+              <></>
+            );
+          })
+        ) : (
+          <></>
+        )}
       </Box>
-      <Box direction="column" style={{ width: '100%' }}>
-        {Array.from(Array(page.perPage).keys()).map((rowIx) => {
+      <Box direction="column" style={{ width: '100%', position: 'relative' }}>
+        {Array.from(Array(perPage).keys()).map((rowIx) => {
           return (
             <Box
               key={rowIx}
@@ -110,50 +146,78 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
                 borderRadius: '20px',
                 height: '40px',
                 marginBottom: '16px',
-                padding: '10px 36px',
-                backgroundImage: 'white',
+                padding: '10px 16px',
+                backgroundColor: rowColor,
               }}>
-              {Array.from(Array(page.perPage).keys()).map((colIx) => {
-                const column = props.columns[colIx];
-                if (column === undefined) {
-                  return <></>;
-                }
-                const show = column.show === undefined ? true : column.show; // Repeated code as above. Changes need to be done in both places
-                return show ? (
-                  <Box
-                    key={colIx}
-                    direction="row"
-                    justify={column.align || 'center'}
-                    style={{ width: props.columns[colIx].width, userSelect: 'text' }}>
-                    {props.rows(rowIx, colIx)}
-                  </Box>
-                ) : (
-                  <></>
-                );
-              })}
+              {!props.loading && props.columns ? (
+                Array.from(Array(props.columns.length).keys()).map((colIx) => {
+                  if (props.columns) {
+                    const column = props.columns[colIx];
+                    if (column === undefined) {
+                      return <></>;
+                    }
+                    const show = column.show === undefined ? true : column.show; // Repeated code as above. Changes need to be done in both places
+                    return show ? (
+                      <Box
+                        key={`${rowIx}-${colIx}`}
+                        direction="row"
+                        justify={column.align || 'center'}
+                        style={{ width: props.columns[colIx].width, userSelect: 'text' }}>
+                        {props.rows ? props.rows(rowIx, colIx) : <></>}
+                      </Box>
+                    ) : (
+                      <></>
+                    );
+                  }
+                })
+              ) : (
+                <></>
+              )}
             </Box>
           );
         })}
+        {loading ? (
+          <Box
+            fill
+            justify="center"
+            align="center"
+            style={{
+              position: 'absolute',
+              borderRadius: '20px',
+              backgroundColor: styleConstants.colors.lightGrayBackground,
+            }}>
+            <Spinner></Spinner>
+            Loading
+          </Box>
+        ) : (
+          <></>
+        )}
       </Box>
 
       <Box direction="row" justify="center" align="center" style={{ height: '60px' }}>
-        <Box style={{ marginRight: '12px', cursor: 'pointer' }} onClick={() => prevPage()}>
-          <FormPrevious></FormPrevious>
-        </Box>
+        {page && page.totalPages && page.totalPages > 1 ? (
+          <>
+            <Box style={{ marginRight: '12px', cursor: 'pointer' }} onClick={() => prevPage()}>
+              <FormPrevious></FormPrevious>
+            </Box>
 
-        {Array.from(Array(page.totalPages).keys()).map((ix) => {
-          return (
-            <PageNumber
-              onClick={() => setPage(ix)}
-              style={{ marginRight: '8px' }}
-              key={ix}
-              number={ix + 1}
-              selected={page.number === ix}></PageNumber>
-          );
-        })}
-        <Box style={{ marginLeft: '12px', cursor: 'pointer' }} onClick={() => nextPage()}>
-          <FormNext></FormNext>
-        </Box>
+            {Array.from(Array(page.totalPages).keys()).map((ix) => {
+              return (
+                <PageNumber
+                  onClick={() => setPage(ix)}
+                  style={{ marginRight: '8px' }}
+                  key={ix}
+                  number={ix + 1}
+                  selected={page.number === ix}></PageNumber>
+              );
+            })}
+            <Box style={{ marginLeft: '12px', cursor: 'pointer' }} onClick={() => nextPage()}>
+              <FormNext></FormNext>
+            </Box>
+          </>
+        ) : (
+          <></>
+        )}
       </Box>
     </Box>
   );

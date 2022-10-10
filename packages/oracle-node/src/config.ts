@@ -24,13 +24,41 @@ export const PRICE_UPDATE_PERIOD = +process.env.PRICE_UPDATE_PERIOD;
 
 export const config: ExecutionConfig = {
   world: worldConfig,
-  executionWatcher: { enabled: true, period: 10 },
-  republishWatcher: { enabled: true, period: 10 },
-  republishTimeMargin: 5,
-  fundersUpdatePeriod: 10,
-  tvlUpdatePeriod: 10,
+
+  executionWatcher: { enabled: true, period: 30 },
+  republishWatcher: { enabled: true, period: 30 },
+
+  /** republishTimeMargin: The time to wait after the expected publish date
+   * to be sure the block.timestamp large enough */
+  republishTimeMargin: 10,
+
+  fundersUpdatePeriod: 30,
+  tvlUpdatePeriod: 30,
 };
 
 export const DISABLE_VERIFICATION =
   process.env.DISABLE_VERIFICATION !== undefined &&
   process.env.DISABLE_VERIFICATION.toLocaleLowerCase() === 'true';
+
+const chainConfig = new Map<
+  number,
+  {
+    privateKey: string;
+    url?: string;
+    chainName?: string;
+    alchemyKey?: string;
+  }
+>();
+
+chainConfig.set(1337, {
+  privateKey: process.env.ORACLE_PRIVATE_KEY_LOCAL,
+  url: process.env.JSON_RPC_URL_LOCAL,
+});
+
+chainConfig.set(5, {
+  privateKey: process.env.ORACLE_PRIVATE_KEY_GOERLI,
+  alchemyKey: process.env.ALCHEMY_KEY_GOERLI,
+  chainName: 'goerli',
+});
+
+export { chainConfig };

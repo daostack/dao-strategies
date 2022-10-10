@@ -1,40 +1,64 @@
-import { ChainsDetails } from '@dao-strategies/core';
+import { ChainsDetails, getAddress } from '@dao-strategies/core';
 import { Box, BoxExtendedProps } from 'grommet';
-import { Link } from 'grommet-icons';
-import { FC } from 'react';
-import { theme } from './styles/themes';
+import { CSSProperties, FC } from 'react';
+import { useEnsName } from 'wagmi';
+import { styleConstants } from './styles/themes';
 
 interface IAddress extends BoxExtendedProps {
-  address: string | null | undefined;
-  chainId: number | null | undefined;
+  address: string | undefined;
+  chainId: number | undefined;
+  disableClick?: boolean;
 }
 
 export const Address: FC<IAddress> = (props: IAddress) => {
+  const { data: ens } = useEnsName({
+    address: props.address,
+    enabled: false,
+  });
+
   if (props.address === null || props.address === undefined || props.chainId === null || props.chainId === undefined) {
     return <></>;
   }
 
-  const exploreAddress = ChainsDetails.chainOfId(props.chainId)?.exploreAddress;
+  const disableClick = props.disableClick !== undefined ? props.disableClick : false;
 
-  const length = props.address.length;
-  const addressStr = `${props.address.toLowerCase().slice(0, 5)}...${props.address
-    .toLowerCase()
-    .slice(length - 5, length)}`;
+  const chain = ChainsDetails.chainOfId(props.chainId);
+  const exploreAddress = chain?.exploreAddress;
+  const exploreEns = chain?.exploreEns;
+
+  const address = getAddress(props.address);
+  const text = ens
+    ? ens
+    : address
+    ? `${address.slice(0, 5)}...${address.slice(address.length - 5, address.length)}`
+    : '';
+
+  const url = ens
+    ? exploreEns !== undefined
+      ? exploreEns(ens)
+      : undefined
+    : exploreAddress !== undefined
+    ? exploreAddress(props.address)
+    : undefined;
+
+  const style: CSSProperties = { color: styleConstants.colors.links, textDecoration: 'none', ...props.style };
 
   return (
     <Box {...props}>
       {exploreAddress ? (
         <Box align="center" direction="row">
-          <a
-            style={{ color: theme.links, textDecoration: 'none' }}
-            target="_blank"
-            rel="noreferrer"
-            href={exploreAddress(props.address)}>
-            {addressStr} <Link color={theme.links} style={{ height: '14px' }}></Link>
-          </a>
+          {disableClick ? (
+            <Box style={style}>{text}</Box>
+          ) : url !== undefined ? (
+            <a style={style} target="_blank" rel="noreferrer" href={url}>
+              {text}
+            </a>
+          ) : (
+            text
+          )}
         </Box>
       ) : (
-        <span style={{ color: theme.links }}>{addressStr}</span>
+        <span style={{ color: styleConstants.colors.links }}>{text}</span>
       )}
     </Box>
   );

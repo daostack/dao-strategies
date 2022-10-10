@@ -11,6 +11,7 @@ export interface RouteConfig {
   controller: new (manager: ServiceManager) => Controller;
   action: string;
   protected: boolean;
+  file?: boolean;
 }
 
 export const Routes: RouteConfig[] = [
@@ -20,6 +21,14 @@ export const Routes: RouteConfig[] = [
     controller: CampaignController,
     action: 'register',
     protected: true,
+  },
+  {
+    method: 'post',
+    route: '/campaign/uploadLogo/:uri',
+    controller: CampaignController,
+    action: 'uploadLogo',
+    protected: true,
+    file: true,
   },
   {
     method: 'post',
@@ -40,6 +49,13 @@ export const Routes: RouteConfig[] = [
     route: '/campaign/funders/:uri',
     controller: CampaignController,
     action: 'getFunders',
+    protected: false,
+  },
+  {
+    method: 'post',
+    route: '/campaign/fundEvents/:uri',
+    controller: CampaignController,
+    action: 'getFundEvents',
     protected: false,
   },
   {
@@ -89,6 +105,13 @@ export const Routes: RouteConfig[] = [
     route: '/time/now',
     controller: CampaignController,
     action: 'timeNow',
+    protected: false,
+  },
+  {
+    method: 'get',
+    route: '/onchain/balanceOf/:chainId/:asset/:account',
+    controller: CampaignController,
+    action: 'balanceOf',
     protected: false,
   },
   {

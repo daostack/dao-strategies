@@ -1,43 +1,44 @@
-import { Box, Spinner } from 'grommet';
+import { Box, BoxExtendedProps } from 'grommet';
 import { FC, useEffect, useState } from 'react';
-import { useNow } from '../hooks/useNow';
-import { IElement } from './styles/BasicElements';
+import { useNowContext } from '../hooks/useNow';
+import { DateManager } from '../utils/date.manager';
+import { AppRemainingTime } from './styles/BasicElements';
 
-const DEBUG = false;
+const DEBUG = true;
 
-export interface CountdownI extends IElement {
-  'to-date': number;
+export interface CountdownI extends BoxExtendedProps {
+  toDate: number;
+  text?: string;
 }
 
 export const Countdown: FC<CountdownI> = (props: CountdownI) => {
-  const [remaining, setRemaining] = useState<string>();
-  const { now } = useNow();
+  const [remaining, setRemaining] = useState<Duration | undefined>(undefined);
+  const { now } = useNowContext();
+  const execDate = new DateManager(props.toDate);
 
   if (DEBUG) console.log('Countdown', { props, now });
 
   useEffect(() => {
     const getRem = () => {
       if (DEBUG) console.log('Countdown - Interval', { now });
-      if (now !== undefined) {
-        now.refresh();
-        const rem = (props['to-date'] - now.getTime()).toString();
-        if (DEBUG) console.log('Countdown - Interval - rem', { rem });
-        setRemaining(rem);
+      if (!now) {
+        setRemaining(undefined);
+      } else {
+        const duration = DateManager.intervalDuration(now.getTimeDynamic(), execDate.getTime());
+        if (DEBUG) console.log('duration: ', { duration });
+        setRemaining(duration);
       }
     };
+
     getRem();
     const interval = setInterval(getRem, 1000);
     return () => clearInterval(interval);
   }, [now, props]);
 
-  const loading = now === undefined;
-
   return (
     <>
-      <Box style={{ width: '100%', textAlign: 'center' }} justify="center" align="center" direction="row">
-        {loading ? <Spinner></Spinner> : <Box>{remaining !== undefined ? remaining : ''}</Box>}
-        {/* <Box pad="small">6</Box>:
-        <Clock time={`PT${remaining}S`} run="backward" type="digital" /> */}
+      <Box style={{ textAlign: 'start', ...props.style }} justify="start" align="start">
+        {remaining !== undefined ? <AppRemainingTime compactFormat={false} remainingTime={remaining} /> : <></>}
       </Box>
     </>
   );

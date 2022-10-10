@@ -55,7 +55,8 @@
     "helpers",
     "./hardhat.config.ts",
     "./deploy",
-    "./typechain"
+    "./typechain",
+    "./test/scenarios.json"
   ],
   "exclude": [
     "**/node_modules",

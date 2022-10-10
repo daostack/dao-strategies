@@ -1,4 +1,6 @@
+import { getAddress } from '@dao-strategies/core';
 import bodyParser from 'body-parser';
+import fileUpload from 'express-fileupload';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import Session from 'express-session';
@@ -9,6 +11,9 @@ import { config, port } from './config';
 import { Routes } from './enpoints/routes';
 import { appLogger } from './logger';
 import { ServiceManager } from './service.manager';
+
+// import { createRedisClient } from './utils/redisClient';
+// const RedisStore = require("connect-redis")(Session)
 
 /* eslint-disable 
   @typescript-eslint/no-unsafe-member-access,
@@ -33,22 +38,59 @@ interface BigInt {
 // create express app
 const app = express();
 
+appLogger.info(
+  `Running in ${
+    process.env.NODE_ENV !== undefined ? process.env.NODE_ENV : 'default(dev)'
+  } mode`
+);
+
 /** CORS configuration */
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: ((env: string): any => {
+    switch (env) {
+      case 'production':
+        return 'http://app.commonvalue.xyz.s3-website-eu-west-1.amazonaws.com';
+      case 'test-prod':
+      default:
+        return 'http://localhost:3000';
+    }
+  })(process.env.NODE_ENV),
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   credentials: true,
 };
 
 app.use(cors(corsOptions));
 
+app.set('trust proxy', 1);
+
+const cookieConfig = ((env: string): any => {
+  switch (env) {
+    case 'production':
+    case 'test-prod':
+      return {
+        sameSite: 'none',
+        secure: true, // if true only transmit cookie over https, only when frontend is also https ?
+      };
+    default:
+      return {
+        sameSite: true,
+        secure: false, // if true only transmit cookie over https, only when frontend is also https ?
+      };
+  }
+})(process.env.NODE_ENV);
+
 app.use(
   Session({
     name: 'siwe-quickstart',
     secret: 'siwe-quickstart-secret',
+    proxy: true,
     resave: true,
     saveUninitialized: true,
-    cookie: { secure: false, sameSite: true },
+    cookie: {
+      ...cookieConfig,
+      httpOnly: false, // if true prevent client side JS from reading the cookie
+      maxAge: 1000 * 60 * 10, // session max age in miliseconds
+    },
   })
 );
 
@@ -72,20 +114,30 @@ app.use(
 /** JSON body parser */
 app.use(bodyParser.json());
 
-/** Services instantiation */
+const fileUploadOptions = {
+  debug: process.env.NODE_ENV !== 'production',
+  fileSize: 2e6,
+};
+
+/** Services instantiation (globally reused, we don's support hot loading the services) */
 const manager = new ServiceManager(config);
 
 /** --------------------- */
+
+const nop = (req: any, res: any, next: any): any => {
+  return next();
+};
 
 /** Register routes */
 Routes.forEach((route) => {
   (app as any)[route.method](
     route.route,
+    route.file ? fileUpload(fileUploadOptions) : nop,
     async (req: Request, res: Response, next: Function) => {
       try {
-        const loggedUser: string | undefined =
-          req.session?.siwe?.address.toLowerCase();
-
+        const loggedUser: string | undefined = getAddress(
+          req.session?.siwe?.address
+        );
         if (route.protected) {
           if (loggedUser === undefined) {
             throw new Error(
@@ -102,8 +154,6 @@ Routes.forEach((route) => {
       } catch (error) {
         console.error(error);
         throw error;
-        appLogger.error(error.message);
-        next(error);
       }
     }
   );

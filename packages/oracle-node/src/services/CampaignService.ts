@@ -6,7 +6,6 @@ import {
   CampaignUriDetails,
   getCampaignUri,
   IStrategyComputation,
-  Strategy_ID,
   bigIntToNumber,
   RootDetails,
   SharesRead,
@@ -20,10 +19,11 @@ import {
   Share,
 } from '@prisma/client';
 import { ethers } from 'ethers';
-
+import { BigNumber } from 'ethers/lib/ethers';
 import { resimulationPeriod } from '../config';
 import { appLogger } from '../logger';
 import { CampaignRepository } from '../repositories/CampaignRepository';
+import { uploadLogoToS3 } from '../utils/awsClient';
 
 import { campaignToUriDetails } from './CampaignUri';
 import { IndexingService } from './onchain/IndexService';
@@ -66,6 +66,9 @@ export class CampaignService {
 
   /** keep track of campaigns which are being run */
   running: Map<string, Promise<SharesRead>> = new Map();
+
+  /** keep track of campaigns which are being published */
+  publishing: Map<string, Promise<void>> = new Map();
 
   /** Co-dependency between CampaignService and CampaignOnChainService :( */
   protected readDataService: ReadDataService;
@@ -223,7 +226,7 @@ export class CampaignService {
   }
 
   async runStrategy(
-    strategyId: Strategy_ID,
+    strategyId: string,
     strategyParams: any
   ): Promise<Balances> {
     appLogger.info(`calling strategy ${strategyId}`);
@@ -241,61 +244,83 @@ export class CampaignService {
 
   /**  */
   async publishCampaign(uri: string): Promise<void> {
-    appLogger.info(`publishCampaign: ${uri}`);
-    const campaign = await this.get(uri);
-    /**
-     * computeRoot will also save the root as a new campaign root if different from
-     * the previous one
-     */
-    const rootDetails = await this.computeRoot(campaign);
-
-    const publishInfo = await this.readDataService.getPublishInfo(
-      campaign.address
-    );
-
-    appLogger.debug(
-      `publishCampaign: rootDetails: ${JSON.stringify(
-        rootDetails
-      )} - publishInfo: ${JSON.stringify(publishInfo)}`
-    );
-
-    if (
-      rootDetails.root !== publishInfo.status.approvedRoot &&
-      rootDetails.root !== publishInfo.status.pendingRoot &&
-      publishInfo.status.isProposeWindowActive
-    ) {
-      appLogger.debug(`publishCampaign - root: ${rootDetails.root}`);
-      await this.sendTransactionService.publishShares(
-        campaign.address,
-        rootDetails.root
-      );
-
-      await this.campaignRepo.setPublished(uri, true, this.timeService.now());
-    } else {
-      appLogger.debug(
-        `publishCampaign skipped, merkle root not new: ${rootDetails.root}`
-      );
+    if (this.publishing.has(uri)) {
+      appLogger.warn(`publishCampaign reentered ${uri}`);
+      return this.publishing.get(uri);
     }
 
-    /** republishing is configured when publishing if there were pending shareholders */
-    if (rootDetails.totalPending > 0) {
-      if (!publishInfo.status.locked) {
-        /**
-         * schedule to republish when oracle clock reaches the publish start. Add a margin to make sure
-         * that the onchain clock will also hold the time-based condition.
-         */
-        if (publishInfo.derived === undefined)
-          throw new Error(
-            'publish info does not include the derived parameters'
-          );
+    const publish = async (): Promise<void> => {
+      appLogger.info(`publishCampaign: ${uri}`);
+      const campaign = await this.get(uri);
+      /**
+       * computeRoot will also save the root as a new campaign root if different from
+       * the previous one
+       */
+      const rootDetails = await this.computeRoot(campaign);
 
-        appLogger.debug(`publishCampaign - configuring republish ${uri} `);
-        await this.campaignRepo.setRepublishDate(
-          uri,
-          publishInfo.derived.nextWindowStarts + this.config.republishTimeMargin
+      const publishInfo = await this.readDataService.getPublishInfo(
+        campaign.address,
+        campaign.chainId
+      );
+
+      appLogger.debug(
+        `publishCampaign: rootDetails: ${JSON.stringify(
+          rootDetails
+        )} - publishInfo: ${JSON.stringify(publishInfo)}`
+      );
+
+      if (
+        rootDetails.root !== publishInfo.status.approvedRoot &&
+        rootDetails.root !== publishInfo.status.pendingRoot &&
+        publishInfo.status.isProposeWindowActive
+      ) {
+        appLogger.debug(`publishCampaign - root: ${rootDetails.root}`);
+        await this.sendTransactionService.publishShares(
+          campaign.address,
+          campaign.chainId,
+          rootDetails.root
+        );
+
+        await this.campaignRepo.setPublished(uri, true, this.timeService.now());
+      } else {
+        appLogger.debug(
+          `publishCampaign skipped, merkle root not new: ${rootDetails.root}`
         );
       }
+
+      /** republishing is configured when publishing if there were pending shareholders */
+      if (rootDetails.totalPending > 0) {
+        if (!publishInfo.status.locked) {
+          /**
+           * schedule to republish when oracle clock reaches the publish start. Add a margin to make sure
+           * that the onchain clock will also hold the time-based condition.
+           */
+          if (publishInfo.derived === undefined)
+            throw new Error(
+              'publish info does not include the derived parameters'
+            );
+
+          appLogger.debug(`publishCampaign - configuring republish ${uri} `);
+          await this.campaignRepo.setRepublishDate(
+            uri,
+            publishInfo.derived.nextWindowStarts +
+              this.config.republishTimeMargin
+          );
+        }
+      }
+    };
+
+    const publishing = publish();
+    this.publishing.set(uri, publishing);
+
+    try {
+      await publishing;
+    } catch (e) {
+      appLogger.error(`Error publishing shares to ${uri}`);
+      console.error(e);
     }
+
+    this.publishing.delete(uri);
   }
 
   isPendingExecution(uri: string, now: number): Promise<boolean> {
@@ -464,8 +489,21 @@ export class CampaignService {
     return sharesToAddresses;
   }
 
-  getSharesOfAddress(uri: string, address: string): Promise<Share[] | null> {
-    return this.campaignRepo.getSharesOfAddress(uri, address);
+  /** sum all the shares of a given address */
+  async getSharesOfAddressInPp(
+    uri: string,
+    address: string
+  ): Promise<string | undefined> {
+    const shares = await this.campaignRepo.getSharesOfAddressInPp(uri, address);
+    if (!shares) {
+      return undefined;
+    }
+
+    const sum = shares.reduce<BigNumber>((acc, share) => {
+      return acc.add(BigNumber.from(share.amount));
+    }, BigNumber.from(0));
+
+    return sum.toString();
   }
 
   async setShares(uri: string, shares: Balances): Promise<void> {
@@ -486,6 +524,25 @@ export class CampaignService {
     by: string
   ): Promise<void> {
     await this.campaignRepo.setDetails(uri, details, by);
+  }
+
+  async uploadLogoToS3(logo: any, uri: string, by: string): Promise<void> {
+    // check if eligable (if person who creates campaign is same that uploads logo)
+    const campaign = await this.get(uri);
+    console.log('campaign.creatorId ', campaign.creatorId, ' BY ', by);
+    if (campaign.creatorId !== by) {
+      throw new Error('campaign logo can only be set by campaign creator');
+    }
+
+    // upload to s3 retrieve logo url
+    const logoUrl = await uploadLogoToS3(
+      uri,
+      this.timeService.now(),
+      logo.data
+    );
+
+    // store logo url in campaigns row
+    await this.campaignRepo.setLogoUrl(uri, logoUrl);
   }
 
   setExecuted(uri: string): Promise<void> {

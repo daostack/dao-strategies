@@ -1,22 +1,21 @@
 import { useContract, useSigner } from 'wagmi';
 
 import { ContractsJson, Typechain } from '@dao-strategies/core';
+import { ethers } from 'ethers';
 
-export const useCampaignFactory = (): Typechain.CampaignFactory | undefined => {
+export const useCampaignFactory = (chainId?: number): Typechain.CampaignFactory | undefined => {
   const { data: signer } = useSigner();
-  //   const { activeChain } = useNetwork();
 
-  //   const contractJson =
-  //     activeChain === undefined
-  //       ? undefined
-  //       : (hardhatContractsJson as any)[activeChain.id][activeChain.name]['contracts']['CampaignFactory'];
-  //   const abi = contractJson ? contractJson['abi'] : undefined;
-
-  return useContract<Typechain.CampaignFactory>({
-    addressOrName: ContractsJson.jsonOfChain().contracts.CampaignFactory.address,
-    contractInterface: ContractsJson.jsonOfChain().contracts.CampaignFactory.abi,
+  const contract = useContract<Typechain.CampaignFactory>({
+    addressOrName: chainId
+      ? ContractsJson.jsonOfChain(chainId).contracts.CampaignFactory.address
+      : ethers.constants.AddressZero,
+    contractInterface: chainId ? ContractsJson.defaultJson().contracts.CampaignFactory.abi : {},
     signerOrProvider: signer,
   });
+
+  if (chainId === undefined) return undefined;
+  return contract;
 };
 
 export const useCampaignInstance = (address: string): Typechain.Campaign | undefined => {
@@ -24,7 +23,7 @@ export const useCampaignInstance = (address: string): Typechain.Campaign | undef
 
   return useContract<Typechain.Campaign>({
     addressOrName: address,
-    contractInterface: ContractsJson.jsonOfChain().contracts.Campaign.abi,
+    contractInterface: ContractsJson.defaultJson().contracts.Campaign.abi,
     signerOrProvider: signer,
   });
 };

@@ -7,11 +7,37 @@ import { PublishInfo } from '../types';
 
 import { ContractsJson } from './contracts.json';
 
+const chainConstants = new Map<number, { multicallAddress?: string }>();
+
+chainConstants.set(1337, {
+  /* eslint-disable */
+  multicallAddress: ContractsJson.jsonOfChain(1337).contracts.Multicall.address,
+  /* eslint-enable */
+});
+
+chainConstants.set(5, {
+  multicallAddress: '0x77dca2c955b15e9de4dbbcf1246b4b85b651e50e',
+});
+
+export const campaignFactoryInstance = (
+  address: string,
+  signer: Signer
+): Campaign => {
+  const contract = new Contract(
+    address,
+    /* eslint-disable */
+    ContractsJson.defaultJson().contracts.Campaign.abi,
+    /* eslint-enable */
+    signer
+  );
+  return contract as Campaign;
+};
+
 export const campaignInstance = (address: string, signer: Signer): Campaign => {
   const contract = new Contract(
     address,
     /* eslint-disable */
-    ContractsJson.jsonOfChain().contracts.Campaign.abi,
+    ContractsJson.defaultJson().contracts.Campaign.abi,
     /* eslint-enable */
     signer
   );
@@ -25,7 +51,7 @@ export const campaignProvider = (
   const contract = new Contract(
     address,
     /* eslint-disable */
-    ContractsJson.jsonOfChain().contracts.Campaign.abi,
+    ContractsJson.defaultJson().contracts.Campaign.abi,
     /* eslint-enable */
     provider
   );
@@ -39,7 +65,7 @@ export const erc20Provider = (
   const contract = new Contract(
     address,
     /* eslint-disable */
-    ContractsJson.jsonOfChain().contracts.TestErc20.abi,
+    ContractsJson.defaultJson().contracts.TestErc20.abi,
     /* eslint-enable */
     provider
   );
@@ -50,7 +76,7 @@ export const erc20Instance = (address: string, signer: Signer): TestErc20 => {
   const contract = new Contract(
     address,
     /* eslint-disable */
-    ContractsJson.jsonOfChain().contracts.TestErc20.abi,
+    ContractsJson.defaultJson().contracts.TestErc20.abi,
     /* eslint-enable */
     signer
   );
@@ -59,14 +85,13 @@ export const erc20Instance = (address: string, signer: Signer): TestErc20 => {
 
 export const getCampaignPublishInfo = async (
   provider: providers.Provider,
+  chainId: number,
   address: string
 ): Promise<PublishInfo> => {
   const multicall = new Multicall({
     ethersProvider: provider,
-    /* eslint-disable */
     multicallCustomContractAddress:
-      ContractsJson.jsonOfChain().contracts.Multicall.address,
-    /* eslint-enable */
+      chainConstants.get(chainId)?.multicallAddress,
   });
 
   const contractCallContext: ContractCallContext[] = [
@@ -74,7 +99,7 @@ export const getCampaignPublishInfo = async (
       reference: 'campaign',
       contractAddress: address,
       /* eslint-disable */
-      abi: ContractsJson.jsonOfChain().contracts.Campaign.abi,
+      abi: ContractsJson.defaultJson().contracts.Campaign.abi,
       /* eslint-enable */
       calls: [
         {
