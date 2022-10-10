@@ -422,21 +422,24 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const repoButton = ((status) => {
-    if (!status.inputIsValid) {
-      return <AddCircle color={styleConstants.colors.primaryLight}></AddCircle>;
-    }
-    // else
-    if (status.checking) {
-      return <Spinner></Spinner>;
-    }
-    // else
-    if (status.inputExists && status.repoIsNew) {
-      return <AddCircle onClick={() => addRepo(validRepo)} color={styleConstants.colors.primary}></AddCircle>;
-    }
-    // else
-    if (status.inputDontExist || !status.repoIsNew) {
-      return <StatusCritical color={styleConstants.colors.alertText}></StatusCritical>;
-    }
+    const icon = (() => {
+      if (!status.inputIsValid) {
+        return <AddCircle color={styleConstants.colors.primaryLight}></AddCircle>;
+      }
+      // else
+      if (status.checking) {
+        return <Spinner></Spinner>;
+      }
+      // else
+      if (status.inputExists && status.repoIsNew) {
+        return <AddCircle color={styleConstants.colors.primary}></AddCircle>;
+      }
+      // else
+      if (status.inputDontExist || !status.repoIsNew) {
+        return <StatusCritical color={styleConstants.colors.alertText}></StatusCritical>;
+      }
+    })();
+    return <Box onClick={status.inputExists && status.repoIsNew ? () => addRepo(validRepo) : undefined}>{icon}</Box>;
   })(existStatus);
 
   const addRepo = (repo: string) => {
@@ -659,7 +662,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               const strategy = strategies.get(option);
               if (strategy === undefined) throw new Error(`never`);
 
-              return <StrategySelector strategy={strategy}></StrategySelector>;
+              return (
+                <Box style={{ padding: '0px 12px' }}>
+                  <StrategySelector strategy={strategy}></StrategySelector>
+                </Box>
+              );
             }}
           </AppSelect>
         </AppFormField>
@@ -681,13 +688,12 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                       </li>
                       <li style={{ marginTop: '10px' }}>
                         <b>{reactionConfigOptions.get(ReactionConfig.ONLY_REACTS)}</b>: Each reaction to a merged
-                        pull-request given by a previous contributor opf the reposiotry gives one point. One
-                        pull-request can give more than one points.
+                        pull-request given by a previous contributor of the reposiotry gives one point. One pull-request
+                        can give more than one points.
                       </li>
                       <li style={{ marginTop: '10px' }}>
-                        <b>{reactionConfigOptions.get(ReactionConfig.PRS_AND_REACTS)}</b>: Each reaction to a merged
-                        pull-request given by a previous repository contributor gives one point. One pull-request can
-                        give more than one points.
+                        <b>{reactionConfigOptions.get(ReactionConfig.PRS_AND_REACTS)}</b>: Each pull-request and each
+                        valid reaction (see above) will give one point. One pull-request can give more than one points.
                       </li>
                     </ul>
                   </Box>
