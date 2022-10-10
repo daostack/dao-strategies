@@ -55,18 +55,19 @@ export const AssetIcon: FC<IAsset> = (props: IAsset) => {
 
 interface IBalance extends BoxExtendedProps {
   asset?: TokenBalance;
+  ratio?: number;
 }
 
 export const AssetBalance: FC<IBalance> = (props: IBalance) => {
   if (props.asset === undefined) return <></>;
+  const ratio = props.ratio !== undefined ? props.ratio : 1;
+  const value = +ethers.utils.formatUnits(props.asset.balance, props.asset.decimals) * ratio;
   return (
     <Box direction="row" align="center" style={{ fontWeight: '500' }}>
       <Box style={{ textAlign: 'center', height: '24px', width: '24px' }}>
         <img src={props.asset.icon} alt={props.asset.name} />
       </Box>
-      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>
-        {ethers.utils.formatUnits(props.asset.balance, props.asset.decimals)}
-      </Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{valueToString(value)}</Box>
       <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
     </Box>
   );
@@ -74,10 +75,11 @@ export const AssetBalance: FC<IBalance> = (props: IBalance) => {
 
 export const AssetBalanceRow: FC<IBalance> = (props: IBalance) => {
   if (props.asset === undefined) return <></>;
+  const ratio = props.ratio !== undefined ? props.ratio : 1;
   return (
     <Box direction="row" style={{ width: '100%', ...props.style }} justify="between" align="center">
-      <AssetBalance asset={props.asset}></AssetBalance>
-      <Box style={{ fontWeight: '500' }}>${assetValue(props.asset, 2)}</Box>
+      <AssetBalance asset={props.asset} ratio={props.ratio}></AssetBalance>
+      <Box style={{ fontWeight: '500' }}>${assetValue(props.asset, ratio, 2)}</Box>
     </Box>
   );
 };
@@ -252,7 +254,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
           {props.assets ? (
             props.assets.map((asset) => {
               return asset.balance !== '0' ? (
-                <AssetBalanceRow style={{ marginBottom: '20px' }} asset={asset}></AssetBalanceRow>
+                <AssetBalanceRow style={{ marginBottom: '20px' }} asset={asset} ratio={ratio}></AssetBalanceRow>
               ) : (
                 <></>
               );
