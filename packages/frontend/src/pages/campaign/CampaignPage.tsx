@@ -197,31 +197,23 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const contributors_table = (
-    <>
-      {shares !== undefined ? (
-        <>
-          <AppCard style={{ marginTop: '52px', padding: '24px 24px' }}>
-            <Box direction="row" justify="between" align="center">
-              <AppHeading level="2" style={{ marginBottom: '24px' }}>
-                Contributors board
-              </AppHeading>
-              <Box style={{ height: '20px', width: '20px' }} onClick={() => getShares()}>
-                <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
-              </Box>
-            </Box>
-            <RewardsTable
-              shares={shares}
-              chainId={campaign.chainId}
-              showReward
-              raised={otherDetails?.raised}
-              updatePage={updatePage}
-              perPage={PER_PAGE}></RewardsTable>
-          </AppCard>
-        </>
-      ) : (
-        <Spinner></Spinner>
-      )}
-    </>
+    <AppCard style={{ marginTop: '52px', padding: '24px 24px' }}>
+      <Box direction="row" justify="between" align="center">
+        <AppHeading level="2" style={{ marginBottom: '24px' }}>
+          Contributors board
+        </AppHeading>
+        <Box style={{ height: '20px', width: '20px' }} onClick={() => getShares()}>
+          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+        </Box>
+      </Box>
+      <RewardsTable
+        shares={shares}
+        chainId={campaign.chainId}
+        showReward
+        raised={otherDetails?.raised}
+        updatePage={updatePage}
+        perPage={PER_PAGE}></RewardsTable>
+    </AppCard>
   );
 
   const fundersTable = (
