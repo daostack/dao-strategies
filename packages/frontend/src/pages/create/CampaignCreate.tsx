@@ -30,6 +30,7 @@ import {
   CHALLENGE_PERIOD,
   INCLUDED_CHAINS,
   oracleAddressMap,
+  TELEGRAM_INVITE_LINK,
 } from '../../config/appConfig';
 import { RouteNames } from '../MainPage';
 import {
@@ -141,7 +142,7 @@ const PER_PAGE = 8;
 const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
-  const { account, chain, switchNetwork, connect } = useLoggedUser();
+  const { account, chain, switchNetwork, connect, user } = useLoggedUser();
   const { showError } = useUserError();
 
   const { now, reset: resetNow } = useNowContext();
@@ -482,6 +483,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         isLastFormPage: pageIx === 1, // before the review page
         isReview: pageIx === 2,
       },
+      createAuthorized: user !== undefined && user.canCreate,
       shouldSimulate: periodType !== PeriodType.future,
       canSimulate: isLogged,
       mustSimulate: periodType === PeriodType.retroactive,
@@ -941,6 +943,20 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                 <Spinner></Spinner>
               </Box>
             </Layer>
+          ) : (
+            <></>
+          )}
+
+          {user && !user.canCreate ? (
+            <AppCallout style={{ marginBottom: '40px' }}>
+              <div>
+                &#128075; We are currenlty on private beta. If you want to create a campaign{' '}
+                <a href={TELEGRAM_INVITE_LINK} target="_blank" rel="noreferrer">
+                  please contact
+                </a>{' '}
+                us and we will add you to our beta-testers program
+              </div>
+            </AppCallout>
           ) : (
             <></>
           )}

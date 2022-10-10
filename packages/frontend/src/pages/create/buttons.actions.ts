@@ -7,6 +7,7 @@ export interface FormStatus {
     isLastFormPage: boolean;
     isReview: boolean;
   };
+  createAuthorized: boolean;
   shouldSimulate: boolean;
   canSimulate: boolean;
   mustSimulate: boolean;
@@ -143,6 +144,12 @@ export const getButtonActions = (
     if (status.wrongNetwork) {
       rightText = `Switch Network`;
       rightAction = () => actions.switchNetwork();
+    }
+
+    if (!status.createAuthorized) {
+      rightText = `Not Authorized`;
+      rightAction = () => actions.switchNetwork();
+      rightDisabled = true;
     }
   }
 

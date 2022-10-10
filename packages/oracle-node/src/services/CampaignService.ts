@@ -33,6 +33,7 @@ import {
   ZERO_BYTES32,
 } from './onchain/SendTransactionsService';
 import { TimeService } from './TimeService';
+import { UserService } from './UserService';
 
 export interface RootComputation {
   root: string;
@@ -79,6 +80,7 @@ export class CampaignService {
   constructor(
     protected campaignRepo: CampaignRepository,
     protected timeService: TimeService,
+    protected userService: UserService,
     protected strategyComputation: IStrategyComputation,
     protected sendTransactionService: SendTransactionService,
     protected config: CampaigServiceConfig
@@ -531,6 +533,12 @@ export class CampaignService {
     details: CampaignCreateDetails,
     by: string
   ): Promise<void> {
+    const can = await this.userService.canCreate(by);
+
+    if (!can) {
+      throw new Error(`user can't create: ${by}`);
+    }
+
     await this.campaignRepo.setDetails(uri, details, by);
   }
 
