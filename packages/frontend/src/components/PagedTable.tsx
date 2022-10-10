@@ -1,7 +1,7 @@
 import { Page } from '@dao-strategies/core';
 import { BoxExtendedProps, Box, Spinner } from 'grommet';
 import { FormNext, FormPrevious } from 'grommet-icons';
-import { FC, useCallback } from 'react';
+import { FC, ReactNode, useCallback } from 'react';
 import { styleConstants } from './styles/themes';
 
 export interface IPageNumber extends BoxExtendedProps {
@@ -46,11 +46,13 @@ export interface PagedTableI extends BoxExtendedProps {
   rows?: (row: number, column: number) => React.ReactElement;
   updatePage?: (page: Page) => void;
   invert?: boolean;
+  loadingMsg?: ReactNode;
 }
 
 export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
   const page = props.page;
   const loading = props.loading !== undefined ? props.loading : false;
+  const loadingMsg = props.loadingMsg !== undefined ? props.loadingMsg : 'Loading';
 
   const nextPage = useCallback(() => {
     if (page && props.updatePage) {
@@ -185,9 +187,10 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
               position: 'absolute',
               borderRadius: '20px',
               backgroundColor: styleConstants.colors.lightGrayBackground,
+              textAlign: 'center',
             }}>
             <Spinner></Spinner>
-            Loading
+            {loadingMsg}
           </Box>
         ) : (
           <></>

@@ -230,16 +230,24 @@ export class CampaignService {
     strategyParams: any
   ): Promise<Balances> {
     appLogger.info(`calling strategy ${strategyId}`);
-    const shares = await this.strategyComputation.runStrategy(
-      strategyId,
-      strategyParams
-    );
+    try {
+      const shares = await this.strategyComputation.runStrategy(
+        strategyId,
+        strategyParams
+      );
+      appLogger.info(
+        `calling strategy ${strategyId} - done, ${shares.size} receivers found`
+      );
 
-    appLogger.info(
-      `calling strategy ${strategyId} - done, ${shares.size} receivers found`
-    );
-
-    return shares;
+      return shares;
+    } catch (e) {
+      console.error(e);
+      throw new Error(
+        `Error running strategy ${strategyId}, ${JSON.stringify(
+          strategyParams
+        )}`
+      );
+    }
   }
 
   /**  */
