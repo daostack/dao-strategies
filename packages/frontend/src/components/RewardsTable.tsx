@@ -29,7 +29,17 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
   const chainId = props.chainId;
 
   if (shares === undefined) {
-    return <PagedTable loading perPage={props.perPage}></PagedTable>;
+    return (
+      <PagedTable
+        loading
+        perPage={props.perPage}
+        loadingMsg={
+          <>
+            Computing shares. Please hold, <br />
+            this may take up to a few minutes.
+          </>
+        }></PagedTable>
+    );
   }
 
   const data: any[] = Object.entries(shares.shares).map(([username, share]) => {
@@ -105,7 +115,6 @@ export const RewardsTable: FC<RewardsTableI> = (props: RewardsTableI) => {
 
   return (
     <PagedTable
-      loading={shares === undefined}
       invert={props.invert}
       page={shares.page}
       columns={columns}
