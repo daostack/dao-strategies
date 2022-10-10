@@ -44,7 +44,7 @@ export class UserService {
   async checkVerification(
     github_username: string,
     loggedUser: string
-  ): Promise<Verification> {
+  ): Promise<Verification | undefined> {
     const verification = !DISABLE_VERIFICATION
       ? await this.verifications.getVerificationGithub(github_username)
       : {

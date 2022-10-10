@@ -101,7 +101,7 @@ export class UserController extends Controller {
     _response: Response,
     _next: NextFunction,
     loggedUser: string
-  ): Promise<Verification> {
+  ): Promise<Verification | undefined> {
     return this.manager.services.user.checkVerification(
       request.body.handle as string,
       loggedUser
