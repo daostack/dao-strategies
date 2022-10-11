@@ -6,7 +6,6 @@ import { RewardsTable } from '../../components/RewardsTable';
 
 import {
   AppButton,
-  AppCallout,
   AppCard,
   AppHeading,
   AppModal,
@@ -24,11 +23,9 @@ import { HEADER_HEIGHT, MAX_WIDTH } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
 import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
-import { styleConstants } from '../../components/styles/themes';
 import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FundersTable } from '../../components/FundersTable';
-import { Refresh } from 'grommet-icons';
 import { FixedAdmin } from './fixed.admin';
 import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
@@ -197,7 +194,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const contributors_table = (
-    <AppCard style={{ marginTop: '52px', padding: '24px 24px', position: 'relative' }}>
+    <AppCard style={{ marginTop: '52px', padding: '24px 24px' }} showReload onReload={() => getShares()}>
       <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Contributors board
@@ -210,17 +207,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         raised={otherDetails?.raised}
         updatePage={updatePage}
         perPage={PER_PAGE}></RewardsTable>
-
-      <Box
-        style={{ position: 'absolute', right: '12px', top: '12px', height: '20px', width: '20px' }}
-        onClick={() => getShares()}>
-        <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
-      </Box>
     </AppCard>
   );
 
   const fundersTable = (
-    <AppCard style={{ marginTop: '40px', padding: '24px 24px', position: 'relative' }}>
+    <AppCard style={{ marginTop: '40px', padding: '24px 24px' }} showReload onReload={() => getFunders()}>
       <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Funders
@@ -232,12 +223,6 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         updatePage={updatePage}
         perPage={PER_PAGE}
         preferred={customAsset?.id}></FundersTable>
-
-      <Box
-        style={{ position: 'absolute', right: '12px', top: '12px', height: '20px', width: '20px' }}
-        onClick={() => getFunders()}>
-        <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
-      </Box>
     </AppCard>
   );
 

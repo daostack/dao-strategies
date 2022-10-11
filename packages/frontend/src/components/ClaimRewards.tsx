@@ -14,6 +14,7 @@ import { Box, CheckBox } from 'grommet';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
 import { Refresh } from 'grommet-icons';
 import { styleConstants } from './styles/themes';
+import { hasAssets } from '../utils/general';
 
 interface IParams extends IElement {
   campaignAddress: string;
@@ -33,7 +34,9 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
   const { campaign, claimInfo, checkClaimInfo } = useCampaignContext();
 
   const [showClaim, setShowClaim] = useState<boolean>(false);
-  const [hasTargetAddress, setHasTargetAddress] = useState<boolean>(false);
+  const [claiming, setClaiming] = useState<boolean>(false);
+
+  // const [hasTargetAddress, setHasTargetAddress] = useState<boolean>(false);
 
   const { now } = useNowContext();
   const { user, account, githubAccount } = useLoggedUser();
@@ -52,7 +55,7 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
     canClaim: currentClaim !== undefined && currentClaim.shares !== undefined,
     willCanClaim:
       (pendingClaim !== undefined && pendingClaim.shares !== undefined) ||
-      (inPpClaim !== undefined && inPpClaim.shares !== undefined),
+      (inPpClaim !== undefined && inPpClaim.shares !== undefined && inPpClaim.shares !== '0'),
     claim: currentClaim !== undefined ? currentClaim : pendingClaim !== undefined ? pendingClaim : undefined,
     wasExecuted: campaign.executed,
     wasPublished: campaign.published,
@@ -71,13 +74,22 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
       throw new Error('claim info undefined');
     }
 
-    await claimRewards(
-      campaignInstance,
-      account,
-      status.claim.shares,
-      status.claim.proof,
-      status.claim.assets.map((asset) => asset.address)
-    );
+    setClaiming(true);
+    try {
+      await claimRewards(
+        campaignInstance,
+        account,
+        status.claim.shares,
+        status.claim.proof,
+        status.claim.assets.map((asset) => asset.address)
+      );
+      checkClaimInfo();
+      setShowClaim(false);
+    } catch (e) {
+      console.error(e);
+    }
+
+    setClaiming(false);
   };
 
   const claimAssets = ((): ClaimInPp | undefined => {
@@ -110,7 +122,8 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
     }
   })();
 
-  const claimDisabled = status.willCanClaim && !status.canClaim;
+  const hasValue = claimAssets && claimAssets.assets && hasAssets(claimAssets.assets);
+  const claimDisabled = (status.willCanClaim && !status.canClaim) || !hasValue;
 
   return (
     <>
@@ -118,16 +131,16 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         <AppModal heading="Claim Reward" onClosed={() => setShowClaim(false)}>
           <Box>
             {status.claim ? <AssetsTable showSummary assets={status.claim.assets}></AssetsTable> : <></>}
-
+            {/* 
             <Box style={{ marginTop: '32px' }} direction="row" align="center">
               <Box style={{ marginRight: '16px' }}>Claim to custom address</Box>
               <CheckBox toggle onChange={(event) => setHasTargetAddress(event.target.checked)}></CheckBox>
             </Box>
 
-            {hasTargetAddress ? <AppInput style={{ marginTop: '20px' }} placeholder="0x..."></AppInput> : <></>}
+            {hasTargetAddress ? <AppInput style={{ marginTop: '20px' }} placeholder="0x..."></AppInput> : <></>} */}
 
-            <AppButton style={{ marginTop: '32px' }} primary onClick={() => claim()}>
-              Claim
+            <AppButton style={{ marginTop: '32px' }} primary onClick={() => claim()} disabled={claiming}>
+              {claiming ? 'Claiming...' : 'Claim'}
             </AppButton>
           </Box>
         </AppModal>
@@ -139,7 +152,7 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         title="My Rewards"
         assets={claimAssets?.assets}
         action={
-          claimAssets ? (
+          claimAssets && claimAssets.shares !== '0' ? (
             <Box style={{ width: '100%' }}>
               <AppButton
                 disabled={claimDisabled}
@@ -149,9 +162,11 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
                 label={
                   claimDisabled ? (
                     now && claimAssets.activationTime && claimAssets.activationTime > 0 ? (
-                      `${now.prettyDiff(claimAssets.activationTime + campaign.CHALLENGE_PERIOD)} to claim`
-                    ) : (
+                      `${now.cloneToNow().prettyDiff(claimAssets.activationTime + campaign.CHALLENGE_PERIOD)} to claim`
+                    ) : hasValue ? (
                       <></>
+                    ) : (
+                      <>No assets found</>
                     )
                   ) : (
                     <>Claim</>
