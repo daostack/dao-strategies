@@ -5,7 +5,7 @@ export const constants = {
   darkText: '#000',
   lineheighText: '225%',
   lightBackground: '#ffffff',
-  lightGray: '#3E3E3E',
+  lightGray: '#F3F3F3', 
   smallTextGray: '#9C9C9C',
   lightGreen: '#265332',
   lightBorder: '#323232',

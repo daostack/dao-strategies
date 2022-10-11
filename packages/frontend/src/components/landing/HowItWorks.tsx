@@ -6,6 +6,7 @@ import { constants } from './constants';
 
 import { IElement, AppHeading, AppLabel } from '../styles/BasicElements';
 import { HowItWorksLayoutBox } from './HowItWorksLayoutBox';
+import { RoundedSVG } from './RoundedSVG';
 
 interface DescriptionProps extends BoxExtendedProps {
   title: string;
@@ -81,6 +82,7 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
       }}
       align="center">
       <>
+        <RoundedSVG />
         <Box alignSelf="center" style={{ marginBottom: '36px' }}>
           <AppHeading size="64px">How it works</AppHeading>
         </Box>
