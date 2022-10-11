@@ -10,5 +10,5 @@ export const constants = {
   lightGreen: '#265332',
   lightBorder: '#323232',
   lightGrayBackground: '#F3F3F3',
-  blackText: '#0E0F19'
+  blackText: '#0E0F19',
 };

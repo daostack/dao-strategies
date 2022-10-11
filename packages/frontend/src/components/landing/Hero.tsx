@@ -9,11 +9,7 @@ import { styleConstants } from '../styles/themes';
 import { NewsletterSubscribe } from './NewsLetterSubscribe';
 import { constants } from './constants';
 
-
-interface IHero extends BoxExtendedProps {
-
-}
-
+interface IHero extends BoxExtendedProps {}
 
 export const Hero: FC<IHero> = (props: IHero) => {
   const size = React.useContext(ResponsiveContext);
@@ -40,7 +36,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
         return {};
     }
   })(size);
-  console.log(config)
+  console.log(config);
   return (
     <Box
       fill
@@ -48,14 +44,15 @@ export const Hero: FC<IHero> = (props: IHero) => {
         paddingLeft: '10vw',
         paddingRight: '10vw',
         marginTop: '6vw',
-        marginBottom: '20vw'
+        marginBottom: '20vw',
       }}
       direction={config.direction}>
       {/* Hero Message and subparagraph */}
-      <Box flex={{ grow: 0, shrink: 0 }}
+      <Box
+        flex={{ grow: 0, shrink: 0 }}
         style={{
           width: config.widths[0],
-          color: constants.lightGray
+          color: constants.lightGray,
         }}
         align="start"
         justify="start">
@@ -71,16 +68,16 @@ export const Hero: FC<IHero> = (props: IHero) => {
           Rewards for Value <br />
           Creators
         </AppHeading>
-        <AppLabel style={{ maxWidth: '520px' }}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Semper felis blandit donec pharetra. Id blandit tellus eu augue rhoncus. dipiscing elit. Semper felis</AppLabel>
-
+        <AppLabel style={{ maxWidth: '520px' }}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Semper felis blandit donec pharetra. Id blandit
+          tellus eu augue rhoncus. dipiscing elit. Semper felis
+        </AppLabel>
       </Box>
 
       {/* CTA --> SignUp Form */}
-      <Box width={config.widths[1]} >
+      <Box width={config.widths[1]}>
         <NewsletterSubscribe />
       </Box>
-
     </Box>
   );
 };
-

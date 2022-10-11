@@ -71,36 +71,25 @@ export const Footer: FC<IElement> = () => {
         </Box>
 
         {/* Follow us and Resources */}
-        <Box style={{ width: '65%' }} align='start' justify='start' direction={footerBoxStyle.direction}>
+        <Box style={{ width: '65%' }} align="start" justify="start" direction={footerBoxStyle.direction}>
           {/* Follow us box */}
           <Box pad={{ vertical: 'medium' }}>
-            <AppHeading size="28px" >Follow Us</AppHeading>
-            <Box pad={{ vertical: 'medium' }} gap='18px'>
-              <p>
-                Twitter
-              </p>
-              <p>
-                Twitter
-              </p>
-              <p>
-                Twitter
-              </p>
+            <AppHeading size="28px">Follow Us</AppHeading>
+            <Box pad={{ vertical: 'medium' }} gap="18px">
+              <p>Twitter</p>
+              <p>Twitter</p>
+              <p>Twitter</p>
             </Box>
           </Box>
           {/* Resources box */}
-          <Box pad={{ vertical: 'medium' }} margin={{ left: footerBoxStyle.direction === 'row' ? '130px' : '0px' }} >
-            <AppHeading size="28px" >Resources</AppHeading>
-            <Box pad={{ vertical: 'medium' }} gap='18px'>
-              <p>
-                Docs
-              </p>
-              <p>
-                Blog
-              </p>
+          <Box pad={{ vertical: 'medium' }} margin={{ left: footerBoxStyle.direction === 'row' ? '130px' : '0px' }}>
+            <AppHeading size="28px">Resources</AppHeading>
+            <Box pad={{ vertical: 'medium' }} gap="18px">
+              <p>Docs</p>
+              <p>Blog</p>
             </Box>
           </Box>
         </Box>
-
       </Box>
     </>
   );

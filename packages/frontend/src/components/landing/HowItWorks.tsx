@@ -14,7 +14,6 @@ interface IBoxProps extends BoxExtendedProps {
   iconPath: string;
 }
 
-
 export const HowItWorks: FC<IElement> = () => {
   const size = React.useContext(ResponsiveContext);
 
@@ -26,18 +25,24 @@ export const HowItWorks: FC<IElement> = () => {
         imagePath="/images/welcome-bg-1.png"
         description={
           <>
-            <AppHeading size='40px' color='#D87D13'>Create</AppHeading>
+            <AppHeading size="40px" color="#D87D13">
+              Create
+            </AppHeading>
             <Box
               margin={{ top: '20px' }}
               fill
-              style={{ fontSize: '20px', lineHeight: '178%', letterSpacing: '-0.43px', color: '#989BA0', }}>
+              style={{ fontSize: '20px', lineHeight: '178%', letterSpacing: '-0.43px', color: '#989BA0' }}>
               When a campaign is executed, it’s contributors recieve shares according to the rule-set
             </Box>
           </>
         }></HowItWorksLayoutBox>
 
       {/* First Seperator SVG */}
-      {!size.includes('small') && (<Box><img src="/images-landing/SeperatorFirst.svg" alt="first-seperator"></img></Box>)}
+      {!size.includes('small') && (
+        <Box>
+          <img src="/images-landing/SeperatorFirst.svg" alt="first-seperator"></img>
+        </Box>
+      )}
     </>,
     <>
       {/* Second How To Section --> Execute: */}
@@ -47,7 +52,9 @@ export const HowItWorks: FC<IElement> = () => {
         imagePosition={size.includes('small') ? 'left' : 'right'}
         description={
           <>
-            <AppHeading size='40px' color='#5762D5'>Execute</AppHeading>
+            <AppHeading size="40px" color="#5762D5">
+              Execute
+            </AppHeading>
             <Box
               margin={{ top: '20px' }}
               fill
@@ -58,7 +65,11 @@ export const HowItWorks: FC<IElement> = () => {
         }></HowItWorksLayoutBox>
 
       {/* Second Seperator SVG*/}
-      {!size.includes('small') && (<Box><img src="/images-landing/SeperatorSecond.svg" alt="first-seperator"></img></Box>)}
+      {!size.includes('small') && (
+        <Box>
+          <img src="/images-landing/SeperatorSecond.svg" alt="first-seperator"></img>
+        </Box>
+      )}
     </>,
     // Third How To Section --> Claim:
     <HowItWorksLayoutBox
@@ -66,17 +77,19 @@ export const HowItWorks: FC<IElement> = () => {
       imagePath="/images/welcome-bg-1.png"
       description={
         <>
-          <AppHeading size='40px' color='#4BA664'>Claim</AppHeading>
+          <AppHeading size="40px" color="#4BA664">
+            Claim
+          </AppHeading>
           <Box
             margin={{ top: '20px' }}
             fill
             style={{ fontSize: '20px', lineHeight: '178%', letterSpacing: '-0.43px', color: '#989BA0' }}>
-            Contributors can then claim their rewards as a portion of all the assets, ERC-20 or native, that were sent (or will be sent) to the campaign
+            Contributors can then claim their rewards as a portion of all the assets, ERC-20 or native, that were sent
+            (or will be sent) to the campaign
           </Box>
         </>
-      }></HowItWorksLayoutBox>
+      }></HowItWorksLayoutBox>,
   ];
-
 
   return (
     <Box

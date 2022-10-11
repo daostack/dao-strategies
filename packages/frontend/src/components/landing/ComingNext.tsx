@@ -26,9 +26,7 @@ const Platform: FC<IBoxProps> = (props: IBoxProps) => {
         <Box>
           <img style={{ height: '32px', width: '32px' }} src={props.iconPath} alt="logo"></img>
         </Box>
-        <AppLabel style={{ marginLeft: '8px' }}>
-          {props.name}
-        </AppLabel>
+        <AppLabel style={{ marginLeft: '8px' }}>{props.name}</AppLabel>
       </Box>
     </Box>
   );
@@ -63,7 +61,9 @@ export const ComingNext: FC<IElement> = () => {
   })(size);
 
   return (
-    <Box style={{ padding: '6vw', margin: '0 auto', width: '100%', backgroundColor: constants.lightBackground }} align="center">
+    <Box
+      style={{ padding: '6vw', margin: '0 auto', width: '100%', backgroundColor: constants.lightBackground }}
+      align="center">
       <Box alignSelf="start" style={{ marginBottom: '36px' }}>
         <AppHeading size="28px">
           -Coming Soon- <span style={{ color: constants.lightGray }}>New Integrations</span>
@@ -74,7 +74,6 @@ export const ComingNext: FC<IElement> = () => {
         align="start"
         style={{
           width: '100%',
-
         }}
         wrap={true}>
         <Platform iconPath="/images-landing/Twitter.svg" style={boxStyle} name="Twitter"></Platform>

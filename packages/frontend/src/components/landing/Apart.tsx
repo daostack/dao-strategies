@@ -14,19 +14,28 @@ interface IBoxProps extends BoxExtendedProps {
 
 const FeatureCore: FC<IBoxProps> = (props: IBoxProps) => {
   const left = props.style !== undefined && props.style.textAlign === 'left';
-  console.log('FeatureCore left ', left)
+  console.log('FeatureCore left ', left);
   return (
     <Box
       className={props.className}
-      style={{ maxWidth: '1300px', textAlign: left ? 'left' : 'center', ...props.style, padding: '12px 16px 24px 16px' }}>
+      style={{
+        maxWidth: '1300px',
+        textAlign: left ? 'left' : 'center',
+        ...props.style,
+        padding: '12px 16px 24px 16px',
+      }}>
       <Box align={left ? 'start' : 'center'}>
         <Box style={{ height: '64px', marginBottom: '16px' }} justify={left ? 'start' : 'center'}>
           <>{props.icon}</>
         </Box>
         <Box style={{ marginBottom: '16px' }} justify={left ? 'start' : 'center'}>
-          <AppLabel style={{ textTransform: 'inherit', fontWeight: 700, fontSize: '24px', color: constants.blackText }}>{props.title}</AppLabel>
+          <AppLabel style={{ textTransform: 'inherit', fontWeight: 700, fontSize: '24px', color: constants.blackText }}>
+            {props.title}
+          </AppLabel>
         </Box>
-        <AppLabel color={constants.lightGray} style={{ lineHeight: '22px', fontSize: '16px', textTransform: 'inherit' }}>
+        <AppLabel
+          color={constants.lightGray}
+          style={{ lineHeight: '22px', fontSize: '16px', textTransform: 'inherit' }}>
           <>{props.subtitle}</>
         </AppLabel>
       </Box>
@@ -83,15 +92,19 @@ export const SetUsApart: FC<IElement> = () => {
         backgroundColor: constants.lightBackground,
         marginLeft: constants.paddingLeft,
         marginRight: constants.paddingLeft,
-        marginBottom: '6vw'
+        marginBottom: '6vw',
       }}>
-      <Box alignSelf="start" style={{ marginBottom: '48px' }} gap="12px" >
+      <Box alignSelf="start" style={{ marginBottom: '48px' }} gap="12px">
         <AppHeading size="64px">What sets us Apart</AppHeading>
-        <AppButton color={constants.lightBackground}
+        <AppButton
+          color={constants.lightBackground}
           style={{
             fontWeight: 700,
-            backgroundColor: constants.darkText, maxWidth: '364px'
-          }}>Learn why Common Value</AppButton>
+            backgroundColor: constants.darkText,
+            maxWidth: '364px',
+          }}>
+          Learn why Common Value
+        </AppButton>
       </Box>
       <Box direction="row" align="start" wrap={true}>
         <Feature
