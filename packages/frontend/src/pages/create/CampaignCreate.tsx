@@ -525,7 +525,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const leftText = () => {
-    if (pageIx === 0) return 'Cancel';
+    if (pageIx === 0) return 'Back';
     return (
       <Box direction="row" align="center">
         <FormPreviousLink style={{ marginRight: '6px' }}></FormPreviousLink>Previous
@@ -953,7 +953,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <></>
           )}
 
-          {user && !user.canCreate ? (
+          {account === undefined || (user && !user.canCreate) ? (
             <AppCallout style={{ marginBottom: '40px' }}>
               <div>
                 &#128075; We are currenlty on private beta. If you want to create a campaign{' '}
