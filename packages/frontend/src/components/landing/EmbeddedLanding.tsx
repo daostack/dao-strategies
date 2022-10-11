@@ -30,7 +30,7 @@ export const EmbeddedLanding: FC<IEmbeddedLanding> = (props: IEmbeddedLanding) =
 
       <HowItWorks style={{ marginTop: '14vw' }}></HowItWorks>
       <ComingNext></ComingNext>
-      <Footer></Footer>
+      <Footer style={{ margin: '0 auto', padding: '2cw 5vw' }}></Footer>
     </Box>
   );
 };
