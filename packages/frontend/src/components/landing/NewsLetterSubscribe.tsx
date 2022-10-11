@@ -9,7 +9,7 @@ export const NewsletterSubscribe = () => {
 
 
     const maxWidthDependingOnDevice = () => {
-        return size.includes('small') ? '100vw' : '35vw'
+        return size.includes('small') ? '100vw' : '30vw'
     }
 
     const MAILCHIMP_URL = process.env.VITE_MAILCHIMP_URL || 'https://xyz.us14.list-manage.com/subscribe/post?u=e22f5256c29782ac6460a0fc3&amp;id=01c9ca1bed&amp;f_id=009ff8e0f0';

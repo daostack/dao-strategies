@@ -79,6 +79,7 @@ const NewsletterForm = ({ status, message, onValidated }: NewsletterFormProps) =
                             <AppFormField
                                 name="title">
                                 <AppInput
+                                    style={{ width: 'fill' }}
                                     id="emailaddress"
                                     type="text"
                                     width="fill"
@@ -94,6 +95,7 @@ const NewsletterForm = ({ status, message, onValidated }: NewsletterFormProps) =
 
                             <Box pad="medium">
                                 <AppButton
+                                    style={{ backgroundColor: 'rgba(75, 166, 100, 0.6)' }}
                                     primary
                                     onClick={handleFormSubmit}
                                     type="button"
