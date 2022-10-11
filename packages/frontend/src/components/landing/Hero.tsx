@@ -1,10 +1,6 @@
-import { Box, BoxExtendedProps, Heading, Paragraph, ResponsiveContext } from 'grommet';
-import React from 'react';
-import { FC, ReactElement } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { HEADER_HEIGHT, MAX_WIDTH } from '../../pages/AppHeader';
-import { AppButton, AppCard, AppHeading, AppLabel } from '../styles/BasicElements';
+import { Box, BoxExtendedProps } from 'grommet';
+import { FC } from 'react';
+import { AppCard, AppHeading, AppLabel } from '../styles/BasicElements';
 import { styleConstants } from '../styles/themes';
 import { NewsletterSubscribe } from './NewsLetterSubscribe';
 import { constants } from './constants';
@@ -14,7 +10,7 @@ interface IHero extends BoxExtendedProps {}
 
 export const Hero: FC<IHero> = (props: IHero) => {
   return (
-    <TwoColumns mediumIsSmall>
+    <TwoColumns>
       <Box
         style={{
           color: constants.lightGray,
@@ -31,8 +27,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
             fontFamily: styleConstants.font.secondary,
             fontWeight: '700',
           }}>
-          Rewards for Value <br />
-          Creators
+          Rewards for Value Creators
         </AppHeading>
         <AppLabel style={{ maxWidth: '520px' }}>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Semper felis blandit donec pharetra. Id blandit

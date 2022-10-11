@@ -1,38 +1,9 @@
-import {
-  Box,
-  Button,
-  ButtonExtendedProps,
-  Form,
-  FormField,
-  TextArea,
-  TextInput,
-  Text,
-  BoxExtendedProps,
-} from 'grommet';
+import { Box, Form, BoxExtendedProps } from 'grommet';
 import { FC, useState } from 'react';
-import styled, { css } from 'styled-components';
-import { AppButton } from '../styles/BasicElements';
-
-const inputStyle = css`
-  & {
-    padding: 24px 32px;
-    border-radius: 34px;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #adbfb2;
-    border: solid 1px rgba(255, 255, 255, 0.2);
-    font-weight: 400;
-  }
-`;
-const AppTextInput = styled(TextInput)`
-  ${inputStyle}
-`;
-const AppTextArea = styled(TextArea)`
-  ${inputStyle}
-`;
+import { AppButton, AppFormField, AppInput, AppTextArea } from '../styles/BasicElements';
 
 /** manually extracted from form, using this tutorial https://dev.to/utkarshdhiman48/custom-frontend-for-google-form-456l */
 const url = 'https://docs.google.com/forms/d/e/1FAIpQLSf0BBhMH635A4MzCijnWscDDxC0s6XYMuu47nesMBA7LWMqNQ/formResponse';
-const nameName = 'entry.1633159233';
 const emailName = 'entry.1588852581';
 const feedbackName = 'entry.501734265';
 
@@ -51,7 +22,6 @@ export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletter
     const dataToPost = new FormData(); //formdata API
 
     //fill name attributes to corresponding values
-    dataToPost.append(nameName, values.name);
     dataToPost.append(emailName, values.email);
     dataToPost.append(feedbackName, values.feedback);
 
@@ -71,6 +41,8 @@ export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletter
       .catch((err) => setError(true));
   };
 
+  const disabled = values.email === undefined || values.email === '';
+
   return (
     <Form
       onSubmit={(event) => submit(event.value)}
@@ -79,20 +51,18 @@ export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletter
         setValues(nextValue);
       }}
       style={{ width: '100%', maxWidth: '500px', ...props.style }}>
-      <FormField name="email">
-        <AppTextInput name="email" placeholder="Email (optional, to be kept updated)"></AppTextInput>
-      </FormField>
-      <FormField name="feedback">
-        <AppTextArea resize="vertical" name="Feedback" placeholder="Comments (optional)"></AppTextArea>
-      </FormField>
+      <AppFormField name="email">
+        <AppInput name="email" placeholder="Email or Telegram"></AppInput>
+      </AppFormField>
+      <AppFormField name="feedback">
+        <AppTextArea resize="vertical" name="feedback" placeholder="Comments" autoResize={false}></AppTextArea>
+      </AppFormField>
       {error ? (
-        <Box pad={{ vertical: '16px', horizontal: '32px' }} style={{ color: '#ac2525' }}>
-          Sorry, there was an error submitting your response.
-        </Box>
+        <Box style={{ color: '#ac2525' }}>Sorry, there was an error submitting your response.</Box>
       ) : submitted ? (
-        <Box pad={{ vertical: '16px', horizontal: '32px' }}>🙂 Sent! </Box>
+        <Box>🙂 Sent! </Box>
       ) : (
-        <AppButton style={{ width: '100%' }} disabled={true} primary type="submit" label="Send 🚀" />
+        <AppButton style={{ width: '100%' }} disabled={disabled} primary type="submit" label="Get Beta Access 🚀" />
       )}
     </Form>
   );
