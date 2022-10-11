@@ -1,4 +1,4 @@
-import { Box, ResponsiveContext } from 'grommet';
+import { Box, ResponsiveContext, Image } from 'grommet';
 import React from 'react';
 import { FC } from 'react';
 import { styleConstants } from '../styles/themes';
@@ -76,7 +76,10 @@ export const Footer: FC<IElement> = () => {
           <Box pad={{ vertical: 'medium' }}>
             <AppHeading size="28px">Follow Us</AppHeading>
             <Box pad={{ vertical: 'medium' }} gap="18px">
-              <p>Twitter</p>
+              <Box direction="row" gap="12px">
+                <Image src="/images-landing/Twitter.svg"></Image>
+                <p>Twitter</p>
+              </Box>
               <p>Twitter</p>
               <p>Twitter</p>
             </Box>

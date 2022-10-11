@@ -18,7 +18,7 @@ export const EmbeddedLanding: FC<IEmbeddedLanding> = (props: IEmbeddedLanding) =
   return (
     <Box>
       <Box
-        style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, margin: '0 25px', marginTop: HEADER_HEIGHT, padding: '0px 5vw' }}>
+        style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, margin: '0 auto', marginTop: HEADER_HEIGHT, padding: '0px 5vw' }}>
         <Banner></Banner>
         <Hero style={{ marginTop: '80px' }}></Hero>
         <LandingCampaigns style={{ marginTop: '60px' }}></LandingCampaigns>
