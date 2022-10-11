@@ -39,7 +39,7 @@ export const Footer: FC<IFooter> = (props: IFooter) => {
         ...props.style,
       }}>
       {/* Logo */}
-      <Box>
+      <Box style={{ margin: '10vw 0vw' }}>
         <Logo></Logo>
       </Box>
 

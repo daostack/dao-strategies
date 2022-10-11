@@ -60,8 +60,9 @@ export const Hero: FC<IHero> = (props: IHero) => {
           }}>
           Rewards for Value Creators
         </AppHeading>
-        <AppLabel style={{ maxWidth: '520px' }}>
-          A Web3-Powered engine for distributing rewards to your contributors
+        <AppLabel style={{ maxWidth: '520px', marginTop: '2vw' }}>
+          Web3 incentive engine for communities. CommonValue is a rewards platform that connects web2 activities to web3
+          rewards
         </AppLabel>
       </Box>
       <AppCard
