@@ -49,10 +49,13 @@ const corsOptions = {
   origin: ((env: string): any => {
     switch (env) {
       case 'production':
-        return 'http://app.commonvalue.xyz.s3-website-eu-west-1.amazonaws.com';
+        return process.env.CORS_PROD.split(' ');
       case 'test-prod':
+        return process.env.CORS_PROD.split(' ').concat(
+          process.env.CORS_DEV.split(' ')
+        );
       default:
-        return 'http://localhost:3000';
+        return process.env.CORS_DEV.split(' ');
     }
   })(process.env.NODE_ENV),
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
