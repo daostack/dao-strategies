@@ -39,6 +39,7 @@ periodOptions.set(PeriodKeys.next6Months, `${NEXT} 6 months`);
 periodOptions.set(PeriodKeys.custom, CUSTOM);
 
 export const SET_FROM_NOW = 'SET_FROM_NOW';
+export const FIRST_PAGE = { number: 0, perPage: 8 };
 
 export enum PeriodType {
   retroactive = 'retroactive',

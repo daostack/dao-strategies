@@ -46,7 +46,7 @@ export const AssetIcon: FC<IAsset> = (props: IAsset) => {
         ...props.style,
       }}>
       <Box style={{ textAlign: 'center', height: '20px', width: '20px' }}>
-        <img src={props.asset.icon} alt={props.asset.name} />
+        {props.asset.icon ? <img src={props.asset.icon} alt={props.asset.name} /> : <></>}
       </Box>
       <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
     </Box>
@@ -65,9 +65,9 @@ export const AssetBalance: FC<IBalance> = (props: IBalance) => {
   return (
     <Box direction="row" align="center" style={{ fontWeight: '500' }}>
       <Box style={{ textAlign: 'center', height: '24px', width: '24px' }}>
-        <img src={props.asset.icon} alt={props.asset.name} />
+        {props.asset.icon ? <img src={props.asset.icon} alt={props.asset.name} /> : <></>}
       </Box>
-      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{valueToString(value)}</Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{valueToString(value, 2)}</Box>
       <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
     </Box>
   );
@@ -204,9 +204,7 @@ export const AssetsValue: FC<IAssetsValue> = (props: IAssetsValue) => {
     if (preferred) {
       return {
         preferredString: balanceToStr(preferred),
-        secondaryString: hasValue
-          ? `+ ${usdString}`
-          : '' + arrayToStr(raisedCustom.filter((a) => a.id !== preferred.id)),
+        secondaryString: hasValue ? `${usdString}` : '' + arrayToStr(raisedCustom.filter((a) => a.id !== preferred.id)),
         has: true,
       };
     }

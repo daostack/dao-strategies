@@ -32,7 +32,6 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
   };
 
   const campaignClicked = (address: string) => {
-    console.log('clicked', { address });
     navigate(RouteNames.Campaign(address));
   };
 

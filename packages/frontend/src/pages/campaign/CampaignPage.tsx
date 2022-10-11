@@ -6,7 +6,6 @@ import { RewardsTable } from '../../components/RewardsTable';
 
 import {
   AppButton,
-  AppCallout,
   AppCard,
   AppHeading,
   AppModal,
@@ -24,18 +23,16 @@ import { HEADER_HEIGHT, MAX_WIDTH } from '../AppHeader';
 import { CampaignAreas, CampaignGrid } from './CampaignGrid';
 import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
-import { styleConstants } from '../../components/styles/themes';
 import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FundersTable } from '../../components/FundersTable';
-import { Refresh } from 'grommet-icons';
 import { FixedAdmin } from './fixed.admin';
 import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
 import { CampaignStatus } from '../../components/CampaignStatus';
 import { RouteNames } from '../MainPage';
-import { reactionConfigOptions } from '../campaign.support';
+import { FIRST_PAGE, reactionConfigOptions } from '../campaign.support';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -96,10 +93,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   useEffect(() => {
     if (DEBUG) console.log('Campaign Page updated', { campaign });
-    getShares({ number: 0, perPage: PER_PAGE });
+    getShares(FIRST_PAGE);
     getOtherDetails();
     checkClaimInfo();
-    getFunders({ number: 0, perPage: PER_PAGE });
+    getFunders(FIRST_PAGE);
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
@@ -197,14 +194,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const contributors_table = (
-    <AppCard style={{ marginTop: '52px', padding: '24px 24px' }}>
+    <AppCard style={{ marginTop: '52px', padding: '24px 24px' }} showReload onReload={() => getShares()}>
       <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Contributors board
         </AppHeading>
-        <Box style={{ height: '20px', width: '20px' }} onClick={() => getShares()}>
-          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
-        </Box>
       </Box>
       <RewardsTable
         shares={shares}
@@ -217,17 +211,18 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const fundersTable = (
-    <AppCard style={{ marginTop: '40px', padding: '24px 24px' }}>
+    <AppCard style={{ marginTop: '40px', padding: '24px 24px' }} showReload onReload={() => getFunders()}>
       <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Funders
         </AppHeading>
-        <Box style={{ height: '20px', width: '20px' }} onClick={() => getFunders()}>
-          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
-        </Box>
       </Box>
 
-      <FundersTable funders={funders} updatePage={updatePage} perPage={PER_PAGE}></FundersTable>
+      <FundersTable
+        funders={funders}
+        updatePage={updatePage}
+        perPage={PER_PAGE}
+        preferred={customAsset?.id}></FundersTable>
     </AppCard>
   );
 
@@ -257,12 +252,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         assets={otherDetails?.balances}
         preferred={customAsset?.id}
         action={
-          <AppButton
-            secondary
-            label="Fund Campaign"
-            style={{ width: '100%', fontSize: styleConstants.textFontSizes.small }}
-            onClick={() => setShowFund(true)}
-          />
+          <AppButton secondary label="Fund Campaign" style={{ width: '100%' }} onClick={() => setShowFund(true)} />
         }></BalanceCard>
     </>
   );
