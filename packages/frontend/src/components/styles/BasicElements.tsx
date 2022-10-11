@@ -144,7 +144,11 @@ export const AppInput = styled(TextInput)`
   }
 `;
 
-export const AppTextArea: FC<TextAreaProps> = (props: TextAreaProps) => {
+interface IAppTextArea extends TextAreaProps {
+  autoResize?: boolean;
+}
+
+export const AppTextArea: FC<IAppTextArea> = (props: IAppTextArea) => {
   const ref = useRef<HTMLTextAreaElement>();
 
   const autosize = () => {
@@ -164,7 +168,9 @@ export const AppTextArea: FC<TextAreaProps> = (props: TextAreaProps) => {
   };
 
   const onchange = () => {
-    autosize();
+    if (props.autoResize) {
+      autosize();
+    }
   };
 
   if (ref === null || ref === undefined) {
