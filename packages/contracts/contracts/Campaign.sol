@@ -21,25 +21,19 @@ contract Campaign is Initializable, ReentrancyGuard {
     uint256 public ACTIVATION_PERIOD;
     uint256 public ACTIVE_DURATION;
 
-    enum ChallengeAction {
-        CancelPending,
-        CancelPendingAndLockCurrent,
-        CancelCampaign
-    }
-
     bytes32 public approvedMerkleRoot;
 
     /** Optimistic flow used to update merkleRoot.
-     * - Oracle propose update and Guardian can block
-     * - Guardian cannot initiate an update */
+     * - Oracle propose update and Admin can block
+     * - Admin cannot initiate an update */
     bytes32 public pendingMerkleRoot;
     uint256 public activationTime;
     uint256 public deployTime;
 
-    /** Uri pointing to the campaign's reward strategy */
-    bytes32 public strategyUri;
+    /** Uri pointing to the campaign's reward ruleset */
+    bytes32 public rewardRulesetUri;
 
-    address public guardian;
+    address public admin;
     address public oracle;
 
     /** amount of total assets already claimed per asset address (zero address represents the native token) */
@@ -47,35 +41,39 @@ contract Campaign is Initializable, ReentrancyGuard {
     /** amount of assets already claimed per claimer address, per asset address (zero address represents the native token) */
     mapping(address => mapping(address => uint256)) public claimed;
 
-    /** Once locked, the merkleRoot cannot be updated anymore */
-    bool public locked;
+    /** Once locked, the merkleRoot cannot be updated anymore until unlocked */
+    bool public sharesLocked;
+    /** Once cancelled, the assets providers can withdraw */
+    bool public campaignCancelled;
 
     /** amount of rewards provided per address of provider, per asset address (zero address represents the native token) */
     mapping(address => mapping(address => uint256)) public providers;
+    /** amount of total rewards provided per asset address (zero address represents the native token) */
+    mapping(address => uint256) public totalProvided;
 
     event Fund(address indexed provider, uint256 amount, address asset);
     event SharesMerkleRootUpdate(bytes32 sharesMerkleRoot, bytes32 sharesUri, uint256 activationTime);
     event Claim(address indexed account, uint256 share, uint256 reward, address assset);
-    event Challenge(ChallengeAction action);
+    event Challenge();
     event Withdraw(address indexed account, uint256 amount, address asset);
-    event Lock(bool locked);
+    event SharesLock(bool locked);
+    event CampaignCancelled();
 
     error InvalidProof();
-
     error ProposeWindowNotActive(uint256 blockTime);
     error ChallengePeriodActive(uint256 blockTime);
     error OnlyInChallengePeriod(uint256 blockTime);
-
     error NoRewardAvailable();
-    error OnlyGuardian();
+    error OnlyAdmin();
     error WithdrawalNotAllowed();
     error NoAssetsToWithdraw();
     error OnlyOracle();
-    error Locked();
+    error NotIfCampaignLocked();
+    error NotIfCampaignCancelled();
 
-    modifier onlyGuardian() {
-        if (msg.sender != guardian) {
-            revert OnlyGuardian();
+    modifier onlyAdmin() {
+        if (msg.sender != admin) {
+            revert OnlyAdmin();
         }
         _;
     }
@@ -88,8 +86,15 @@ contract Campaign is Initializable, ReentrancyGuard {
     }
 
     modifier notLocked() {
-        if (locked) {
-            revert Locked();
+        if (sharesLocked) {
+            revert NotIfCampaignLocked();
+        }
+        _;
+    }
+
+    modifier notCancelled() {
+        if (campaignCancelled) {
+            revert NotIfCampaignCancelled();
         }
         _;
     }
@@ -104,16 +109,16 @@ contract Campaign is Initializable, ReentrancyGuard {
      * active window
      */
     function initCampaign(
-        bytes32 _strategyUri,
-        address _guardian,
+        bytes32 _rewardRulesetUri,
+        address _admin,
         address _oracle,
         uint256 _activationTime,
         uint256 _CHALLENGE_PERIOD,
         uint256 _ACTIVATION_PERIOD,
         uint256 _ACTIVE_DURATION
     ) external initializer {
-        strategyUri = _strategyUri;
-        guardian = _guardian;
+        rewardRulesetUri = _rewardRulesetUri;
+        admin = _admin;
         oracle = _oracle;
         activationTime = _activationTime > 0 ? _activationTime : block.timestamp;
         deployTime = block.timestamp;
@@ -125,7 +130,7 @@ contract Campaign is Initializable, ReentrancyGuard {
 
     /** Fund campaign with native or any ERC20 token.
      * For native token, asset is the zero address.  */
-    function fund(address asset, uint256 amount) external payable nonReentrant {
+    function fund(address asset, uint256 amount) external payable nonReentrant notCancelled {
         if (asset == address(0)) {
             _fund(msg.value, asset, msg.sender);
         } else {
@@ -133,9 +138,9 @@ contract Campaign is Initializable, ReentrancyGuard {
         }
     }
 
-    /** Only the oracle can propose new merkleRoot. The proposal is stored and becomes active only
+    /** Only the oracle can propose a new merkleRoot. The proposed root becomes active only
      * after a CHALLENGE_PERIOD */
-    function proposeShares(bytes32 _sharesMerkleRoot, bytes32 _sharesUri) external onlyOracle notLocked {
+    function proposeShares(bytes32 _sharesMerkleRoot, bytes32 _sharesUri) external onlyOracle notLocked notCancelled {
         checkMerkleRootUpdateAllowed();
 
         approvedMerkleRoot = pendingMerkleRoot;
@@ -145,14 +150,14 @@ contract Campaign is Initializable, ReentrancyGuard {
         emit SharesMerkleRootUpdate(_sharesMerkleRoot, _sharesUri, activationTime);
     }
 
-    /** External function to start claiming one ore more assets. Proof verification is only done here */
+    /** Claim rewards from one or more assets */
     function claim(
         address account,
         uint256 share,
         bytes32[] calldata proof,
         address[] calldata assets,
         address target
-    ) external nonReentrant {
+    ) external nonReentrant notCancelled {
         verifyShares(account, share, proof);
 
         for (uint8 ix = 0; ix < assets.length; ix++) {
@@ -160,37 +165,34 @@ contract Campaign is Initializable, ReentrancyGuard {
         }
     }
 
-    /** Guardian can challenge, with 3 possible actions:
-     * 1. Only cancel the pending merkle root, future updates are possible
-     * 2. Cancel the pending merkle root and lock the campaign, disabling any future merkle root updates
-     * 3. Cancel the whole campaign, claiming is not allowed and asset providers can withdraw back their assets */
-    function challenge(ChallengeAction action) external onlyGuardian notLocked {
+    /** Admin can cancel the pending merkle root while in challenge period.
+     * Previously approved root will stay active */
+    function challenge() external onlyAdmin {
         if (!isChallengePeriod()) {
             revert OnlyInChallengePeriod(block.timestamp);
         }
 
         pendingMerkleRoot = bytes32(0);
-        if (action == ChallengeAction.CancelPendingAndLockCurrent) {
-            locked = true;
-        } else if (action == ChallengeAction.CancelCampaign) {
-            locked = true;
-            approvedMerkleRoot = bytes32(0);
-        }
-
-        emit Challenge(action);
+        emit Challenge();
     }
 
-    /** Guardian can lock the campaign, meaning disable future merkle root updates.
-     * Locking a campaign with no merkle root is equivalent to canceling the campaign, allowing asset providers to withdraw */
-    function setLock(bool _lock) external onlyGuardian {
-        locked = _lock;
-        emit Lock(_lock);
+    /** Admin can lock the campaign, meaning disable future merkle root updates */
+    function setSharesLock(bool _lock) external onlyAdmin {
+        sharesLocked = _lock;
+        emit SharesLock(_lock);
     }
 
-    /** asset providers can withdraw their assets only in case the campaign was cancelled by the guardian */
+    /** Admin can cancel the campaign.
+     * After cancellation, asset providers can withdraw their assets and claims are disabled */
+    function cancelCampaign() external onlyAdmin {
+        campaignCancelled = true;
+        emit CampaignCancelled();
+    }
+
+    /** asset providers can withdraw their proportion of assets only in case the campaign was cancelled by the admin */
     function withdrawAssets(address account, address asset) external nonReentrant {
-        if (withdrawAllowed()) {
-            uint256 amount = providers[asset][account];
+        if (campaignCancelled) {
+            uint256 amount = (totalReceived(asset) * providers[asset][account]) / totalProvided[asset];
             if (amount == 0) {
                 revert NoAssetsToWithdraw();
             }
@@ -204,7 +206,7 @@ contract Campaign is Initializable, ReentrancyGuard {
         }
     }
 
-    receive() external payable {
+    receive() external payable notCancelled {
         _fund(msg.value, address(0), msg.sender);
     }
 
@@ -218,7 +220,7 @@ contract Campaign is Initializable, ReentrancyGuard {
         return asset == address(0) ? address(this).balance : IERC20(asset).balanceOf(address(this));
     }
 
-    /** Validates the shares of an account and computes the available rewards for it */
+    /** Validates the shares of an account */
     function verifyShares(
         address account,
         uint256 share,
@@ -242,9 +244,9 @@ contract Campaign is Initializable, ReentrancyGuard {
         return (totalReceived(asset) * share) / TOTAL_SHARES - claimed[asset][account];
     }
 
-    /** isPendingActive returns true if the active root is the pending one */
+    /** Returns true if the active root is the pending one */
     function isPendingActive() public view returns (bool isActive) {
-        return block.timestamp > activationTime;
+        return pendingMerkleRoot != bytes32(0) && block.timestamp > activationTime;
     }
 
     /** Valid root is either the approved or pending one depending on the activation time */
@@ -263,11 +265,12 @@ contract Campaign is Initializable, ReentrancyGuard {
         return block.timestamp < activationTime;
     }
 
+    /** Returns true if propose window for the oracle is active */
     function isProposeWindowActive() public view returns (bool) {
         return (uint256(block.timestamp) - uint256(deployTime)) % ACTIVATION_PERIOD < ACTIVE_DURATION;
     }
 
-    /** Reverits of the merkleRoot is not allowed. */
+    /** Returns true if the oracle can propose a new merkle root */
     function checkMerkleRootUpdateAllowed() public view {
         if (isChallengePeriod()) {
             revert ChallengePeriodActive(block.timestamp);
@@ -278,26 +281,13 @@ contract Campaign is Initializable, ReentrancyGuard {
         }
     }
 
-    /** If true, a locked campaign means withdrawals are enabled */
-    function lockForWithdrawals() public view returns (bool) {
-        return approvedMerkleRoot == bytes32(0) && pendingMerkleRoot == bytes32(0);
-    }
-
-    /** Indicates whether withdrawal for providers is allowed */
-    function withdrawAllowed() public view returns (bool) {
-        if (locked && lockForWithdrawals()) {
-            return true;
-        }
-        return false;
-    }
-
     /** variable getters */
 
     /***************
     INTERNAL FUNCTIONS
     ***************/
 
-    /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) proportional */
+    /** Claiming is always enabled (effectively possible only when a non-zero approved merkleRoot is set) */
     function _claim(
         address account,
         uint256 share,
@@ -325,6 +315,7 @@ contract Campaign is Initializable, ReentrancyGuard {
         address from
     ) internal {
         providers[asset][from] += amount;
+        totalProvided[asset] += amount;
         if (asset != address(0)) {
             IERC20(asset).safeTransferFrom(from, address(this), amount);
         }

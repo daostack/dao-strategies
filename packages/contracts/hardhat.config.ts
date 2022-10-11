@@ -25,8 +25,6 @@ import { HardhatUserConfig, task } from 'hardhat/config';
 import { config as envConfig } from 'dotenv';
 envConfig({ path: './.env' });
 
-console.log('Goerli API key: ', process.env.ALCHEMY_GOERLI_KEY);
-
 const mnemonicPath = './mnemonic.secret';
 const getMnemonic = (): string => {
   try {
@@ -66,7 +64,7 @@ const config: HardhatUserConfig = {
       },
     },
     mumbai: {
-      url: `https://polygon-mumbai.g.alchemy.com/v2/Dv15ryJxK5LL3dMfgvmC6e19UNokx3Zn`,
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.ALCHEMY_MUMBAI_KEY}`,
       accounts: {
         mnemonic: getMnemonic(),
       },
@@ -92,10 +90,10 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      goerli: "WHA7PKJ8XNAD6RF2FZ9BPEQFKSJBGTUMBR",
-      mainnet: "WHA7PKJ8XNAD6RF2FZ9BPEQFKSJBGTUMBR",
-      polygonMumbai: "WUCJ25PG9X17CRNIX3C2ZZPFZ8V9I1D9UP",
-      polygon: "WUCJ25PG9X17CRNIX3C2ZZPFZ8V9I1D9UP"
+      goerli: `${process.env.ETHERSCAN_API_KEY}`,
+      mainnet: `${process.env.ETHERSCAN_API_KEY}`,
+      polygonMumbai: `${process.env.POLYSCAN_API_KEY}`,
+      polygon: `${process.env.POLYSCAN_API_KEY}`
     }
   },
   solidity: {
@@ -122,6 +120,7 @@ const config: HardhatUserConfig = {
 };
 export default config;
 
+/*
 task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
   const randomWallet = ethers.Wallet.createRandom();
   const { privateKey } = randomWallet._signingKey();
@@ -132,3 +131,4 @@ task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
 task('reset', 'Get tx receipt').setAction(async (_, hre) => {
   await hre.network.provider.send('hardhat_reset');
 });
+*/
