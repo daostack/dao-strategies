@@ -26,7 +26,7 @@ const Description: FC<DescriptionProps> = (props: DescriptionProps) => {
   );
 };
 
-export const HowItWorks: FC<IElement> = () => {
+export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   const sections = () => [
     <>
       {/* First How To Section --> Create: */}
@@ -73,12 +73,11 @@ export const HowItWorks: FC<IElement> = () => {
 
   return (
     <Box
-      fill
       style={{
         paddingTop: '3vw',
         paddingBottom: constants.paddingTop,
         backgroundColor: constants.lightBackground,
-        marginTop: '5vh',
+        ...props.style,
       }}
       align="center">
       <>

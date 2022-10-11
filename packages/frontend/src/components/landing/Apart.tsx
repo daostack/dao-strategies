@@ -19,10 +19,9 @@ const FeatureCore: FC<IBoxProps> = (props: IBoxProps) => {
     <Box
       className={props.className}
       style={{
-        maxWidth: '1300px',
         textAlign: left ? 'left' : 'center',
-        ...props.style,
         padding: '12px 16px 24px 16px',
+        ...props.style,
       }}>
       <Box align={left ? 'start' : 'center'}>
         <Box style={{ height: '64px', marginBottom: '16px' }} justify={left ? 'start' : 'center'}>
@@ -49,29 +48,21 @@ const Feature = styled(FeatureCore)`
   }
 `;
 
-export const SetUsApart: FC<IElement> = () => {
+export const SetUsApart: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   const size = React.useContext(ResponsiveContext);
 
   const boxStyle = ((size: string): React.CSSProperties => {
     switch (size) {
       case 'xsmall':
+      case 'small':
         return {
           width: '100%',
           textAlign: 'left',
         };
-      case 'small':
-        return {
-          width: '50%',
-          textAlign: 'center',
-        };
       case 'medium':
-        return {
-          width: '50%',
-          textAlign: 'left',
-        };
       case 'large':
         return {
-          width: '25%',
+          width: '50%',
           textAlign: 'left',
         };
       default:
@@ -85,14 +76,12 @@ export const SetUsApart: FC<IElement> = () => {
     <Box
       style={{
         borderRadius: '20px',
-        minHeight: '60vh',
         paddingTop: '6vh',
         paddingLeft: constants.paddingLeft,
         paddingRight: constants.paddingLeft,
         backgroundColor: constants.lightBackground,
-        marginLeft: constants.paddingLeft,
-        marginRight: constants.paddingLeft,
-        marginBottom: '6vw',
+
+        ...props.style,
       }}>
       <Box alignSelf="start" style={{ marginBottom: '48px' }} gap="12px">
         <AppHeading size="64px">What sets us Apart</AppHeading>

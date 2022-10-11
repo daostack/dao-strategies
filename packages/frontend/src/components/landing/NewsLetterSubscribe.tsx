@@ -13,8 +13,6 @@ import { FC, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { AppButton } from '../styles/BasicElements';
 
-import { constants } from './constants';
-
 const inputStyle = css`
   & {
     padding: 24px 32px;

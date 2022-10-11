@@ -39,9 +39,17 @@ export const Hero: FC<IHero> = (props: IHero) => {
           tellus eu augue rhoncus. dipiscing elit. Semper felis
         </AppLabel>
       </Box>
-      <Box style={{ padding: '5vw 5vw', height: '300px' }} justify="center" align="center">
+      <AppCard
+        style={{
+          margin: '5vw 5vw',
+          height: '300px',
+          boxShadow: '0px 40.64px 54.56px rgba(14, 15, 25, 0.1)',
+          borderRadius: '20px',
+        }}
+        justify="center"
+        align="center">
         <NewsletterSubscribe />
-      </Box>
+      </AppCard>
     </TwoColumns>
   );
 };
