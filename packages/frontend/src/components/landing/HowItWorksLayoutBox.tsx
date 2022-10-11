@@ -9,12 +9,12 @@ interface IBoxProps extends BoxExtendedProps {
   imagePath: string;
   description: JSX.Element;
   separatorUrl?: string;
-  imagePosition?: string;
+  flip?: boolean;
 }
 
 export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
   const size = React.useContext(ResponsiveContext);
-  const imagePosition = props.imagePosition ?? 'left';
+  const flip = props.flip !== undefined ? props.flip : false;
 
   const imageBox = (
     <Box
@@ -43,7 +43,7 @@ export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
 
   return (
     <Box style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <TwoColumns widths={['40%', '60%']}>
+      <TwoColumns widths={flip ? ['60%', '40%'] : ['40%', '60%']}>
         <Box
           justify="center"
           align="center"
@@ -51,9 +51,9 @@ export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
             width: '100%',
             height: '100%',
           }}>
-          {imageBox}
+          {flip ? textBox : imageBox}
         </Box>
-        <Box>{textBox}</Box>
+        <Box>{flip ? imageBox : textBox}</Box>
       </TwoColumns>
       {props.separatorUrl && !size.includes('small') ? (
         <Box direction="row" style={{ height: '30vw', maxHeight: '300px' }}>

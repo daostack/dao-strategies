@@ -47,7 +47,7 @@ export const HowItWorks: FC<IElement> = () => {
       <HowItWorksLayoutBox
         key={'how-it-works-2'}
         imagePath="/images/welcome-bg-1.png"
-        imagePosition="right"
+        flip
         description={
           <Description
             title="Execute"
