@@ -76,9 +76,7 @@ export const SetUsApart: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
     <Box
       style={{
         borderRadius: '20px',
-        paddingTop: '6vh',
-        paddingLeft: constants.paddingLeft,
-        paddingRight: constants.paddingLeft,
+        padding: '6vh 4vw 0 4vw',
         backgroundColor: constants.lightBackground,
         ...props.style,
       }}>

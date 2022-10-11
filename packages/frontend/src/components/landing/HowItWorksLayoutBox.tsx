@@ -20,17 +20,23 @@ export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
   const imageBox = (
     <Box
       style={{
+        borderRadius: '50%',
+        overflow: 'hidden',
+        backgroundColor: '#cccccc',
         width: '25vw',
         height: '25vw',
         minWidth: '200px',
         maxWidth: '320px',
         minHeight: '200px',
         maxHeight: '320px',
-        borderRadius: '50%',
-        overflow: 'hidden',
-        background: `url(${props.imagePath}) center no-repeat`,
-        backgroundSize: 'cover',
-      }}></Box>
+        margin: '1vw',
+      }}
+      justify="center"
+      align="center">
+      <Box style={{}}>
+        <Image fit="cover" src={props.imagePath} alt="icon" />
+      </Box>
+    </Box>
   );
 
   const textBox = (

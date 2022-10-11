@@ -7,6 +7,7 @@ import { constants } from './constants';
 import { IElement, AppHeading, AppLabel } from '../styles/BasicElements';
 import { HowItWorksLayoutBox } from './HowItWorksLayoutBox';
 import { RoundedSVG } from './RoundedSVG';
+import { styleConstants } from '../styles/themes';
 
 interface DescriptionProps extends BoxExtendedProps {
   title: string;
@@ -36,11 +37,11 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
       <HowItWorksLayoutBox
         key={'how-it-works-1'}
         style={{ marginBottom: '24px' }}
-        imagePath="/images/welcome-bg-1.png"
+        imagePath="/images-landing/example-01-v2.png"
         description={
           <Description
             title="Create"
-            description="When a campaign is executed, it’s contributors recieve shares according to the rule-set"
+            description="Choose the reward rules for the campaign & deploy it to one of many supported chains"
             _color="#D87D13"
           />
         }
@@ -50,12 +51,12 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
       {/* Second How To Section --> Execute: */}
       <HowItWorksLayoutBox
         key={'how-it-works-2'}
-        imagePath="/images/welcome-bg-1.png"
+        imagePath="/images-landing/example-02-v2.png"
         flip
         description={
           <Description
             title="Execute"
-            description="When a campaign is executed, it’s contributors recieve shares according to the rule-set"
+            description="Campaign shares are distributed to the contributors, according to the predefined rules"
             _color="#5762D5"
           />
         }
@@ -64,7 +65,7 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
     // Third How To Section --> Claim:
     <HowItWorksLayoutBox
       key={'how-it-works-3'}
-      imagePath="/images/welcome-bg-1.png"
+      imagePath="/images-landing/example-03-v2.png"
       description={
         <Description
           title="Claim"
@@ -79,26 +80,15 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
     <>
       <Box
         style={{
-          backgroundColor: constants.lightBackground,
-          position: 'relative',
-          zIndex: 10,
           ...props.style,
         }}
         align="center">
         <>
-          <Box alignSelf="center" style={{ marginBottom: '36px' }}>
-            <RoundedSVG
-              color={constants.lightBackground}
-              style={{
-                width: '100vw',
-                zIndex: -1,
-                position: 'absolute',
-                top: !size.includes('small') ? '-12vw' : '-32vw',
-                left: 0,
-              }}
-            />
+          <Box alignSelf="center" style={{ marginBottom: '36px', padding: '6vw 0' }}>
             <AppLabel style={{ textAlign: 'center' }}>Creating a campaign</AppLabel>
-            <AppHeading size="64px">How it works</AppHeading>
+            <AppHeading size="64px" style={{ marginTop: '20px', fontFamily: styleConstants.font.secondary }}>
+              How it works
+            </AppHeading>
           </Box>
           {sections()}
         </>
