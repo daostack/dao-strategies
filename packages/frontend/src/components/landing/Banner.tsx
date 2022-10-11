@@ -18,16 +18,12 @@ export const Banner: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
         return {
           margin: {
             top: '5vw',
-            left: constants.paddingLeft,
-            right: constants.paddingLeft,
           },
         };
       case 'large':
         return {
           margin: {
             top: '5vw',
-            left: constants.paddingLeft,
-            right: constants.paddingLeft,
           },
         };
       default:

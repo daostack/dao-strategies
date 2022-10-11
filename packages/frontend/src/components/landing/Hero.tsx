@@ -8,51 +8,17 @@ import { AppButton, AppCard, AppHeading, AppLabel } from '../styles/BasicElement
 import { styleConstants } from '../styles/themes';
 import { NewsletterSubscribe } from './NewsLetterSubscribe';
 import { constants } from './constants';
+import { TwoColumns } from './TwoColumns';
 
 interface IHero extends BoxExtendedProps {}
 
 export const Hero: FC<IHero> = (props: IHero) => {
-  const size = React.useContext(ResponsiveContext);
-
-  const config = ((size: string): any => {
-    switch (size) {
-      case 'xsmall':
-      case 'small':
-        return {
-          direction: 'column',
-          widths: ['100%', '100%'],
-          justifyText: 'center',
-          alignText: 'center',
-        };
-      case 'medium':
-      case 'large':
-        return {
-          direction: 'row',
-          widths: ['50%', '50%'],
-          justifyText: 'center',
-          alignText: 'center',
-        };
-      default:
-        return {};
-    }
-  })(size);
-  console.log(config);
   return (
-    <Box
-      fill
-      style={{
-        paddingLeft: '10vw',
-        paddingRight: '10vw',
-        marginTop: '6vw',
-        marginBottom: '20vw',
-      }}
-      direction={config.direction}>
-      {/* Hero Message and subparagraph */}
+    <TwoColumns>
       <Box
-        flex={{ grow: 0, shrink: 0 }}
         style={{
-          width: config.widths[0],
           color: constants.lightGray,
+          ...props.style,
         }}
         align="start"
         justify="start">
@@ -73,11 +39,9 @@ export const Hero: FC<IHero> = (props: IHero) => {
           tellus eu augue rhoncus. dipiscing elit. Semper felis
         </AppLabel>
       </Box>
-
-      {/* CTA --> SignUp Form */}
-      <Box width={config.widths[1]}>
+      <Box style={{ padding: '5vw 5vw', height: '300px' }} justify="center" align="center">
         <NewsletterSubscribe />
       </Box>
-    </Box>
+    </TwoColumns>
   );
 };
