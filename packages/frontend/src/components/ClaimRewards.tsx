@@ -1,5 +1,4 @@
-import { Box, CheckBox, Text } from 'grommet';
-import { ChainsDetails, TokenBalance, TreeClaimInfo } from '@dao-strategies/core';
+import { ClaimInPp, TreeClaimInfo } from '@dao-strategies/core';
 import { FC, useState } from 'react';
 
 import { useCampaignContext } from '../hooks/useCampaign';
@@ -8,11 +7,13 @@ import { claimRewards } from '../pages/campaign.support';
 
 import { useNowContext } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
-import { truncate } from '../utils/ethers';
 
-import { AppButton, AppInput, AppModal, IElement } from './styles/BasicElements';
-import { AssetsTable, ChainTag } from './Assets';
+import { AppButton, AppCallout, AppInput, AppModal, IElement } from './styles/BasicElements';
+import { AssetsTable } from './Assets';
+import { Box, CheckBox } from 'grommet';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
+import { Refresh } from 'grommet-icons';
+import { styleConstants } from './styles/themes';
 
 interface IParams extends IElement {
   campaignAddress: string;
@@ -29,7 +30,7 @@ interface UserClaimStatus {
 }
 
 export const ClaimCard: FC<IParams> = (props: IParams) => {
-  const { campaign, claimInfo } = useCampaignContext();
+  const { campaign, claimInfo, checkClaimInfo } = useCampaignContext();
 
   const [showClaim, setShowClaim] = useState<boolean>(false);
   const [hasTargetAddress, setHasTargetAddress] = useState<boolean>(false);
@@ -79,20 +80,39 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
     );
   };
 
-  const claimAssets = ((): undefined | { shares: string; assets: TokenBalance[] } => {
-    if (status.claim) {
+  const claimAssets = ((): ClaimInPp | undefined => {
+    if (status.claim && status.claim.assets && status.claim.shares) {
       return {
         assets: status.claim.assets,
         shares: status.claim.shares,
+        activationTime: currentClaim ? 0 : claimInfo?.activationTime,
+      };
+    }
+
+    if (inPpClaim && inPpClaim.assets && inPpClaim.shares && inPpClaim.activationTime) {
+      return {
+        assets: inPpClaim.assets,
+        shares: inPpClaim.shares,
+        activationTime: inPpClaim.activationTime,
+      };
+    }
+
+    return undefined;
+  })();
+
+  const whyText = (() => {
+    if (!campaign.executed) {
+      return 'Campaign not yet executed';
+    }
+
+    if (status.willCanClaim) {
+      return 'Campaign shares update pending';
     }
   })();
 
-  const showCanClaim = (status.canClaim || status.willCanClaim) && claimAssets !== undefined;
-  const claimInFuture = status.willCanClaim && claimInfo && claimInfo.activationTime && now;
-
   return (
     <>
-      {showCanClaim ? (
+      {showClaim ? (
         <AppModal heading="Claim Reward" onClosed={() => setShowClaim(false)}>
           <Box>
             {status.claim ? <AssetsTable showSummary assets={status.claim.assets}></AssetsTable> : <></>}
@@ -113,29 +133,54 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         <></>
       )}
       <BalanceCard
-        style={{ padding: '24px', ...props.style }}
+        style={{ padding: '24px', position: 'relative', ...props.style }}
         title="My Rewards"
         assets={claimAssets?.assets}
         action={
-          showCanClaim ? (
-            <>
-              {? (
-                <Box>Claiming will be enabled in {claimInfo.activationTime - now.getTime()}</Box>
-              ) : (
-                <></>
-              )}
+          claimAssets ? (
+            <Box>
               <AppButton
                 disabled={status.willCanClaim}
                 style={{ width: '100%' }}
                 primary
-                onClick={() => setShowClaim(true)}>
-                Claim
-              </AppButton>
-            </>
+                onClick={() => setShowClaim(true)}
+                label={
+                  status.willCanClaim ? (
+                    now && claimAssets.activationTime && claimAssets.activationTime > 0 ? (
+                      `${now.prettyDiff(claimAssets.activationTime + campaign.CHALLENGE_PERIOD)} to claim`
+                    ) : (
+                      'Claim'
+                    )
+                  ) : (
+                    <></>
+                  )
+                }
+              />
+              {status.willCanClaim ? (
+                <Box
+                  direction="row"
+                  justify="center"
+                  style={{
+                    fontSize: styleConstants.textFontSizes.small,
+                    color: styleConstants.colors.ligthGrayText2,
+                    marginTop: '8px',
+                  }}>
+                  {whyText}
+                </Box>
+              ) : (
+                <></>
+              )}
+            </Box>
           ) : (
-            <>No rewards found</>
+            <AppCallout>{campaign.executed ? <>No rewards found</> : <>Campaign shares not yet computed</>}</AppCallout>
           )
-        }></BalanceCard>
+        }>
+        <Box
+          style={{ position: 'absolute', right: '12px', top: '12px', height: '20px', width: '20px' }}
+          onClick={() => checkClaimInfo()}>
+          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+        </Box>
+      </BalanceCard>
     </>
   );
 };

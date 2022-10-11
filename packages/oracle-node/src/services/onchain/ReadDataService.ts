@@ -12,6 +12,8 @@ import {
   erc20Provider,
   Asset,
   cmpAddresses,
+  ClaimInPp,
+  bigIntToNumber,
 } from '@dao-strategies/core';
 import { Campaign } from '@prisma/client';
 import { BigNumber, ethers } from 'ethers';
@@ -301,7 +303,7 @@ export class ReadDataService {
     campaignContract: Typechain.Campaign,
     chainId: number,
     customAssets: string[]
-  ): Promise<{ shares: string; assets?: TokenBalance[] }> {
+  ): Promise<ClaimInPp> {
     const shares = await this.campaignService.getSharesOfAddressInPp(
       uri,
       address
@@ -316,7 +318,17 @@ export class ReadDataService {
       campaignContract
     );
 
-    return { shares, assets };
+    const campaign = await this.campaignService.getFromAddress(
+      campaignContract.address
+    );
+
+    return {
+      shares,
+      assets,
+      activationTime: campaign.executed
+        ? bigIntToNumber(campaign.republishDate)
+        : bigIntToNumber(campaign.execDate),
+    };
   }
 
   async getClaimInfo(
@@ -385,7 +397,10 @@ export class ReadDataService {
     return this.price.priceOf(chainId, address);
   }
 
-  async assetOfAddress(address: string, chainId: number) {
+  async assetOfAddress(
+    address: string,
+    chainId: number
+  ): Promise<Asset | undefined> {
     let asset = ChainsDetails.assetOfAddress(chainId, address);
     if (!asset) {
       asset = await this.getCustomAsset(address, chainId);

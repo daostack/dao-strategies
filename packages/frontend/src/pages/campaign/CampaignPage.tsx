@@ -197,14 +197,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const contributors_table = (
-    <AppCard style={{ marginTop: '52px', padding: '24px 24px' }}>
+    <AppCard style={{ marginTop: '52px', padding: '24px 24px', position: 'relative' }}>
       <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Contributors board
         </AppHeading>
-        <Box style={{ height: '20px', width: '20px' }} onClick={() => getShares()}>
-          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
-        </Box>
       </Box>
       <RewardsTable
         shares={shares}
@@ -213,18 +210,21 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         raised={otherDetails?.raised}
         updatePage={updatePage}
         perPage={PER_PAGE}></RewardsTable>
+
+      <Box
+        style={{ position: 'absolute', right: '12px', top: '12px', height: '20px', width: '20px' }}
+        onClick={() => getShares()}>
+        <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+      </Box>
     </AppCard>
   );
 
   const fundersTable = (
-    <AppCard style={{ marginTop: '40px', padding: '24px 24px' }}>
+    <AppCard style={{ marginTop: '40px', padding: '24px 24px', position: 'relative' }}>
       <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Funders
         </AppHeading>
-        <Box style={{ height: '20px', width: '20px' }} onClick={() => getFunders()}>
-          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
-        </Box>
       </Box>
 
       <FundersTable
@@ -232,6 +232,12 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         updatePage={updatePage}
         perPage={PER_PAGE}
         preferred={customAsset?.id}></FundersTable>
+
+      <Box
+        style={{ position: 'absolute', right: '12px', top: '12px', height: '20px', width: '20px' }}
+        onClick={() => getFunders()}>
+        <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+      </Box>
     </AppCard>
   );
 

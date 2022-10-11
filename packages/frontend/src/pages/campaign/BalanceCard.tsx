@@ -36,6 +36,7 @@ export const BalanceCard = React.forwardRef<HTMLDivElement, BalanceCardProps>((p
         type="card"></AssetsValue>
 
       {props.action !== undefined ? props.action : <></>}
+      {props.children}
     </AppCard>
   );
 });
