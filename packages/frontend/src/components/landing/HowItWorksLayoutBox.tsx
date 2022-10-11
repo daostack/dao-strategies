@@ -45,7 +45,7 @@ export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
   );
 
   return (
-    <Box style={{ maxWidth: '800px', margin: `0 ${!size.includes('small') ? 'auto' : '10vw'}` }}>
+    <Box style={{ maxWidth: '800px', margin: `${!size.includes('small') ? '0' : '24px'} auto` }}>
       <TwoColumns widths={flip ? ['60%', '40%'] : ['40%', '60%']}>
         <Box
           justify="center"

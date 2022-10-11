@@ -28,11 +28,14 @@ const Description: FC<DescriptionProps> = (props: DescriptionProps) => {
 };
 
 export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  const size = React.useContext(ResponsiveContext);
+
   const sections = () => [
     <>
       {/* First How To Section --> Create: */}
       <HowItWorksLayoutBox
         key={'how-it-works-1'}
+        style={{ marginBottom: '24px' }}
         imagePath="/images/welcome-bg-1.png"
         description={
           <Description
@@ -79,7 +82,6 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
           backgroundColor: constants.lightBackground,
           position: 'relative',
           zIndex: 10,
-          marginTop: '42vw',
           ...props.style,
         }}
         align="center">
@@ -91,10 +93,11 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
                 width: '100vw',
                 zIndex: -1,
                 position: 'absolute',
-                top: 'calc(-5vw * 1.6 + -25px)',
+                top: !size.includes('small') ? '-12vw' : '-32vw',
                 left: 0,
               }}
             />
+            <AppLabel style={{ textAlign: 'center' }}>Creating a campaign</AppLabel>
             <AppHeading size="64px">How it works</AppHeading>
           </Box>
           {sections()}

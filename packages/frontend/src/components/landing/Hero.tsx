@@ -36,8 +36,9 @@ export const Hero: FC<IHero> = (props: IHero) => {
       </Box>
       <AppCard
         style={{
-          margin: '5vw 5vw',
+          margin: '5vw 2vw',
           height: '300px',
+          width: '80%',
           boxShadow: '0px 40.64px 54.56px rgba(14, 15, 25, 0.1)',
           borderRadius: '20px',
         }}

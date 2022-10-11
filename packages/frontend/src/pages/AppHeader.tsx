@@ -73,7 +73,7 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
       ) : (
         <></>
       )}
-      <LoggedUser></LoggedUser>
+      {!size.includes('small') ? <LoggedUser></LoggedUser> : <></>}
     </Box>
   );
 
