@@ -1,5 +1,5 @@
 import { Box, CheckBox, Text } from 'grommet';
-import { ChainsDetails, TreeClaimInfo } from '@dao-strategies/core';
+import { ChainsDetails, TokenBalance, TreeClaimInfo } from '@dao-strategies/core';
 import { FC, useState } from 'react';
 
 import { useCampaignContext } from '../hooks/useCampaign';
@@ -43,12 +43,15 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
 
   const currentClaim = claimInfo !== undefined && claimInfo.current !== undefined ? claimInfo.current : undefined;
   const pendingClaim = claimInfo !== undefined && claimInfo.pending !== undefined ? claimInfo.pending : undefined;
+  const inPpClaim = claimInfo !== undefined && claimInfo.inPp !== undefined ? claimInfo.inPp : undefined;
 
   const status: UserClaimStatus = {
     isLogged: user !== undefined,
     isVerified: githubAccount !== undefined,
     canClaim: currentClaim !== undefined && currentClaim.shares !== undefined,
-    willCanClaim: pendingClaim !== undefined && pendingClaim.shares !== undefined,
+    willCanClaim:
+      (pendingClaim !== undefined && pendingClaim.shares !== undefined) ||
+      (inPpClaim !== undefined && inPpClaim.shares !== undefined),
     claim: currentClaim !== undefined ? currentClaim : pendingClaim !== undefined ? pendingClaim : undefined,
     wasExecuted: campaign.executed,
     wasPublished: campaign.published,
@@ -76,19 +79,20 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
     );
   };
 
-  let claimValue: string = '0';
-  const canClaim = (status.canClaim || status.willCanClaim) && status.claim !== undefined;
+  const claimAssets = ((): undefined | { shares: string; assets: TokenBalance[] } => {
+    if (status.claim) {
+      return {
+        assets: status.claim.assets,
+        shares: status.claim.shares,
+    }
+  })();
 
-  if (canClaim) {
-    claimValue =
-      status.claim && status.claim.assets
-        ? truncate(ChainsDetails.valueOfAssets(status.claim.assets).toString(), 2)
-        : '0';
-  }
+  const showCanClaim = (status.canClaim || status.willCanClaim) && claimAssets !== undefined;
+  const claimInFuture = status.willCanClaim && claimInfo && claimInfo.activationTime && now;
 
   return (
     <>
-      {status.canClaim && showClaim ? (
+      {showCanClaim ? (
         <AppModal heading="Claim Reward" onClosed={() => setShowClaim(false)}>
           <Box>
             {status.claim ? <AssetsTable showSummary assets={status.claim.assets}></AssetsTable> : <></>}
@@ -111,11 +115,11 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
       <BalanceCard
         style={{ padding: '24px', ...props.style }}
         title="My Rewards"
-        assets={status.claim?.assets}
+        assets={claimAssets?.assets}
         action={
-          canClaim ? (
+          showCanClaim ? (
             <>
-              {status.willCanClaim && claimInfo && claimInfo.activationTime && now ? (
+              {? (
                 <Box>Claiming will be enabled in {claimInfo.activationTime - now.getTime()}</Box>
               ) : (
                 <></>

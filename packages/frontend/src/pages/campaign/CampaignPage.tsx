@@ -227,7 +227,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         </Box>
       </Box>
 
-      <FundersTable funders={funders} updatePage={updatePage} perPage={PER_PAGE}></FundersTable>
+      <FundersTable
+        funders={funders}
+        updatePage={updatePage}
+        perPage={PER_PAGE}
+        preferred={customAsset?.id}></FundersTable>
     </AppCard>
   );
 
