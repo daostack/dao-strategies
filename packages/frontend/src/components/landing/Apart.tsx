@@ -76,25 +76,10 @@ export const SetUsApart: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
     <Box
       style={{
         borderRadius: '20px',
-        paddingTop: '6vh',
-        paddingLeft: constants.paddingLeft,
-        paddingRight: constants.paddingLeft,
+        padding: '6vh 4vw 0 4vw',
         backgroundColor: constants.lightBackground,
-
         ...props.style,
       }}>
-      <Box alignSelf="start" style={{ marginBottom: '48px' }} gap="12px">
-        <AppHeading size="64px">What sets us Apart</AppHeading>
-        <AppButton
-          color={constants.lightBackground}
-          style={{
-            fontWeight: 700,
-            backgroundColor: constants.darkText,
-            maxWidth: '364px',
-          }}>
-          Learn why Common Value
-        </AppButton>
-      </Box>
       <Box direction="row" align="start" wrap={true}>
         <Feature
           icon={icons.ruleBased}
@@ -133,6 +118,17 @@ export const SetUsApart: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
               community needs.
             </p>
           }></Feature>
+      </Box>
+      <Box alignSelf="start" style={{ marginBottom: '48px' }} gap="12px">
+        <AppButton
+          color={constants.lightBackground}
+          style={{
+            fontWeight: 700,
+            backgroundColor: constants.darkText,
+            maxWidth: '364px',
+          }}>
+          Learn more
+        </AppButton>
       </Box>
     </Box>
   );

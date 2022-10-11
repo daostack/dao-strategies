@@ -4,7 +4,7 @@ import { FC } from 'react';
 export const RoundedSVG: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   return (
     <Box {...props}>
-      <svg width="1512" height="343" viewBox="0 0 1512 343" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 1512 343" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           fill-rule="evenodd"
           clip-rule="evenodd"

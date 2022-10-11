@@ -1,96 +1,68 @@
-import { Box, ResponsiveContext } from 'grommet';
+import { Box, Image, BoxExtendedProps } from 'grommet';
 import React from 'react';
 import { FC } from 'react';
-import { styleConstants } from '../styles/themes';
-import { ByDAOstack } from './ByDAOstack';
 import { Logo } from '../Logo';
 
-import { AppHeading, IElement } from '../styles/BasicElements';
+import { AppHeading, AppLabel } from '../styles/BasicElements';
+import { constants } from './constants';
+import { TwoColumns } from './TwoColumns';
 
-export const Footer: FC<IElement> = () => {
-  const size = React.useContext(ResponsiveContext);
+interface IFooterIcon extends BoxExtendedProps {
+  imageSrc: string;
+  itemText: string;
+  itemLink: string;
+}
 
-  const boxStyle = ((size: string): React.CSSProperties => {
-    switch (size) {
-      case 'xsmall':
-      case 'small':
-        return {
-          width: '100%',
-        };
-
-      case 'medium':
-      case 'large':
-        return {
-          width: '50%',
-        };
-      default:
-        return {
-          width: '25%',
-        };
-    }
-  })(size);
-
-  const footerBoxStyle = ((size: string): any => {
-    switch (size) {
-      case 'xsmall':
-        return {
-          width: '100%',
-          direction: 'column',
-        };
-
-      case 'small':
-        return {
-          width: '100%',
-          direction: 'column',
-        };
-      case 'medium':
-      case 'large':
-        return {
-          width: '50%',
-          direction: 'row',
-        };
-      default:
-        return {
-          width: '25%',
-        };
-    }
-  })(size);
+const FooterItem: FC<IFooterIcon> = (props: IFooterIcon) => {
+  const { imageSrc, itemText, itemLink } = props;
 
   return (
-    <>
-      <Box
-        direction={footerBoxStyle.direction}
-        style={{
-          paddingLeft: '8vw',
-          paddingRight: '8vw',
-          paddingTop: '2vw',
-        }}>
-        {/* Logo */}
-        <Box style={{ width: '35%' }}>
-          <Logo style={footerBoxStyle}></Logo>
-        </Box>
+    <a style={{ textDecoration: 'none' }} href={itemLink} target="_blank" rel="noreferrer">
+      <Box direction="row" gap="12px" align="center" justify="center" style={{ ...props.style }}>
+        {imageSrc && <Image src={imageSrc}></Image>}
+        <AppLabel style={{ color: constants.blackText }}>{itemText}</AppLabel>
+      </Box>
+    </a>
+  );
+};
 
-        {/* Follow us and Resources */}
-        <Box style={{ width: '65%' }} align="start" justify="start" direction={footerBoxStyle.direction}>
-          {/* Follow us box */}
-          <Box pad={{ vertical: 'medium' }}>
-            <AppHeading size="28px">Follow Us</AppHeading>
-            <Box pad={{ vertical: 'medium' }} gap="18px">
-              <p>Twitter</p>
-              <p>Twitter</p>
-              <p>Twitter</p>
-            </Box>
+interface IFooter extends BoxExtendedProps {}
+
+export const Footer: FC<IFooter> = (props: IFooter) => {
+  return (
+    <TwoColumns
+      align="start"
+      justify="start"
+      widths={['35%', '65%']}
+      style={{
+        padding: '6vw 3vw',
+        ...props.style,
+      }}>
+      {/* Logo */}
+      <Box style={{ margin: '10vw 0vw' }}>
+        <Logo></Logo>
+      </Box>
+
+      {/* Follow us and Resources */}
+      <Box align="start" justify="start" direction="row" gap="10vw">
+        {/* Follow us box */}
+        <Box>
+          <AppHeading size="28px">Follow Us</AppHeading>
+          <Box pad={{ vertical: 'medium' }} gap="18px">
+            <FooterItem imageSrc="images-landing/Footer/Twitter.png" itemText="Twitter" itemLink="" />
+            <FooterItem imageSrc="images-landing/Footer/Discord.png" itemText="Discord" itemLink="" />
+            <FooterItem imageSrc="images-landing/Footer/Github.png" itemText="Github" itemLink="" />
           </Box>
-          {/* Resources box */}
-          <Box pad={{ vertical: 'medium' }} margin={{ left: footerBoxStyle.direction === 'row' ? '130px' : '0px' }}>
-            <AppHeading size="28px">Resources</AppHeading>
-            <Box pad={{ vertical: 'medium' }} gap="18px">
-              <p>Docs</p>
-              <p>Blog</p>
-            </Box>
+        </Box>
+        {/* Resources box */}
+        <Box>
+          <AppHeading size="28px">Resources</AppHeading>
+          <Box pad={{ vertical: 'medium' }} gap="18px">
+            <FooterItem imageSrc="" itemText="Docs" itemLink="" />
+            <FooterItem imageSrc="" itemText="Blog" itemLink="" />
           </Box>
         </Box>
       </Box>
-    </>
+    </TwoColumns>
   );
 };

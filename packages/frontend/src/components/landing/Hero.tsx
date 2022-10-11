@@ -1,5 +1,5 @@
-import { Box, BoxExtendedProps } from 'grommet';
-import { FC } from 'react';
+import { Box, BoxExtendedProps, ResponsiveContext } from 'grommet';
+import { CSSProperties, FC, useContext } from 'react';
 import { AppCard, AppHeading, AppLabel } from '../styles/BasicElements';
 import { styleConstants } from '../styles/themes';
 import { NewsletterSubscribe } from './NewsLetterSubscribe';
@@ -9,35 +9,67 @@ import { TwoColumns } from './TwoColumns';
 interface IHero extends BoxExtendedProps {}
 
 export const Hero: FC<IHero> = (props: IHero) => {
+  const size = useContext(ResponsiveContext);
+
+  const headingStyle = ((): CSSProperties => {
+    switch (size) {
+      case 'xsmall':
+      case 'small':
+        return {
+          fontSize: '70px',
+          lineHeight: '110%',
+        };
+
+      case 'medium':
+        return {
+          fontSize: '80px',
+          lineHeight: '110%',
+        };
+
+      case 'large':
+        return {
+          fontSize: '90px',
+          lineHeight: '110%',
+        };
+
+      default:
+        return {
+          fontSize: '90px',
+          lineHeight: '110%',
+        };
+    }
+  })();
+
+  console.log({ headingStyle });
+
   return (
-    <TwoColumns>
+    <TwoColumns style={{ ...props.style }}>
       <Box
         style={{
           color: constants.lightGray,
-          ...props.style,
         }}
         align="start"
         justify="start">
         <AppHeading
           level={1}
           style={{
-            fontSize: '80px',
-            lineHeight: '115px',
             textAlign: 'start',
             fontFamily: styleConstants.font.secondary,
             fontWeight: '700',
+            ...headingStyle,
           }}>
           Rewards for Value Creators
         </AppHeading>
-        <AppLabel style={{ maxWidth: '520px' }}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Semper felis blandit donec pharetra. Id blandit
-          tellus eu augue rhoncus. dipiscing elit. Semper felis
+        <AppLabel style={{ maxWidth: '520px', marginTop: '2vw' }}>
+          Web3 incentive engine for communities. CommonValue is a rewards platform that connects web2 activities to web3
+          rewards
         </AppLabel>
       </Box>
       <AppCard
         style={{
-          margin: '5vw 5vw',
+          margin: '5vw 2vw',
           height: '300px',
+          width: '80%',
           boxShadow: '0px 40.64px 54.56px rgba(14, 15, 25, 0.1)',
           borderRadius: '20px',
         }}
