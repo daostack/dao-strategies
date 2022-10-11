@@ -14,7 +14,7 @@ interface IHero extends BoxExtendedProps {}
 
 export const Hero: FC<IHero> = (props: IHero) => {
   return (
-    <TwoColumns>
+    <TwoColumns mediumIsSmall>
       <Box
         style={{
           color: constants.lightGray,
