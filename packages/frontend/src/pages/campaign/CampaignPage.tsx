@@ -267,12 +267,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
         assets={otherDetails?.balances}
         preferred={customAsset?.id}
         action={
-          <AppButton
-            secondary
-            label="Fund Campaign"
-            style={{ width: '100%', fontSize: styleConstants.textFontSizes.small }}
-            onClick={() => setShowFund(true)}
-          />
+          <AppButton secondary label="Fund Campaign" style={{ width: '100%' }} onClick={() => setShowFund(true)} />
         }></BalanceCard>
     </>
   );

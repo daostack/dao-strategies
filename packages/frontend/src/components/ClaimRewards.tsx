@@ -105,10 +105,12 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
       return 'Campaign not yet executed';
     }
 
-    if (status.willCanClaim) {
+    if (status.willCanClaim && !status.canClaim) {
       return 'Campaign shares update pending';
     }
   })();
+
+  const claimDisabled = status.willCanClaim && !status.canClaim;
 
   return (
     <>
@@ -138,25 +140,25 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         assets={claimAssets?.assets}
         action={
           claimAssets ? (
-            <Box>
+            <Box style={{ width: '100%' }}>
               <AppButton
-                disabled={status.willCanClaim}
+                disabled={claimDisabled}
                 style={{ width: '100%' }}
                 primary
                 onClick={() => setShowClaim(true)}
                 label={
-                  status.willCanClaim ? (
+                  claimDisabled ? (
                     now && claimAssets.activationTime && claimAssets.activationTime > 0 ? (
                       `${now.prettyDiff(claimAssets.activationTime + campaign.CHALLENGE_PERIOD)} to claim`
                     ) : (
-                      'Claim'
+                      <></>
                     )
                   ) : (
-                    <></>
+                    <>Claim</>
                   )
                 }
               />
-              {status.willCanClaim ? (
+              {claimDisabled ? (
                 <Box
                   direction="row"
                   justify="center"
