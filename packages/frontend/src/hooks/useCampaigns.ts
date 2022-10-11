@@ -5,16 +5,24 @@ import { ORACLE_NODE_URL } from '../config/appConfig';
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function useCampaigns() {
   const [campaigns, setCampaigns] = useState<CampaignReadDetails[]>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const get = async () => {
-    const response = await fetch(ORACLE_NODE_URL + `/campaigns`, {
-      method: 'get',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
+    setIsLoading(true);
 
-    const campaigns: CampaignReadDetails[] = await response.json();
-    setCampaigns(campaigns.filter((campaign) => campaign.address !== null));
+    try {
+      const response = await fetch(ORACLE_NODE_URL + `/campaigns`, {
+        method: 'get',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      const campaigns: CampaignReadDetails[] = await response.json();
+      setCampaigns(campaigns.filter((campaign) => campaign.address !== null));
+    } catch (e) {
+      console.error(e);
+    }
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -23,7 +31,7 @@ export function useCampaigns() {
 
   return {
     campaigns: campaigns,
-    isLoading: false,
+    isLoading,
     error: false,
   };
 }

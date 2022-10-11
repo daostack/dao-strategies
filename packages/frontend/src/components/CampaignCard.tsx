@@ -9,11 +9,14 @@ import { styleConstants } from './styles/themes';
 
 export interface ICampaignCard extends BoxExtendedProps {
   campaign?: CampaignReadDetails;
+  compact?: boolean;
 }
 
 export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((props, ref) => {
   const campaign = props.campaign as CampaignReadDetails;
   const { now } = useNowContext();
+
+  const compact = props.compact !== undefined ? props.compact : false;
 
   if (!campaign) {
     return (
@@ -33,20 +36,23 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
   };
 
   return (
-    <AppCard {...props} ref={ref} style={{ ...props.style }}>
+    <AppCard
+      {...props}
+      ref={ref}
+      style={{ width: compact ? '320px' : 'auto', height: compact ? '100px' : 'auto', ...props.style }}>
       {/* Header with Logo and Campaigns Name */}
-      <Box direction="row" align="start" margin={{ vertical: '0px' }}>
+      <Box direction="row" align="start" style={{ margin: '0px' }}>
         <Box
-          style={{ minWidth: '55px', position: 'relative', flexShrink: '0', marginRight: '16px' }}
+          style={{ minWidth: compact ? '40px' : '55px', position: 'relative', flexShrink: '0', marginRight: '16px' }}
           alignContent="start"
           align="start">
-          <CampaignIcon src={campaign.logoUrl} iconSize="64px"></CampaignIcon>
+          <CampaignIcon src={campaign.logoUrl} iconSize={compact ? '40px' : '64px'}></CampaignIcon>
           <Box
             justify="center"
             align="center"
             style={{
-              width: '24px',
-              height: '24px',
+              width: compact ? '18px' : '24px',
+              height: compact ? '18px' : '24px',
               borderRadius: '50%',
               backgroundColor: '#ffffff',
               position: 'absolute',
@@ -54,7 +60,11 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
               top: '-1px',
               zIndex: 10,
             }}>
-            <Image src="./images/Github.png" style={{ borderRadius: '50%' }} width="20px" height="20px"></Image>
+            <Image
+              src="./images/Github.png"
+              style={{ borderRadius: '50%' }}
+              width={compact ? '14px' : '20px'}
+              height={compact ? '14px' : '20px'}></Image>
           </Box>
         </Box>
 
@@ -63,15 +73,19 @@ export const CampaignCard = React.forwardRef<HTMLDivElement, ICampaignCard>((pro
             {campaign.title}
           </AppHeading>
 
-          <Text style={{ color: styleConstants.colors.lightGrayTextDarker, fontSize: '14px', lineHeight: '20px' }}>
-            {getCampaignExecutionTime()}
-          </Text>
+          {!compact ? (
+            <Text style={{ color: styleConstants.colors.lightGrayTextDarker, fontSize: '14px', lineHeight: '20px' }}>
+              {getCampaignExecutionTime()}
+            </Text>
+          ) : (
+            <></>
+          )}
         </Box>
       </Box>
 
       {/* Campaign Description and funds */}
       <Box style={{ marginTop: '6px' }}>
-        {campaign.description && (
+        {!compact && campaign.description && (
           <FixedHeightPar
             style={{ margin: '0px 16px 0px 0px', color: styleConstants.colors.lightGrayTextDarker, fontSize: '16px' }}
             content={<>{campaign.description}</>}></FixedHeightPar>
