@@ -10,6 +10,7 @@ import { IElement } from './styles/BasicElements';
 
 export interface FundersTableI extends IElement {
   funders?: CampaignFundersRead;
+  preferred?: string;
   updatePage: (page: Page) => void;
   invert?: boolean;
   perPage: number; // needed to render the "loading" table of the correct size even if "shares" is undefined
@@ -48,7 +49,13 @@ export const FundersTable: FC<FundersTableI> = (props: FundersTableI) => {
 
     switch (colIx) {
       case 0:
-        return <AssetsValue title="Funds Provided" type="inline" assets={datum.assets}></AssetsValue>;
+        return (
+          <AssetsValue
+            title="Funds Provided"
+            type="inline"
+            assets={datum.assets}
+            preferred={props.preferred}></AssetsValue>
+        );
 
       case 1:
         return <Address chainId={campaign.chainId} address={datum.address}></Address>;

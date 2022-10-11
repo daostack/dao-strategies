@@ -12,6 +12,8 @@ import {
   erc20Provider,
   Asset,
   cmpAddresses,
+  ClaimInPp,
+  bigIntToNumber,
 } from '@dao-strategies/core';
 import { Campaign } from '@prisma/client';
 import { BigNumber, ethers } from 'ethers';
@@ -141,29 +143,31 @@ export class ReadDataService {
   }
 
   async getCustomAssets(
-    customAssets: string[],
+    assetsAddresses: string[],
     chainId: number
   ): Promise<Asset[]> {
-    return await Promise.all(
-      customAssets.map(async (assetAddress): Promise<Asset> => {
-        const token = erc20Provider(
-          assetAddress,
-          this.getProvider(chainId).provider
-        );
-
-        //
-        const decimals = await token.decimals();
-        const symbol = await token.symbol();
-
-        return {
-          address: assetAddress,
-          decimals: decimals,
-          id: assetAddress,
-          name: symbol,
-          // balance: balance.toString(),
-        };
-      })
+    return Promise.all(
+      assetsAddresses.map((address) => this.getCustomAsset(address, chainId))
     );
+  }
+
+  async getCustomAsset(assetAddress: string, chainId: number): Promise<Asset> {
+    const token = erc20Provider(
+      assetAddress,
+      this.getProvider(chainId).provider
+    );
+
+    //
+    const decimals = await token.decimals();
+    const symbol = await token.symbol();
+
+    return {
+      address: assetAddress,
+      decimals: decimals,
+      id: assetAddress,
+      name: symbol,
+      // balance: balance.toString(),
+    };
   }
 
   /** append the balance of the custom assets of a given address */
@@ -299,7 +303,7 @@ export class ReadDataService {
     campaignContract: Typechain.Campaign,
     chainId: number,
     customAssets: string[]
-  ): Promise<{ shares: string; assets?: TokenBalance[] }> {
+  ): Promise<ClaimInPp> {
     const shares = await this.campaignService.getSharesOfAddressInPp(
       uri,
       address
@@ -314,7 +318,17 @@ export class ReadDataService {
       campaignContract
     );
 
-    return { shares, assets };
+    const campaign = await this.campaignService.getFromAddress(
+      campaignContract.address
+    );
+
+    return {
+      shares,
+      assets,
+      activationTime: campaign.executed
+        ? bigIntToNumber(campaign.republishDate)
+        : bigIntToNumber(campaign.execDate),
+    };
   }
 
   async getClaimInfo(
@@ -383,13 +397,24 @@ export class ReadDataService {
     return this.price.priceOf(chainId, address);
   }
 
+  async assetOfAddress(
+    address: string,
+    chainId: number
+  ): Promise<Asset | undefined> {
+    let asset = ChainsDetails.assetOfAddress(chainId, address);
+    if (!asset) {
+      asset = await this.getCustomAsset(address, chainId);
+    }
+    return asset;
+  }
+
   /** Fill out the Asset details and the price from the asset address and amount */
   async tokenBalance(
     chainId: number,
     address: string,
     amount: string
   ): Promise<TokenBalance> {
-    const asset = ChainsDetails.assetOfAddress(chainId, address);
+    const asset = await this.assetOfAddress(address, chainId);
     const price = await this.price.priceOf(chainId, address);
     return { ...asset, balance: amount, price };
   }
@@ -407,7 +432,11 @@ export class ReadDataService {
     chainId: number,
     account: string
   ): Promise<TokenBalance> {
-    const asset = ChainsDetails.assetOfAddress(chainId, assetAddress);
+    const asset = await this.assetOfAddress(assetAddress, chainId);
+    if (!asset) {
+      throw new Error(`Asset not found ${assetAddress} chainId: ${chainId}`);
+    }
+
     const { provider } = this.providers.get(chainId);
 
     let get: Promise<BigNumber>;

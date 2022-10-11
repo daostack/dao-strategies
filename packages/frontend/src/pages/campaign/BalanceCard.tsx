@@ -1,12 +1,12 @@
 import { TokenBalance } from '@dao-strategies/core';
-import { Box, BoxExtendedProps, Tip } from 'grommet';
-import React, { useMemo } from 'react';
+import { Box } from 'grommet';
+import React from 'react';
 import { ReactElement } from 'react';
-import { AppCard } from '../../components/styles/BasicElements';
+import { AppCard, AppCardProps } from '../../components/styles/BasicElements';
 import { styleConstants } from '../../components/styles/themes';
 import { AssetsValue } from '../../components/Assets';
 
-interface BalanceCardProps extends BoxExtendedProps {
+interface BalanceCardProps extends AppCardProps {
   title: string;
   subtitle?: ReactElement;
   assets?: TokenBalance[];
@@ -16,7 +16,13 @@ interface BalanceCardProps extends BoxExtendedProps {
 
 export const BalanceCard = React.forwardRef<HTMLDivElement, BalanceCardProps>((props, ref) => {
   return (
-    <AppCard ref={ref} align="center" style={{ ...props.style }}>
+    <AppCard
+      ref={ref}
+      align="center"
+      style={{ ...props.style }}
+      showReload={props.showReload}
+      onReload={props.onReload}
+      reloading={props.reloading}>
       <Box
         style={{
           textTransform: 'uppercase',
@@ -36,6 +42,7 @@ export const BalanceCard = React.forwardRef<HTMLDivElement, BalanceCardProps>((p
         type="card"></AssetsValue>
 
       {props.action !== undefined ? props.action : <></>}
+      {props.children}
     </AppCard>
   );
 });

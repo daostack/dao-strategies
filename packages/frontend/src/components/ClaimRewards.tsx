@@ -1,5 +1,4 @@
-import { Box, CheckBox, Text } from 'grommet';
-import { ChainsDetails, TreeClaimInfo } from '@dao-strategies/core';
+import { ClaimInPp, TreeClaimInfo } from '@dao-strategies/core';
 import { FC, useState } from 'react';
 
 import { useCampaignContext } from '../hooks/useCampaign';
@@ -8,11 +7,14 @@ import { claimRewards } from '../pages/campaign.support';
 
 import { useNowContext } from '../hooks/useNow';
 import { useCampaignInstance } from '../hooks/useContracts';
-import { truncate } from '../utils/ethers';
 
-import { AppButton, AppInput, AppModal, IElement } from './styles/BasicElements';
-import { AssetsTable, ChainTag } from './Assets';
+import { AppButton, AppCallout, AppInput, AppModal, IElement } from './styles/BasicElements';
+import { AssetsTable } from './Assets';
+import { Box, CheckBox } from 'grommet';
 import { BalanceCard } from '../pages/campaign/BalanceCard';
+import { Refresh } from 'grommet-icons';
+import { styleConstants } from './styles/themes';
+import { hasAssets } from '../utils/general';
 
 interface IParams extends IElement {
   campaignAddress: string;
@@ -29,10 +31,12 @@ interface UserClaimStatus {
 }
 
 export const ClaimCard: FC<IParams> = (props: IParams) => {
-  const { campaign, claimInfo } = useCampaignContext();
+  const { campaign, claimInfo, checkClaimInfo } = useCampaignContext();
 
   const [showClaim, setShowClaim] = useState<boolean>(false);
-  const [hasTargetAddress, setHasTargetAddress] = useState<boolean>(false);
+  const [claiming, setClaiming] = useState<boolean>(false);
+
+  // const [hasTargetAddress, setHasTargetAddress] = useState<boolean>(false);
 
   const { now } = useNowContext();
   const { user, account, githubAccount } = useLoggedUser();
@@ -43,12 +47,15 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
 
   const currentClaim = claimInfo !== undefined && claimInfo.current !== undefined ? claimInfo.current : undefined;
   const pendingClaim = claimInfo !== undefined && claimInfo.pending !== undefined ? claimInfo.pending : undefined;
+  const inPpClaim = claimInfo !== undefined && claimInfo.inPp !== undefined ? claimInfo.inPp : undefined;
 
   const status: UserClaimStatus = {
     isLogged: user !== undefined,
     isVerified: githubAccount !== undefined,
     canClaim: currentClaim !== undefined && currentClaim.shares !== undefined,
-    willCanClaim: pendingClaim !== undefined && pendingClaim.shares !== undefined,
+    willCanClaim:
+      (pendingClaim !== undefined && pendingClaim.shares !== undefined) ||
+      (inPpClaim !== undefined && inPpClaim.shares !== undefined && inPpClaim.shares !== '0'),
     claim: currentClaim !== undefined ? currentClaim : pendingClaim !== undefined ? pendingClaim : undefined,
     wasExecuted: campaign.executed,
     wasPublished: campaign.published,
@@ -67,41 +74,73 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
       throw new Error('claim info undefined');
     }
 
-    await claimRewards(
-      campaignInstance,
-      account,
-      status.claim.shares,
-      status.claim.proof,
-      status.claim.assets.map((asset) => asset.address)
-    );
+    setClaiming(true);
+    try {
+      await claimRewards(
+        campaignInstance,
+        account,
+        status.claim.shares,
+        status.claim.proof,
+        status.claim.assets.map((asset) => asset.address)
+      );
+      checkClaimInfo();
+      setShowClaim(false);
+    } catch (e) {
+      console.error(e);
+    }
+
+    setClaiming(false);
   };
 
-  let claimValue: string = '0';
-  const canClaim = (status.canClaim || status.willCanClaim) && status.claim !== undefined;
+  const claimAssets = ((): ClaimInPp | undefined => {
+    if (status.claim && status.claim.assets && status.claim.shares) {
+      return {
+        assets: status.claim.assets,
+        shares: status.claim.shares,
+        activationTime: currentClaim ? 0 : claimInfo?.activationTime,
+      };
+    }
 
-  if (canClaim) {
-    claimValue =
-      status.claim && status.claim.assets
-        ? truncate(ChainsDetails.valueOfAssets(status.claim.assets).toString(), 2)
-        : '0';
-  }
+    if (inPpClaim && inPpClaim.assets && inPpClaim.shares && inPpClaim.activationTime) {
+      return {
+        assets: inPpClaim.assets,
+        shares: inPpClaim.shares,
+        activationTime: inPpClaim.activationTime,
+      };
+    }
+
+    return undefined;
+  })();
+
+  const whyText = (() => {
+    if (!campaign.executed) {
+      return 'Campaign not yet executed';
+    }
+
+    if (status.willCanClaim && !status.canClaim) {
+      return 'Campaign shares update pending';
+    }
+  })();
+
+  const hasValue = claimAssets && claimAssets.assets && hasAssets(claimAssets.assets);
+  const claimDisabled = (status.willCanClaim && !status.canClaim) || !hasValue;
 
   return (
     <>
-      {status.canClaim && showClaim ? (
+      {showClaim ? (
         <AppModal heading="Claim Reward" onClosed={() => setShowClaim(false)}>
           <Box>
             {status.claim ? <AssetsTable showSummary assets={status.claim.assets}></AssetsTable> : <></>}
-
+            {/* 
             <Box style={{ marginTop: '32px' }} direction="row" align="center">
               <Box style={{ marginRight: '16px' }}>Claim to custom address</Box>
               <CheckBox toggle onChange={(event) => setHasTargetAddress(event.target.checked)}></CheckBox>
             </Box>
 
-            {hasTargetAddress ? <AppInput style={{ marginTop: '20px' }} placeholder="0x..."></AppInput> : <></>}
+            {hasTargetAddress ? <AppInput style={{ marginTop: '20px' }} placeholder="0x..."></AppInput> : <></>} */}
 
-            <AppButton style={{ marginTop: '32px' }} primary onClick={() => claim()}>
-              Claim
+            <AppButton style={{ marginTop: '32px' }} primary onClick={() => claim()} disabled={claiming}>
+              {claiming ? 'Claiming...' : 'Claim'}
             </AppButton>
           </Box>
         </AppModal>
@@ -109,29 +148,56 @@ export const ClaimCard: FC<IParams> = (props: IParams) => {
         <></>
       )}
       <BalanceCard
-        style={{ padding: '24px', ...props.style }}
+        style={{ padding: '24px', position: 'relative', ...props.style }}
         title="My Rewards"
-        assets={status.claim?.assets}
+        assets={claimAssets?.assets}
         action={
-          canClaim ? (
-            <>
-              {status.willCanClaim && claimInfo && claimInfo.activationTime && now ? (
-                <Box>Claiming will be enabled in {claimInfo.activationTime - now.getTime()}</Box>
+          claimAssets && claimAssets.shares !== '0' ? (
+            <Box style={{ width: '100%' }}>
+              <AppButton
+                disabled={claimDisabled}
+                style={{ width: '100%' }}
+                primary
+                onClick={() => setShowClaim(true)}
+                label={
+                  claimDisabled ? (
+                    now && claimAssets.activationTime && claimAssets.activationTime > 0 ? (
+                      `${now.cloneToNow().prettyDiff(claimAssets.activationTime + campaign.CHALLENGE_PERIOD)} to claim`
+                    ) : hasValue ? (
+                      <></>
+                    ) : (
+                      <>No assets found</>
+                    )
+                  ) : (
+                    <>Claim</>
+                  )
+                }
+              />
+              {claimDisabled ? (
+                <Box
+                  direction="row"
+                  justify="center"
+                  style={{
+                    fontSize: styleConstants.textFontSizes.small,
+                    color: styleConstants.colors.ligthGrayText2,
+                    marginTop: '8px',
+                  }}>
+                  {whyText}
+                </Box>
               ) : (
                 <></>
               )}
-              <AppButton
-                disabled={status.willCanClaim}
-                style={{ width: '100%' }}
-                primary
-                onClick={() => setShowClaim(true)}>
-                Claim
-              </AppButton>
-            </>
+            </Box>
           ) : (
-            <>No rewards found</>
+            <AppCallout>{campaign.executed ? <>No rewards found</> : <>Campaign shares not yet computed</>}</AppCallout>
           )
-        }></BalanceCard>
+        }>
+        <Box
+          style={{ position: 'absolute', right: '12px', top: '12px', height: '20px', width: '20px' }}
+          onClick={() => checkClaimInfo()}>
+          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+        </Box>
+      </BalanceCard>
     </>
   );
 };

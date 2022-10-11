@@ -78,6 +78,11 @@ export class DateManager {
     return this.getTime() + Date.now() / 1000 - this.localTimeZero;
   }
 
+  /** returns a new DateManger object with the time = getTimeDynamic */
+  cloneToNow(): DateManager {
+    return DateManager.from(new Date(this.getTimeDynamic() * 1000));
+  }
+
   /** updates to the latest device date (keeping the bias) */
   refresh(): void {
     this.date = new Date();

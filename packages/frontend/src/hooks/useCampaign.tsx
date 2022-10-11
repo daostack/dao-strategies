@@ -11,6 +11,7 @@ import {
 
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { useLoggedUser } from './useLoggedUser';
+import { FIRST_PAGE } from '../pages/campaign.support';
 
 export type CampaignContextType = {
   isLoading: boolean;
@@ -53,7 +54,7 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
     async (page?: Page): Promise<void> => {
       if (campaign === undefined) return undefined;
 
-      const _page = page === undefined ? lastPageShares : page;
+      const _page = page === undefined ? (lastPageShares !== undefined ? lastPageShares : FIRST_PAGE) : page;
 
       if (!_page) {
         throw Error(`Page undefined`);
