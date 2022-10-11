@@ -39,8 +39,6 @@ export const TwoColumns: FC<ITwoColumns> = (props: ITwoColumns) => {
 
   const children = props.children as ReactNode[];
 
-  console.log({ children });
-
   return (
     <Box
       fill
