@@ -1,5 +1,4 @@
-
-import { Box, CheckBox } from 'grommet';
+import { Box, CheckBox, ResponsiveContext } from 'grommet';
 import { Add, Moon } from 'grommet-icons';
 import React, { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -21,26 +20,40 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
   const { setTheme } = useThemeContext();
   const navigate = useNavigate();
   const location = useLocation();
+  const size = React.useContext(ResponsiveContext);
 
-  const left = <>
-    <Box direction='row'>
-      <Logo onClick={() => navigate(RouteNames.Base)}></Logo>
+  const left = (
+    <>
+      <Box direction="row">
+        <Logo onClick={() => navigate(RouteNames.Base)}></Logo>
 
-      <Box align='center' justify='center'
-        pad={{ horizontal: '10px' }}
-        margin={{ left: '16px', vertical: '12px' }}
-        style={{ fontWeight: 500, minWidth: '31px', color: styleConstants.colors.whiteElements }}
-        background='#5762D5'>
-        Beta
+        <Box
+          align="center"
+          justify="center"
+          pad={{ horizontal: '10px' }}
+          margin={{ left: '16px', vertical: '12px' }}
+          style={{ fontWeight: 500, minWidth: '31px', color: styleConstants.colors.whiteElements }}
+          background="#5762D5">
+          Beta
+        </Box>
+
+        {!size.includes('small') ? (
+          <Box
+            align="center"
+            justify="center"
+            direction="row"
+            gap="20px"
+            style={{ fontWeight: 500 }}
+            margin={{ left: '48px' }}>
+            <a>Explore Campaigns</a>
+            <a>Docs</a>
+          </Box>
+        ) : (
+          <></>
+        )}
       </Box>
-
-      <Box align='center' justify='center' direction='row' gap='20px' style={{ fontWeight: 500 }} margin={{ left: '48px' }}>
-        <a>Explore Campaigns</a>
-        <a>Docs</a>
-      </Box>
-    </Box>
-
-  </>;
+    </>
+  );
 
   const right = (
     <Box direction="row" align="center">
