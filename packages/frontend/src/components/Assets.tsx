@@ -67,7 +67,7 @@ export const AssetBalance: FC<IBalance> = (props: IBalance) => {
       <Box style={{ textAlign: 'center', height: '24px', width: '24px' }}>
         <img src={props.asset.icon} alt={props.asset.name} />
       </Box>
-      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{valueToString(value)}</Box>
+      <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{valueToString(value, 2)}</Box>
       <Box style={{ textAlign: 'center', marginLeft: '8px' }}>{props.asset.name}</Box>
     </Box>
   );

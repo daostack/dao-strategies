@@ -23,6 +23,7 @@ import {
   sharesFromDetails,
   SET_FROM_NOW,
   reactionConfigOptions,
+  FIRST_PAGE,
 } from '../campaign.support';
 import {
   ACTIVATION_PERIOD,
@@ -138,7 +139,6 @@ const initialValues: CampaignFormValues =
 
 const MORE_SOON = 'MORE_SOON';
 const CREATE_FORM_KEY = 'CREATE_FORM_KEY';
-const PER_PAGE = 8;
 const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
@@ -379,7 +379,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       if (DEBUG) console.log('CampaignCreate - simulate()');
       setSimulating(true);
 
-      await simulate({ number: 0, perPage: PER_PAGE });
+      await simulate(FIRST_PAGE);
 
       setSimulating(false);
     };
@@ -515,7 +515,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   useEffect(() => {
     if (status.page.isReview && status.canSimulate && !status.isSimulating && !status.wasSimulated) {
-      void simulate({ number: 0, perPage: 10 });
+      void simulate(FIRST_PAGE);
     }
   }, [status, account, simulate]);
 
@@ -900,7 +900,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                   shares={shares}
                   chainId={chainId}
                   updatePage={updatePage}
-                  perPage={PER_PAGE}></RewardsTable>
+                  perPage={FIRST_PAGE.perPage}></RewardsTable>
               </Box>
             ) : (
               <Box

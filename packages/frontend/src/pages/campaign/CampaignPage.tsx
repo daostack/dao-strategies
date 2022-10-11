@@ -35,7 +35,7 @@ import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
 import { CampaignStatus } from '../../components/CampaignStatus';
 import { RouteNames } from '../MainPage';
-import { reactionConfigOptions } from '../campaign.support';
+import { FIRST_PAGE, reactionConfigOptions } from '../campaign.support';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -96,10 +96,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
   useEffect(() => {
     if (DEBUG) console.log('Campaign Page updated', { campaign });
-    getShares({ number: 0, perPage: PER_PAGE });
+    getShares(FIRST_PAGE);
     getOtherDetails();
     checkClaimInfo();
-    getFunders({ number: 0, perPage: PER_PAGE });
+    getFunders(FIRST_PAGE);
     /** we want to react when campaign is loaded only */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign]);
