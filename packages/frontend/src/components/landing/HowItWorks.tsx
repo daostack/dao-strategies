@@ -73,21 +73,33 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   ];
 
   return (
-    <Box
-      style={{
-        paddingTop: '3vw',
-        paddingBottom: constants.paddingTop,
-        backgroundColor: constants.lightBackground,
-        ...props.style,
-      }}
-      align="center">
-      <>
-        <RoundedSVG />
-        <Box alignSelf="center" style={{ marginBottom: '36px' }}>
-          <AppHeading size="64px">How it works</AppHeading>
-        </Box>
-        {sections()}
-      </>
-    </Box>
+    <>
+      <Box
+        style={{
+          backgroundColor: constants.lightBackground,
+          position: 'relative',
+          zIndex: 10,
+          marginTop: '42vw',
+          ...props.style,
+        }}
+        align="center">
+        <>
+          <Box alignSelf="center" style={{ marginBottom: '36px' }}>
+            <RoundedSVG
+              color={constants.lightBackground}
+              style={{
+                width: '100vw',
+                zIndex: -1,
+                position: 'absolute',
+                top: 'calc(-5vw * 1.6 + -25px)',
+                left: 0,
+              }}
+            />
+            <AppHeading size="64px">How it works</AppHeading>
+          </Box>
+          {sections()}
+        </>
+      </Box>
+    </>
   );
 };
