@@ -212,6 +212,7 @@ export interface Verification {
 export interface LoggedUserDetails {
   address: string;
   verifications: Verification[];
+  canCreate: boolean;
 }
 
 export interface FundEventRead {

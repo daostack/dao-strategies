@@ -14,8 +14,10 @@ export const formatEther = (wei: string | BigNumber | number, decimals: number =
   return truncate(str, decimals);
 };
 
-export const assetValue = (token: TokenBalance, decimals: number = 4): string => {
+export const assetValue = (token: TokenBalance, ratio: number = 1, decimals: number = 4): string => {
   const value =
-    token.price !== undefined ? +ethers.utils.formatUnits(token.balance, token.decimals) * token.price : undefined;
+    token.price !== undefined
+      ? +ethers.utils.formatUnits(token.balance, token.decimals) * token.price * ratio
+      : undefined;
   return value !== undefined ? truncate(value.toString(), decimals) : '--';
 };

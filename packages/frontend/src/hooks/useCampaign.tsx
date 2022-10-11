@@ -15,7 +15,7 @@ import { useLoggedUser } from './useLoggedUser';
 export type CampaignContextType = {
   isLoading: boolean;
   campaign: CampaignReadDetails | undefined;
-  getShares: (page: Page) => Promise<void>;
+  getShares: (page?: Page) => Promise<void>;
   shares: SharesRead | undefined;
   getOtherDetails: () => Promise<void>;
   otherDetails: CampaignOnchainDetails | undefined;
@@ -40,20 +40,31 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
   const { user } = useLoggedUser();
 
   const [shares, setShares] = useState<SharesRead>();
+  const [lastPageShares, setLastPageShares] = useState<Page>();
+
   const [funders, setFunders] = useState<CampaignFundersRead>();
-  const [lastPage, setLastPage] = useState<Page>();
+  const [lastPageFunders, setLastPageFunders] = useState<Page>();
+
   const [fundEvents, setFundEvents] = useState<FundEventRead[]>();
   const [otherDetails, setOtherDetails] = useState<CampaignOnchainDetails>();
   const [claimInfo, setClaimInfo] = useState<CampaignClaimInfo>();
 
   const getShares = useCallback(
-    async (page: Page): Promise<void> => {
+    async (page?: Page): Promise<void> => {
       if (campaign === undefined) return undefined;
+
+      const _page = page === undefined ? lastPageShares : page;
+
+      if (!_page) {
+        throw Error(`Page undefined`);
+      }
+
+      setLastPageShares(_page);
 
       const response = await fetch(ORACLE_NODE_URL + `/campaign/sharesFromUri/${campaign.uri}`, {
         method: 'post',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page }),
+        body: JSON.stringify({ page: _page }),
         credentials: 'include',
       });
 
@@ -89,14 +100,11 @@ export const CampaignContext: FC<CampaignContextProps> = (props: CampaignContext
   const getFunders = useCallback(
     async (page?: Page, force?: boolean): Promise<void> => {
       console.log('checking funders');
-
-      const _page = page === undefined ? lastPage : page;
-
+      const _page = page === undefined ? lastPageFunders : page;
       if (!_page) {
         throw Error(`Page undefined`);
       }
-
-      setLastPage(_page);
+      setLastPageFunders(_page);
 
       if (!campaign) return;
 

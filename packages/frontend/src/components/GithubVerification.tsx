@@ -25,6 +25,7 @@ enum VerificationStatus {
 export const GithubVerification: FC<IVerificationProps> = (props: IVerificationProps) => {
   const { user, refresh } = useLoggedUser();
   const [handle, setHandle] = useState<string>('');
+  const [error, setError] = useState<string>();
 
   const [debouncedHandle] = useDebounce(handle, 1200);
   const [checkingHandle, setCheckingHandle] = useState<boolean>(true);
@@ -69,8 +70,16 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
       }).then((response) => {
         response.json().then((data) => {
           setReadingGists(false);
-          setVerification(data);
-          refresh();
+          const ver = Object.keys(data).length > 0 ? data : undefined;
+          if (ver) {
+            setVerification(ver);
+            refresh();
+          } else {
+            setError('Gist not found');
+            setTimeout(() => {
+              setError(undefined);
+            }, 2000);
+          }
         });
       });
     }
@@ -170,7 +179,7 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
         {status >= 1 ? (
           <Box style={{ margin: '12px 0px' }}>
             <AppButton
-              disabled={verification !== undefined || readingGists}
+              disabled={verification !== undefined || readingGists || error !== undefined}
               onClick={() => checkGist()}
               primary
               _type="slim"
@@ -186,6 +195,15 @@ export const GithubVerification: FC<IVerificationProps> = (props: IVerificationP
                 )
               }
             />
+            {error !== undefined ? (
+              <Box style={{ color: styleConstants.colors.alertText }}>
+                <Box pad="small" align="center">
+                  {error}
+                </Box>
+              </Box>
+            ) : (
+              <></>
+            )}
           </Box>
         ) : (
           <></>

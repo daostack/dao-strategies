@@ -28,12 +28,14 @@ export class UserService {
 
   async getVerified(address: string): Promise<LoggedUserDetails | undefined> {
     const user = await this.get(address);
+    const canCreate = await this.canCreate(address);
     if (!user) return undefined;
 
     const verifications = await this.getVerificationsTo(address);
     return {
       address,
       verifications,
+      canCreate,
     };
   }
 
@@ -44,7 +46,7 @@ export class UserService {
   async checkVerification(
     github_username: string,
     loggedUser: string
-  ): Promise<Verification> {
+  ): Promise<Verification | undefined> {
     const verification = !DISABLE_VERIFICATION
       ? await this.verifications.getVerificationGithub(github_username)
       : {
@@ -76,6 +78,10 @@ export class UserService {
 
   async create(details: Prisma.UserCreateInput): Promise<User> {
     return this.userRepo.create(details);
+  }
+
+  canCreate(address: string): Promise<boolean> {
+    return this.userRepo.canCreate(address);
   }
 
   deleteAll(): Promise<void> {

@@ -9,6 +9,7 @@ import {
   SharesRead,
   Page,
   strategies,
+  ReactionConfig,
 } from '@dao-strategies/core';
 
 import { useCampaignFactory } from '../../hooks/useContracts';
@@ -22,7 +23,7 @@ import {
   sharesFromDetails,
   SET_FROM_NOW,
   reactionConfigOptions,
-  ReactionConfig,
+  FIRST_PAGE,
 } from '../campaign.support';
 import {
   ACTIVATION_PERIOD,
@@ -30,6 +31,7 @@ import {
   CHALLENGE_PERIOD,
   INCLUDED_CHAINS,
   oracleAddressMap,
+  TELEGRAM_INVITE_LINK,
 } from '../../config/appConfig';
 import { RouteNames } from '../MainPage';
 import {
@@ -41,12 +43,14 @@ import {
   AppFormField,
   AppHeading,
   AppInput,
+  AppLabel,
   AppSelect,
   AppTag,
   AppTextArea,
   CampaignIcon,
   ExpansiveParagraph,
   HorizontalLine,
+  InfoProperty,
   RepoTag,
   SelectRow,
   SelectValue,
@@ -135,11 +139,10 @@ const initialValues: CampaignFormValues =
 
 const MORE_SOON = 'MORE_SOON';
 const CREATE_FORM_KEY = 'CREATE_FORM_KEY';
-const PER_PAGE = 8;
 const DEBUG = true;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
-  const { account, chain, switchNetwork, connect } = useLoggedUser();
+  const { account, chain, switchNetwork, connect, user } = useLoggedUser();
   const { showError } = useUserError();
 
   const { now, reset: resetNow } = useNowContext();
@@ -183,9 +186,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     if (chain !== undefined) {
       const connectedChainName = ChainsDetails.chainOfId(chain.id)?.chain.name;
       if (connectedChainName !== undefined) {
-        setFormValues({ ...formValues, chainName: connectedChainName });
+        onValuesUpdated({ ...formValues, chainName: connectedChainName });
       } else {
-        setFormValues({ ...formValues, chainName: ChainsDetails.chains()[0].name });
+        onValuesUpdated({ ...formValues, chainName: ChainsDetails.chains()[0].name });
       }
     }
 
@@ -283,31 +286,8 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     };
   };
 
-  /** single wrapper of setFormValues to detect details changes */
-  const setFormValues = (nextFormValues: CampaignFormValues) => {
-    if (formValues === undefined) return;
-    const oldDetails = strategyDetails(formValues, now, account);
-
-    /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
-    if (oldDetails !== undefined && shares !== undefined) {
-      const nextDetails = strategyDetails(nextFormValues, now, account);
-      if (nextDetails !== undefined) {
-        const currentUri = getCampaignUri(oldDetails);
-        const nextUri = getCampaignUri(nextDetails);
-        if (nextUri !== currentUri) {
-          setShares(undefined);
-        }
-      }
-    }
-
-    setStoredForm(nextFormValues);
-    setFormValuesState(nextFormValues);
-  };
-
   /** Hook called everytime any field in the form is updated, it keeps the formValues state in synch */
   const onValuesUpdated = (values: CampaignFormValues) => {
-    if (DEBUG) console.log('CampaignCreate - onValuesUpdated()', { values });
-
     /** ignore some cases */
     if (values.strategyId === MORE_SOON) {
       return;
@@ -334,7 +314,26 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       // validate every change after the first time
       validate(values);
     }
-    setFormValues(values);
+
+    const oldDetails = strategyDetails(formValues, now, account);
+    /** reset simulation only if uriParameters changed (not all parameters chage the uri) */
+    if (oldDetails !== undefined && shares !== undefined) {
+      const nextDetails = strategyDetails(values, now, account);
+      if (nextDetails !== undefined) {
+        const currentUri = getCampaignUri(oldDetails);
+        const nextUri = getCampaignUri(nextDetails);
+        if (nextUri !== currentUri) {
+          setShares(undefined);
+        }
+      }
+    }
+
+    const details = strategyDetails(values, now, account);
+    if (DEBUG)
+      console.log('CampaignCreate - onValuesUpdated()', { values, oldValues: formValues, details, oldDetails });
+
+    setStoredForm(values);
+    setFormValuesState(values);
   };
 
   const validate = (values: CampaignFormValues): string[] => {
@@ -380,7 +379,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
       if (DEBUG) console.log('CampaignCreate - simulate()');
       setSimulating(true);
 
-      await simulate({ number: 0, perPage: PER_PAGE });
+      await simulate(FIRST_PAGE);
 
       setSimulating(false);
     };
@@ -390,8 +389,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const simulate = useMemo(() => {
     return async (_page: Page): Promise<void> => {
       if (details === undefined) throw new Error();
-      const shares = await sharesFromDetails(details, _page);
-      setShares(shares);
+      try {
+        const shares = await sharesFromDetails(details, _page);
+        setShares(shares);
+      } catch (e) {
+        console.error(e);
+        setShares(undefined);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details]);
@@ -418,21 +422,24 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   };
 
   const repoButton = ((status) => {
-    if (!status.inputIsValid) {
-      return <AddCircle color={styleConstants.colors.primaryLight}></AddCircle>;
-    }
-    // else
-    if (status.checking) {
-      return <Spinner></Spinner>;
-    }
-    // else
-    if (status.inputExists && status.repoIsNew) {
-      return <AddCircle onClick={() => addRepo(validRepo)} color={styleConstants.colors.primary}></AddCircle>;
-    }
-    // else
-    if (status.inputDontExist || !status.repoIsNew) {
-      return <StatusCritical color={styleConstants.colors.alertText}></StatusCritical>;
-    }
+    const icon = (() => {
+      if (!status.inputIsValid) {
+        return <AddCircle color={styleConstants.colors.primaryLight}></AddCircle>;
+      }
+      // else
+      if (status.checking) {
+        return <Spinner></Spinner>;
+      }
+      // else
+      if (status.inputExists && status.repoIsNew) {
+        return <AddCircle color={styleConstants.colors.primary}></AddCircle>;
+      }
+      // else
+      if (status.inputDontExist || !status.repoIsNew) {
+        return <StatusCritical color={styleConstants.colors.alertText}></StatusCritical>;
+      }
+    })();
+    return <Box onClick={status.inputExists && status.repoIsNew ? () => addRepo(validRepo) : undefined}>{icon}</Box>;
   })(existStatus);
 
   const addRepo = (repo: string) => {
@@ -445,7 +452,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
     (repo: string) => {
       const ix = formValues.repositoryFullnames.indexOf(repo);
       formValues.repositoryFullnames.splice(ix, 1);
-      setFormValues({ ...formValues });
+      onValuesUpdated({ ...formValues });
     },
     [formValues]
   );
@@ -463,11 +470,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const setFromNow = useCallback(() => {
     if (formValues.customPeriodChoiceFrom !== SET_FROM_NOW) {
       if (now !== undefined) {
-        setFormValues({ ...formValues, customPeriodChoiceFrom: SET_FROM_NOW });
+        onValuesUpdated({ ...formValues, customPeriodChoiceFrom: SET_FROM_NOW });
       }
     } else {
       if (now !== undefined) {
-        setFormValues({ ...formValues, customPeriodChoiceFrom: now.toString() });
+        onValuesUpdated({ ...formValues, customPeriodChoiceFrom: now.toString() });
       }
     }
   }, [formValues, now]);
@@ -479,6 +486,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         isLastFormPage: pageIx === 1, // before the review page
         isReview: pageIx === 2,
       },
+      createAuthorized: user !== undefined && user.canCreate,
       shouldSimulate: periodType !== PeriodType.future,
       canSimulate: isLogged,
       mustSimulate: periodType === PeriodType.retroactive,
@@ -507,7 +515,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   useEffect(() => {
     if (status.page.isReview && status.canSimulate && !status.isSimulating && !status.wasSimulated) {
-      void simulate({ number: 0, perPage: 10 });
+      void simulate(FIRST_PAGE);
     }
   }, [status, account, simulate]);
 
@@ -654,15 +662,43 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               const strategy = strategies.get(option);
               if (strategy === undefined) throw new Error(`never`);
 
-              return <StrategySelector strategy={strategy}></StrategySelector>;
+              return (
+                <Box style={{ padding: '0px 12px' }}>
+                  <StrategySelector strategy={strategy}></StrategySelector>
+                </Box>
+              );
             }}
           </AppSelect>
         </AppFormField>
       </Box>
 
-      <TwoColumns line={false} gap={40}>
+      <TwoColumns line={false} gap={20} frs={[0.8, 1.2]}>
         <Box>
-          <AppFormField name="reactionsConfig" label="Count contribution scores using">
+          <AppFormField
+            name="reactionsConfig"
+            label={
+              <FieldLabel
+                label="Count contribution scores using"
+                help={
+                  <Box>
+                    <ul style={{ padding: '0px 0px 0px 16px' }}>
+                      <li>
+                        <b>{reactionConfigOptions.get(ReactionConfig.ONLY_PRS)}</b>: Each merged pull-request gives one
+                        point.
+                      </li>
+                      <li style={{ marginTop: '10px' }}>
+                        <b>{reactionConfigOptions.get(ReactionConfig.ONLY_REACTS)}</b>: Each reaction to a merged
+                        pull-request given by a previous contributor of the reposiotry gives one point. One pull-request
+                        can give more than one points.
+                      </li>
+                      <li style={{ marginTop: '10px' }}>
+                        <b>{reactionConfigOptions.get(ReactionConfig.PRS_AND_REACTS)}</b>: Each pull-request and each
+                        valid reaction (see above) will give one point. One pull-request can give more than one points.
+                      </li>
+                    </ul>
+                  </Box>
+                }></FieldLabel>
+            }>
             <AppSelect
               name="reactionsConfig"
               options={Array.from(reactionConfigOptions.keys())}
@@ -690,7 +726,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                   <FieldLabel
                     style={{ marginBottom: '8px' }}
                     label="Add Github repositories"
-                    help="The campaign will compute a list of shareholders based on programmed rules. These are programmatic rules that can fetch data from web2 and web3 protocols."></FieldLabel>
+                    help="Pull-requests made to any of these repositories (can be more than one) will count towards receiving shares on this campaign."></FieldLabel>
                 }
                 <Box style={{ fontWeight: 'normal', fontSize: '13px' }}>
                   Use the format 'user/repo' or paste the link to the repo.
@@ -734,7 +770,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </Box>
 
         <Box>
-          <AppFormField name="livePeriodChoice" label="Live period">
+          <AppFormField
+            name="livePeriodChoice"
+            label={
+              <FieldLabel
+                label="Set the Contribution Period"
+                help="Pull-requests that are merged within this time period will count towards receiving shares on this campaign."></FieldLabel>
+            }>
             <AppSelect name="livePeriodChoice" options={Array.from(periodOptions.values())}></AppSelect>
           </AppFormField>
 
@@ -820,6 +862,9 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               <Parameter label="Rule-set">
                 <StrategySelector strategy={selectedStrategy}></StrategySelector>
               </Parameter>
+              <Parameter style={{ marginTop: '40px' }} label="Count contribution scores using">
+                {reactionConfigOptions.get(formValues.reactionsConfig)}
+              </Parameter>
               <Parameter style={{ marginTop: '40px' }} label="Github Repositories">
                 {formValues.repositoryFullnames.map((name) => {
                   return <RepoTag repo={name} style={{ marginBottom: '12px' }} />;
@@ -827,13 +872,13 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
               </Parameter>
             </Box>
             <Box>
-              <Parameter label="Live Period">
-                <Box justify="start" direction="row">
-                  <Box style={{ width: '60px' }}>From:</Box>
+              <Parameter label="Contribution Period">
+                <Box justify="start" direction="column">
+                  <AppLabel style={{}}>From:</AppLabel>
                   <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.start).toString()}</Box>
                 </Box>
-                <Box justify="start" direction="row">
-                  <Box style={{ width: '60px' }}>To: </Box>
+                <Box justify="start" direction="column" style={{ marginTop: '16px' }}>
+                  <AppLabel style={{}}>To: </AppLabel>
                   <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.end).toString()}</Box>
                 </Box>
               </Parameter>
@@ -855,7 +900,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                   shares={shares}
                   chainId={chainId}
                   updatePage={updatePage}
-                  perPage={PER_PAGE}></RewardsTable>
+                  perPage={FIRST_PAGE.perPage}></RewardsTable>
               </Box>
             ) : (
               <Box
@@ -904,6 +949,20 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
                 <Spinner></Spinner>
               </Box>
             </Layer>
+          ) : (
+            <></>
+          )}
+
+          {user && !user.canCreate ? (
+            <AppCallout style={{ marginBottom: '40px' }}>
+              <div>
+                &#128075; We are currenlty on private beta. If you want to create a campaign{' '}
+                <a href={TELEGRAM_INVITE_LINK} target="_blank" rel="noreferrer">
+                  please contact
+                </a>{' '}
+                us and we will add you to our beta-testers program
+              </div>
+            </AppCallout>
           ) : (
             <></>
           )}

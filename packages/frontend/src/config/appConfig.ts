@@ -46,3 +46,5 @@ export const GITHUB_DOMAINS = [
   'https://www.github.com/',
   'http://www.github.com/',
 ];
+
+export const TELEGRAM_INVITE_LINK = 'https://telegram.com';

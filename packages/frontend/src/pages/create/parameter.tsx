@@ -16,6 +16,7 @@ export const Parameter: FC<IParameter> = (props: IParameter) => {
           marginBottom: '13px',
           textTransform: 'uppercase',
           fontSize: styleConstants.textFontSizes.small,
+          fontWeight: '700',
         }}>
         {props.label}
       </Box>

@@ -1,4 +1,8 @@
-import { getAddressStrict, VerificationIntent } from '@dao-strategies/core';
+import {
+  getAddress,
+  getAddressStrict,
+  VerificationIntent,
+} from '@dao-strategies/core';
 import { PrismaClient, Prisma, User, CrossVerification } from '@prisma/client';
 
 export class UserRepository {
@@ -10,8 +14,9 @@ export class UserRepository {
     });
   }
 
-  async get(address: string): Promise<User> {
-    return this.client.user.findUnique({ where: { address: address } });
+  async get(address: string): Promise<User | undefined> {
+    const user = this.client.user.findUnique({ where: { address: address } });
+    return user !== null ? user : undefined;
   }
 
   async exist(address: string): Promise<boolean> {
@@ -68,5 +73,12 @@ export class UserRepository {
         from: username,
       },
     });
+  }
+
+  async canCreate(address: string): Promise<boolean> {
+    const has = await this.client.approvedUsers.findUnique({
+      where: { address: getAddress(address) },
+    });
+    return has !== null;
   }
 }
