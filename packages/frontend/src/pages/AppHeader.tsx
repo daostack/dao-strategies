@@ -17,7 +17,6 @@ export interface IMainPageHeaderProps {
 }
 
 export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
-  const { setTheme } = useThemeContext();
   const navigate = useNavigate();
   const location = useLocation();
   const size = React.useContext(ResponsiveContext);
@@ -45,10 +44,9 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
             gap="20px"
             style={{ fontWeight: 500 }}
             margin={{ left: '48px' }}>
-            <Link style={{ textDecoration: 'none', color: 'gray' }} to={RouteNames.Campaigns}>
+            <Link style={{ textDecoration: 'none', color: styleConstants.colors.text }} to={RouteNames.Campaigns}>
               Explore Campaigns
             </Link>
-            <a>Docs</a>
           </Box>
         ) : (
           <></>
