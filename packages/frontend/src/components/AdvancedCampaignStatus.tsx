@@ -5,8 +5,6 @@ import { useCampaignContext } from '../hooks/useCampaign';
 import { useCampaignInstance } from '../hooks/useContracts';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 import { useNowContext } from '../hooks/useNow';
-import { lockCampaign } from '../pages/campaign.support';
-import { Address } from './Address';
 
 import {
   AppAccordion,
@@ -24,45 +22,19 @@ interface IAdvancedCampaign {
 }
 
 export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCampaign) => {
-  const { campaign, otherDetails, shares, getOtherDetails } = useCampaignContext();
-  const [locking, setLocking] = useState<boolean>(false);
-
-  const { account } = useLoggedUser();
-
-  const campaignInstance = useCampaignInstance(props.campaignAddress);
+  const { campaign, otherDetails, shares } = useCampaignContext();
 
   const { now } = useNowContext();
 
-  const locked = otherDetails?.publishInfo?.status.locked !== undefined && otherDetails?.publishInfo?.status.locked;
-
-  const lock = useCallback(async () => {
-    if (campaignInstance === undefined) {
-      throw new Error('claim info undefined');
-    }
-
-    setLocking(true);
-    await lockCampaign(campaignInstance, !locked);
-    setLocking(false);
-
-    refresh();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campaignInstance, locked]);
-
-  const refresh = () => {
-    getOtherDetails();
-    now?.refresh();
-  };
-
-  const isLogged = account !== undefined;
-
   if (!campaign) {
     return (
-      <>
+      <Box fill justify="center" align="center">
         <Spinner></Spinner>
-      </>
+      </Box>
     );
   }
+
+  const locked = otherDetails?.publishInfo?.status.locked !== undefined && otherDetails?.publishInfo?.status.locked;
 
   if (!otherDetails || !otherDetails.publishInfo || !shares || !now) {
     return <Spinner></Spinner>;
@@ -137,13 +109,13 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
           style={{ margin: '0px 2px', display: 'inline' }}></Address>})  */}
       </Box>
 
-      <AppAccordion style={{}}>
+      <AppAccordion style={{ paddingBottom: '40px' }}>
         <AppAccordionPanel label={'Cancel Pending Merkle Root'} subtitle={'Description of the Admin action'}>
           <TransactionCalldata
             address={campaign.address}
             chainId={campaign.chainId}
             method="challenge"
-            params={[0]}
+            params={[]}
             value={'0'}
             approvedAccount={campaign.guardian}></TransactionCalldata>
         </AppAccordionPanel>
@@ -155,7 +127,7 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
           <TransactionCalldata
             address={campaign.address}
             chainId={campaign.chainId}
-            method="setLock"
+            method="setSharesLock"
             params={[true]}
             value={'0'}
             approvedAccount={campaign.guardian}></TransactionCalldata>
@@ -168,8 +140,8 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
           <TransactionCalldata
             address={campaign.address}
             chainId={campaign.chainId}
-            method="challenge"
-            params={[2]}
+            method="cancelCampaign"
+            params={[]}
             value={'0'}
             approvedAccount={campaign.guardian}></TransactionCalldata>
         </AppAccordionPanel>

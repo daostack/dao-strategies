@@ -19,6 +19,10 @@ chainConstants.set(5, {
   multicallAddress: '0x77dca2c955b15e9de4dbbcf1246b4b85b651e50e',
 });
 
+chainConstants.set(137, {
+  multicallAddress: '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507',
+});
+
 export const campaignFactoryInstance = (
   address: string,
   signer: Signer
@@ -138,8 +142,8 @@ export const getCampaignPublishInfo = async (
           methodParameters: [],
         },
         {
-          reference: 'locked',
-          methodName: 'locked',
+          reference: 'sharesLocked',
+          methodName: 'sharesLocked',
           methodParameters: [],
         },
         {
@@ -187,7 +191,7 @@ export const getCampaignPublishInfo = async (
       approvedRoot: getReturnedReference<string>('approvedMerkleRoot'),
       pendingRoot: getReturnedReference<string>('pendingMerkleRoot'),
       validRoot: getReturnedReference<string>('getValidRoot'),
-      locked: getReturnedReference<boolean>('locked'),
+      locked: getReturnedReference<boolean>('sharesLocked'),
       blockNumber: block.number,
       timestamp: block.timestamp,
       isProposeWindowActive: getReturnedReference<boolean>(

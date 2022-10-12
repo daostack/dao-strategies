@@ -61,4 +61,10 @@ chainConfig.set(5, {
   chainName: 'goerli',
 });
 
+chainConfig.set(137, {
+  privateKey: process.env.ORACLE_PRIVATE_KEY_POLIGON,
+  alchemyKey: process.env.ALCHEMY_KEY_POLYGON,
+  chainName: 'matic',
+});
+
 export { chainConfig };

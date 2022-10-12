@@ -1,7 +1,7 @@
 import { Box, CheckBox, ResponsiveContext } from 'grommet';
 import { Add, Moon } from 'grommet-icons';
 import React, { FC } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LoggedUser } from '../components/LoggedUser';
 import { Logo } from '../components/Logo';
 import { AppButton } from '../components/styles/BasicElements';
@@ -45,7 +45,9 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
             gap="20px"
             style={{ fontWeight: 500 }}
             margin={{ left: '48px' }}>
-            <a>Explore Campaigns</a>
+            <Link style={{ textDecoration: 'none', color: 'gray' }} to={RouteNames.Campaigns}>
+              Explore Campaigns
+            </Link>
             <a>Docs</a>
           </Box>
         ) : (

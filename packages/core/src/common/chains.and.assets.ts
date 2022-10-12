@@ -82,7 +82,7 @@ const chainList: ChainAndAssets[] = [
       `${POLIGON_ETHERSCAN_URL}/address/${address}`,
     exploreTx: (hash: string) => `${POLIGON_ETHERSCAN_URL}/tx/${hash}`,
     exploreEns: (ens: string) => `https://app.ens.domains/name/${ens}/details`,
-    chainIcon: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=022',
+    chainIcon: 'https://cryptologos.cc/logos/polygon-matic-logo.png?v=023',
     assets: [
       {
         id: 'matic',
