@@ -16,6 +16,7 @@ import '@tenderly/hardhat-tenderly';
 import 'hardhat-deploy';
 import 'solidity-coverage';
 import 'hardhat-gas-reporter';
+import "@nomiclabs/hardhat-etherscan";
 
 import * as fs from 'fs';
 
@@ -24,21 +25,12 @@ import { HardhatUserConfig, task } from 'hardhat/config';
 import { config as envConfig } from 'dotenv';
 envConfig({ path: './.env' });
 
-/**
- * Set your target network!!!
- */
-//console.log('HARDHAT_TARGET_NETWORK: ', process.env.HARDHAT_TARGET_NETWORK);
-console.log('Rinkeby API key: ', process.env.ALCHEMY_RINKEBY_KEY);
-console.log('Goerli API key: ', process.env.ALCHEMY_GOERLI_KEY);
-
 const mnemonicPath = './mnemonic.secret';
 const getMnemonic = (): string => {
   try {
     return fs.readFileSync(mnemonicPath).toString().trim();
   } catch (e) {
-    if (process.env.HARDHAT_TARGET_NETWORK !== 'localhost') {
-      console.log('☢️ WARNING: No mnemonic file created for a deploy account. Try `yarn run generate` and then `yarn run account`.');
-    }
+    console.log('missing mnemonic file in deployment to live network');
   }
   return '';
 };
@@ -46,7 +38,6 @@ const getMnemonic = (): string => {
 export const LOCAL_CHAIN_ID = 1337;
 
 const config: HardhatUserConfig = {
-  //defaultNetwork: process.env.HARDHAT_TARGET_NETWORK,
   namedAccounts: {
     deployer: {
       default: 0, // here this will by default take the first account as deployer
@@ -60,14 +51,8 @@ const config: HardhatUserConfig = {
       },
       chainId: LOCAL_CHAIN_ID,
     },
-    rinkeby: {
-      url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_RINKEBY_KEY}`,
-      accounts: {
-        mnemonic: getMnemonic(),
-      },
-    },
     mainnet: {
-      url: 'https://eth-mainnet.g.alchemy.com/v2/dgWViC5GtyYZ8Ay_Sn17TeyxzqfqWdta',
+      url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_MAINNET_KEY}`,
       accounts: {
         mnemonic: getMnemonic(),
       },
@@ -78,6 +63,38 @@ const config: HardhatUserConfig = {
         mnemonic: getMnemonic(),
       },
     },
+    mumbai: {
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.ALCHEMY_MUMBAI_KEY}`,
+      accounts: {
+        mnemonic: getMnemonic(),
+      },
+    },
+    polygon: {
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_POLYGON_KEY}`,
+      accounts: {
+        mnemonic: getMnemonic(),
+      },
+    },
+    gnosis: {
+      url: 'https://rpc.gnosischain.com/',
+      accounts: {
+        mnemonic: getMnemonic(),
+      },
+    },
+    chiado: {
+      url: 'https://rpc.chiadochain.net',
+      accounts: {
+        mnemonic: getMnemonic(),
+      },
+    },
+  },
+  etherscan: {
+    apiKey: {
+      goerli: `${process.env.ETHERSCAN_API_KEY}`,
+      mainnet: `${process.env.ETHERSCAN_API_KEY}`,
+      polygonMumbai: `${process.env.POLYSCAN_API_KEY}`,
+      polygon: `${process.env.POLYSCAN_API_KEY}`
+    }
   },
   solidity: {
     compilers: [
@@ -103,6 +120,7 @@ const config: HardhatUserConfig = {
 };
 export default config;
 
+/*
 task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
   const randomWallet = ethers.Wallet.createRandom();
   const { privateKey } = randomWallet._signingKey();
@@ -113,3 +131,4 @@ task('wallet', 'Create a wallet (pk) link', async (_, { ethers }) => {
 task('reset', 'Get tx receipt').setAction(async (_, hre) => {
   await hre.network.provider.send('hardhat_reset');
 });
+*/

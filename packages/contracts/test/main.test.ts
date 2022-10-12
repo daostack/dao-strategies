@@ -8,17 +8,12 @@ import scenarios from "./scenarios.json";
 
 import { Campaign, Campaign__factory, CampaignFactory__factory } from './../typechain';
 import { toWei, toBigNumber, fastForwardToTimestamp, getTimestamp } from './support';
+import { verify } from 'crypto';
 
 const TOTAL_SHARES = toBigNumber('1', 18);
 const ZERO_BYTES = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const SECONDS_IN_WEEK = 604800;
 const SECONDS_IN_DAY = 86400;
-
-enum ChallengeAction {
-    CancelPending,
-    CancelPendingAndLockCurrent,
-    CancelCampaign
-}
 
 const deployCampaign = async () => {
     const campaignDeployer = await ethers.getContractFactory<Campaign__factory>('Campaign');
@@ -46,16 +41,16 @@ describe("Basic Test", () => {
         let account1: SignerWithAddress;
         let account2: SignerWithAddress;
         let handler: SignerWithAddress;
-        let guardian: SignerWithAddress;
+        let admin: SignerWithAddress;
         let oracle: SignerWithAddress;
         const claimer1Shares = toBigNumber('0.5', 18);
         const claimer2Shares = toBigNumber('0.5', 18);
 
         beforeEach(async () => {
-            [funder, account1, account2, handler, guardian, oracle] = await ethers.getSigners();
+            [funder, account1, account2, handler, admin, oracle] = await ethers.getSigners();
             const campaignCreationTx = await campaignFactory.createCampaign(
                 ZERO_BYTES,
-                guardian.address,
+                admin.address,
                 oracle.address,
                 0,
                 SECONDS_IN_WEEK,
@@ -108,9 +103,9 @@ describe("Basic Test", () => {
                     });
                 });
 
-                describe("and the guardian cancels the campaign", () => {
+                describe("and the admin cancels the campaign", () => {
                     beforeEach(async () => {
-                        let tx = await campaginProxy.connect(guardian).challenge(ChallengeAction.CancelCampaign);
+                        let tx = await campaginProxy.connect(admin).cancelCampaign();
                         tx.wait();
                     });
 
@@ -130,9 +125,9 @@ describe("Basic Test", () => {
                     });
                 });
 
-                describe("and the guardian cancels the pending root", () => {
+                describe("and the admin cancels the pending root", () => {
                     beforeEach(async () => {
-                        let tx = await campaginProxy.connect(guardian).challenge(ChallengeAction.CancelPending);
+                        let tx = await campaginProxy.connect(admin).challenge();
                         await tx.wait();
                     });
 
@@ -154,7 +149,7 @@ describe("Basic Test", () => {
                             await expect(tx.wait()).to.be.reverted;
                         });
 
-                        describe("and the oracle pulishes the root again", () => {
+                        describe("and the oracle publishes the root again", () => {
                             beforeEach(async () => {
                                 let tx = await campaginProxy.connect(oracle).proposeShares(tree.getHexRoot(), ZERO_BYTES);
                                 await tx.wait();
@@ -162,14 +157,65 @@ describe("Basic Test", () => {
                                 await fastForwardToTimestamp(activationTime.add(10));
                             });
 
-                            it("first account claims successfully", async () => {
-                                let account1BalanceBeforeClaim = await ethers.provider.getBalance(account1.address);
+                            it("claim fails when proof is wrong", async () => {
                                 const proofAccount1 = tree.getProof(account1.address, claimer1Shares);
-                                let tx = await campaginProxy.connect(account1).claim(account1.address, claimer1Shares, proofAccount1, [ethers.constants.AddressZero], account1.address);
-                                const { gasUsed, effectiveGasPrice } = await tx.wait();
-                                let gasCostClaim = gasUsed.mul(effectiveGasPrice);
-                                let account1balanceAfterClaim = await ethers.provider.getBalance(account1.address);
-                                expect(account1balanceAfterClaim.add(gasCostClaim)).to.eq(account1BalanceBeforeClaim.add(ethers.utils.parseEther('0.5')));
+                                let tx = await campaginProxy.connect(account2).claim(account2.address, claimer2Shares, proofAccount1, [ethers.constants.AddressZero], account2.address);
+                                await expect(tx.wait()).to.be.reverted;
+                            });
+
+                            describe("and the first account claims the reward", () => {
+                                let account1BalanceBeforeClaim: BigNumber;
+                                let gasCostClaim: BigNumber;
+
+                                beforeEach(async () => {
+                                    account1BalanceBeforeClaim = await ethers.provider.getBalance(account1.address);
+                                    const proofAccount1 = tree.getProof(account1.address, claimer1Shares);
+                                    let tx = await campaginProxy.connect(account1).claim(account1.address, claimer1Shares, proofAccount1, [ethers.constants.AddressZero], account1.address);
+                                    const { gasUsed, effectiveGasPrice } = await tx.wait();
+                                    gasCostClaim = gasUsed.mul(effectiveGasPrice);
+                                });
+
+                                it("account1 received the reward", async () => {
+                                    let account1balanceAfterClaim = await ethers.provider.getBalance(account1.address);
+                                    expect(account1balanceAfterClaim.add(gasCostClaim)).to.eq(account1BalanceBeforeClaim.add(ethers.utils.parseEther('0.5')));
+                                });
+
+                                describe("first account claims again", () => {
+                                    let account1BalanceBeforeClaim: BigNumber;
+                                    let gasCostClaim: BigNumber;
+
+                                    beforeEach(async () => {
+                                        account1BalanceBeforeClaim = await ethers.provider.getBalance(account1.address);
+                                        const proofAccount1 = tree.getProof(account1.address, claimer1Shares);
+                                        let tx = await campaginProxy.connect(account1).claim(account1.address, claimer1Shares, proofAccount1, [ethers.constants.AddressZero], account1.address);
+                                        const { gasUsed, effectiveGasPrice } = await tx.wait();
+                                        gasCostClaim = gasUsed.mul(effectiveGasPrice);
+                                    });
+
+                                    it("received 0 rewards", async () => {
+                                        let account1balanceAfterClaim = await ethers.provider.getBalance(account1.address);
+                                        expect(account1balanceAfterClaim.add(gasCostClaim)).to.eq(account1BalanceBeforeClaim);
+                                    });
+
+                                    describe("and second account claims", () => {
+                                        let account2BalanceBeforeClaim: BigNumber;
+                                        let gasCostClaim: BigNumber;
+
+                                        beforeEach(async () => {
+                                            account2BalanceBeforeClaim = await ethers.provider.getBalance(account2.address);
+                                            // fast forward to claim period and then claim
+                                            const proofAccount2 = tree.getProof(account2.address, claimer1Shares);
+                                            let tx = await campaginProxy.connect(account2).claim(account2.address, claimer2Shares, proofAccount2, [ethers.constants.AddressZero], account2.address);
+                                            const { gasUsed, effectiveGasPrice } = await tx.wait();
+                                            gasCostClaim = gasUsed.mul(effectiveGasPrice);
+                                        });
+
+                                        it("account2 received the reward", async () => {
+                                            let account2balanceAfterClaim = await ethers.provider.getBalance(account2.address);
+                                            expect(account2balanceAfterClaim.add(gasCostClaim)).to.eq(account2BalanceBeforeClaim.add(ethers.utils.parseEther('0.5')));
+                                        });
+                                    });
+                                });
                             });
                         });
                     });
@@ -258,6 +304,98 @@ describe("Basic Test", () => {
 
             });
         });
+
+        describe("and the oracle includes only the first account in the tree", () => {
+            let tree1: BalanceTree;
+            let tree2: BalanceTree;
+
+            beforeEach(async () => {
+                const claimersBalances: Balances = new Map();
+                claimersBalances.set(account1.address, claimer1Shares);
+                tree1 = new BalanceTree(claimersBalances);
+                let tx = await campaginProxy.connect(oracle).proposeShares(tree1.getHexRoot(), ZERO_BYTES);
+                await tx.wait();
+            });
+
+            describe("and a funder sends 1 Eth with the fund function", () => {
+                beforeEach(async () => {
+                    let tx = await campaginProxy.connect(funder).fund(ethers.constants.AddressZero, ethers.utils.parseEther("1.0"), { value: ethers.utils.parseEther("1.0") });
+                    await tx.wait();
+                });
+
+                it("returns 1 Eth for balanceOfAsset", async () => {
+                    expect(await campaginProxy.balanceOfAsset(ethers.constants.AddressZero)).to.eq(
+                        ethers.utils.parseEther("1.0").toString()
+                    );
+                });
+
+                describe("and the oracle updates the tree to include also the second account", () => {
+                    beforeEach(async () => {
+                        // fast forward to claim period
+                        const activationTime = await campaginProxy.activationTime();
+                        await fastForwardToTimestamp(activationTime.add(10));
+
+                        const claimersBalances: Balances = new Map();
+                        claimersBalances.set(account1.address, claimer1Shares);
+                        claimersBalances.set(account2.address, claimer2Shares);
+                        tree2 = new BalanceTree(claimersBalances);
+                        let tx = await campaginProxy.connect(oracle).proposeShares(tree2.getHexRoot(), ZERO_BYTES);
+                        await tx.wait();
+                    });
+
+                    describe("and first account claims while challenge period", () => {
+                        let account1BalanceBeforeClaim: BigNumber;
+                        let gasCostClaim: BigNumber;
+
+                        beforeEach(async () => {
+                            account1BalanceBeforeClaim = await ethers.provider.getBalance(account1.address);
+                            const proofAccount1 = tree1.getProof(account1.address, claimer1Shares);
+                            let tx = await campaginProxy.connect(account1).claim(account1.address, claimer1Shares, proofAccount1, [ethers.constants.AddressZero], account1.address);
+                            const { gasUsed, effectiveGasPrice } = await tx.wait();
+                            gasCostClaim = gasUsed.mul(effectiveGasPrice);
+                        });
+
+                        it("account1 received the reward", async () => {
+                            let account1balanceAfterClaim = await ethers.provider.getBalance(account1.address);
+                            expect(account1balanceAfterClaim.add(gasCostClaim)).to.eq(account1BalanceBeforeClaim.add(ethers.utils.parseEther('0.5')));
+                        });
+
+                        it("reverts when second account tries to claim", async () => {
+                            const proofAccount2 = tree2.getProof(account2.address, claimer2Shares);
+                            let tx = await campaginProxy.connect(account2).claim(account2.address, claimer1Shares, proofAccount2, [ethers.constants.AddressZero], account2.address);
+                            await expect(tx.wait()).to.be.reverted;
+                        });
+
+                        describe("and challenge period passes", () => {
+                            beforeEach(async () => {
+                                // fast forward to claim period
+                                const activationTime = await campaginProxy.activationTime();
+                                await fastForwardToTimestamp(activationTime.add(10));
+                            });
+
+                            describe("and second account claims", () => {
+                                let account2BalanceBeforeClaim: BigNumber;
+                                let gasCostClaim: BigNumber;
+
+                                beforeEach(async () => {
+                                    account2BalanceBeforeClaim = await ethers.provider.getBalance(account2.address);
+                                    const proofAccount2 = tree2.getProof(account2.address, claimer2Shares);
+                                    let tx = await campaginProxy.connect(account2).claim(account2.address, claimer2Shares, proofAccount2, [ethers.constants.AddressZero], account2.address);
+                                    const { gasUsed, effectiveGasPrice } = await tx.wait();
+                                    gasCostClaim = gasUsed.mul(effectiveGasPrice);
+                                });
+
+                                it("account2 received the reward", async () => {
+                                    let account2balanceAfterClaim = await ethers.provider.getBalance(account2.address);
+                                    expect(account2balanceAfterClaim.add(gasCostClaim)).to.eq(account2BalanceBeforeClaim.add(ethers.utils.parseEther('0.5')));
+                                });
+                            });
+                        });
+
+                    });
+                });
+            });
+        });
     });
 });
 
@@ -278,7 +416,7 @@ describe("Scenario Tests", () => {
         let funders: SignerWithAddress[];
         let claimers: SignerWithAddress[];
         let handler: SignerWithAddress;
-        let guardian: SignerWithAddress;
+        let admin: SignerWithAddress;
         let oracle: SignerWithAddress;
         let fundsSum: number;
 
@@ -286,7 +424,7 @@ describe("Scenario Tests", () => {
             const signers = await ethers.getSigners();
             handler = signers[0]
             oracle = signers[1];
-            guardian = signers[2];
+            admin = signers[2];
             funders = signers.slice(3, 3 + fundsPerFunderEth.length);
             claimers = signers.slice(3 + funders.length, 3 + funders.length + shares.length);
 
@@ -294,7 +432,7 @@ describe("Scenario Tests", () => {
 
             const campaignCreationTx = await campaignFactory.createCampaign(
                 ZERO_BYTES,
-                guardian.address,
+                admin.address,
                 oracle.address,
                 0,
                 SECONDS_IN_WEEK,
@@ -383,3 +521,5 @@ describe("Scenario Tests", () => {
         });
     }
 });
+
+

@@ -8,6 +8,7 @@ import { ContractsJson } from './contracts.json';
 
 const ETHERSCAN_URL = 'https://etherscan.io';
 const GOERLI_ETHERSCAN_URL = 'https://goerli.etherscan.io';
+const POLIGON_ETHERSCAN_URL = 'https://polyscan.com';
 
 /** Single source of truth for the supported chains and assets. It is imported on the
  * frontend */
@@ -72,6 +73,44 @@ const chainList: ChainAndAssets[] = [
         name: 'Xeenus',
         icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=022',
         decimals: 6,
+      },
+    ],
+  },
+  {
+    chain: chain.polygon,
+    exploreAddress: (address: string) =>
+      `${POLIGON_ETHERSCAN_URL}/address/${address}`,
+    exploreTx: (hash: string) => `${POLIGON_ETHERSCAN_URL}/tx/${hash}`,
+    exploreEns: (ens: string) => `https://app.ens.domains/name/${ens}/details`,
+    chainIcon: 'https://cryptologos.cc/logos/polygon-matic-logo.png?v=023',
+    assets: [
+      {
+        id: 'matic',
+        address: ethers.constants.AddressZero,
+        name: 'Matic',
+        icon: 'https://cryptologos.cc/logos/polygon-matic-logo.png?v=023',
+        decimals: 18,
+      },
+      {
+        id: 'usdc',
+        address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+        name: 'USDC',
+        icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=022',
+        decimals: 18,
+      },
+      {
+        id: 'dai',
+        address: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+        name: 'DAI',
+        icon: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png?v=023',
+        decimals: 18,
+      },
+      {
+        id: 'usdt',
+        address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
+        name: 'USDT',
+        icon: 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=023',
+        decimals: 18,
       },
     ],
   },

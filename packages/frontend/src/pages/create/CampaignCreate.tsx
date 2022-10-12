@@ -139,7 +139,7 @@ const initialValues: CampaignFormValues =
 
 const MORE_SOON = 'MORE_SOON';
 const CREATE_FORM_KEY = 'CREATE_FORM_KEY';
-const DEBUG = true;
+const DEBUG = false;
 
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, chain, switchNetwork, connect, user } = useLoggedUser();

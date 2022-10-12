@@ -11,7 +11,7 @@ import { styleConstants } from './styles/themes';
 export interface ITransactionCalldata extends BoxExtendedProps {
   address: string;
   chainId: number;
-  method: 'setLock' | 'challenge';
+  method: 'setSharesLock' | 'challenge' | 'cancelCampaign';
   params: (string | boolean | number | BigNumber)[];
   value: string;
   approvedAccount?: string; // if defined, the transaction can be sent with the current signer

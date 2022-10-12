@@ -10,7 +10,7 @@ import {
   CampaignReadDetails,
   TokenBalance,
   FundEventRead,
-  getAddressStrict
+  getAddressStrict,
 } from '@dao-strategies/core';
 import { NextFunction, Request, Response } from 'express';
 
@@ -134,11 +134,17 @@ export class CampaignController extends Controller {
     next: NextFunction,
     loggedUser: string | undefined
   ): Promise<void> {
+    if (!request.files) {
+      return;
+    }
+
     const { logo } = request.files;
     const { uri } = request.params;
 
     if (!logo) {
-      throw new Error('no files uploaded or no input named "logo" found, cant process with upload to s3');
+      throw new Error(
+        'no files uploaded or no input named "logo" found, cant process with upload to s3'
+      );
     }
     if (!uri) {
       throw new Error('no uri specified, not able to create correct naming');
