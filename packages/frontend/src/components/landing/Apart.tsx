@@ -33,8 +33,15 @@ const FeatureCore: FC<IBoxProps> = (props: IBoxProps) => {
           </AppLabel>
         </Box>
         <AppLabel
-          color={constants.lightGray}
-          style={{ lineHeight: '22px', fontSize: '16px', textTransform: 'inherit' }}>
+          color={constants.subParagraphGray}
+          style={{
+            fontFamily: 'DM Sans',
+            fontWeight: 400,
+            lineHeight: '21px',
+            letterSpacing: '-0.43px',
+            fontSize: '16px',
+            textTransform: 'inherit',
+          }}>
           <>{props.subtitle}</>
         </AppLabel>
       </Box>
