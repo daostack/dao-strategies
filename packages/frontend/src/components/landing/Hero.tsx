@@ -54,18 +54,22 @@ export const Hero: FC<IHero> = (props: IHero) => {
         align="start"
         justify="start">
         <AppHeading level={1} style={textHeadlineAttributes}>
-          Rewards for{' '}
-          <span
-            style={{
-              ...textHeadlineAttributes,
-              marginRight: '10px',
-              background: `url(//s2.svgbox.net/pen-brushes.svg?ic=brush-1&color=${constants.lightGreen.replace(
-                '#',
-                ''
-              )})`,
-            }}>
+          Rewards for
+          <Box style={{ position: 'relative', zIndex: '1' }}>
             Value
-          </span>
+            <Box
+              style={{
+                zIndex: '0',
+                height: headingStyle.fontSize,
+                width: '250px',
+                background: `url(/images/penbrush.svg) center no-repeat`,
+                backgroundSize: 'cover',
+                position: 'absolute',
+                left: '0px',
+                top: '8px',
+                overflow: 'visible',
+              }}></Box>
+          </Box>
           Creators
         </AppHeading>
 
