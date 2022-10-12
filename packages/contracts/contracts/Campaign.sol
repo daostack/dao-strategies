@@ -192,7 +192,7 @@ contract Campaign is Initializable, ReentrancyGuard {
     /** asset providers can withdraw their proportion of assets only in case the campaign was cancelled by the admin */
     function withdrawAssets(address account, address asset) external nonReentrant {
         if (campaignCancelled) {
-            uint256 amount = (totalReceived(asset) * providers[asset][account]) / totalProvided[asset];
+            uint256 amount = (balanceOfAsset(asset) * providers[asset][account]) / totalProvided[asset];
             if (amount == 0) {
                 revert NoAssetsToWithdraw();
             }
