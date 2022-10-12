@@ -30,39 +30,44 @@ interface IFooter extends BoxExtendedProps {}
 
 export const Footer: FC<IFooter> = (props: IFooter) => {
   return (
-    <TwoColumns
-      align="start"
-      justify="start"
-      widths={['35%', '65%']}
-      style={{
-        padding: '6vw 3vw',
-        ...props.style,
-      }}>
-      {/* Logo */}
-      <Box style={{ margin: '10vw 0vw' }}>
-        <Logo></Logo>
-      </Box>
+    <Box>
+      <Box style={{ height: '6vw', maxHeight: '150px' }}></Box>
+      <TwoColumns
+        align="start"
+        justify="start"
+        widths={['35%', '65%']}
+        style={{
+          ...props.style,
+        }}>
+        {/* Logo */}
+        <Box>
+          <Box style={{ height: '3vw', maxHeight: '200px', minHeight: '20px' }}></Box>
+          <Logo></Logo>
+          <Box style={{ height: '3vw', maxHeight: '250px', minHeight: '50px' }}></Box>
+        </Box>
 
-      {/* Follow us and Resources */}
-      <Box align="start" justify="start" direction="row" gap="10vw">
-        {/* Follow us box */}
-        <Box>
-          <AppHeading size="28px">Follow Us</AppHeading>
-          <Box pad={{ vertical: 'medium' }} gap="18px">
-            <FooterItem imageSrc="images-landing/Footer/Twitter.png" itemText="Twitter" itemLink="" />
-            <FooterItem imageSrc="images-landing/Footer/Discord.png" itemText="Discord" itemLink="" />
-            <FooterItem imageSrc="images-landing/Footer/Github.png" itemText="Github" itemLink="" />
+        {/* Follow us and Resources */}
+        <Box align="start" justify="start" direction="row" gap="10vw">
+          {/* Follow us box */}
+          <Box>
+            <AppHeading size="28px">Follow Us</AppHeading>
+            <Box pad={{ vertical: 'medium' }} gap="18px">
+              <FooterItem imageSrc="images-landing/Footer/Twitter.png" itemText="Twitter" itemLink="" />
+              <FooterItem imageSrc="images-landing/Footer/Discord.png" itemText="Discord" itemLink="" />
+              <FooterItem imageSrc="images-landing/Footer/Github.png" itemText="Github" itemLink="" />
+            </Box>
+          </Box>
+          {/* Resources box */}
+          <Box>
+            <AppHeading size="28px">Resources</AppHeading>
+            <Box pad={{ vertical: 'medium' }} gap="18px">
+              <FooterItem imageSrc="" itemText="Docs" itemLink="" />
+              <FooterItem imageSrc="" itemText="Blog" itemLink="" />
+            </Box>
           </Box>
         </Box>
-        {/* Resources box */}
-        <Box>
-          <AppHeading size="28px">Resources</AppHeading>
-          <Box pad={{ vertical: 'medium' }} gap="18px">
-            <FooterItem imageSrc="" itemText="Docs" itemLink="" />
-            <FooterItem imageSrc="" itemText="Blog" itemLink="" />
-          </Box>
-        </Box>
-      </Box>
-    </TwoColumns>
+      </TwoColumns>
+      <Box style={{ height: '6vw', maxHeight: '150px' }}></Box>
+    </Box>
   );
 };
