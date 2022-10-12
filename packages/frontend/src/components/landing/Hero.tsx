@@ -40,8 +40,6 @@ export const Hero: FC<IHero> = (props: IHero) => {
     }
   })();
 
-  console.log({ headingStyle });
-
   return (
     <TwoColumns style={{ ...props.style }}>
       <Box

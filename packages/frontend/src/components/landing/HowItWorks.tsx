@@ -6,6 +6,7 @@ import { AppHeading, AppLabel } from '../styles/BasicElements';
 import { HowItWorksLayoutBox } from './HowItWorksLayoutBox';
 import { RoundedSVG } from './RoundedSVG';
 import { styleConstants } from '../styles/themes';
+import { relative } from 'path';
 
 interface DescriptionProps extends BoxExtendedProps {
   title: string;
@@ -29,6 +30,48 @@ const Description: FC<DescriptionProps> = (props: DescriptionProps) => {
 
 export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   const size = React.useContext(ResponsiveContext);
+
+  const additionalImage = (): JSX.Element => {
+    const twinkleStarsAroundImage = (): JSX.Element[] => {
+      const stars = [] as JSX.Element[];
+      const starPositions = [
+        {
+          top: '25px',
+          right: '100px',
+        },
+        {
+          bottom: '25px',
+          left: '130px',
+        },
+        {
+          top: '125px',
+          left: '140px',
+        },
+        {
+          bottom: '140px',
+          left: '80px',
+        },
+      ];
+
+      for (let index = 0; index < 5; index++) {
+        stars.push(
+          <Image
+            width="16px"
+            height="16px"
+            style={{ position: 'absolute', ...starPositions[index] }}
+            src="/images-landing/star.svg"></Image>
+        );
+      }
+      return stars;
+    };
+
+    return (
+      <Box>
+        <Image fit="cover" src="images-landing/HowItWorksImage.png" />
+        {twinkleStarsAroundImage()}
+      </Box>
+    );
+  };
 
   const sections = () => [
     <>
@@ -59,20 +102,23 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
             _color="#5762D5"
           />
         }
-        separatorUrl="/images-landing/SeperatorSecond.svg"></HowItWorksLayoutBox>
+        separatorUrl="/images-landing/SeperatorSecond.svg"
+        additionalImage={additionalImage()}></HowItWorksLayoutBox>
     </>,
-    // Third How To Section --> Claim:
-    <HowItWorksLayoutBox
-      key={'how-it-works-3'}
-      imagePath="/images-landing/example-03-v2.png"
-      description={
-        <Description
-          title="Claim"
-          description="Contributors can then claim their rewards as a portion of all the assets, ERC-20 or native, that were sent
-            (or will be sent) to the campaign"
-          _color="#4BA664"
-        />
-      }></HowItWorksLayoutBox>,
+    // Third How To Section --> Claim with additional picture
+    <>
+      <HowItWorksLayoutBox
+        key={'how-it-works-3'}
+        imagePath="/images-landing/example-03-v2.png"
+        description={
+          <Description
+            title="Claim"
+            description="Contributors can then claim their rewards as a portion of all the assets, ERC-20 or native, that were sent
+         (or will be sent) to the campaign"
+            _color="#4BA664"
+          />
+        }></HowItWorksLayoutBox>
+    </>,
   ];
 
   return (
