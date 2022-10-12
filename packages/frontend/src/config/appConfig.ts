@@ -33,13 +33,13 @@ export const DAYS = 24 * HOURS;
 
 // WARNING! These times must be larger than the expected tx mining time.
 // Otherwise the tx may fail bacause it get's mined outside the expected active period.
-export const CHALLENGE_PERIOD = 1 * DAYS;
-export const ACTIVE_DURATION = 1 * DAYS;
-export const ACTIVATION_PERIOD = 7 * DAYS;
+// export const CHALLENGE_PERIOD = 1 * DAYS;
+// export const ACTIVE_DURATION = 1 * DAYS;
+// export const ACTIVATION_PERIOD = 7 * DAYS;
 
-// export const CHALLENGE_PERIOD = 30;
-// export const ACTIVE_DURATION = 30;
-// export const ACTIVATION_PERIOD = 90;
+export const CHALLENGE_PERIOD = 30;
+export const ACTIVE_DURATION = 30;
+export const ACTIVATION_PERIOD = 90;
 
 export const ALCHEMY_GOERLI_KEY = 'aQapGNEneTscr5ixwb05r-J-OWEEwQvF';
 

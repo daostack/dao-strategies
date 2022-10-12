@@ -5,6 +5,7 @@ import { icons } from './Apart.icons';
 import { AppButton, AppHeading, AppLabel, IElement } from '../styles/BasicElements';
 import styled from 'styled-components';
 import { constants } from './constants';
+import { styleConstants } from '../styles/themes';
 
 interface IBoxProps extends BoxExtendedProps {
   icon: JSX.Element;
@@ -22,21 +23,20 @@ const FeatureCore: FC<IBoxProps> = (props: IBoxProps) => {
         textAlign: left ? 'left' : 'center',
         padding: '12px 16px 24px 16px',
         ...props.style,
-      }}>
-      <Box align={left ? 'start' : 'center'}>
+      }}
+      align="center">
+      <Box align={left ? 'start' : 'center'} style={{ maxWidth: '350px' }}>
         <Box style={{ height: '64px', marginBottom: '16px' }} justify={left ? 'start' : 'center'}>
           <>{props.icon}</>
         </Box>
-        <Box style={{ marginBottom: '16px' }} justify={left ? 'start' : 'center'}>
-          <AppLabel style={{ textTransform: 'inherit', fontWeight: 700, fontSize: '24px', color: constants.blackText }}>
-            {props.title}
-          </AppLabel>
+        <Box
+          style={{ marginBottom: '16px', fontSize: '24px', fontWeight: 500, color: constants.blackText }}
+          justify={left ? 'start' : 'center'}>
+          {props.title}
         </Box>
-        <AppLabel
-          color={constants.lightGray}
-          style={{ lineHeight: '22px', fontSize: '16px', textTransform: 'inherit' }}>
+        <Box style={{ lineHeight: '22px', fontSize: '16px', color: styleConstants.colors.lightGrayTextDarker }}>
           <>{props.subtitle}</>
-        </AppLabel>
+        </Box>
       </Box>
     </Box>
   );
@@ -119,7 +119,7 @@ export const SetUsApart: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
             </p>
           }></Feature>
       </Box>
-      <Box alignSelf="start" style={{ marginBottom: '48px' }} gap="12px">
+      <Box alignSelf="center" style={{ marginBottom: '48px' }} gap="12px">
         <AppButton
           color={constants.lightBackground}
           style={{
