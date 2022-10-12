@@ -41,7 +41,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
   })();
 
   const textHeadlineAttributes = Object.assign(
-    { textAlign: 'start', fontFamily: styleConstants.font.secondary, fontWeight: '700' },
+    { textAlign: 'start', fontFamily: styleConstants.font.secondary, fontWeight: '700', wordBreak: 'break-world' },
     headingStyle
   );
 
