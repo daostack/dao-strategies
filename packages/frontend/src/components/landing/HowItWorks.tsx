@@ -6,6 +6,7 @@ import { AppHeading, AppLabel } from '../styles/BasicElements';
 import { HowItWorksLayoutBox } from './HowItWorksLayoutBox';
 import { RoundedSVG } from './RoundedSVG';
 import { styleConstants } from '../styles/themes';
+import { constants } from './constants';
 
 interface DescriptionProps extends BoxExtendedProps {
   title: string;
@@ -28,6 +29,8 @@ const Description: FC<DescriptionProps> = (props: DescriptionProps) => {
 };
 
 export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+  const size = React.useContext(ResponsiveContext);
+
   const additionalImage = (): JSX.Element => {
     const twinkleStarsAroundImage = (): JSX.Element[] => {
       const stars = [] as JSX.Element[];
@@ -124,8 +127,11 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
         style={{
           ...props.style,
         }}
+        width="100vw"
         align="center">
         <>
+          {!size.includes('small') && <RoundedSVG color={constants.lightBackground} style={{ marginTop: '-5vw' }} />}
+
           <Box alignSelf="center" style={{ marginBottom: '36px', padding: '6vw 0' }}>
             <AppLabel style={{ textAlign: 'center' }}>Creating a campaign</AppLabel>
             <AppHeading size="64px" style={{ marginTop: '20px', fontFamily: styleConstants.font.secondary }}>

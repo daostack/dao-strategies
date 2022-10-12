@@ -5,6 +5,7 @@ import { styleConstants } from '../styles/themes';
 import { NewsletterSubscribe } from './NewsLetterSubscribe';
 import { constants } from './constants';
 import { TwoColumns } from './TwoColumns';
+import { Brush } from './BrushEffectSVG';
 
 interface IHero extends BoxExtendedProps {}
 
@@ -40,6 +41,11 @@ export const Hero: FC<IHero> = (props: IHero) => {
     }
   })();
 
+  const textHeadlineAttributes = Object.assign(
+    { textAlign: 'start', fontFamily: styleConstants.font.secondary, fontWeight: '700' },
+    headingStyle
+  );
+
   return (
     <TwoColumns style={{ ...props.style }}>
       <Box
@@ -48,16 +54,22 @@ export const Hero: FC<IHero> = (props: IHero) => {
         }}
         align="start"
         justify="start">
-        <AppHeading
-          level={1}
-          style={{
-            textAlign: 'start',
-            fontFamily: styleConstants.font.secondary,
-            fontWeight: '700',
-            ...headingStyle,
-          }}>
-          Rewards for Value Creators
+        <AppHeading level={1} style={textHeadlineAttributes}>
+          Rewards for{' '}
+          <span
+            style={{
+              ...textHeadlineAttributes,
+              marginRight: '10px',
+              background: `url(//s2.svgbox.net/pen-brushes.svg?ic=brush-1&color=${constants.lightGreen.replace(
+                '#',
+                ''
+              )})`,
+            }}>
+            Value
+          </span>
+          Creators
         </AppHeading>
+
         <AppLabel
           color={constants.subParagraphGray}
           style={{
