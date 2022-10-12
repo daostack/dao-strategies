@@ -34,7 +34,6 @@
     "express-winston": "^4.2.0",
     "jest": "^28.1.0",
     "multiformats": "^9.6.5",
-    "node-fetch": "2.6.6",
     "octokit": "^1.7.1",
     "pg": "^8.4.0",
     "random": "^3.0.6",

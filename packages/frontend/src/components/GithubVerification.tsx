@@ -5,7 +5,7 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { ORACLE_NODE_URL } from '../config/appConfig';
 import { useLoggedUser } from '../hooks/useLoggedUser';
 
-import { AppButton, AppCallout, AppInput, HorizontalLine, IElement, NumberedRow } from './styles/BasicElements';
+import { AppButton, AppCallout, AppInput, IElement, NumberedRow } from './styles/BasicElements';
 import { useDebounce } from 'use-debounce';
 import { GithubProfileCard } from './GithubProfileCard';
 import { Clone, Copy, StatusGood } from 'grommet-icons';

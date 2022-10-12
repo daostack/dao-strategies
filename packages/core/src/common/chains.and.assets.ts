@@ -8,7 +8,7 @@ import { ContractsJson } from './contracts.json';
 
 const ETHERSCAN_URL = 'https://etherscan.io';
 const GOERLI_ETHERSCAN_URL = 'https://goerli.etherscan.io';
-const POLIGON_ETHERSCAN_URL = 'https://polyscan.com';
+const POLIGON_ETHERSCAN_URL = 'https://polygonscan.com';
 
 /** Single source of truth for the supported chains and assets. It is imported on the
  * frontend */
