@@ -14,7 +14,7 @@ interface IBoxProps extends BoxExtendedProps {
 
 const FeatureCore: FC<IBoxProps> = (props: IBoxProps) => {
   const left = props.style !== undefined && props.style.textAlign === 'left';
-  console.log('FeatureCore left ', left);
+
   return (
     <Box
       className={props.className}

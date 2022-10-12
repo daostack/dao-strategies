@@ -27,7 +27,17 @@ import {
   AccordionPanelExtendedProps,
   AccordionExtendedProps,
 } from 'grommet';
-import { CircleQuestion, Clone, Close, FormDown, FormUp, IconProps, StatusGood, Validate } from 'grommet-icons';
+import {
+  CircleQuestion,
+  Clone,
+  Close,
+  FormDown,
+  FormUp,
+  IconProps,
+  Refresh,
+  StatusGood,
+  Validate,
+} from 'grommet-icons';
 import React, { CSSProperties, FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { GITHUB_DOMAINS } from '../../config/appConfig';
@@ -320,7 +330,11 @@ const cardStyle: React.CSSProperties = {
   borderRadius: '8px',
 };
 
-interface AppCardProps extends BoxExtendedProps {}
+export interface AppCardProps extends BoxExtendedProps {
+  showReload?: boolean;
+  reloading?: boolean;
+  onReload?: () => any;
+}
 
 export const AppCard = React.forwardRef<HTMLDivElement, AppCardProps>((props, ref) => {
   return (
@@ -328,10 +342,20 @@ export const AppCard = React.forwardRef<HTMLDivElement, AppCardProps>((props, re
       {...props}
       ref={ref}
       style={{
+        position: 'relative',
         ...cardStyle,
         ...props.style,
       }}>
       {props.children}
+      {props.showReload ? (
+        <Box
+          style={{ position: 'absolute', right: '12px', top: '12px', height: '20px', width: '20px' }}
+          onClick={() => (props.onReload ? props.onReload() : undefined)}>
+          <Refresh style={{ height: '20px', width: '20px' }}></Refresh>
+        </Box>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 });

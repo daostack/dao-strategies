@@ -111,6 +111,12 @@ export interface CampaignOnchainDetails {
   root?: RootDetails;
 }
 
+export interface ClaimInPp {
+  shares: string;
+  assets?: TokenBalance[];
+  activationTime?: number;
+}
+
 export interface TreeClaimInfo {
   /** merkle root */
   root: string;
@@ -133,7 +139,7 @@ export interface CampaignClaimInfo {
   /** true if the campaign was already published  */
   published: boolean;
   /** claims that in principle will be avaialable if the root is correctly updated */
-  inPp?: { shares?: string; assets?: TokenBalance[] };
+  inPp?: { shares?: string; assets?: TokenBalance[]; activationTime?: number };
   /** current claim info */
   current?: TreeClaimInfo;
   /** pending claim info */

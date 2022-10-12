@@ -1,10 +1,8 @@
 import { Box, BoxExtendedProps, Grid, ResponsiveContext, Image } from 'grommet';
 import React, { ReactNode } from 'react';
 import { FC } from 'react';
-import styled from 'styled-components';
-import { constants } from './constants';
 
-import { IElement, AppHeading, AppLabel } from '../styles/BasicElements';
+import { AppHeading, AppLabel } from '../styles/BasicElements';
 import { HowItWorksLayoutBox } from './HowItWorksLayoutBox';
 import { RoundedSVG } from './RoundedSVG';
 import { styleConstants } from '../styles/themes';
@@ -21,6 +19,7 @@ const Description: FC<DescriptionProps> = (props: DescriptionProps) => {
       <AppHeading size="40px" color={props._color}>
         {props.title}
       </AppHeading>
+      <Box style={{ height: '16px' }}></Box>
       <Box fill style={{ fontSize: '20px', lineHeight: '178%', letterSpacing: '-0.43px', color: '#989BA0' }}>
         {props.description}
       </Box>

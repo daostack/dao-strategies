@@ -63,8 +63,6 @@ export const ComingNext: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   return (
     <Box
       style={{
-        padding: '6vw',
-        margin: '0 auto',
         width: '100%',
         backgroundColor: constants.lightBackground,
         ...props.style,

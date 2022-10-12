@@ -1,7 +1,6 @@
 import { Box, BoxExtendedProps, Image, ResponsiveContext } from 'grommet';
 import React from 'react';
 import { FC } from 'react';
-import { styleConstants } from '../styles/themes';
 import { constants } from './constants';
 import { TwoColumns } from './TwoColumns';
 
@@ -42,6 +41,7 @@ export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
   const textBox = (
     <Box
       style={{
+        padding: '20px',
         color: constants.smallTextGray,
       }}>
       <Box style={{ maxWidth: '500px', textAlign: !size.includes('small') ? 'left' : 'center' }}>
@@ -53,16 +53,12 @@ export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
   return (
     <Box style={{ maxWidth: '800px', margin: `${!size.includes('small') ? '0' : '24px'} auto` }}>
       <TwoColumns widths={flip ? ['60%', '40%'] : ['40%', '60%']}>
-        <Box
-          justify="center"
-          align="center"
-          style={{
-            width: '100%',
-            height: '100%',
-          }}>
+        <Box justify="center" align="center">
           {flip ? textBox : imageBox}
         </Box>
-        <Box>{flip ? imageBox : textBox}</Box>
+        <Box justify="center" align="center">
+          {flip ? imageBox : textBox}
+        </Box>
       </TwoColumns>
       {props.separatorUrl && !size.includes('small') ? (
         <Box direction="row" style={{ height: '30vw', maxHeight: '300px' }}>

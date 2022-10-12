@@ -324,7 +324,7 @@ export class CampaignRepository {
       LEFT JOIN 
         public."CrossVerification" as crossver
       ON shares.account = "from"
-	    WHERE crossver.to = ${address}
+	    WHERE crossver.to = ${`ethereum-all:${address}`}
     `;
 
     /** one address can be the target of multiple accounts */
