@@ -111,20 +111,15 @@ export const SetUsApart: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
           title="Multiple Integrations"
           subtitle={
             <>
-              <p>Distribute rewards based on activity on different platforms (on and off-chain).</p>
-              <p>Connect to Ethereum Protocols, Github, Twitter, Discord and others.</p>
+              <p>Distribute rewards to contributors based on their activities on various platforms.</p>
+              <p>Currently supports Github. More coming soon.</p>
             </>
           }></Feature>
         <Feature
           icon={icons.extensible}
           style={boxStyle}
           title="Extensible"
-          subtitle={
-            <p>
-              Create custom sets of rules that easily and flexibly combine data from different sources and best fit your
-              community needs.
-            </p>
-          }></Feature>
+          subtitle={<p>Create custom reward rules that fits to your community.</p>}></Feature>
       </Box>
       <Box alignSelf="start" style={{ marginBottom: '48px' }} gap="12px">
         <AppButton
