@@ -32,7 +32,7 @@ const Platform: FC<IBoxProps> = (props: IBoxProps) => {
   );
 };
 
-export const ComingNext: FC<IElement> = () => {
+export const ComingNext: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   const size = React.useContext(ResponsiveContext);
 
   const boxStyle = ((size: string): React.CSSProperties => {
@@ -62,7 +62,11 @@ export const ComingNext: FC<IElement> = () => {
 
   return (
     <Box
-      style={{ padding: '6vw', margin: '0 auto', width: '100%', backgroundColor: constants.lightBackground }}
+      style={{
+        width: '100%',
+        backgroundColor: constants.lightBackground,
+        ...props.style,
+      }}
       align="center">
       <Box alignSelf="start" style={{ marginBottom: '36px' }}>
         <AppHeading size="28px">

@@ -55,12 +55,16 @@ export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletter
         <AppInput name="email" placeholder="Email or Telegram"></AppInput>
       </AppFormField>
       <AppFormField name="feedback">
-        <AppTextArea resize="vertical" name="feedback" placeholder="Comments" autoResize={false}></AppTextArea>
+        <AppTextArea
+          resize="vertical"
+          name="feedback"
+          placeholder="Why do you want to get beta access"
+          autoResize={false}></AppTextArea>
       </AppFormField>
       {error ? (
         <Box style={{ color: '#ac2525' }}>Sorry, there was an error submitting your response.</Box>
       ) : submitted ? (
-        <Box>🙂 Sent! </Box>
+        <Box>🙂 Thank you for showing interest, we will reach out to you! </Box>
       ) : (
         <AppButton style={{ width: '100%' }} disabled={disabled} primary type="submit" label="Get Beta Access 🚀" />
       )}

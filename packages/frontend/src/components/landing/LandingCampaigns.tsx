@@ -5,6 +5,7 @@ import { useCampaigns } from '../../hooks/useCampaigns';
 import { RouteNames } from '../../pages/MainPage';
 import { CampaignCard } from '../CampaignCard';
 import { AppButton, AppCallout, AppHeading } from '../styles/BasicElements';
+import { styleConstants } from '../styles/themes';
 
 export const LandingCampaigns: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   const { campaigns, isLoading } = useCampaigns();
@@ -16,8 +17,10 @@ export const LandingCampaigns: FC<BoxExtendedProps> = (props: BoxExtendedProps) 
 
   return (
     <Box style={{ ...props.style }}>
-      <AppHeading level={1}>Recent Campaigns:</AppHeading>
-      <div style={{ width: '100vw', overflowX: 'auto', padding: '0vw 0vw 0vw 0vw' }}>
+      <AppHeading level={1} style={{ fontFamily: styleConstants.font.secondary }}>
+        Recent Campaigns:
+      </AppHeading>
+      <div style={{ padding: '0vw 0vw 0vw 0vw' }}>
         {!isLoading && campaigns !== undefined ? (
           campaigns.length > 0 ? (
             campaigns.map((campaign, ix) => {
@@ -37,8 +40,14 @@ export const LandingCampaigns: FC<BoxExtendedProps> = (props: BoxExtendedProps) 
           <Spinner></Spinner>
         )}
       </div>
-      <Box style={{ marginTop: '20px', width: 'fit-content' }}>
-        <AppButton onClick={() => navigate(RouteNames.Create)} label="Create New" />
+      <Box direction="row" justify="center" style={{ marginTop: '4vw' }}>
+        <Box style={{ marginTop: '20px' }}>
+          <AppButton
+            style={{ color: styleConstants.colors.primary, padding: '14px 80px' }}
+            onClick={() => navigate(RouteNames.Create)}
+            label="Create New Campaign"
+          />
+        </Box>
       </Box>
     </Box>
   );

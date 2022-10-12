@@ -9,6 +9,7 @@ import { Banner } from './Banner';
 import { Box } from 'grommet';
 import { HEADER_HEIGHT } from '../../pages/AppHeader';
 import { LandingCampaigns } from './LandingCampaigns';
+import { constants } from './constants';
 
 interface IEmbeddedLanding {}
 
@@ -16,21 +17,28 @@ export const MAX_WIDTH_LANDING = 1600;
 
 export const EmbeddedLanding: FC<IEmbeddedLanding> = (props: IEmbeddedLanding) => {
   return (
-    <Box>
-      <Box
-        style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, margin: '0 auto', marginTop: HEADER_HEIGHT, padding: '0px 5vw' }}>
+    <Box style={{}}>
+      <Box style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, margin: `${HEADER_HEIGHT}px auto 0 auto`, padding: '0px 5vw' }}>
         <Banner></Banner>
-        <Hero style={{ marginTop: '80px' }}></Hero>
-        <LandingCampaigns style={{ marginTop: '60px' }}></LandingCampaigns>
+        <Box style={{ height: '10vw', maxHeight: '150px' }}></Box>
+        <Hero style={{}}></Hero>
+        <Box style={{ height: '15vw', maxHeight: '200px' }}></Box>
+        <LandingCampaigns style={{}}></LandingCampaigns>
       </Box>
 
-      <Box style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, margin: '0 auto', padding: '0px 5vw' }}>
-        <SetUsApart style={{ marginTop: '8vw' }}></SetUsApart>
+      <Box style={{ height: '15vw', maxHeight: '250px' }}></Box>
+      <Box style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, margin: '0 auto 0 auto', padding: '0px 5vw' }}>
+        <SetUsApart style={{}}></SetUsApart>
       </Box>
 
-      <HowItWorks style={{ marginTop: '8vw' }}></HowItWorks>
-      <ComingNext></ComingNext>
-      <Footer></Footer>
+      <Box style={{ height: '15vw', maxHeight: '300px' }}></Box>
+      <Box style={{ backgroundColor: constants.lightBackground }} align="center">
+        <HowItWorks style={{}}></HowItWorks>
+        <Box style={{ height: '10vw', maxHeight: '300px' }}></Box>
+        <ComingNext style={{ maxWidth: `${MAX_WIDTH_LANDING}px` }}></ComingNext>
+        <Box style={{ height: '10vw', maxHeight: '300px' }}></Box>
+      </Box>
+      <Footer style={{}}></Footer>
     </Box>
   );
 };
