@@ -130,7 +130,9 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
         width="100vw"
         align="center">
         <>
-          {!size.includes('small') && <RoundedSVG color={constants.lightBackground} style={{ marginTop: '-5vw' }} />}
+          {!size.includes('small') && (
+            <RoundedSVG width="100vw" color={constants.lightBackground} style={{ marginTop: '-5.2vw' }} />
+          )}
 
           <Box alignSelf="center" style={{ marginBottom: '36px', padding: '6vw 0' }}>
             <AppLabel style={{ textAlign: 'center' }}>Creating a campaign</AppLabel>

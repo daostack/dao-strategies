@@ -1,10 +1,16 @@
-import { Box, BoxExtendedProps } from 'grommet';
+import { Box, BoxExtendedProps, Image } from 'grommet';
 import { FC } from 'react';
 
 export const RoundedSVG: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   return (
     <Box {...props}>
-      <svg width="100%" height="98" viewBox="0 0 1512 81" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <Image fit="cover" src="/images-landing/Ellipse.png" width="100%" height="auto" />
+      {/* <svg
+        height="100%"
+        width="100%"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg">
         <g clip-path="url(#clip0_2164_21542)">
           <path
             fill-rule="evenodd"
@@ -15,10 +21,10 @@ export const RoundedSVG: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
         </g>
         <defs>
           <clipPath id="clip0_2164_21542">
-            <rect width="100%" height="98" fill={props.color} />
+            <rect height="100%" width="100%" viewBox="0 0 100 100" preserveAspectRatio="none" fill={props.color} />
           </clipPath>
         </defs>
-      </svg>
+      </svg> */}
     </Box>
   );
 };
