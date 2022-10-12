@@ -690,7 +690,8 @@ export const CampaignIcon: FC<ICampaignIcon> = (props: ICampaignIcon) => {
         width: `${value}${units}`,
         borderRadius: `${value / 2}${units}`,
         overflow: 'hidden',
-        border: '1px solid',
+        border: '2px solid',
+        borderColor: styleConstants.colors.lightGrayBorder,
         ...props.style,
       }}>
       <Image fit="cover" src={props.src || '/images/welcome-bg-1.png'}></Image>
