@@ -40,7 +40,10 @@ export const Hero: FC<IHero> = (props: IHero) => {
     }
   })();
 
-  console.log({ headingStyle });
+  const textHeadlineAttributes = Object.assign(
+    { textAlign: 'start', fontFamily: styleConstants.font.secondary, fontWeight: '700', wordBreak: 'break-world' },
+    headingStyle
+  );
 
   return (
     <TwoColumns style={{ ...props.style }}>
@@ -50,17 +53,38 @@ export const Hero: FC<IHero> = (props: IHero) => {
         }}
         align="start"
         justify="start">
-        <AppHeading
-          level={1}
-          style={{
-            textAlign: 'start',
-            fontFamily: styleConstants.font.secondary,
-            fontWeight: '700',
-            ...headingStyle,
-          }}>
-          Rewards for Value Creators
+        <AppHeading level={1} style={textHeadlineAttributes}>
+          Rewards for
+          <Box style={{ position: 'relative', zIndex: '1' }}>
+            Value
+            <Box
+              style={{
+                zIndex: '0',
+                height: headingStyle.fontSize,
+                width: '250px',
+                background: `url(/images/penbrush.svg) center no-repeat`,
+                backgroundSize: 'cover',
+                position: 'absolute',
+                left: '0px',
+                top: '8px',
+                overflow: 'visible',
+              }}></Box>
+          </Box>
+          Creators
         </AppHeading>
-        <AppLabel style={{ maxWidth: '520px', marginTop: '2vw' }}>
+
+        <AppLabel
+          color={constants.subParagraphGray}
+          style={{
+            maxWidth: '520px',
+            marginTop: '2vw',
+            fontFamily: 'DM Sans',
+            fontWeight: 400,
+            lineHeight: '156.4%',
+            letterSpacing: '-0.43px',
+            fontSize: '20px',
+            textTransform: 'inherit',
+          }}>
           Web3 incentive engine for communities. CommonValue is a rewards platform that connects web2 activities to web3
           rewards
         </AppLabel>
@@ -69,7 +93,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
         style={{
           margin: '5vw 2vw',
           height: '300px',
-          width: '80%',
+          width: size.includes('small') ? '100%' : '80%',
           boxShadow: '0px 40.64px 54.56px rgba(14, 15, 25, 0.1)',
           borderRadius: '20px',
         }}

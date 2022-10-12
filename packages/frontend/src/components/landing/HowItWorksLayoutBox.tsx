@@ -9,6 +9,7 @@ interface IBoxProps extends BoxExtendedProps {
   description: JSX.Element;
   separatorUrl?: string;
   flip?: boolean;
+  additionalImage?: React.ReactNode; // an extra image beside the seperator
 }
 
 export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
@@ -61,17 +62,32 @@ export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
         </Box>
       </TwoColumns>
       {props.separatorUrl && !size.includes('small') ? (
-        <Box direction="row" style={{ height: '30vw', maxHeight: '300px' }}>
-          <Box style={{ height: '100%', width: '20vw', maxWidth: '150px', flexShrink: '0' }}></Box>
-          <Box
-            style={{
-              flexGrow: '1',
-              flexShrink: '1',
-            }}>
-            <Image fit="cover" src={props.separatorUrl}></Image>
+        <>
+          {' '}
+          <Box direction="row" style={{ position: 'relative', height: '30vw', maxHeight: '300px' }}>
+            <Box style={{ height: '100%', width: '20vw', maxWidth: '150px', flexShrink: '0' }}></Box>
+            <Box
+              style={{
+                flexGrow: '1',
+                flexShrink: '1',
+              }}>
+              <Image fit="cover" src={props.separatorUrl}></Image>
+            </Box>
+            {props.additionalImage && (
+              <Box
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  transform: 'translate(50%, 10vw)',
+                  height: 'auto',
+                  maxHeight: '300px',
+                }}>
+                {props.additionalImage}
+              </Box>
+            )}
+            <Box style={{ height: '100%', width: '20vw', maxWidth: '150px', flexShrink: '0' }}></Box>
           </Box>
-          <Box style={{ height: '100%', width: '20vw', maxWidth: '150px', flexShrink: '0' }}></Box>
-        </Box>
+        </>
       ) : (
         <></>
       )}
