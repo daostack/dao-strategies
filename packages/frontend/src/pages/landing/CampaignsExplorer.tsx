@@ -1,4 +1,5 @@
-import { Box, BoxExtendedProps, Spinner, Text } from 'grommet';
+import { Box, BoxExtendedProps, ResponsiveContext, Spinner, Text } from 'grommet';
+import React from 'react';
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CampaignCard } from '../../components/CampaignCard';
@@ -31,6 +32,25 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
     xlarge: ['auto'],
   };
 
+  const size = React.useContext(ResponsiveContext);
+
+  const { gap } = (() => {
+    switch (size) {
+      case 'xsmall':
+      case 'small':
+        return { gap: '3.5vw' };
+
+      case 'medium':
+        return { gap: '20px' };
+
+      case 'large':
+        return { gap: '30px' };
+
+      default:
+        return { gap: '3vw' };
+    }
+  })();
+
   const campaignClicked = (address: string) => {
     navigate(RouteNames.Campaign(address));
   };
@@ -40,9 +60,8 @@ export const CampaignsExplorer: FC<ICampaignsExplorerProps> = (props: ICampaigns
       <Box fill style={{ padding: '16px 32px', marginTop: HEADER_HEIGHT, maxWidth: MAX_WIDTH, ...props.style }}>
         {campaigns !== undefined ? (
           campaigns.length > 0 ? (
-            <ResponsiveGrid columnsAt={columns} rowsAt={rows} gap="3.5vw" pad={{ vertical: '30px' }}>
+            <ResponsiveGrid columnsAt={columns} rowsAt={rows} gap={gap} pad={{ vertical: '30px' }}>
               {campaigns.map((campaign) => {
-                console.log({ campaignClicked });
                 return (
                   <CampaignCard
                     onClick={() => campaignClicked(campaign.address)}

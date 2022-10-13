@@ -26,6 +26,8 @@ import {
   AccordionPanel,
   AccordionPanelExtendedProps,
   AccordionExtendedProps,
+  ResponsiveContext,
+  LayerPositionType,
 } from 'grommet';
 import {
   CircleQuestion,
@@ -632,6 +634,7 @@ export const InfoProperty: FC<IInfoProperty> = (props: IInfoProperty) => {
 
 export interface IAppModal extends LayerExtendedProps {
   heading: string;
+  position?: LayerPositionType;
   onClosed?: () => void;
   onSuccess?: () => void;
   onError?: () => void;
@@ -648,9 +651,19 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
     if (props.onClosed) props.onClosed();
   };
 
+  const size = React.useContext(ResponsiveContext);
+  const mobile = size ? size.includes('small') : true;
+
+  const position = props.position !== undefined ? props.position : 'right';
+
   return (
-    <Layer {...props} style={{ ...props.style }} position="right" onEsc={() => close()} onClickOutside={() => close()}>
-      <Box style={{ paddingTop: '5vh', height: '100vh', width: 'auto', flexShrink: '0' }}>
+    <Layer
+      {...props}
+      style={{ ...props.style }}
+      position={position}
+      onEsc={() => close()}
+      onClickOutside={() => close()}>
+      <Box style={{ paddingTop: '5vh', height: '100vh', width: mobile ? 'auto' : '550px', flexShrink: '0' }}>
         <Box style={{ padding: '0 2.5vw', flexShrink: '0' }}>
           <Box
             direction="row"

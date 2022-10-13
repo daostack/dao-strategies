@@ -1,12 +1,11 @@
-import { Box, CheckBox, ResponsiveContext } from 'grommet';
-import { Add, Moon } from 'grommet-icons';
+import { Box, ResponsiveContext } from 'grommet';
+import { Add } from 'grommet-icons';
 import React, { FC } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LoggedUser } from '../components/LoggedUser';
 import { Logo } from '../components/Logo';
 import { AppButton } from '../components/styles/BasicElements';
 import { styleConstants } from '../components/styles/themes';
-import { useThemeContext } from '../ThemedApp';
 import { RouteNames } from './MainPage';
 
 export const HEADER_HEIGHT = 66;
@@ -24,7 +23,7 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
   const left = (
     <>
       <Box direction="row">
-        <Logo onClick={() => navigate(RouteNames.Base)}></Logo>
+        <Logo compact={size.includes('small')} onClick={() => navigate(RouteNames.Base)}></Logo>
 
         <Box
           align="center"
@@ -73,7 +72,7 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
       ) : (
         <></>
       )}
-      {!size.includes('small') ? <LoggedUser></LoggedUser> : <></>}
+      <LoggedUser></LoggedUser>
     </Box>
   );
 
@@ -85,12 +84,9 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
         height: `${HEADER_HEIGHT}px`,
       }}
       direction="row"
-      justify="center">
-      <Box
-        style={{ width: '100%', padding: '0px 32px', maxWidth: `${MAX_WIDTH}px` }}
-        direction="row"
-        justify="between"
-        align="center">
+      justify="center"
+      align="baseline">
+      <Box style={{ width: '100%', padding: '0px 32px', maxWidth: `${MAX_WIDTH}px` }} direction="row" justify="between">
         {left}
         {right}
       </Box>

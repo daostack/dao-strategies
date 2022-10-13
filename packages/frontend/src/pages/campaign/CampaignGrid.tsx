@@ -17,9 +17,12 @@ export const CampaignGrid: FC<ICampaignGrid> = (props: ICampaignGrid) => {
     { name: CampaignAreas.right, start: [1, 0], end: [1, 0] },
   ];
 
-  const columnsSmall: GridSizeType[] = columnsLarge;
-  const rowsSmall: GridSizeType[] = rowsLarge;
-  const areasSmall: AreasType = areasLarge;
+  const columnsSmall: GridSizeType[] = ['repeat(auto-fit, minmax(400px, 1fr));'];
+  const rowsSmall: GridSizeType[] = ['auto'];
+  const areasSmall: AreasType = [
+    { name: CampaignAreas.left, start: [0, 0], end: [0, 0] },
+    { name: CampaignAreas.right, start: [1, 0], end: [1, 0] },
+  ];
 
   const columns: Record<Breakpoint, GridSizeType[]> = {
     small: columnsSmall,

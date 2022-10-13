@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Box, Spinner } from 'grommet';
+import { Box, ResponsiveContext, Spinner } from 'grommet';
 import { FC, useEffect, useRef, useState } from 'react';
 import { ChainsDetails, cmpAddresses, Page } from '@dao-strategies/core';
 import { RewardsTable } from '../../components/RewardsTable';
@@ -12,27 +12,29 @@ import {
   CampaignIcon,
   ExpansibleCard,
   ExpansiveParagraph,
+  HorizontalLine,
   InfoProperty,
   RepoTag,
 } from '../../components/styles/BasicElements';
-import { TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
+import { ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { DateManager } from '../../utils/date.manager';
 import { HEADER_HEIGHT, MAX_WIDTH } from '../AppHeader';
-import { CampaignAreas, CampaignGrid } from './CampaignGrid';
 import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
 import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FundersTable } from '../../components/FundersTable';
-import { FixedAdmin } from './fixed.admin';
+import { Admin } from './fixed.admin';
 import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
 import { CampaignStatus } from '../../components/CampaignStatus';
 import { RouteNames } from '../MainPage';
 import { FIRST_PAGE, reactionConfigOptions } from '../campaign.support';
+import { TwoColumns } from '../../components/landing/TwoColumns';
+import { Footer } from '../../components/landing/Footer';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -68,6 +70,9 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [colWidth, setColWidth] = useState<number>(0);
   // remember the DOM element
   let colRef = useRef<HTMLDivElement>(null);
+
+  const size = React.useContext(ResponsiveContext);
+  const mobile = size.includes('small');
 
   // called everytime the DOM element changes
   const fundCardRefUpdated = (ref: React.RefObject<HTMLDivElement>): void => {
@@ -152,7 +157,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       style={{ marginTop: '16px' }}
       padding={[24, 24, 36, 24]}
       hiddenPart={
-        <TwoColumns boxes={{ align: 'start', justify: 'start' }} grid={{ style: { marginTop: '40px' } }}>
+        <TwoColumns>
           <Box>
             <InfoProperty title="Github Repositories">
               {campaign.strategyParams.repositories.map((repo: any, ix: number) => (
@@ -258,9 +263,19 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const claim = <ClaimCard style={{ marginTop: '40px' }} campaignAddress={campaign.address}></ClaimCard>;
-  const guardian = <FixedAdmin btnWidth={colWidth} address={campaign.address}></FixedAdmin>;
+  const guardian = <Admin btnWidth={colWidth} address={campaign.address} fixed={!mobile}></Admin>;
 
-  const left = (
+  const left = mobile ? (
+    <>
+      {details}
+      {info}
+      <Box style={{ marginTop: mobile ? '40px' : '0px' }}>{funds}</Box>
+      {user !== undefined ? claim : <></>}
+      {contributors_table}
+      <Box style={{ marginBottom: mobile ? '40px' : '0px' }}>{fundersTable}</Box>
+      {guardian}
+    </>
+  ) : (
     <>
       {details}
       {info}
@@ -269,7 +284,9 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     </>
   );
 
-  const right = (
+  const right = mobile ? (
+    <></>
+  ) : (
     <>
       {funds}
       {user !== undefined ? claim : <></>}
@@ -297,10 +314,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           maxWidth: `${MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
-        <CampaignGrid gap={`${CAMPAIGN_GAP}px`}>
-          <Box gridArea={CampaignAreas.left}>{left}</Box>
-          <Box gridArea={CampaignAreas.right}>{right}</Box>
-        </CampaignGrid>
+        <TwoColumns gap="20px" widths={['70%', '30%']} style={{ alignItems: 'start' }}>
+          <Box>{left}</Box>
+          <Box align="center" justify="center">
+            {right}
+          </Box>
+        </TwoColumns>
+        <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
+        <Footer></Footer>;
       </Box>
     </Box>
   );

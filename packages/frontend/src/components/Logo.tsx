@@ -2,7 +2,12 @@ import { Box, BoxExtendedProps, Image } from 'grommet';
 import { FC } from 'react';
 import { styleConstants } from './styles/themes';
 
-export const Logo: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
+interface ILogo extends BoxExtendedProps {
+  compact?: boolean;
+}
+
+export const Logo: FC<ILogo> = (props: ILogo) => {
+  const compact = props.compact !== undefined ? props.compact : false;
   return (
     <Box
       {...props}
@@ -18,7 +23,7 @@ export const Logo: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
         color: styleConstants.colors.headingDark,
       }}>
       <Image width="32" height="32" src="/favicon-32x32.png" />
-      CommonValue
+      {compact ? <></> : 'CommonValue'}
     </Box>
   );
 };

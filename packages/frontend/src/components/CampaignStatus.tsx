@@ -6,6 +6,7 @@ import { DateManager } from '../utils/date.manager';
 import { Address } from './Address';
 
 import { Countdown } from './Countdown';
+import { TwoColumns } from './landing/TwoColumns';
 import { HelpTip } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';
 
@@ -49,7 +50,8 @@ export const CampaignStatus: FC<CampaignStatusI> = (props: CampaignStatusI) => {
   );
 
   return (
-    <Box
+    <TwoColumns
+      widths={['70%', '30%']}
       style={{
         color: styleConstants.colors.ligthGrayText2,
         fontSize: styleConstants.textFontSizes.small,
@@ -61,6 +63,6 @@ export const CampaignStatus: FC<CampaignStatusI> = (props: CampaignStatusI) => {
       <Box direction="row" align="center" style={{ flexShrink: '0' }}>
         Created by: <Address style={{ marginLeft: '2px' }} address={campaign.creatorId} chainId={campaign.chainId} />
       </Box>
-    </Box>
+    </TwoColumns>
   );
 };

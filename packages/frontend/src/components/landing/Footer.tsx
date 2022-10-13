@@ -41,7 +41,7 @@ interface IFooter extends BoxExtendedProps {}
 
 export const Footer: FC<IFooter> = (props: IFooter) => {
   return (
-    <Box>
+    <Box style={{ width: '100%' }} align="center">
       <Box style={{ height: '6vw', maxHeight: '150px' }}></Box>
       <TwoColumns
         align="start"
@@ -51,25 +51,25 @@ export const Footer: FC<IFooter> = (props: IFooter) => {
           ...props.style,
         }}>
         {/* Logo */}
-        <Box>
+        <Box align="center">
           <Box style={{ height: '3vw', maxHeight: '200px', minHeight: '20px' }}></Box>
           <Logo></Logo>
           <Box style={{ height: '3vw', maxHeight: '250px', minHeight: '50px' }}></Box>
         </Box>
 
         {/* Follow us and Resources */}
-        <Box align="start" justify="start" direction="row" gap="10vw">
+        <Box align="start" justify="center" direction="row" gap="10vw">
           {/* Follow us box */}
           <Box>
             <AppHeading size="28px">Follow Us</AppHeading>
             <Box pad={{ vertical: 'medium' }} gap="8px" align="start">
               <FooterItem
-                imageSrc="images-landing/Footer/Twitter.png"
+                imageSrc="/images-landing/Footer/Twitter.png"
                 itemText="Twitter"
                 itemLink="https://twitter.com/commonvalue_xyz"
               />
-              <FooterItem imageSrc="images-landing/Footer/Discord.png" itemText="Discord" soon />
-              <FooterItem imageSrc="images-landing/Footer/Github.png" itemText="Github" soon />
+              <FooterItem imageSrc="/images-landing/Footer/Discord.png" itemText="Discord" soon />
+              <FooterItem imageSrc="/images-landing/Footer/Github.png" itemText="Github" soon />
             </Box>
           </Box>
           {/* Resources box */}

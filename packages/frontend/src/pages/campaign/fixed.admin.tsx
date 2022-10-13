@@ -6,13 +6,16 @@ import { AdvancedCampaignStatus } from '../../components/AdvancedCampaignStatus'
 import { AppCard, AppModal, CircleIcon } from '../../components/styles/BasicElements';
 import { styleConstants } from '../../components/styles/themes';
 
-export interface IFixedAdmin extends BoxExtendedProps {
+export interface IAdmin extends BoxExtendedProps {
   address: string;
   btnWidth: number;
+  fixed?: boolean;
 }
 
-export const FixedAdmin: FC<IFixedAdmin> = (props: IFixedAdmin) => {
+export const Admin: FC<IAdmin> = (props: IAdmin) => {
   const [showGuardianControl, setShowGuardianControl] = useState<boolean>(false);
+
+  const fixed = props.fixed !== undefined ? props.fixed : true;
 
   return showGuardianControl ? (
     <AppModal heading="Advanced Status" onClosed={() => setShowGuardianControl(false)}>
@@ -27,7 +30,7 @@ export const FixedAdmin: FC<IFixedAdmin> = (props: IFixedAdmin) => {
         fontSize: styleConstants.textFontSizes.small,
         minHeight: 'auto',
         width: `${props.btnWidth}px`,
-        position: 'fixed',
+        position: fixed ? 'fixed' : 'unset',
         bottom: '36px',
       }}>
       <CircleIcon
