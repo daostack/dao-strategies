@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Box, Spinner } from 'grommet';
+import { Box, ResponsiveContext, Spinner } from 'grommet';
 import { FC, useEffect, useRef, useState } from 'react';
 import { ChainsDetails, cmpAddresses, Page } from '@dao-strategies/core';
 import { RewardsTable } from '../../components/RewardsTable';
@@ -15,7 +15,7 @@ import {
   InfoProperty,
   RepoTag,
 } from '../../components/styles/BasicElements';
-import { TwoColumns, ViewportContainer } from '../../components/styles/LayoutComponents.styled';
+import { ViewportContainer } from '../../components/styles/LayoutComponents.styled';
 import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { DateManager } from '../../utils/date.manager';
@@ -33,6 +33,7 @@ import { ChainTag } from '../../components/Assets';
 import { CampaignStatus } from '../../components/CampaignStatus';
 import { RouteNames } from '../MainPage';
 import { FIRST_PAGE, reactionConfigOptions } from '../campaign.support';
+import { TwoColumns } from '../../components/landing/TwoColumns';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -68,6 +69,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const [colWidth, setColWidth] = useState<number>(0);
   // remember the DOM element
   let colRef = useRef<HTMLDivElement>(null);
+
+  const size = React.useContext(ResponsiveContext);
 
   // called everytime the DOM element changes
   const fundCardRefUpdated = (ref: React.RefObject<HTMLDivElement>): void => {
@@ -152,7 +155,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
       style={{ marginTop: '16px' }}
       padding={[24, 24, 36, 24]}
       hiddenPart={
-        <TwoColumns boxes={{ align: 'start', justify: 'start' }} grid={{ style: { marginTop: '40px' } }}>
+        <TwoColumns>
           <Box>
             <InfoProperty title="Github Repositories">
               {campaign.strategyParams.repositories.map((repo: any, ix: number) => (
@@ -211,8 +214,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const fundersTable = (
-    <AppCard style={{ marginTop: '40px', padding: '24px 24px' }} showReload onReload={() => getFunders()}>
-      <Box direction="row" justify="between" align="center">
+    <AppCard style={{ padding: '12px 12px', marginTop: '52px' }} showReload onReload={() => getFunders()}>
+      <Box direction="row" justify="start">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Funders
         </AppHeading>
@@ -264,18 +267,15 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     <>
       {details}
       {info}
+      {size.includes('small') ? <Box margin={{ top: '24px' }}>{funds}</Box> : <></>}
       {contributors_table}
       {fundersTable}
-    </>
-  );
-
-  const right = (
-    <>
-      {funds}
       {user !== undefined ? claim : <></>}
       {guardian}
     </>
   );
+
+  const right = <> {!size.includes('small') ? funds : <></>}</>;
 
   return (
     <Box
@@ -297,10 +297,12 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           maxWidth: `${MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
-        <CampaignGrid gap={`${CAMPAIGN_GAP}px`}>
-          <Box gridArea={CampaignAreas.left}>{left}</Box>
-          <Box gridArea={CampaignAreas.right}>{right}</Box>
-        </CampaignGrid>
+        <TwoColumns gap="20px" widths={['70%', '30%']} style={{ alignItems: 'baseline' }}>
+          <Box>{left}</Box>
+          <Box align="center" justify="center">
+            {right}
+          </Box>
+        </TwoColumns>
       </Box>
     </Box>
   );

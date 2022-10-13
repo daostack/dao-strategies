@@ -42,17 +42,15 @@ export const TwoColumns: FC<ITwoColumns> = (props: ITwoColumns) => {
   return (
     <Box
       fill
+      justify="center"
+      align="center"
       style={{
         ...props.style,
       }}
       direction={config.direction}>
       {/* Hero Message and subparagraph */}
-      <Box style={{ flexGrow: 0, flexShrink: 0, width: config.widths[0] }} justify="center" align="center">
-        {children[0]}
-      </Box>
-      <Box style={{ flexGrow: 0, flexShrink: 0, width: config.widths[1] }} justify="center" align="center">
-        {children[1]}
-      </Box>
+      <Box style={{ flexGrow: 0, flexShrink: 0, width: config.widths[0] }}>{children[0]}</Box>
+      <Box style={{ flexGrow: 0, flexShrink: 0, width: config.widths[1] }}>{children[1]}</Box>
     </Box>
   );
 };

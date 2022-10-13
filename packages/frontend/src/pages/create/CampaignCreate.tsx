@@ -57,7 +57,7 @@ import {
 } from '../../components/styles/BasicElements';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FormProgress } from './FormProgress';
-import { TwoColumns } from '../../components/styles/LayoutComponents.styled';
+import { TwoColumns } from '../../components/landing/TwoColumns';
 import { AddCircle, FormPreviousLink, FormTrash, StatusCritical } from 'grommet-icons';
 import { useGithubSearch } from '../../hooks/useGithubSearch';
 import { RewardsTable } from '../../components/RewardsTable';
@@ -74,7 +74,7 @@ import { StrategySelector } from './strategy.selector';
 import { DateManager } from '../../utils/date.manager';
 import { FieldLabel } from './field.label';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-
+import { useResponsiveForMobileOnly } from '../../hooks/useResponsiveTextSize';
 export interface ICampaignCreateProps {
   dum?: any;
 }
@@ -672,7 +672,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </AppFormField>
       </Box>
 
-      <TwoColumns line={false} gap={20} frs={[0.8, 1.2]}>
+      <TwoColumns style={useResponsiveForMobileOnly({ justifyContent: 'start', alignItems: 'start' })}>
         <Box>
           <AppFormField
             name="reactionsConfig"
@@ -709,14 +709,14 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             </AppSelect>
           </AppFormField>
         </Box>
-        <Box>
+        <Box style={{ marginTop: '12px' }}>
           <Image src="/images/gh-pr-diagram.png" />
         </Box>
       </TwoColumns>
 
       <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
 
-      <TwoColumns grid={{ style: { marginBottom: '66px' } }}>
+      <TwoColumns>
         <Box>
           <AppFormField
             name="description"
@@ -751,7 +751,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             {formValues.repositoryFullnames.length > 0 ? (
               formValues.repositoryFullnames.map((repo) => {
                 return (
-                  <Box style={{ width: '100%', marginTop: '25px' }} direction="row" justify="between" align="center">
+                  <Box
+                    style={{ width: '100%', marginTop: '25px', marginBottom: '12px' }}
+                    direction="row"
+                    align="center">
                     <RepoTag repo={repo} />
                     <Box onClick={() => clearRepo(repo)} style={{ width: '28px', height: '28px' }}>
                       <FormTrash
@@ -769,7 +772,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           </>
         </Box>
 
-        <Box>
+        <Box
+          style={{
+            marginBottom: '35px',
+            ...useResponsiveForMobileOnly({ marginTop: '20px', width: '100%', textAlign: 'start' }),
+          }}>
           <AppFormField
             name="livePeriodChoice"
             label={
@@ -873,11 +880,11 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             </Box>
             <Box>
               <Parameter label="Contribution Period">
-                <Box justify="start" direction="column">
+                <Box>
                   <AppLabel style={{}}>From:</AppLabel>
                   <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.start).toString()}</Box>
                 </Box>
-                <Box justify="start" direction="column" style={{ marginTop: '16px' }}>
+                <Box style={{ marginTop: '16px' }}>
                   <AppLabel style={{}}>To: </AppLabel>
                   <Box>{DateManager.from(finalDetails?.strategyParams.timeRange.end).toString()}</Box>
                 </Box>
@@ -929,17 +936,15 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   return (
     <Box justify="start" align="center" style={{ width: '100%' }}>
-      <Box
-        justify="start"
-        align="center"
-        style={{ marginTop: HEADER_HEIGHT, padding: '2vw 3vw 70px 3vw', width: '100%' }}>
+      <Box justify="start" align="center" style={{ marginTop: HEADER_HEIGHT, width: '100%' }}>
         <AppCard
           style={{
-            padding: '48px 64px 88px 64px',
+            padding: '48px 36px 88px 64px',
             borderRadius: '20px',
             width: '100%',
             maxWidth: '800px',
             minHeight: 'calc()',
+            ...useResponsiveForMobileOnly({ padding: '48px 25px 88px 25px' }),
           }}>
           {status.isDeploying ? (
             <Layer>
@@ -967,7 +972,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <></>
           )}
 
-          <Box style={{ width: '100%', maxWidth: '380px' }} direction="row" justify="center">
+          <Box style={{ width: '100%', overflow: 'hidden', maxWidth: '380px' }} direction="row" justify="center">
             <FormProgress
               stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
               position={pageIx}
