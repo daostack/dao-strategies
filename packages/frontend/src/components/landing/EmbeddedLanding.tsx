@@ -38,7 +38,7 @@ export const EmbeddedLanding: FC<IEmbeddedLanding> = (props: IEmbeddedLanding) =
         <ComingNext style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, padding: '0 5vw' }}></ComingNext>
         <Box style={{ height: '10vw', maxHeight: '300px' }}></Box>
       </Box>
-      <Footer style={{}}></Footer>
+      <Footer style={{ maxWidth: `${MAX_WIDTH_LANDING}px` }}></Footer>
     </Box>
   );
 };
