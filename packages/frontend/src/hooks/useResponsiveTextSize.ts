@@ -18,7 +18,7 @@ export const useResponsiveTextSize = ({initialLargeTextSize, ownConfig}: useResp
     ["default", {fontSize: initialLargeTextSize * 1.2}]
   ])
 
-  const [currentTextsize, setCurrentTextSize] = useState(responsiveTextSizeConfig.get('large'))
+  const [currentTextsize, setCurrentTextSize] = useState(responsiveTextSizeConfig.get(size))
 
   useEffect(() => {
     setCurrentTextSize( responsiveTextSizeConfig.get(size) ??  responsiveTextSizeConfig.get('default') )
