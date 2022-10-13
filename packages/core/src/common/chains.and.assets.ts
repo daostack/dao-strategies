@@ -96,7 +96,7 @@ const chainList: ChainAndAssets[] = [
         address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
         name: 'USDC',
         icon: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png?v=022',
-        decimals: 18,
+        decimals: 6,
       },
       {
         id: 'dai',
@@ -110,7 +110,7 @@ const chainList: ChainAndAssets[] = [
         address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
         name: 'USDT',
         icon: 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=023',
-        decimals: 18,
+        decimals: 6,
       },
     ],
   },
