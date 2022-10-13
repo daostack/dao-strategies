@@ -1,28 +1,39 @@
 import { Box, Image, BoxExtendedProps } from 'grommet';
-import React from 'react';
 import { FC } from 'react';
 import { Logo } from '../Logo';
 
 import { AppHeading, AppLabel } from '../styles/BasicElements';
+import { styleConstants } from '../styles/themes';
 import { constants } from './constants';
 import { TwoColumns } from './TwoColumns';
 
 interface IFooterIcon extends BoxExtendedProps {
   imageSrc: string;
   itemText: string;
-  itemLink: string;
+  itemLink?: string;
+  soon?: boolean;
 }
 
 const FooterItem: FC<IFooterIcon> = (props: IFooterIcon) => {
   const { imageSrc, itemText, itemLink } = props;
+  const soon = props.soon !== undefined ? props.soon : false;
 
-  return (
-    <a style={{ textDecoration: 'none' }} href={itemLink} target="_blank" rel="noreferrer">
-      <Box direction="row" gap="12px" align="center" justify="center" style={{ ...props.style }}>
-        {imageSrc && <Image src={imageSrc}></Image>}
-        <AppLabel style={{ color: constants.blackText }}>{itemText}</AppLabel>
+  const el = (
+    <Box direction="row" align="center" justify="center" style={{ ...props.style }}>
+      <Box style={{ width: '30px', flexShrink: '0' }}>
+        {imageSrc && <Image style={{ height: '30px', width: '30px' }} src={imageSrc}></Image>}
       </Box>
+      <Box style={{ color: !soon ? constants.blackText : styleConstants.colors.lightGrayTextDarker }}>{itemText}</Box>
+      {soon ? <Box style={{ marginLeft: '4px', fontSize: styleConstants.textFontSizes.xsmall }}>(soon)</Box> : ''}
+    </Box>
+  );
+
+  return props.itemLink && !soon ? (
+    <a style={{ textDecoration: 'none' }} href={itemLink} target="_blank" rel="noreferrer">
+      {el}
     </a>
+  ) : (
+    el
   );
 };
 
@@ -51,18 +62,21 @@ export const Footer: FC<IFooter> = (props: IFooter) => {
           {/* Follow us box */}
           <Box>
             <AppHeading size="28px">Follow Us</AppHeading>
-            <Box pad={{ vertical: 'medium' }} gap="18px">
-              <FooterItem imageSrc="images-landing/Footer/Twitter.png" itemText="Twitter" itemLink="" />
-              <FooterItem imageSrc="images-landing/Footer/Discord.png" itemText="Discord" itemLink="" />
-              <FooterItem imageSrc="images-landing/Footer/Github.png" itemText="Github" itemLink="" />
+            <Box pad={{ vertical: 'medium' }} gap="8px" align="start">
+              <FooterItem
+                imageSrc="images-landing/Footer/Twitter.png"
+                itemText="Twitter"
+                itemLink="https://twitter.com/commonvalue_xyz"
+              />
+              <FooterItem imageSrc="images-landing/Footer/Discord.png" itemText="Discord" soon />
+              <FooterItem imageSrc="images-landing/Footer/Github.png" itemText="Github" soon />
             </Box>
           </Box>
           {/* Resources box */}
           <Box>
             <AppHeading size="28px">Resources</AppHeading>
-            <Box pad={{ vertical: 'medium' }} gap="18px">
-              <FooterItem imageSrc="" itemText="Docs" itemLink="" />
-              <FooterItem imageSrc="" itemText="Blog" itemLink="" />
+            <Box pad={{ vertical: 'medium' }} gap="8px" align="start">
+              <FooterItem imageSrc="" itemText="Blog" itemLink="https://mirror.xyz/commonvalue.eth" />
             </Box>
           </Box>
         </Box>

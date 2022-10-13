@@ -294,7 +294,11 @@ export class CampaignService {
         await this.campaignRepo.setPublished(uri, true, this.timeService.now());
       } else {
         appLogger.debug(
-          `publishCampaign skipped, merkle root not new: ${rootDetails.root}`
+          `publishCampaign skipped, merkle root not new. 
+          new root: ${rootDetails.root}, 
+          approvedRoot: ${publishInfo.status.approvedRoot}, 
+          pendingRoot: ${publishInfo.status.pendingRoot},
+          window active: ${publishInfo.status.isProposeWindowActive}`
         );
       }
 

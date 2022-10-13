@@ -77,7 +77,7 @@ export const AdvancedCampaignStatus: FC<IAdvancedCampaign> = (props: IAdvancedCa
         ) : (
           <>
             No updates currenly proposed by the oracle. Next update will be done in{' '}
-            {now ? now.prettyDiff(info.nextWindowStarts) : ''}
+            {now ? now.cloneToNow().prettyDiff(info.nextWindowStarts) : ''}
           </>
         )}
       </AppCard>

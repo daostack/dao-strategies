@@ -385,6 +385,7 @@ export class CampaignRepository {
             lte: now,
           },
           OR: [{ executed: false }, { executed: null }],
+          registered: true,
         },
       })
       .then(Boolean);

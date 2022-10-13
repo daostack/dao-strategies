@@ -20,7 +20,11 @@ export const Banner: FC<IBannerProps> = (props: IBannerProps) => {
       justify="center"
       background={constants.lightBackground}>
       Only people with Beta access can create campaigns. Ask to{' '}
-      <a style={{ display: 'inline-block', color: constants.purpleText }} href={bannerLink}>
+      <a
+        style={{ display: 'inline-block', color: constants.purpleText }}
+        href={bannerLink}
+        target="_blank"
+        rel="noreferrer">
         get Beta access
       </a>
     </Box>

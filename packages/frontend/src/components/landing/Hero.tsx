@@ -54,23 +54,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
         align="start"
         justify="start">
         <AppHeading level={1} style={textHeadlineAttributes}>
-          Rewards for
-          <Box style={{ position: 'relative', zIndex: '1' }}>
-            Value
-            <Box
-              style={{
-                zIndex: '0',
-                height: headingStyle.fontSize,
-                width: '250px',
-                background: `url(/images/penbrush.svg) center no-repeat`,
-                backgroundSize: 'cover',
-                position: 'absolute',
-                left: '0px',
-                top: '8px',
-                overflow: 'visible',
-              }}></Box>
-          </Box>
-          Creators
+          Rewards for Value Creators
         </AppHeading>
 
         <AppLabel

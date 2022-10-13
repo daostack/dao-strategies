@@ -2,15 +2,40 @@ import {
   campaignInstance,
   CampaignCreateDetails,
   Typechain,
+  ChainsDetails,
 } from '@dao-strategies/core';
+import { ethers } from 'ethers';
 import { CID } from 'multiformats';
 import { base32 } from 'multiformats/bases/base32';
+import fetch from 'node-fetch';
 
 import { appLogger } from '../../logger';
 import { ChainProviders } from '../../types';
 
 export const ZERO_BYTES32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+const gasStationGasPrice = async (url: string): Promise<string | undefined> => {
+  try {
+    const response = await fetch(url, {
+      method: 'get',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const data = await response.json();
+
+    return ethers.utils
+      .parseUnits(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        Math.ceil(data.fast.maxFee as number).toString(),
+        'gwei'
+      )
+      .toString();
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 export class SendTransactionService {
   readonly campaignFactory: Typechain.CampaignFactory;
@@ -67,6 +92,29 @@ export class SendTransactionService {
     /* eslint-enable */
   }
 
+  async getGasPrice(chainId: number): Promise<string> {
+    const chain = ChainsDetails.chainOfId(chainId);
+    if (!chain) {
+      return Promise.resolve(ethers.utils.parseUnits('4', 'gwei').toString());
+    }
+
+    const price = await (async (): Promise<string> => {
+      switch (chainId) {
+        case 1337:
+        case 5:
+          return ethers.utils.parseUnits('4', 'gwei').toString();
+
+        case 137:
+          const price = await gasStationGasPrice(
+            'https://gasstation-mainnet.matic.network/v2'
+          );
+          return price;
+      }
+    })();
+
+    return price;
+  }
+
   async publishShares(
     address: string,
     chainId: number,
@@ -94,7 +142,8 @@ export class SendTransactionService {
           chainId: ${chainId}, 
           signer: ${signerAddress}`
       );
-      const tx = await campaign.proposeShares(root, ZERO_BYTES32);
+      const gasPrice = await this.getGasPrice(chainId);
+      const tx = await campaign.proposeShares(root, ZERO_BYTES32, { gasPrice });
       const rec = await tx.wait();
 
       appLogger.info(
