@@ -56,7 +56,8 @@ export const LandingCampaigns: FC<BoxExtendedProps> = (props: BoxExtendedProps) 
       </Box>
 
       {/* Create new campaign box */}
-      <Box direction="row" justify="center" style={{ marginTop: '4vw', gap: '20px' }}>
+      <Box style={{ width: '100%', height: '8vw', maxHeight: '50px' }}></Box>
+      <Box direction="row" justify="center" style={{ gap: '20px' }}>
         <AppButton
           style={{ color: styleConstants.colors.primary }}
           onClick={() => navigate(RouteNames.Campaigns)}
