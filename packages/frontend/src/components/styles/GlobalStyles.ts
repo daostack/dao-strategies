@@ -53,4 +53,15 @@ export const GlobalStyles = createGlobalStyle`
   input[type=number] {
     -moz-appearance: textfield;
   }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar-chrome::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar-firefox {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+} 
 `;

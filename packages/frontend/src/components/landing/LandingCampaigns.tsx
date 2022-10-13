@@ -21,7 +21,7 @@ export const LandingCampaigns: FC<BoxExtendedProps> = (props: BoxExtendedProps) 
     if (isLoading) return <Spinner></Spinner>;
     if (!campaigns || campaigns.length === 0) return <AppCallout>No Campaigns Found</AppCallout>;
 
-    const exploreCampaignCards = (props?: BoxExtendedProps, compact: boolean = true): any => {
+    const exploreCampaignCards = (extraStyling?: React.CSSProperties, compact: boolean = true): any => {
       return campaigns.map((campaign, ix) => {
         return (
           <CampaignCard
@@ -29,17 +29,33 @@ export const LandingCampaigns: FC<BoxExtendedProps> = (props: BoxExtendedProps) 
             onClick={() => campaignClicked(campaign.address)}
             compact={compact}
             campaign={campaign}
-            style={{ float: 'left', margin: '1vw 1vw 1vw 0vw', ...props?.style }}></CampaignCard>
+            style={{ float: 'left', margin: '1vw 1vw 1vw 0vw', ...extraStyling }}></CampaignCard>
         );
       });
     };
     const campaignsOnMobile = (
       <>
-        <Carousel fill>{exploreCampaignCards({ width: '100vw', height: 'auto' }, false)}</Carousel>
+        <Box
+          direction="row"
+          className="hide-scrollbar-chrome hide-scrollbar-firefox"
+          style={{
+            padding: '0',
+            scrollbarWidth: 'none',
+            overflowX: 'scroll',
+            justifyItems: 'center',
+            alignItems: 'center',
+            maxWidth: '95vw',
+          }}
+          fill>
+          {exploreCampaignCards({ flexShrink: '0', width: '100vw', height: 'auto' }, false)}
+        </Box>
       </>
     );
     return (
-      <div style={{ padding: '0vw 0vw 0vw 0vw' }}>
+      <div
+        style={{
+          padding: '0',
+        }}>
         {size.includes('small') ? <>{campaignsOnMobile}</> : <>{exploreCampaignCards()}</>}
       </div>
     );
