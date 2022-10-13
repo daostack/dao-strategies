@@ -578,7 +578,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             required
             help="The campaign funds will be controlled by a contract deployed on this network."></FieldLabel>
         }
-        style={{ marginBottom: '40px' }}>
+        style={{ marginBottom: '40px', marginTop: '20px' }}>
         <AppSelect name="chainName" options={chainOptions}></AppSelect>
       </AppFormField>
 
@@ -972,7 +972,10 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             <></>
           )}
 
-          <Box style={{ width: '100%', overflow: 'hidden', maxWidth: '380px' }} direction="row" justify="center">
+          <Box
+            style={{ width: '100%', maxWidth: '380px', ...useResponsiveForMobileOnly({ overflow: 'hidden' }) }}
+            direction="row"
+            justify="center">
             <FormProgress
               stations={[{ description: 'Basic Info' }, { description: 'Configuration' }, { description: 'Preview' }]}
               position={pageIx}
