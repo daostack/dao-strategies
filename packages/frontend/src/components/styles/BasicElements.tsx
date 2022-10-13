@@ -650,7 +650,7 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
 
   return (
     <Layer {...props} style={{ ...props.style }} position="right" onEsc={() => close()} onClickOutside={() => close()}>
-      <Box style={{ paddingTop: '5vh', height: '100vh', width: '550px', flexShrink: '0' }}>
+      <Box style={{ paddingTop: '5vh', height: '100vh', width: 'auto', flexShrink: '0' }}>
         <Box style={{ padding: '0 2.5vw', flexShrink: '0' }}>
           <Box
             direction="row"
