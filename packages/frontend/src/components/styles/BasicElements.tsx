@@ -26,6 +26,7 @@ import {
   AccordionPanel,
   AccordionPanelExtendedProps,
   AccordionExtendedProps,
+  ResponsiveContext,
 } from 'grommet';
 import {
   CircleQuestion,
@@ -648,9 +649,12 @@ export const AppModal: FC<IAppModal> = (props: IAppModal) => {
     if (props.onClosed) props.onClosed();
   };
 
+  const size = React.useContext(ResponsiveContext);
+  const mobile = size.includes('small');
+
   return (
     <Layer {...props} style={{ ...props.style }} position="right" onEsc={() => close()} onClickOutside={() => close()}>
-      <Box style={{ paddingTop: '5vh', height: '100vh', width: 'auto', flexShrink: '0' }}>
+      <Box style={{ paddingTop: '5vh', height: '100vh', width: mobile ? 'auto' : '550px', flexShrink: '0' }}>
         <Box style={{ padding: '0 2.5vw', flexShrink: '0' }}>
           <Box
             direction="row"

@@ -12,6 +12,7 @@ import {
   CampaignIcon,
   ExpansibleCard,
   ExpansiveParagraph,
+  HorizontalLine,
   InfoProperty,
   RepoTag,
 } from '../../components/styles/BasicElements';
@@ -20,13 +21,12 @@ import { useCampaignContext } from '../../hooks/useCampaign';
 import { FundCampaign } from '../../components/FundCampaign';
 import { DateManager } from '../../utils/date.manager';
 import { HEADER_HEIGHT, MAX_WIDTH } from '../AppHeader';
-import { CampaignAreas, CampaignGrid } from './CampaignGrid';
 import { Address } from '../../components/Address';
 import { BalanceCard } from './BalanceCard';
 import { ClaimCard } from '../../components/ClaimRewards';
 import { useLoggedUser } from '../../hooks/useLoggedUser';
 import { FundersTable } from '../../components/FundersTable';
-import { FixedAdmin } from './fixed.admin';
+import { Admin } from './fixed.admin';
 import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
@@ -34,6 +34,7 @@ import { CampaignStatus } from '../../components/CampaignStatus';
 import { RouteNames } from '../MainPage';
 import { FIRST_PAGE, reactionConfigOptions } from '../campaign.support';
 import { TwoColumns } from '../../components/landing/TwoColumns';
+import { Footer } from '../../components/landing/Footer';
 
 /** constants to deduce the size of the fixed-size admin control button */
 export const CAMPAIGN_PAD_SIDES = 5;
@@ -71,6 +72,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   let colRef = useRef<HTMLDivElement>(null);
 
   const size = React.useContext(ResponsiveContext);
+  const mobile = size.includes('small');
 
   // called everytime the DOM element changes
   const fundCardRefUpdated = (ref: React.RefObject<HTMLDivElement>): void => {
@@ -214,8 +216,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const fundersTable = (
-    <AppCard style={{ padding: '12px 12px', marginTop: '52px' }} showReload onReload={() => getFunders()}>
-      <Box direction="row" justify="start">
+    <AppCard style={{ marginTop: '40px', padding: '24px 24px' }} showReload onReload={() => getFunders()}>
+      <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Funders
         </AppHeading>
@@ -261,21 +263,36 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const claim = <ClaimCard style={{ marginTop: '40px' }} campaignAddress={campaign.address}></ClaimCard>;
-  const guardian = <FixedAdmin btnWidth={colWidth} address={campaign.address}></FixedAdmin>;
+  const guardian = <Admin btnWidth={colWidth} address={campaign.address} fixed={!mobile}></Admin>;
 
-  const left = (
+  const left = mobile ? (
     <>
       {details}
       {info}
-      {size.includes('small') ? <Box margin={{ top: '24px' }}>{funds}</Box> : <></>}
+      <Box style={{ marginTop: mobile ? '40px' : '0px' }}>{funds}</Box>
+      {user !== undefined ? claim : <></>}
+      {contributors_table}
+      <Box style={{ marginBottom: mobile ? '40px' : '0px' }}>{fundersTable}</Box>
+      {guardian}
+    </>
+  ) : (
+    <>
+      {details}
+      {info}
       {contributors_table}
       {fundersTable}
+    </>
+  );
+
+  const right = mobile ? (
+    <></>
+  ) : (
+    <>
+      {funds}
       {user !== undefined ? claim : <></>}
       {guardian}
     </>
   );
-
-  const right = <> {!size.includes('small') ? funds : <></>}</>;
 
   return (
     <Box
@@ -297,12 +314,14 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           maxWidth: `${MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
-        <TwoColumns gap="20px" widths={['70%', '30%']} style={{ alignItems: 'baseline' }}>
+        <TwoColumns gap="20px" widths={['70%', '30%']} style={{ alignItems: 'start' }}>
           <Box>{left}</Box>
           <Box align="center" justify="center">
             {right}
           </Box>
         </TwoColumns>
+        <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
+        <Footer></Footer>;
       </Box>
     </Box>
   );

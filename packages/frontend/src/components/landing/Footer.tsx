@@ -58,18 +58,18 @@ export const Footer: FC<IFooter> = (props: IFooter) => {
         </Box>
 
         {/* Follow us and Resources */}
-        <Box align="center" justify="center" direction="row" gap="10vw">
+        <Box align="start" justify="center" direction="row" gap="10vw">
           {/* Follow us box */}
           <Box>
             <AppHeading size="28px">Follow Us</AppHeading>
             <Box pad={{ vertical: 'medium' }} gap="8px" align="start">
               <FooterItem
-                imageSrc="images-landing/Footer/Twitter.png"
+                imageSrc="/images-landing/Footer/Twitter.png"
                 itemText="Twitter"
                 itemLink="https://twitter.com/commonvalue_xyz"
               />
-              <FooterItem imageSrc="images-landing/Footer/Discord.png" itemText="Discord" soon />
-              <FooterItem imageSrc="images-landing/Footer/Github.png" itemText="Github" soon />
+              <FooterItem imageSrc="/images-landing/Footer/Discord.png" itemText="Discord" soon />
+              <FooterItem imageSrc="/images-landing/Footer/Github.png" itemText="Github" soon />
             </Box>
           </Box>
           {/* Resources box */}

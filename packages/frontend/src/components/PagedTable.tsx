@@ -146,7 +146,7 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
                 border: '1px solid',
                 borderColor: styleConstants.colors.lightGrayBorder,
                 borderRadius: '20px',
-                height: '40px',
+                minHeight: '40px',
                 marginBottom: '16px',
                 padding: '10px 16px',
                 backgroundColor: rowColor,
@@ -164,7 +164,7 @@ export const PagedTable: FC<PagedTableI> = (props: PagedTableI) => {
                         key={`${rowIx}-${colIx}`}
                         direction="row"
                         justify={column.align || 'center'}
-                        style={{ width: props.columns[colIx].width, userSelect: 'text' }}>
+                        style={{ width: props.columns[colIx].width, userSelect: 'text', overflow: 'hidden' }}>
                         {props.rows ? props.rows(rowIx, colIx) : <></>}
                       </Box>
                     ) : (
