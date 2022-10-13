@@ -4,6 +4,7 @@ import { FC } from 'react';
 import { constants } from './constants';
 
 import { AppHeading, AppLabel, IElement } from '../styles/BasicElements';
+import { useResponsiveTextSize } from '../../hooks/useResponsiveTextSize';
 
 interface IBoxProps extends BoxExtendedProps {
   iconPath: string;
@@ -11,6 +12,8 @@ interface IBoxProps extends BoxExtendedProps {
 }
 
 const Platform: FC<IBoxProps> = (props: IBoxProps) => {
+  const responsiveTextSize = useResponsiveTextSize({ initialLargeTextSize: 20 });
+
   return (
     <Box style={{ ...props.style, padding: '16px 16px' }}>
       <Box
@@ -26,7 +29,15 @@ const Platform: FC<IBoxProps> = (props: IBoxProps) => {
         <Box>
           <img style={{ height: '32px', width: '32px' }} src={props.iconPath} alt="logo"></img>
         </Box>
-        <AppLabel style={{ marginLeft: '8px' }}>{props.name}</AppLabel>
+        <AppLabel
+          style={{
+            textTransform: 'inherit',
+            marginLeft: '8px',
+            fontSize: responsiveTextSize,
+            color: constants.blackText,
+          }}>
+          {props.name}
+        </AppLabel>
       </Box>
     </Box>
   );
@@ -34,7 +45,6 @@ const Platform: FC<IBoxProps> = (props: IBoxProps) => {
 
 export const ComingNext: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
   const size = React.useContext(ResponsiveContext);
-
   const boxStyle = ((size: string): React.CSSProperties => {
     switch (size) {
       case 'xsmall':
@@ -59,18 +69,20 @@ export const ComingNext: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
         };
     }
   })(size);
+  const responsiveTextSize = useResponsiveTextSize({ initialLargeTextSize: 40 });
 
   return (
     <Box
       style={{
         width: '100%',
+        padding: '1vw',
         backgroundColor: constants.lightBackground,
         ...props.style,
       }}
       align="center">
-      <Box alignSelf="start" style={{ marginBottom: '36px' }}>
-        <AppHeading size="28px">
-          -Coming Soon- <span style={{ color: constants.lightGray }}>New Integrations</span>
+      <Box alignSelf="start" style={{ marginLeft: '12px', marginBottom: '36px' }}>
+        <AppHeading size={responsiveTextSize}>
+          -Coming Soon- <span style={{ color: constants.comingSoonGrayText }}>New Integrations</span>
         </AppHeading>
       </Box>
       <Box
