@@ -35,7 +35,7 @@ export const LandingCampaigns: FC<BoxExtendedProps> = (props: BoxExtendedProps) 
         direction="row"
         style={{
           overflowX: 'scroll',
-          maxWidth: '95vw',
+          maxWidth: '90vw',
         }}
         fill>
         {campaigns.map((campaign, ix) => {
