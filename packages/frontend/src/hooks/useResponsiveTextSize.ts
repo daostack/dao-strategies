@@ -26,3 +26,9 @@ export const useResponsiveTextSize = ({initialLargeTextSize, ownConfig}: useResp
 
   return `${currentTextsize?.fontSize || initialLargeTextSize}px`;
 };
+
+export const useResponsiveForMobileOnly = (attr: React.CSSProperties): React.CSSProperties | undefined => {
+  const size = React.useContext(ResponsiveContext);
+  if(size.includes('small')) return attr
+  else return undefined
+};

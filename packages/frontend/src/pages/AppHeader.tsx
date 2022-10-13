@@ -85,12 +85,9 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
         height: `${HEADER_HEIGHT}px`,
       }}
       direction="row"
-      justify="center">
-      <Box
-        style={{ width: '100%', padding: '0px 32px', maxWidth: `${MAX_WIDTH}px` }}
-        direction="row"
-        justify="between"
-        align="center">
+      justify="center"
+      align="baseline">
+      <Box style={{ width: '100%', padding: '0px 32px', maxWidth: `${MAX_WIDTH}px` }} direction="row" justify="between">
         {left}
         {right}
       </Box>
