@@ -136,7 +136,10 @@ export const HowItWorks: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
 
           <Box alignSelf="center" style={{ marginBottom: '36px', padding: '6vw 0' }}>
             <AppLabel style={{ textAlign: 'center' }}>Creating a campaign</AppLabel>
-            <AppHeading size="64px" style={{ marginTop: '20px', fontFamily: styleConstants.font.secondary }}>
+            <AppHeading
+              size="64px"
+              textAlign="center"
+              style={{ marginTop: '20px', fontFamily: styleConstants.font.secondary }}>
               How it works
             </AppHeading>
           </Box>

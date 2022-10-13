@@ -12,5 +12,6 @@ export const constants = {
   lightBorder: '#323232',
   lightGrayBackground: '#F3F3F3',
   blackText: '#0E0F19',
-  purpleText: '#5762D5'
+  purpleText: '#5762D5',
+  comingSoonGrayText: '#878787'
 };
