@@ -24,5 +24,5 @@ export const useResponsiveTextSize = ({initialLargeTextSize, ownConfig}: useResp
     setCurrentTextSize( responsiveTextSizeConfig.get(size) ??  responsiveTextSizeConfig.get('default') )
   }, [size])
 
-  return `${currentTextsize?.fontSize}px`;
+  return `${currentTextsize?.fontSize || initialLargeTextSize}px`;
 };
