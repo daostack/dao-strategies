@@ -1,5 +1,6 @@
 import { Box, Layer } from 'grommet';
 import { ReactNode, createContext, useContext, FC, useState } from 'react';
+import { AppModal } from '../components/styles/BasicElements';
 
 export type LoggedUserContextType = {
   showError: (message: string, stack?: any) => void;
@@ -21,12 +22,12 @@ export const ErrorContext: FC<ErrorContextProps> = (props) => {
   };
 
   const errorWindow = hasError ? (
-    <Layer onClickOutside={() => setError(undefined)}>
+    <AppModal heading="Error" onClosed={() => setError(undefined)} position="center">
       <Box pad="medium">
         {error.message}
         {error.forceReload ? <a href="/">reload</a> : <></>}
       </Box>
-    </Layer>
+    </AppModal>
   ) : (
     <></>
   );

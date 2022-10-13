@@ -1,6 +1,5 @@
 import { Box, BoxExtendedProps, ResponsiveContext } from 'grommet';
 import React, { FC, ReactNode } from 'react';
-import { constants } from './constants';
 
 interface ITwoColumns extends BoxExtendedProps {
   mediumIsSmall?: boolean;
