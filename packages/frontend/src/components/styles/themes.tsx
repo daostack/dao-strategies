@@ -61,6 +61,18 @@ const extension: ThemeType = {
         size: styleConstants.textFontSizes.small,
       },
     },
+    breakpoints: {
+      xsmall: {
+        value: 700,
+      },
+      small: {
+        value: 900,
+      },
+      medium: {
+        value: 1400,
+      },
+      large: {},
+    },
   },
   heading: {
     color: styleConstants.colors.headingDark,

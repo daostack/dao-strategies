@@ -70,7 +70,7 @@ export const AppTag: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
 
 export const AppHeading: FC<HeadingExtendedProps> = (props: HeadingExtendedProps) => {
   return (
-    <Heading {...props} weight="700" margin="none">
+    <Heading {...props} style={{ lineHeight: '125%', ...props.style }} weight="700" margin="none">
       {props.children}
     </Heading>
   );
