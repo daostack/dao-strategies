@@ -62,13 +62,17 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
         <Moon style={{ marginLeft: '6px' }}></Moon>
       </Box> */}
       {location.pathname === RouteNames.Campaigns ? (
-        <AppButton
-          onClick={() => navigate(RouteNames.Create)}
-          icon={<Add></Add>}
-          style={{ marginRight: '16px' }}
-          _type="slim"
-          label="Create"
-        />
+        <>
+          {!size.includes('small') && (
+            <AppButton
+              onClick={() => navigate(RouteNames.Create)}
+              icon={<Add></Add>}
+              style={{ marginRight: '16px' }}
+              _type="slim"
+              label="Create"
+            />
+          )}
+        </>
       ) : (
         <></>
       )}
