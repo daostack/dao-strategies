@@ -29,8 +29,8 @@ export const Admin: FC<IAdmin> = (props: IAdmin) => {
       style={{
         fontSize: styleConstants.textFontSizes.small,
         minHeight: 'auto',
-        width: `${props.btnWidth}px`,
-        position: fixed ? 'fixed' : 'unset',
+        width: fixed ? `${props.btnWidth}px` : 'auto',
+        position: fixed ? 'fixed' : 'inherit',
         bottom: '36px',
       }}>
       <CircleIcon

@@ -321,7 +321,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           </Box>
         </TwoColumns>
         <HorizontalLine style={{ margin: '40px 0px' }}></HorizontalLine>
-        <Footer></Footer>;
+        <Footer></Footer>
       </Box>
     </Box>
   );
