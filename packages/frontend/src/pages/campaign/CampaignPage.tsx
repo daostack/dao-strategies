@@ -199,7 +199,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const contributors_table = (
-    <AppCard style={{ marginTop: '52px', padding: '24px 24px' }} showReload onReload={() => getShares()}>
+    <AppCard
+      style={{ marginTop: '52px', padding: '24px 24px', width: mobile ? '90vw' : 'auto' }}
+      showReload
+      onReload={() => getShares()}>
       <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Contributors board
