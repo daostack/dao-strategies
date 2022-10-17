@@ -72,6 +72,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   let colRef = useRef<HTMLDivElement>(null);
 
   const size = React.useContext(ResponsiveContext);
+  console.log({ size });
   const mobile = size.includes('small');
 
   // called everytime the DOM element changes
@@ -199,7 +200,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const contributors_table = (
-    <AppCard style={{ marginTop: '52px', padding: '24px 24px' }} showReload onReload={() => getShares()}>
+    <AppCard
+      style={{ marginTop: '52px', padding: '24px 24px', width: mobile ? '90vw' : 'auto' }}
+      showReload
+      onReload={() => getShares()}>
       <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Contributors board
@@ -287,11 +291,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const right = mobile ? (
     <></>
   ) : (
-    <>
+    <Box style={{ width: '100%', padding: '0vw 40px' }}>
       {funds}
       {user !== undefined ? claim : <></>}
       {guardian}
-    </>
+    </Box>
   );
 
   return (
@@ -314,7 +318,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           maxWidth: `${MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
-        <TwoColumns gap="20px" widths={['70%', '30%']} style={{ alignItems: 'start' }}>
+        <TwoColumns
+          gap="20px"
+          widths={size === 'medium' ? ['60%', '40%'] : ['67%', '33%']}
+          style={{ alignItems: 'start' }}>
           <Box>{left}</Box>
           <Box align="center" justify="center">
             {right}
