@@ -311,7 +311,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
 
       <Box
         style={{
-          maxWidth: `${MAX_WIDTH}px`,
+          maxWidth: mobile ? '90vw' : `${MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
         <TwoColumns gap="20px" widths={['70%', '30%']} style={{ alignItems: 'start' }}>
