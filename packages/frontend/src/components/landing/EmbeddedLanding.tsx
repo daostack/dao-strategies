@@ -10,6 +10,7 @@ import { Box } from 'grommet';
 import { HEADER_HEIGHT } from '../../pages/AppHeader';
 import { LandingCampaigns } from './LandingCampaigns';
 import { constants } from './constants';
+import { NotificationModal } from './NotificationModal';
 
 interface IEmbeddedLanding {}
 
@@ -20,6 +21,7 @@ export const EmbeddedLanding: FC<IEmbeddedLanding> = (props: IEmbeddedLanding) =
     <Box style={{}} align="center">
       <Box style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, margin: `${HEADER_HEIGHT}px 0 0 `, padding: '0px 5vw' }}>
         <Banner bannerLink="https://t.me/+a0mIY6gHOG00OGU0" style={{ marginTop: '32px' }}></Banner>
+        <NotificationModal />
         <Box style={{ height: '10vw', maxHeight: '150px' }}></Box>
         <Hero style={{}}></Hero>
         <Box style={{ height: '15vw', maxHeight: '200px' }}></Box>

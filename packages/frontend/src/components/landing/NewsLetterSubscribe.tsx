@@ -1,6 +1,8 @@
 import { Box, Form, BoxExtendedProps } from 'grommet';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
+import eventBus from '../../utils/eventBus';
 import { AppButton, AppFormField, AppInput, AppTextArea } from '../styles/BasicElements';
+import { INotificationModal } from './NotificationModal';
 
 /** manually extracted from form, using this tutorial https://dev.to/utkarshdhiman48/custom-frontend-for-google-form-456l */
 const url = 'https://docs.google.com/forms/d/e/1FAIpQLSf0BBhMH635A4MzCijnWscDDxC0s6XYMuu47nesMBA7LWMqNQ/formResponse';
@@ -41,6 +43,18 @@ export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletter
       .catch((err) => setError(true));
   };
 
+  /* if submit was successful, send an event to show the NotificationModal */
+  useEffect(() => {
+    if (submitted) {
+      eventBus.dispatch('showNotification', {
+        title: 'Request Sent!',
+        description: 'Thank you for showing interest, we will notify you when you have access',
+        icon: '/images-landing/Success.png',
+        showDuration: 3000,
+      } as INotificationModal);
+    }
+  }, [submitted]);
+
   const disabled = values.email === undefined || values.email === '';
 
   return (
@@ -61,13 +75,8 @@ export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletter
           placeholder="Why do you want to get beta access"
           autoResize={false}></AppTextArea>
       </AppFormField>
-      {error ? (
-        <Box style={{ color: '#ac2525' }}>Sorry, there was an error submitting your response.</Box>
-      ) : submitted ? (
-        <Box>🙂 Thank you for showing interest, we will reach out to you! </Box>
-      ) : (
-        <AppButton style={{ width: '100%' }} disabled={disabled} primary type="submit" label="Get Beta Access 🚀" />
-      )}
+      {error && <Box style={{ color: '#ac2525' }}>Sorry, there was an error submitting your response.</Box>}
+      <AppButton style={{ width: '100%' }} disabled={disabled} primary type="submit" label="Get Beta Access 🚀" />
     </Form>
   );
 };
