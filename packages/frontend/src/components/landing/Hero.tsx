@@ -5,7 +5,6 @@ import { styleConstants } from '../styles/themes';
 import { NewsletterSubscribe } from './NewsLetterSubscribe';
 import { constants } from './constants';
 import { TwoColumns } from './TwoColumns';
-import { NotificationModal } from './NotificationModal';
 
 interface IHero extends BoxExtendedProps {}
 
