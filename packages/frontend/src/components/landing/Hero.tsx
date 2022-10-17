@@ -5,6 +5,7 @@ import { styleConstants } from '../styles/themes';
 import { NewsletterSubscribe } from './NewsLetterSubscribe';
 import { constants } from './constants';
 import { TwoColumns } from './TwoColumns';
+import { NotificationModal } from './NotificationModal';
 
 interface IHero extends BoxExtendedProps {}
 
@@ -41,12 +42,11 @@ export const Hero: FC<IHero> = (props: IHero) => {
   })();
 
   const textHeadlineAttributes = Object.assign(
-    { textAlign: 'start', fontFamily: styleConstants.font.secondary, fontWeight: '700', wordBreak: 'break-world' },
+    { textAlign: 'start', fontFamily: styleConstants.font.secondary, fontWeight: '700', wordBreak: 'break-word' },
     headingStyle
   );
-
-  return (
-    <TwoColumns style={{ ...props.style }}>
+  const leftLayoutDependingOnSize = (isLarge: boolean) => {
+    return (
       <Box
         style={{
           color: constants.lightGray,
@@ -54,7 +54,24 @@ export const Hero: FC<IHero> = (props: IHero) => {
         align="start"
         justify="start">
         <AppHeading level={1} style={textHeadlineAttributes}>
-          Rewards for Value Creators
+          Rewards for{' '}
+          <span style={{ position: 'relative', zIndex: '1' }}>
+            Value
+            <span
+              style={{
+                zIndex: '-1',
+                height: headingStyle.fontSize,
+                width: size.includes('small') ? '200px' : '17vw',
+                background: `url(/images/penbrush.svg) center no-repeat`,
+                backgroundSize: 'fit',
+                position: 'absolute',
+                left: '0px',
+                top: '8px',
+                overflow: 'visible',
+              }}></span>{' '}
+            {isLarge && <br />}
+          </span>
+          Creators
         </AppHeading>
 
         <AppLabel
@@ -73,6 +90,11 @@ export const Hero: FC<IHero> = (props: IHero) => {
           rewards
         </AppLabel>
       </Box>
+    );
+  };
+
+  const rightLayoutDependingOnSize = (isLarge: boolean) => {
+    return (
       <AppCard
         style={{
           margin: '5vw 2vw',
@@ -80,11 +102,32 @@ export const Hero: FC<IHero> = (props: IHero) => {
           width: size.includes('small') ? '100%' : '80%',
           boxShadow: '0px 40.64px 54.56px rgba(14, 15, 25, 0.1)',
           borderRadius: '20px',
+          maxWidth: '350px',
+          ...(isLarge && { position: 'absolute', right: 0, transform: 'translate(75%, 30%)' }),
         }}
         justify="center"
         align="center">
         <NewsletterSubscribe />
       </AppCard>
-    </TwoColumns>
+    );
+  };
+
+  return (
+    <>
+      {size.includes('large') ? (
+        <Box style={{ position: 'relative' }}>
+          {leftLayoutDependingOnSize(true)}
+          {rightLayoutDependingOnSize(true)}
+        </Box>
+      ) : (
+        <>
+          {' '}
+          <TwoColumns style={{ ...props.style }}>
+            {leftLayoutDependingOnSize(false)}
+            {rightLayoutDependingOnSize(false)}
+          </TwoColumns>
+        </>
+      )}{' '}
+    </>
   );
 };
