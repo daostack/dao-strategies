@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 import { SetUsApart } from './Apart';
 import { ComingNext } from './ComingNext';
 
@@ -6,19 +6,27 @@ import { HowItWorks } from './HowItWorks';
 import { Footer } from './Footer';
 import { Hero } from './Hero';
 import { Banner } from './Banner';
-import { Box } from 'grommet';
+import { Box, ResponsiveContext } from 'grommet';
 import { HEADER_HEIGHT } from '../../pages/AppHeader';
 import { LandingCampaigns } from './LandingCampaigns';
 import { constants } from './constants';
+import { useMainContext } from '../../pages/MainPage';
 
 interface IEmbeddedLanding {}
 
 export const MAX_WIDTH_LANDING = 1600;
 
 export const EmbeddedLanding: FC<IEmbeddedLanding> = (props: IEmbeddedLanding) => {
+  const { mobile } = useMainContext();
+
   return (
-    <Box style={{}} align="center">
-      <Box style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, margin: `${HEADER_HEIGHT}px 0 0 `, padding: '0px 5vw' }}>
+    <Box>
+      <Box
+        style={{
+          maxWidth: `${MAX_WIDTH_LANDING}px`,
+          margin: `${HEADER_HEIGHT}px ${mobile ? '5vw' : '10vw'} 0 `,
+          padding: '0px 5vw',
+        }}>
         <Banner bannerLink="https://t.me/+a0mIY6gHOG00OGU0" style={{ marginTop: '32px' }}></Banner>
         <Box style={{ height: '10vw', maxHeight: '150px' }}></Box>
         <Hero style={{}}></Hero>

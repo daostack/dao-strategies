@@ -67,7 +67,7 @@ export const MainPage: FC = () => {
         });
         return found ? found[1] : {};
       } else {
-        // deafult will only return the style on mobile
+        // default will only return the style on mobile
         return mobile ? config : {};
       }
     },
@@ -94,6 +94,6 @@ export const MainPage: FC = () => {
 
 export function useMainContext(): MainPageContextType {
   const context = useContext(MainContext);
-  if (!context) throw Error('useWeb3React can only be used within the Web3ReactProvider component');
+  if (!context) throw Error('useMainContext can only be used within the MainPageProvider component');
   return context;
 }
