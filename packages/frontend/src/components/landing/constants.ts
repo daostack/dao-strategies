@@ -5,7 +5,7 @@ export const constants = {
   darkText: '#000',
   lineheighText: '225%',
   lightBackground: '#ffffff',
-  lightGray: '#F3F3F3', 
+  lightGray: '#F3F3F3',
   subParagraphGray: '#575757',
   smallTextGray: '#9C9C9C',
   lightGreen: '#4BA664',
@@ -13,5 +13,7 @@ export const constants = {
   lightGrayBackground: '#F3F3F3',
   blackText: '#0E0F19',
   purpleText: '#5762D5',
-  comingSoonGrayText: '#878787'
+  comingSoonGrayText: '#878787',
+  headingSize: '40px',
+  mediumSize: '20px',
 };

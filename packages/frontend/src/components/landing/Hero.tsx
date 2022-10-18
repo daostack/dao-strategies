@@ -5,46 +5,26 @@ import { styleConstants } from '../styles/themes';
 import { NewsletterSubscribe } from './NewsLetterSubscribe';
 import { constants } from './constants';
 import { TwoColumns } from './TwoColumns';
+import { useMainContext } from '../../pages/MainPage';
 
 interface IHero extends BoxExtendedProps {}
 
 export const Hero: FC<IHero> = (props: IHero) => {
+  const { mobile, responsiveStyle, scaleText } = useMainContext();
   const size = useContext(ResponsiveContext);
 
-  const headingStyle = ((): CSSProperties => {
-    switch (size) {
-      case 'xsmall':
-      case 'small':
-        return {
-          fontSize: '70px',
-          lineHeight: '110%',
-        };
-
-      case 'medium':
-        return {
-          fontSize: '80px',
-          lineHeight: '110%',
-        };
-
-      case 'large':
-        return {
-          fontSize: '100px',
-          lineHeight: '110%',
-        };
-
-      default:
-        return {
-          fontSize: '90px',
-          lineHeight: '110%',
-        };
-    }
-  })();
-
+  const headingStyle = responsiveStyle([
+    [['xsmall', 'small'], { fontSize: '70px', lineHeight: '110%' }],
+    [['medium'], { fontSize: '80px', lineHeight: '110%' }],
+    [['large'], { fontSize: '100px', lineHeight: '110%' }],
+    [['default'], { fontSize: '90px', lineHeight: '110%' }],
+  ]);
+  const textSize = scaleText(constants.mediumSize);
   const textHeadlineAttributes = Object.assign(
     { textAlign: 'start', fontFamily: styleConstants.font.secondary, fontWeight: '700', wordBreak: 'break-word' },
     headingStyle
   );
-  const leftLayoutDependingOnSize = (isLarge: boolean) => {
+  const leftLayoutDependingOnSize = () => {
     return (
       <Box
         style={{
@@ -59,13 +39,13 @@ export const Hero: FC<IHero> = (props: IHero) => {
             <span
               style={{
                 zIndex: '-1',
-                height: '12vh',
-                width: '20rem',
+                height: '100%',
+                width: mobile ? '15rem' : '135%',
                 background: `url(/images/penbrush.png) center no-repeat`,
                 backgroundSize: 'contain',
                 position: 'absolute',
-                left: '-.5vw',
-                top: '.8vw',
+                left: '-1vw',
+                top: mobile ? '0px' : '3%',
                 overflow: 'visible',
               }}></span>{' '}
             <br />
@@ -98,11 +78,11 @@ export const Hero: FC<IHero> = (props: IHero) => {
         style={{
           margin: '5vw 2vw',
           height: '300px',
-          width: size.includes('small') ? '100%' : '80%',
+          width: mobile ? '100%' : '80%',
           boxShadow: '0px 40.64px 54.56px rgba(14, 15, 25, 0.1)',
           borderRadius: '20px',
           maxWidth: '450px',
-          ...(isLarge && { position: 'absolute', transform: 'translate(165%, 20%)' }),
+          ...(isLarge && { position: 'absolute', transform: `translate(37vw, 20%)` }),
         }}
         justify="center"
         align="center">
@@ -115,13 +95,13 @@ export const Hero: FC<IHero> = (props: IHero) => {
     <>
       {size.includes('large') ? (
         <Box style={{ position: 'relative' }}>
-          {leftLayoutDependingOnSize(true)}
+          {leftLayoutDependingOnSize()}
           {rightLayoutDependingOnSize(true)}
         </Box>
       ) : (
         <>
           <TwoColumns mediumIsSmall style={{ ...props.style }}>
-            {leftLayoutDependingOnSize(false)}
+            {leftLayoutDependingOnSize()}
             {rightLayoutDependingOnSize(false)}
           </TwoColumns>
         </>

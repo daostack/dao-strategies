@@ -29,21 +29,12 @@ import {
   ResponsiveContext,
   LayerPositionType,
 } from 'grommet';
-import {
-  CircleQuestion,
-  Clone,
-  Close,
-  FormDown,
-  FormUp,
-  IconProps,
-  Refresh,
-  StatusGood,
-  Validate,
-} from 'grommet-icons';
+import { CircleQuestion, Clone, Close, FormDown, FormUp, Refresh, StatusGood, Validate } from 'grommet-icons';
 import React, { CSSProperties, FC, ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { GITHUB_DOMAINS } from '../../config/appConfig';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboad';
+import { parseCssUnits } from '../../utils/general';
 import { styleConstants } from './themes';
 
 export interface IElement {
@@ -70,7 +61,7 @@ export const AppTag: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
 
 export const AppHeading: FC<HeadingExtendedProps> = (props: HeadingExtendedProps) => {
   return (
-    <Heading {...props} weight="700" margin="none">
+    <Heading {...props} style={{ lineHeight: '125%', ...props.style }} weight="700" margin="none">
       {props.children}
     </Heading>
   );
@@ -435,15 +426,7 @@ export const HelpTip: FC<IHelpTip> = (props: IHelpTip) => {
   const { content } = props;
 
   const size = props.iconSize || '13.33px';
-  const reg = new RegExp('(\\d+\\s?)(\\w+)');
-  const parts = reg.exec(size);
-
-  if (parts === null) {
-    throw new Error(`size wrong`);
-  }
-
-  const value = +parts[1];
-  const units = parts[2];
+  const [value, units] = parseCssUnits(size);
 
   return (
     <>
@@ -462,12 +445,10 @@ export const HelpTip: FC<IHelpTip> = (props: IHelpTip) => {
 };
 interface IExpansibleCard extends BoxExtendedProps {
   hiddenPart: React.ReactElement | React.ReactElement[];
-  padding?: number[];
 }
 
 export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
   const [expanded, setExpanded] = useState(false);
-  const padding = props.padding ? props.padding : [0, 0, 0, 0];
 
   const circleStyle: React.CSSProperties = {
     borderRadius: '15px',
@@ -486,8 +467,6 @@ export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
       style={{
         ...cardStyle,
         ...props.style,
-        position: 'relative',
-        padding: `${padding[0]}px ${padding[1]}px ${padding[2]}px ${padding[3]}px`,
       }}>
       {props.children}
       {expanded ? props.hiddenPart : <></>}
@@ -498,11 +477,10 @@ export const ExpansibleCard: FC<IExpansibleCard> = (props: IExpansibleCard) => {
         onClick={() => setExpanded(!expanded)}
         style={{
           height: '30px',
-          position: 'absolute',
           paddingTop: '3px',
           bottom: '-15px',
           cursor: 'pointer',
-          width: `calc(100% - ${padding[1]}px - ${padding[3]}px)`,
+          width: `100%`,
         }}>
         {expanded ? (
           <Box align="center" justify="center" style={{ ...circleStyle }}>

@@ -10,20 +10,21 @@ import { Box, ResponsiveContext } from 'grommet';
 import { HEADER_HEIGHT } from '../../pages/AppHeader';
 import { LandingCampaigns } from './LandingCampaigns';
 import { constants } from './constants';
+import { useMainContext } from '../../pages/MainPage';
 
 interface IEmbeddedLanding {}
 
 export const MAX_WIDTH_LANDING = 1600;
 
 export const EmbeddedLanding: FC<IEmbeddedLanding> = (props: IEmbeddedLanding) => {
-  const size = useContext(ResponsiveContext);
+  const { mobile } = useMainContext();
 
   return (
     <Box>
       <Box
         style={{
           maxWidth: `${MAX_WIDTH_LANDING}px`,
-          margin: `${HEADER_HEIGHT}px ${size.includes('small') ? '5vw' : '10vw'} 0 `,
+          margin: `${HEADER_HEIGHT}px ${mobile ? '5vw' : '10vw'} 0 `,
           padding: '0px 5vw',
         }}>
         <Banner bannerLink="https://t.me/+a0mIY6gHOG00OGU0" style={{ marginTop: '32px' }}></Banner>

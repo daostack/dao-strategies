@@ -53,7 +53,7 @@ export const HowItWorksLayoutBox: FC<IBoxProps> = (props: IBoxProps) => {
 
   return (
     <Box style={{ maxWidth: '800px', margin: `${!size.includes('small') ? '0' : '24px'} auto` }}>
-      <TwoColumns widths={flip ? ['60%', '40%'] : ['40%', '60%']}>
+      <TwoColumns widths={flip ? ['60%', '40%'] : ['40%', '60%']} align="center">
         <Box justify="center" align="center">
           {flip ? textBox : imageBox}
         </Box>
