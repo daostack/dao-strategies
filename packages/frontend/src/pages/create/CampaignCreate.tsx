@@ -33,7 +33,7 @@ import {
   oracleAddressMap,
   TELEGRAM_INVITE_LINK,
 } from '../../config/appConfig';
-import { RouteNames } from '../MainPage';
+import { RouteNames, useMainContext } from '../MainPage';
 import {
   AppButton,
   AppCallout,
@@ -74,7 +74,7 @@ import { StrategySelector } from './strategy.selector';
 import { DateManager } from '../../utils/date.manager';
 import { FieldLabel } from './field.label';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { useResponsiveForMobileOnly } from '../../hooks/useResponsiveTextSize';
+
 export interface ICampaignCreateProps {
   dum?: any;
 }
@@ -144,6 +144,7 @@ const DEBUG = false;
 export const CampaignCreate: FC<ICampaignCreateProps> = () => {
   const { account, chain, switchNetwork, connect, user } = useLoggedUser();
   const { showError } = useUserError();
+  const { responsiveStyle } = useMainContext();
 
   const { now, reset: resetNow } = useNowContext();
   const [pageIx, setPageIx] = useState<number>(0);
@@ -672,7 +673,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         </AppFormField>
       </Box>
 
-      <TwoColumns style={useResponsiveForMobileOnly({ justifyContent: 'start', alignItems: 'start' })}>
+      <TwoColumns style={{ justifyContent: 'start', alignItems: 'start' }}>
         <Box>
           <AppFormField
             name="reactionsConfig"
@@ -775,7 +776,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
         <Box
           style={{
             marginBottom: '35px',
-            ...useResponsiveForMobileOnly({ marginTop: '20px', width: '100%', textAlign: 'start' }),
+            ...responsiveStyle({ marginTop: '20px', width: '100%', textAlign: 'start' }),
           }}>
           <AppFormField
             name="livePeriodChoice"
@@ -828,7 +829,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             Basic Info
           </AppHeading>
 
-          <TwoColumns>
+          <TwoColumns gap="40px">
             <Box>
               {' '}
               <Parameter label="Logo">
@@ -864,7 +865,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             Configuration
           </AppHeading>
 
-          <TwoColumns>
+          <TwoColumns gap="40px">
             <Box>
               <Parameter label="Rule-set">
                 <StrategySelector strategy={selectedStrategy}></StrategySelector>
@@ -936,7 +937,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
 
   return (
     <Box justify="start" align="center" style={{ width: '100%' }}>
-      <Box justify="start" align="center" style={{ marginTop: HEADER_HEIGHT, width: '100%' }}>
+      <Box justify="start" align="center" style={{ marginTop: HEADER_HEIGHT, width: '100%', padding: '0px 2vw' }}>
         <AppCard
           style={{
             padding: '48px 36px 88px 64px',
@@ -944,7 +945,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
             width: '100%',
             maxWidth: '800px',
             minHeight: 'calc()',
-            ...useResponsiveForMobileOnly({ padding: '48px 25px 88px 25px' }),
+            ...responsiveStyle({ padding: '48px 25px 88px 25px' }),
           }}>
           {status.isDeploying ? (
             <Layer>
@@ -973,7 +974,7 @@ export const CampaignCreate: FC<ICampaignCreateProps> = () => {
           )}
 
           <Box
-            style={{ width: '100%', maxWidth: '380px', ...useResponsiveForMobileOnly({ overflow: 'hidden' }) }}
+            style={{ width: '100%', maxWidth: '380px', ...responsiveStyle({ overflow: 'hidden' }) }}
             direction="row"
             justify="center">
             <FormProgress

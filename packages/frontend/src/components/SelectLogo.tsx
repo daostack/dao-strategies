@@ -5,11 +5,11 @@ import { Cropper, ReactCropperElement } from 'react-cropper';
 import { CampaignFormValues } from '../pages/create/CampaignCreate';
 import { Buffer } from 'buffer';
 import { Close } from 'grommet-icons';
-import { useResponsiveForMobileOnly } from '../hooks/useResponsiveTextSize';
 
 //helper css
 import 'cropperjs/dist/cropper.css';
 import React from 'react';
+import { useMainContext } from '../pages/MainPage';
 
 export interface SelectLogoI extends IElement {
   onValuesUpdated: (values: CampaignFormValues) => void;
@@ -25,8 +25,9 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
   const [cropper, setCropper] = useState<Cropper>();
   const logoFileInputRef = useRef<HTMLInputElement | null>(null);
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
-  const size = React.useContext(ResponsiveContext);
-  const hiddenOnMobile = useResponsiveForMobileOnly({ display: 'none' });
+  const { mobile, responsiveStyle } = useMainContext();
+
+  const hiddenOnMobile = responsiveStyle({ display: 'none' });
 
   const getCropData = () => {
     if (typeof cropper !== 'undefined') {
@@ -128,7 +129,7 @@ export const SelectLogo: FC<SelectLogoI> = ({ onValuesUpdated, campaignFormValue
           </FormField>
 
           {/* Show Select Logo Button on Mobile, fileinput above will be hidden but needs to be in the dom */}
-          {size.includes('small') && <>{fileInputButtonOnMobile}</>}
+          {mobile && <>{fileInputButtonOnMobile}</>}
         </>
       ) : (
         <>

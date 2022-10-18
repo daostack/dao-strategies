@@ -1,10 +1,9 @@
-import { Box, BoxExtendedProps, ResponsiveContext } from 'grommet';
-import React from 'react';
+import { Box, BoxExtendedProps } from 'grommet';
 import { FC } from 'react';
 import { constants } from './constants';
 
-import { AppHeading, AppLabel, IElement } from '../styles/BasicElements';
-import { useResponsiveTextSize } from '../../hooks/useResponsiveTextSize';
+import { AppHeading, AppLabel } from '../styles/BasicElements';
+import { useMainContext } from '../../pages/MainPage';
 
 interface IBoxProps extends BoxExtendedProps {
   iconPath: string;
@@ -12,7 +11,8 @@ interface IBoxProps extends BoxExtendedProps {
 }
 
 const Platform: FC<IBoxProps> = (props: IBoxProps) => {
-  const responsiveTextSize = useResponsiveTextSize({ initialLargeTextSize: 20 });
+  const { scaleText } = useMainContext();
+  const textSize = scaleText(constants.mediumSize);
 
   return (
     <Box style={{ ...props.style, padding: '16px 16px' }}>
@@ -33,7 +33,7 @@ const Platform: FC<IBoxProps> = (props: IBoxProps) => {
           style={{
             textTransform: 'inherit',
             marginLeft: '8px',
-            fontSize: responsiveTextSize,
+            fontSize: textSize,
             color: constants.blackText,
           }}>
           {props.name}
@@ -44,32 +44,13 @@ const Platform: FC<IBoxProps> = (props: IBoxProps) => {
 };
 
 export const ComingNext: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
-  const size = React.useContext(ResponsiveContext);
-  const boxStyle = ((size: string): React.CSSProperties => {
-    switch (size) {
-      case 'xsmall':
-        return {
-          width: '100%',
-        };
-      case 'small':
-        return {
-          width: '50%',
-        };
-      case 'medium':
-        return {
-          width: '50%',
-        };
-      case 'large':
-        return {
-          width: '25%',
-        };
-      default:
-        return {
-          width: '25%',
-        };
-    }
-  })(size);
-  const responsiveTextSize = useResponsiveTextSize({ initialLargeTextSize: 40 });
+  const { scaleText, responsiveStyle } = useMainContext();
+  const textSize = scaleText(constants.headingSize);
+  const boxStyle = responsiveStyle([
+    ['xsmall', { width: '100%' }],
+    [['small', 'medium'], { width: '50%' }],
+    ['large', { width: '25%' }],
+  ]);
 
   return (
     <Box
@@ -81,7 +62,7 @@ export const ComingNext: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
       }}
       align="center">
       <Box alignSelf="start" style={{ marginLeft: '12px', marginBottom: '36px' }}>
-        <AppHeading size={responsiveTextSize}>
+        <AppHeading size={textSize}>
           -Coming Soon- <span style={{ color: constants.comingSoonGrayText }}>New Integrations</span>
         </AppHeading>
       </Box>

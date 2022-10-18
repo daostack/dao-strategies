@@ -8,7 +8,7 @@ import { AppButton } from '../components/styles/BasicElements';
 import { styleConstants } from '../components/styles/themes';
 import { RouteNames } from './MainPage';
 
-export const HEADER_HEIGHT = 66;
+export const HEADER_HEIGHT = 80;
 export const MAX_WIDTH = 1200;
 
 export interface IMainPageHeaderProps {
@@ -89,7 +89,7 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
       }}
       direction="row"
       justify="center"
-      align="baseline">
+      align="center">
       <Box style={{ width: '100%', padding: '0px 32px', maxWidth: `${MAX_WIDTH}px` }} direction="row" justify="between">
         {left}
         {right}

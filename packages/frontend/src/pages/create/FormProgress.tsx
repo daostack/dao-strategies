@@ -1,8 +1,8 @@
 import { Box, BoxExtendedProps } from 'grommet';
 import { FC } from 'react';
 
-import { styleConstants, theme } from '../../components/styles/themes';
-import { useResponsiveForMobileOnly } from '../../hooks/useResponsiveTextSize';
+import { styleConstants } from '../../components/styles/themes';
+import { useMainContext } from '../MainPage';
 
 export interface IFormProgress extends BoxExtendedProps {
   position: number;
@@ -15,7 +15,9 @@ export interface IFormProgress extends BoxExtendedProps {
 export const FormProgress: FC<IFormProgress> = (props: IFormProgress) => {
   const height = 16;
   const lineWidth = 1;
-  const correctPositionForPreviewTextOnMobile = useResponsiveForMobileOnly({ left: '-26px' });
+
+  const { responsiveStyle } = useMainContext();
+
   const clicked = (ix: number) => {
     if (props.onSelected) {
       props.onSelected(ix);
@@ -80,7 +82,7 @@ export const FormProgress: FC<IFormProgress> = (props: IFormProgress) => {
                     fontSize: '12px',
                     color: color,
                     userSelect: 'none',
-                    ...(station.description === 'Preview' && { ...correctPositionForPreviewTextOnMobile }), //temporary fix in order to show preview text correctly
+                    ...(station.description === 'Preview' && { ...responsiveStyle({ left: '-26px' }) }), //temporary fix in order to show preview text correctly
                   }}
                   onClick={() => clicked(ix)}>
                   {station.description}

@@ -6,6 +6,7 @@ import { AppButton, AppHeading, AppLabel, IElement } from '../styles/BasicElemen
 import styled from 'styled-components';
 import { constants } from './constants';
 import { styleConstants } from '../styles/themes';
+import { ResponsiveStyleConfig, ResponsiveStyleValue, useMainContext } from '../../pages/MainPage';
 
 interface IBoxProps extends BoxExtendedProps {
   icon: JSX.Element;
@@ -49,29 +50,13 @@ const Feature = styled(FeatureCore)`
 `;
 
 export const SetUsApart: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
-  const size = React.useContext(ResponsiveContext);
+  const { responsiveStyle } = useMainContext();
 
-  const boxStyle = ((size: string): React.CSSProperties => {
-    switch (size) {
-      case 'xsmall':
-      case 'small':
-        return {
-          width: '100%',
-          textAlign: 'left',
-        };
-      case 'medium':
-      case 'large':
-        return {
-          width: '50%',
-          textAlign: 'left',
-        };
-      default:
-        return {
-          width: '25%',
-          textAlign: 'left',
-        };
-    }
-  })(size);
+  const boxStyle = responsiveStyle([
+    [['xsmall', 'small'], { width: '100%', textAlign: 'left' }],
+    [['medium', 'large'], { width: '50%', textAlign: 'left' }],
+  ]);
+
   return (
     <Box
       style={{
