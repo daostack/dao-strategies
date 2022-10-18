@@ -10,7 +10,7 @@ import { useMainContext } from '../../pages/MainPage';
 interface IHero extends BoxExtendedProps {}
 
 export const Hero: FC<IHero> = (props: IHero) => {
-  const { mobile, responsiveStyle, scaleText } = useMainContext();
+  const { mobile, responsiveStyle } = useMainContext();
   const size = useContext(ResponsiveContext);
 
   const headingStyle = responsiveStyle([
@@ -19,7 +19,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
     [['large'], { fontSize: '100px', lineHeight: '110%' }],
     [['default'], { fontSize: '90px', lineHeight: '110%' }],
   ]);
-  const textSize = scaleText(constants.mediumSize);
+
   const textHeadlineAttributes = Object.assign(
     { textAlign: 'start', fontFamily: styleConstants.font.secondary, fontWeight: '700', wordBreak: 'break-word' },
     headingStyle
@@ -93,6 +93,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
 
   return (
     <>
+      {/* large is here important, because it should only be displayed on a large screen, !mobile is not sufficient because of medium option */}
       {size.includes('large') ? (
         <Box style={{ position: 'relative' }}>
           {leftLayoutDependingOnSize()}
