@@ -5,7 +5,6 @@ import { useNowContext } from '../hooks/useNow';
 import { DateManager } from '../utils/date.manager';
 import { Address } from './Address';
 
-import { Countdown } from './Countdown';
 import { TwoColumns } from './landing/TwoColumns';
 import { HelpTip } from './styles/BasicElements';
 import { styleConstants } from './styles/themes';

@@ -46,7 +46,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
   );
 
   return (
-    <TwoColumns style={{ ...props.style }}>
+    <TwoColumns style={{ ...props.style }} align="center">
       <Box
         style={{
           color: constants.lightGray,

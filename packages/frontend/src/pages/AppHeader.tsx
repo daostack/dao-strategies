@@ -8,7 +8,7 @@ import { AppButton } from '../components/styles/BasicElements';
 import { styleConstants } from '../components/styles/themes';
 import { RouteNames } from './MainPage';
 
-export const HEADER_HEIGHT = 66;
+export const HEADER_HEIGHT = 80;
 export const MAX_WIDTH = 1200;
 
 export interface IMainPageHeaderProps {
@@ -62,13 +62,17 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
         <Moon style={{ marginLeft: '6px' }}></Moon>
       </Box> */}
       {location.pathname === RouteNames.Campaigns ? (
-        <AppButton
-          onClick={() => navigate(RouteNames.Create)}
-          icon={<Add></Add>}
-          style={{ marginRight: '16px' }}
-          _type="slim"
-          label="Create"
-        />
+        <>
+          {!size.includes('small') && (
+            <AppButton
+              onClick={() => navigate(RouteNames.Create)}
+              icon={<Add></Add>}
+              style={{ marginRight: '16px' }}
+              _type="slim"
+              label="Create"
+            />
+          )}
+        </>
       ) : (
         <></>
       )}
@@ -85,7 +89,7 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
       }}
       direction="row"
       justify="center"
-      align="baseline">
+      align="center">
       <Box style={{ width: '100%', padding: '0px 32px', maxWidth: `${MAX_WIDTH}px` }} direction="row" justify="between">
         {left}
         {right}

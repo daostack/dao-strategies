@@ -31,7 +31,7 @@ import React from 'react';
 import { useWindowDimensions } from '../../hooks/useWindowDimensions';
 import { ChainTag } from '../../components/Assets';
 import { CampaignStatus } from '../../components/CampaignStatus';
-import { RouteNames } from '../MainPage';
+import { RouteNames, useMainContext } from '../MainPage';
 import { FIRST_PAGE, reactionConfigOptions } from '../campaign.support';
 import { TwoColumns } from '../../components/landing/TwoColumns';
 import { Footer } from '../../components/landing/Footer';
@@ -62,6 +62,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
     getFundEvents,
   } = useCampaignContext();
 
+  const { responsiveStyle } = useMainContext();
+
   const { user } = useLoggedUser();
   /** Things below are needed to keep the width of the admin button equal to the width of the Fund Campaign card */
   // react to window dimension changes
@@ -72,6 +74,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   let colRef = useRef<HTMLDivElement>(null);
 
   const size = React.useContext(ResponsiveContext);
+  console.log({ size });
   const mobile = size.includes('small');
 
   // called everytime the DOM element changes
@@ -155,9 +158,8 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const info = (
     <ExpansibleCard
       style={{ marginTop: '16px' }}
-      padding={[24, 24, 36, 24]}
       hiddenPart={
-        <TwoColumns>
+        <TwoColumns gap="40px" style={{ marginTop: '40px' }}>
           <Box>
             <InfoProperty title="Github Repositories">
               {campaign.strategyParams.repositories.map((repo: any, ix: number) => (
@@ -171,7 +173,7 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
               {reactionConfigOptions.get(campaign.strategyParams.reactionsConfig)}
             </InfoProperty>
           </Box>
-          <Box>
+          <Box style={responsiveStyle({ marginTop: '36px' })}>
             <InfoProperty title="Contribution Period">
               <Box>Start date: {DateManager.from(campaign.strategyParams.timeRange.start).toString()}</Box>
               <Box>End date: {DateManager.from(campaign.strategyParams.timeRange.end).toString()}</Box>
@@ -199,7 +201,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   );
 
   const contributors_table = (
-    <AppCard style={{ marginTop: '52px', padding: '24px 24px' }} showReload onReload={() => getShares()}>
+    <AppCard
+      style={{ marginTop: '52px', padding: '24px 24px', width: mobile ? '90vw' : 'auto' }}
+      showReload
+      onReload={() => getShares()}>
       <Box direction="row" justify="between" align="center">
         <AppHeading level="2" style={{ marginBottom: '24px' }}>
           Contributors board
@@ -287,11 +292,11 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
   const right = mobile ? (
     <></>
   ) : (
-    <>
+    <Box style={{ width: '100%', padding: '0vw 40px' }}>
       {funds}
       {user !== undefined ? claim : <></>}
       {guardian}
-    </>
+    </Box>
   );
 
   return (
@@ -314,7 +319,10 @@ export const CampaignPage: FC<ICampaignPageProps> = () => {
           maxWidth: `${MAX_WIDTH}px`,
           margin: '0 auto',
         }}>
-        <TwoColumns gap="20px" widths={['70%', '30%']} style={{ alignItems: 'start' }}>
+        <TwoColumns
+          gap="20px"
+          widths={size === 'medium' ? ['60%', '40%'] : ['67%', '33%']}
+          style={{ alignItems: 'start' }}>
           <Box>{left}</Box>
           <Box align="center" justify="center">
             {right}
