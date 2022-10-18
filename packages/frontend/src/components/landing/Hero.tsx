@@ -28,7 +28,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
 
       case 'large':
         return {
-          fontSize: '90px',
+          fontSize: '100px',
           lineHeight: '110%',
         };
 
@@ -54,21 +54,21 @@ export const Hero: FC<IHero> = (props: IHero) => {
         justify="start">
         <AppHeading level={1} style={textHeadlineAttributes}>
           Rewards for{' '}
-          <span style={{ position: 'relative', zIndex: '1' }}>
+          <span style={{ position: 'relative', zIndex: '1', overflow: 'visible' }}>
             Value
             <span
               style={{
                 zIndex: '-1',
-                height: headingStyle.fontSize,
-                width: size.includes('small') ? '200px' : '17vw',
-                background: `url(/images/penbrush.svg) center no-repeat`,
-                backgroundSize: 'fit',
+                height: '12vh',
+                width: '20rem',
+                background: `url(/images/penbrush.png) center no-repeat`,
+                backgroundSize: 'contain',
                 position: 'absolute',
-                left: '0px',
-                top: '8px',
+                left: '-.5vw',
+                top: '.8vw',
                 overflow: 'visible',
               }}></span>{' '}
-            {isLarge && <br />}
+            <br />
           </span>
           Creators
         </AppHeading>
@@ -101,8 +101,8 @@ export const Hero: FC<IHero> = (props: IHero) => {
           width: size.includes('small') ? '100%' : '80%',
           boxShadow: '0px 40.64px 54.56px rgba(14, 15, 25, 0.1)',
           borderRadius: '20px',
-          maxWidth: '350px',
-          ...(isLarge && { position: 'absolute', right: 0, transform: 'translate(75%, 30%)' }),
+          maxWidth: '450px',
+          ...(isLarge && { position: 'absolute', transform: 'translate(165%, 20%)' }),
         }}
         justify="center"
         align="center">
@@ -120,13 +120,12 @@ export const Hero: FC<IHero> = (props: IHero) => {
         </Box>
       ) : (
         <>
-          {' '}
-          <TwoColumns style={{ ...props.style }}>
+          <TwoColumns mediumIsSmall style={{ ...props.style }}>
             {leftLayoutDependingOnSize(false)}
             {rightLayoutDependingOnSize(false)}
           </TwoColumns>
         </>
-      )}{' '}
+      )}
     </>
   );
 };
