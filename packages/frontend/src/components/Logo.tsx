@@ -22,7 +22,7 @@ export const Logo: FC<ILogo> = (props: ILogo) => {
         textDecoration: 'none',
         color: styleConstants.colors.headingDark,
       }}>
-      <Image width="32" height="32" src="/favicon-32x32.png" />
+      <Image width="32px" height="32px" src="/images/Logo.png" />
       {compact ? <></> : 'CommonValue'}
     </Box>
   );

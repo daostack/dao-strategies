@@ -1,4 +1,4 @@
-import { Box, ResponsiveContext } from 'grommet';
+import { Box } from 'grommet';
 import { Add } from 'grommet-icons';
 import React, { FC } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -6,7 +6,7 @@ import { LoggedUser } from '../components/LoggedUser';
 import { Logo } from '../components/Logo';
 import { AppButton } from '../components/styles/BasicElements';
 import { styleConstants } from '../components/styles/themes';
-import { RouteNames } from './MainPage';
+import { RouteNames, useMainContext } from './MainPage';
 
 export const HEADER_HEIGHT = 80;
 export const MAX_WIDTH = 1200;
@@ -18,12 +18,12 @@ export interface IMainPageHeaderProps {
 export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const size = React.useContext(ResponsiveContext);
+  const { mobile } = useMainContext();
 
   const left = (
     <>
       <Box direction="row">
-        <Logo compact={size.includes('small')} onClick={() => navigate(RouteNames.Base)}></Logo>
+        <Logo compact={mobile} onClick={() => navigate(RouteNames.Base)}></Logo>
 
         <Box
           align="center"
@@ -35,7 +35,7 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
           Beta
         </Box>
 
-        {!size.includes('small') ? (
+        {!mobile ? (
           <Box
             align="center"
             justify="center"
@@ -63,7 +63,7 @@ export const AppHeader: FC<IMainPageHeaderProps> = (props) => {
       </Box> */}
       {location.pathname === RouteNames.Campaigns ? (
         <>
-          {!size.includes('small') && (
+          {!mobile && (
             <AppButton
               onClick={() => navigate(RouteNames.Create)}
               icon={<Add></Add>}
