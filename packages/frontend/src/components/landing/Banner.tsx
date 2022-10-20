@@ -15,14 +15,15 @@ export const Banner: FC<IBannerProps> = (props: IBannerProps) => {
       justify="center"
       background={constants.lightBackground}>
       <div>
-        CommonValue is currenlty in closed beta. You can explore existing campaigns. If you want to create a new a one,{' '}
+        We are currenlty in a closed beta. You can explore existing campaigns. If you want to create a new a one, please {' '}
         <a
           style={{ display: 'inline-block', color: constants.purpleText }}
           href={bannerLink}
           target="_blank"
           rel="noreferrer">
-          please contact us
+          contact us
         </a>
+        {' '} or fill the form below.
       </div>
     </Box>
   );

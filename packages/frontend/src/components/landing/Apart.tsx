@@ -69,46 +69,50 @@ export const SetUsApart: FC<BoxExtendedProps> = (props: BoxExtendedProps) => {
         <Feature
           icon={icons.ruleBased}
           style={boxStyle}
-          title="Rule-based rewards"
+          title="Customizable Reward Rules"
           subtitle={
             <>
-              <p>A new primitive for DAO rewards distribution.</p>
-              <p>Automatically distribute rewards to your community based on predefined rules.</p>
+              <p>Create your own rules for how Github interactions will result in rewards and recognition</p>
             </>
           }></Feature>
         <Feature
           icon={icons.easy}
           style={boxStyle}
-          title="Easy to use"
+          title="Stay On Github"
           subtitle={
-            <p>Create and deploy new reward campaigns, raise funds and distribute them with just a few clicks.</p>
+            <p>Empower your community with new Web3 capabilities in an environment they already know.</p>
           }></Feature>
         <Feature
           icon={icons.integrations}
           style={boxStyle}
-          title="Multiple Integrations"
+          title="Encourage Collaboration"
           subtitle={
             <>
-              <p>Distribute rewards to contributors based on their activities on various platforms.</p>
-              <p>Currently supports Github. More coming soon.</p>
+              <p>Recognize and reward contributors as they work on big and small tasks</p>
             </>
           }></Feature>
         <Feature
           icon={icons.extensible}
           style={boxStyle}
-          title="Extensible"
-          subtitle={<p>Create custom reward rules that fits to your community.</p>}></Feature>
+          title="Easy Flow To Web3"
+          subtitle={<p>Contributors' rewards await them in a smart contract until they connect with their Github identity, no need for complicated onboarding</p>}></Feature>
       </Box>
       <Box alignSelf="center" style={{ marginBottom: '48px' }} gap="12px">
-        <AppButton
-          color={constants.lightBackground}
-          style={{
-            fontWeight: 700,
-            backgroundColor: constants.darkText,
-            maxWidth: '364px',
-          }}>
-          Learn more
-        </AppButton>
+        <a
+          href='https://mirror.xyz/commonvalue.eth/ylPTlZpyAHurMSjIoKJmjLFKmuxkmB652UrWpS6dEkk'
+          target="_blank"
+          rel="noreferrer">
+          <AppButton
+            color={constants.lightBackground}
+            as='a'
+            style={{
+              fontWeight: 700,
+              backgroundColor: constants.darkText,
+              maxWidth: '364px',
+            }}>
+            Learn more
+          </AppButton>
+        </a>
       </Box>
     </Box>
   );

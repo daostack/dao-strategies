@@ -1,6 +1,7 @@
 import { Box, Form, BoxExtendedProps } from 'grommet';
 import { FC, useState } from 'react';
 import { AppButton, AppFormField, AppInput, AppTextArea } from '../styles/BasicElements';
+import { constants } from './constants';
 
 /** manually extracted from form, using this tutorial https://dev.to/utkarshdhiman48/custom-frontend-for-google-form-456l */
 const url = 'https://docs.google.com/forms/d/e/1FAIpQLSf0BBhMH635A4MzCijnWscDDxC0s6XYMuu47nesMBA7LWMqNQ/formResponse';
@@ -9,7 +10,7 @@ const feedbackName = 'entry.501734265';
 
 const initValues = { name: '', email: '', feedback: '' };
 
-export interface INewsletterSubscribe extends BoxExtendedProps {}
+export interface INewsletterSubscribe extends BoxExtendedProps { }
 
 export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletterSubscribe) => {
   const [values, setValues] = useState(initValues);
@@ -51,6 +52,9 @@ export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletter
         setValues(nextValue);
       }}
       style={{ width: '100%', maxWidth: '500px', ...props.style }}>
+      <Box style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 500, color: constants.subParagraphGray }}>
+        Join the beta
+      </Box>
       <AppFormField name="email">
         <AppInput name="email" placeholder="Email or Telegram"></AppInput>
       </AppFormField>
@@ -58,7 +62,7 @@ export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletter
         <AppTextArea
           resize="vertical"
           name="feedback"
-          placeholder="Why do you want to get beta access"
+          placeholder="Tell us about your community"
           autoResize={false}></AppTextArea>
       </AppFormField>
       {error ? (
@@ -66,7 +70,7 @@ export const NewsletterSubscribe: FC<INewsletterSubscribe> = (props: INewsletter
       ) : submitted ? (
         <Box>🙂 Thank you for showing interest, we will reach out to you! </Box>
       ) : (
-        <AppButton style={{ width: '100%' }} disabled={disabled} primary type="submit" label="Get Beta Access 🚀" />
+        <AppButton style={{ width: '100%' }} disabled={disabled} primary type="submit" label="Submit 🚀" />
       )}
     </Form>
   );

@@ -11,7 +11,7 @@ import { HEADER_HEIGHT } from '../../pages/AppHeader';
 import { LandingCampaigns } from './LandingCampaigns';
 import { constants } from './constants';
 
-interface IEmbeddedLanding {}
+interface IEmbeddedLanding { }
 
 export const MAX_WIDTH_LANDING = 1600;
 
@@ -34,8 +34,6 @@ export const EmbeddedLanding: FC<IEmbeddedLanding> = (props: IEmbeddedLanding) =
       <Box style={{ height: '15vw', maxHeight: '300px' }}></Box>
       <Box style={{ backgroundColor: constants.lightBackground }} align="center">
         <HowItWorks style={{}}></HowItWorks>
-        <Box style={{ height: '10vw', maxHeight: '300px' }}></Box>
-        <ComingNext style={{ maxWidth: `${MAX_WIDTH_LANDING}px`, padding: '0 5vw' }}></ComingNext>
         <Box style={{ height: '10vw', maxHeight: '300px' }}></Box>
       </Box>
       <Footer style={{ maxWidth: `${MAX_WIDTH_LANDING}px` }}></Footer>

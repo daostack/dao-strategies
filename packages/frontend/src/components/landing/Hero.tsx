@@ -6,7 +6,7 @@ import { NewsletterSubscribe } from './NewsLetterSubscribe';
 import { constants } from './constants';
 import { TwoColumns } from './TwoColumns';
 
-interface IHero extends BoxExtendedProps {}
+interface IHero extends BoxExtendedProps { }
 
 export const Hero: FC<IHero> = (props: IHero) => {
   const size = useContext(ResponsiveContext);
@@ -54,7 +54,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
         align="start"
         justify="start">
         <AppHeading level={1} style={textHeadlineAttributes}>
-          Rewards for Value Creators
+          Incentive Layer For Dev Communities
         </AppHeading>
 
         <AppLabel
@@ -69,8 +69,7 @@ export const Hero: FC<IHero> = (props: IHero) => {
             fontSize: '20px',
             textTransform: 'inherit',
           }}>
-          Web3 incentive engine for communities. CommonValue is a rewards platform that connects web2 activities to web3
-          rewards
+          Using Web3 to foster communities by rewarding contributions, incentivizing participation and creating a shared ownership
         </AppLabel>
       </Box>
       <AppCard
