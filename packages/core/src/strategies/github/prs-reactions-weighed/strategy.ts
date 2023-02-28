@@ -103,7 +103,8 @@ export const strategyFunc: StrategyFunc = async (
       if (
         contributor.login != null &&
         contributor.login !== undefined &&
-        !contributor.login.endsWith('[bot]')
+        !contributor.login.endsWith('[bot]') &&
+        !contributor.login.endsWith('bot')
       )
         contributors.add(contributor.login);
     }
@@ -127,8 +128,8 @@ export const strategyFunc: StrategyFunc = async (
         }
       });
 
-      /*if (DEBUG)
-        console.log('allPulls:', { ids: allPulls.map((pull) => pull.number) });*/
+      if (DEBUG)
+        console.log('allPulls:', { ids: allPulls.map((pull) => pull.number) });
 
       /**  compute the points per pr in parallel */
       // get the amount of reactions on every pull request that was made by a contributor
