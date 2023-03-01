@@ -1,5 +1,4 @@
 import {
-  balancesToObject,
   StrategyComputation,
   WorldConfig,
   strategies,
@@ -11,7 +10,7 @@ import { performance } from 'perf_hooks';
 
 const strategyName = (
   process.argv.find((arg) => arg.includes('--strategy=')) ||
-  '--strategy=GH_PRS_REACTIONS_WEIGHED'
+  '--strategy=GH_PRS_REACTIONS_WEIGHTED'
 )
   .split('--strategy=')
   .pop();
@@ -45,10 +44,10 @@ describe(`\nTest strategy "${strategyName}"`, () => {
   test('run strategy', async () => {
     shares = await strategyComp.runStrategy(
       strategyName,
-      strategies[strategyName].strategyInfo.exapmle_Params
+      strategies.get(strategyName)?.info.example_params
     );
 
-    console.log(JSON.stringify(balancesToObject(shares)));
+    console.log(JSON.stringify(shares.entries()));
   }, 360e3);
 
   test('check sum of shares equals 1e18', () => {

@@ -11,8 +11,8 @@ export const strategyInfo: StrategyInfo<Params> = {
   example_params: {
     repositories: [
       {
-        owner: 'ethereum',
-        repo: 'go-ethereum',
+        owner: 'dotansimha',
+        repo: 'graphql-yoga',
       },
     ],
     reactionsConfig: ReactionConfig.PRS_AND_REACTS,

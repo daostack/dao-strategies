@@ -100,7 +100,12 @@ export const strategyFunc: StrategyFunc = async (
     const repoContributors = await getRepoContributors(world, repo);
 
     for (const contributor of repoContributors) {
-      if (contributor.login != null && contributor.login !== undefined)
+      if (
+        contributor.login != null &&
+        contributor.login !== undefined &&
+        !contributor.login.endsWith('[bot]') &&
+        !contributor.login.endsWith('bot')
+      )
         contributors.add(contributor.login);
     }
   }
@@ -131,7 +136,7 @@ export const strategyFunc: StrategyFunc = async (
       // for (const pull of allPulls) {
       const prsPoints = await Promise.all(
         allPulls.map(async (pull) => {
-          if (pull.user === null) {
+          if (pull.user === null || !contributors.has(pull.user.login)) {
             return;
           }
 
