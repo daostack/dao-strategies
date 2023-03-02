@@ -72,6 +72,7 @@ export const strategyDetails = (
       repositories: repos,
       timeRange: { start, end },
       reactionsConfig: values.reactionsConfig,
+      filters: ['.*bot$', '(.*\\[bot\\])$'],
     },
   };
 };

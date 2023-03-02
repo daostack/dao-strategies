@@ -25,6 +25,7 @@ export interface Params {
   repositories: Array<RepoId>;
   timeRange: { start: number; end: number };
   reactionsConfig: ReactionConfig;
+  filters?: string[];
 }
 
 const DEBUG = true;
@@ -100,13 +101,21 @@ export const strategyFunc: StrategyFunc = async (
     const repoContributors = await getRepoContributors(world, repo);
 
     for (const contributor of repoContributors) {
-      if (
-        contributor.login != null &&
-        contributor.login !== undefined &&
-        !contributor.login.endsWith('[bot]') &&
-        !contributor.login.endsWith('bot')
-      )
-        contributors.add(contributor.login);
+      /** if any one filter is possitive, the contributor is filtered out */
+      const shouldFilter = params.filters
+        ? params.filters.reduce((shouldThis, filter) => {
+            const regex = new RegExp(filter.trim());
+            if (contributor.login === undefined) return true;
+            if (contributor.login == null) return true;
+            if (shouldThis) return true;
+
+            return regex.test(contributor.login);
+          }, false)
+        : false;
+
+      if (!shouldFilter) {
+        contributors.add(contributor.login as string);
+      }
     }
   }
 

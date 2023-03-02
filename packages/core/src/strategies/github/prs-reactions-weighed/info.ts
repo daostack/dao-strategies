@@ -20,6 +20,7 @@ export const strategyInfo: StrategyInfo<Params> = {
       start: 1651400578,
       end: 1653215165,
     },
+    filters: ['bot$', '[bot]$'],
   },
   platform: 'github',
 };
